@@ -27,7 +27,7 @@
  * ACE Components were written in the ADAPT Project at the University of
  * Maryland Institute for Advanced Computer Study.
  */
-// $Id: ResourceNotFoundException.java 3192 2010-06-22 16:54:09Z toaster $
+// $Id$
 
 package edu.umiacs.io;
 
@@ -35,7 +35,7 @@ package edu.umiacs.io;
  * 
  * Thrown when a resource on the classpath is not found. 
  * 
- * @version {@code $Revision: 3192 $ $Date$}
+ * @version {@code $Revision$ $Date$}
  * 
  ******************************************************************************/
 public class ResourceNotFoundException extends RuntimeException

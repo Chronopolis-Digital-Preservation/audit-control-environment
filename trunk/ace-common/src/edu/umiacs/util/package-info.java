@@ -27,13 +27,13 @@
  * ACE Components were written in the ADAPT Project at the University of
  * Maryland Institute for Advanced Computer Study.
  */
-// $Id: package-info.java 3192 2010-06-22 16:54:09Z toaster $
+// $Id$
 
 /*******************************************************************************
  * 
  * Standard utility methods and classes.
  * 
- * @version {@code $Revision: 3192 $ $Date$}
+ * @version {@code $Revision$ $Date$}
  * 
  ******************************************************************************/
 package edu.umiacs.util;

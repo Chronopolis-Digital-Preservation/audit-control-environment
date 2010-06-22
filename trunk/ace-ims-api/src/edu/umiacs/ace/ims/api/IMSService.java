@@ -27,7 +27,7 @@
  * ACE Components were written in the ADAPT Project at the University of
  * Maryland Institute for Advanced Computer Study.
  */
-// $Id: IMSService.java 3184 2010-06-18 20:05:07Z toaster $
+// $Id$
 
 package edu.umiacs.ace.ims.api;
 

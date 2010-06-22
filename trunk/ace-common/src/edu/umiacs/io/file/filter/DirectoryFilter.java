@@ -27,7 +27,7 @@
  * ACE Components were written in the ADAPT Project at the University of
  * Maryland Institute for Advanced Computer Study.
  */
-// $Id: DirectoryFilter.java 3192 2010-06-22 16:54:09Z toaster $
+// $Id$
 
 package edu.umiacs.io.file.filter;
 
@@ -39,7 +39,7 @@ import java.io.FileFilter;
  * 
  * Filter that only accepts directories. 
  * 
- * @version {@code $Revision: 3192 $ $Date$}
+ * @version {@code $Revision$ $Date$}
  * 
  ******************************************************************************/
 public class DirectoryFilter implements FileFilter
