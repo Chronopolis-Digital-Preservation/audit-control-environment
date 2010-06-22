@@ -27,7 +27,7 @@
  * ACE Components were written in the ADAPT Project at the University of
  * Maryland Institute for Advanced Computer Study.
  */
-// $Id: TypeFormatter.java 3192 2010-06-22 16:54:09Z toaster $
+// $Id$
 
 package edu.umiacs.util;
 
@@ -62,7 +62,7 @@ package edu.umiacs.util;
  * </ul>
  * </p>
  * 
- * @version {@code $Revision: 3192 $ $Date$}
+ * @version {@code $Revision$ $Date$}
  * 
  ******************************************************************************/
 public class TypeFormatter 

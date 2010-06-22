@@ -27,7 +27,7 @@
  * ACE Components were written in the ADAPT Project at the University of
  * Maryland Institute for Advanced Computer Study.
  */
-// $Id: ResourceInputStream.java 3192 2010-06-22 16:54:09Z toaster $
+// $Id$
 
 package edu.umiacs.io;
 
@@ -39,7 +39,7 @@ import java.io.InputStream;
  * 
  * Input stream for reading files embedded on the classpath. 
  * 
- * @version {@code $Revision: 3192 $ $Date$}
+ * @version {@code $Revision$ $Date$}
  * 
  ******************************************************************************/
 
