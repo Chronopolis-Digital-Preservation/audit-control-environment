@@ -28,7 +28,7 @@
  * Maryland Institute for Advanced Computer Study.
  */
 
-// $Id: DigestException.java 3192 2010-06-22 16:54:09Z toaster $
+// $Id$
 
 package edu.umiacs.ace.digest;
 

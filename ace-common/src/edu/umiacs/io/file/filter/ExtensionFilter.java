@@ -27,7 +27,7 @@
  * ACE Components were written in the ADAPT Project at the University of
  * Maryland Institute for Advanced Computer Study.
  */
-// $Id: ExtensionFilter.java 3192 2010-06-22 16:54:09Z toaster $
+// $Id$
 
 package edu.umiacs.io.file.filter;
 
@@ -40,7 +40,7 @@ import java.io.FilenameFilter;
  * 
  * Filter that accepts files that match a given extension.
  * 
- * @version {@code $Revision: 3192 $ $Date$}
+ * @version {@code $Revision$ $Date$}
  * 
  ******************************************************************************/
 public class ExtensionFilter implements FilenameFilter

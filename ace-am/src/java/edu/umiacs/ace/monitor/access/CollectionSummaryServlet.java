@@ -27,7 +27,7 @@
  * ACE Components were written in the ADAPT Project at the University of
  * Maryland Institute for Advanced Computer Study.
  */
-// $Id: CollectionSummaryServlet.java 3182 2010-06-16 20:53:20Z toaster $
+// $Id$
 package edu.umiacs.ace.monitor.access;
 
 import edu.umiacs.ace.monitor.core.MonitoredItem;

@@ -27,7 +27,7 @@
  * ACE Components were written in the ADAPT Project at the University of
  * Maryland Institute for Advanced Computer Study.
  */
-// $Id: package-info.java 3192 2010-06-22 16:54:09Z toaster $
+// $Id$
 
 /*******************************************************************************
  * 

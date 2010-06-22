@@ -27,7 +27,7 @@
  * ACE Components were written in the ADAPT Project at the University of
  * Maryland Institute for Advanced Computer Study.
  */
-// $Id: HashTreeFormatter.java 3192 2010-06-22 16:54:09Z toaster $
+// $Id$
 package edu.umiacs.ace.hashtree.util;
 
 import edu.umiacs.ace.hashtree.HashTree;
@@ -42,7 +42,7 @@ import java.math.BigInteger;
  *
  * @see HashTree
  * @author University of Maryland, Institute for Advanced Computer Studies
- * @version {@code $Revision: 3192 $ $Date$}
+ * @version {@code $Revision$ $Date$}
  *
  ******************************************************************************/
 public class HashTreeFormatter {

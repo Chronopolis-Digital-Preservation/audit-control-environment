@@ -27,7 +27,7 @@
  * ACE Components were written in the ADAPT Project at the University of
  * Maryland Institute for Advanced Computer Study.
  */
-// $Id: SmbAccess.java 3181 2010-06-16 20:46:16Z toaster $
+// $Id$
 
 package edu.umiacs.ace.driver.cifs;
 

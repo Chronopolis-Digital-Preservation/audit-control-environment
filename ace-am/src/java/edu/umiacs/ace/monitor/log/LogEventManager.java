@@ -27,7 +27,7 @@
  * ACE Components were written in the ADAPT Project at the University of
  * Maryland Institute for Advanced Computer Study.
  */
-// $Id: LogEventManager.java 3187 2010-06-22 14:41:19Z toaster $
+// $Id$
 package edu.umiacs.ace.monitor.log;
 
 import edu.umiacs.ace.monitor.core.Collection;

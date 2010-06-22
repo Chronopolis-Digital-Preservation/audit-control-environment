@@ -32,7 +32,7 @@
  * and open the template in the editor.
  */
 
-// $Id: PropertyParameters.java 3192 2010-06-22 16:54:09Z toaster $
+// $Id$
 
 package edu.umiacs.util;
 
