@@ -77,7 +77,7 @@ public enum LogEnum {
     REMOTE_FILE_MISSING(15, "Remote File Missing", "not corresponding file on remote site"),
     REMOTE_FILE_ONLINE(16, "Remote File Online", "Remote file marked as active"),
     REMOVE_STORAGE_DRIVER(17, "Remove Storage Driver", "Configured storage driver was removed"),
-    STORAGE_DRIVER_ADDED(18, "Add Storage Driver", "New Storage Driver configured"),
+    //STORAGE_DRIVER_ADDED(18, "Add Storage Driver", "New Storage Driver configured"),
     COLLECTION_REGISTERED(19,"Collection Registered", "Collection registered for monitoring"),
     /////////// audit start/stops
     /**
@@ -157,8 +157,8 @@ public enum LogEnum {
                 return REMOTE_FILE_ONLINE;
             case 17:
                 return REMOVE_STORAGE_DRIVER;
-            case 18:
-                return STORAGE_DRIVER_ADDED;
+//            case 18:
+//                return STORAGE_DRIVER_ADDED;
             case 20:
                 return FILE_AUDIT_START;
             case 21:
