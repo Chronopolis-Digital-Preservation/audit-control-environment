@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2007-@year@, University of Maryland
  * All rights reserved.
  *
@@ -31,8 +31,12 @@ package edu.umiacs.ace.monitor.core;
 
 import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.driver.StorageDriverFactory;
+import edu.umiacs.ace.monitor.log.LogEnum;
+import edu.umiacs.ace.monitor.log.LogEvent;
+import edu.umiacs.ace.monitor.log.LogEventManager;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import java.io.IOException;
+import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.servlet.RequestDispatcher;
@@ -55,12 +59,14 @@ public class ClearResourceServlet extends EntityManagerServlet {
         if ( c != null ) {
             if (c.getStorage() != null)
             {
+                LogEventManager lem = new LogEventManager(new Date().getTime(), c);
                 EntityTransaction t = em.getTransaction();
                 t.begin();
                 StorageDriver sd = StorageDriverFactory.createStorageAccess(c, em);
-
+                LogEvent event = lem.createCollectionEvent(LogEnum.REMOVE_STORAGE_DRIVER, "Remove configuration for " + c.getStorage());
                 sd.remove(em);
                 c.setStorage(null);
+                em.persist(event);
                 em.merge(c);
                 t.commit();
             }
