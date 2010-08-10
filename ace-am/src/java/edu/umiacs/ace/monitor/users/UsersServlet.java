@@ -28,7 +28,6 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-
 package edu.umiacs.ace.monitor.users;
 
 import edu.umiacs.ace.util.EntityManagerServlet;
@@ -79,7 +78,10 @@ public class UsersServlet extends EntityManagerServlet {
         Users user = null;
         String error = null;
         boolean refresh = false;
-
+        if ( !Boolean.valueOf(getServletContext().getInitParameter("auth.management")) ) {
+            return;
+        }
+        
         String paramPass = request.getParameter(PARAM_PASSWORD);
 
         // existing userId, lets load and update password
