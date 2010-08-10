@@ -28,7 +28,6 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-
 package edu.umiacs.ace.monitor.users;
 
 import edu.umiacs.ace.util.PersistUtil;
@@ -53,109 +52,113 @@ public class DefaultAccountContextListener implements ServletContextListener {
      */
     @Override
     public void contextInitialized( ServletContextEvent arg0 ) {
-        try {
+
+        arg0.getServletContext().setAttribute("authmanagement", Boolean.valueOf(arg0.getServletContext().getInitParameter("auth.management")));
+        
+        if ( Boolean.valueOf(arg0.getServletContext().getInitParameter("auth.management")) ) {
+            try {
 //            LOG.trace("Testing for account setup");
-            EntityManager em = PersistUtil.getEntityManager();
+                EntityManager em = PersistUtil.getEntityManager();
 
-            Query q = em.createNamedQuery("Users.listAllUsers");
+                Query q = em.createNamedQuery("Users.listAllUsers");
 
-            if ( q.getResultList() == null || q.getResultList().size() == 0 ) {
-                LOG.debug("No accounts found, creating default admin");
-                Users u = new Users();
-                u.setPassword("admin");
-                u.setUsername("admin");
+                if ( q.getResultList() == null || q.getResultList().size() == 0 ) {
+                    LOG.debug("No accounts found, creating default admin");
+                    Users u = new Users();
+                    u.setPassword("admin");
+                    u.setUsername("admin");
 
-                UserRoles status = new UserRoles();
-                status.setRolename("Status");
-                status.setUsername("admin");
+                    UserRoles status = new UserRoles();
+                    status.setRolename("Status");
+                    status.setUsername("admin");
 
-                UserRoles collMod = new UserRoles();
-                collMod.setRolename("Collection Modify");
-                collMod.setUsername("admin");
+                    UserRoles collMod = new UserRoles();
+                    collMod.setRolename("Collection Modify");
+                    collMod.setUsername("admin");
 
-                UserRoles browse = new UserRoles();
-                browse.setRolename("Browse");
-                browse.setUsername("admin");
+                    UserRoles browse = new UserRoles();
+                    browse.setRolename("Browse");
+                    browse.setUsername("admin");
 
-                UserRoles log = new UserRoles();
-                log.setRolename("Log");
-                log.setUsername("admin");
+                    UserRoles log = new UserRoles();
+                    log.setRolename("Log");
+                    log.setUsername("admin");
 
-                UserRoles audit = new UserRoles();
-                audit.setRolename("Audit");
-                audit.setUsername("admin");
+                    UserRoles audit = new UserRoles();
+                    audit.setRolename("Audit");
+                    audit.setUsername("admin");
 
-                UserRoles removeItem = new UserRoles();
-                removeItem.setRolename("Remove Item");
-                removeItem.setUsername("admin");
+                    UserRoles removeItem = new UserRoles();
+                    removeItem.setRolename("Remove Item");
+                    removeItem.setUsername("admin");
 
-                UserRoles users = new UserRoles();
-                users.setRolename("Users");
-                users.setUsername("admin");
+                    UserRoles users = new UserRoles();
+                    users.setRolename("Users");
+                    users.setUsername("admin");
 
-                UserRoles report = new UserRoles();
-                report.setRolename("Report");
-                report.setUsername("admin");
+                    UserRoles report = new UserRoles();
+                    report.setRolename("Report");
+                    report.setUsername("admin");
 
-                UserRoles dloadtoken = new UserRoles();
-                dloadtoken.setRolename("Download Token");
-                dloadtoken.setUsername("admin");
+                    UserRoles dloadtoken = new UserRoles();
+                    dloadtoken.setRolename("Download Token");
+                    dloadtoken.setUsername("admin");
 
-                UserRoles dloaditem = new UserRoles();
-                dloaditem.setRolename("Download Item");
-                dloaditem.setUsername("admin");
+                    UserRoles dloaditem = new UserRoles();
+                    dloaditem.setRolename("Download Item");
+                    dloaditem.setUsername("admin");
 
-                UserRoles summary = new UserRoles();
-                summary.setRolename("Summary");
-                summary.setUsername("admin");
+                    UserRoles summary = new UserRoles();
+                    summary.setRolename("Summary");
+                    summary.setUsername("admin");
 
-                UserRoles compare = new UserRoles();
-                compare.setRolename("Compare");
-                compare.setUsername("admin");
+                    UserRoles compare = new UserRoles();
+                    compare.setRolename("Compare");
+                    compare.setUsername("admin");
 
-                UserRoles duplicates = new UserRoles();
-                duplicates.setRolename("Show Duplicates");
-                duplicates.setUsername("admin");
+                    UserRoles duplicates = new UserRoles();
+                    duplicates.setRolename("Show Duplicates");
+                    duplicates.setUsername("admin");
 
-                UserRoles auditSummaries = new UserRoles();
-                auditSummaries.setRolename("View Audit Summaries");
-                auditSummaries.setUsername("admin");
+                    UserRoles auditSummaries = new UserRoles();
+                    auditSummaries.setRolename("View Audit Summaries");
+                    auditSummaries.setUsername("admin");
 
-                UserRoles actReporting = new UserRoles();
-                actReporting.setRolename("Modify Activity Reporting");
-                actReporting.setUsername("admin");
+                    UserRoles actReporting = new UserRoles();
+                    actReporting.setRolename("Modify Activity Reporting");
+                    actReporting.setUsername("admin");
 
-                UserRoles partnerSite = new UserRoles();
-                partnerSite.setRolename("Modify Partner Sites");
-                partnerSite.setUsername("admin");
+                    UserRoles partnerSite = new UserRoles();
+                    partnerSite.setRolename("Modify Partner Sites");
+                    partnerSite.setUsername("admin");
 
 
-                EntityTransaction et = em.getTransaction();
-                et.begin();
-                em.persist(u);
-                em.persist(status);
-                em.persist(collMod);
-                em.persist(browse);
-                em.persist(log);
-                em.persist(audit);
-                em.persist(removeItem);
-                em.persist(users);
-                em.persist(report);
-                em.persist(dloadtoken);
-                em.persist(dloaditem);
-                em.persist(summary);
-                em.persist(duplicates);
-                em.persist(compare);
-                em.persist(auditSummaries);
-                em.persist(actReporting);
-                em.persist(partnerSite);
-                et.commit();
+                    EntityTransaction et = em.getTransaction();
+                    et.begin();
+                    em.persist(u);
+                    em.persist(status);
+                    em.persist(collMod);
+                    em.persist(browse);
+                    em.persist(log);
+                    em.persist(audit);
+                    em.persist(removeItem);
+                    em.persist(users);
+                    em.persist(report);
+                    em.persist(dloadtoken);
+                    em.persist(dloaditem);
+                    em.persist(summary);
+                    em.persist(duplicates);
+                    em.persist(compare);
+                    em.persist(auditSummaries);
+                    em.persist(actReporting);
+                    em.persist(partnerSite);
+                    et.commit();
+                }
+            } catch ( Exception e ) {
+
+                LOG.error("Error creating default account", e);
             }
-        } catch ( Exception e ) {
-
-            LOG.error("Error creating default account", e);
         }
-
     }
 
     @Override
