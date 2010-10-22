@@ -28,10 +28,11 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-
 package edu.umiacs.ace.driver.localfile;
 
-import edu.umiacs.ace.monitor.audit.AuditIterable;
+import edu.umiacs.ace.driver.AuditIterable;
+import edu.umiacs.ace.driver.DriverStateBean;
+import edu.umiacs.ace.driver.DriverStateBean.State;
 import edu.umiacs.ace.driver.FileBean;
 import edu.umiacs.ace.driver.filter.PathFilter;
 import edu.umiacs.ace.driver.StorageDriver;
@@ -106,14 +107,24 @@ public class LocalFileAccess extends StorageDriver {
             final PathFilter filter, final MonitoredItem[] startPathList ) {
         return new AuditIterable<FileBean>() {
 
+            private DriverStateBean statebean = new DriverStateBean();
+            private MyIterator it;
+
             @Override
             public Iterator<FileBean> iterator() {
-                return new MyIterator(startPathList, filter, digestAlgorithm);
+                it = new MyIterator(startPathList, filter, digestAlgorithm, statebean);
+                return it;
             }
 
             @Override
             public void cancel() {
+                LOG.debug("Cancel called on localfile iterator");
                 cancel = true;
+            }
+
+            @Override
+            public DriverStateBean[] getState() {
+                return new DriverStateBean[]{statebean};
             }
         };
 
@@ -125,18 +136,22 @@ public class LocalFileAccess extends StorageDriver {
         private Queue<File> dirsToProcess = new LinkedList<File>();
         private Queue<File> filesToProcess = new LinkedList<File>();
         private MessageDigest digest;
-        private byte[] buffer = new byte[4096];
+        private byte[] buffer = new byte[32768];
         private File rootFile;
         private PathFilter filter;
+        private DriverStateBean statebean;
 
         public MyIterator( MonitoredItem[] startPath, PathFilter filter,
-                String digestAlgorithm ) {
+                String digestAlgorithm, DriverStateBean statebean ) {
+            this.statebean = statebean;
             this.filter = filter;
             try {
                 digest = MessageDigest.getInstance(digestAlgorithm);
                 rootFile = new File(getCollection().getDirectory());
 
+                statebean.setRunningThread(Thread.currentThread());
 
+                statebean.setStateAndReset(State.LISTING);
                 if ( startPath != null ) {
                     for ( MonitoredItem mi : startPath ) {
                         File startFile;
@@ -178,6 +193,7 @@ public class LocalFileAccess extends StorageDriver {
             } catch ( NoSuchAlgorithmException ex ) {
                 throw new RuntimeException(ex);
             }
+            statebean.setStateAndReset(State.IDLE);
         }
 
         @Override
@@ -200,9 +216,12 @@ public class LocalFileAccess extends StorageDriver {
         }
 
         private void loadNext() {
+            statebean.setStateAndReset(State.LISTING);
+
             // see if wee need to process a directory or if there are files in queue
             while ( filesToProcess.isEmpty() && !dirsToProcess.isEmpty() ) {
                 File directory = dirsToProcess.poll();
+                statebean.setFile(directory.getPath());
                 LOG.trace("Popping directory: " + directory);
                 File[] fileList = directory.listFiles();
                 if ( fileList == null ) {
@@ -230,6 +249,7 @@ public class LocalFileAccess extends StorageDriver {
             } else {
                 next = null;
             }
+            statebean.setStateAndReset(State.IDLE);
 
         }
 
@@ -252,17 +272,27 @@ public class LocalFileAccess extends StorageDriver {
 
         @SuppressWarnings("empty-statement")
         private FileBean processFile( File file ) {
+
+
             DigestInputStream dis = null;
             FileBean fb = new FileBean();
 
             fb.setPathList(extractPathList(file));
 
             LOG.trace("Processing file: " + file);
+            statebean.setStateAndReset(State.OPENING_FILE);
+            statebean.setRead(0);
+            statebean.setTotalSize(file.length());
+            statebean.setFile(file.getPath());
 
             digest.reset();
 
             try {
+                statebean.setState(State.THROTTLE_WAIT);
                 QueryThrottle.waitToRun();
+                statebean.setState(State.READING);
+                statebean.updateLastChange();
+
                 long fileSize = 0;
                 ThrottledInputStream tis =
                         new ThrottledInputStream(new FileInputStream(file), QueryThrottle.getMaxBps(), lastDelay);
@@ -270,6 +300,8 @@ public class LocalFileAccess extends StorageDriver {
                 int read = 0;
                 while ( (read = dis.read(buffer)) >= 0 && !cancel ) {
                     fileSize += read;
+                    statebean.updateLastChange();
+                    statebean.setRead(fileSize);
                 }
                 lastDelay = tis.getSleepTime();
 
@@ -284,6 +316,7 @@ public class LocalFileAccess extends StorageDriver {
                 fb.setErrorMessage(Strings.exceptionAsString(ie));
             } finally {
                 IO.release(dis);
+                statebean.setStateAndReset(State.IDLE);
                 if ( cancel ) {
                     return null;
                 } else {
@@ -295,6 +328,7 @@ public class LocalFileAccess extends StorageDriver {
 
     @Override
     public InputStream getItemInputStream( String itemPath ) throws IOException {
+
         File f = new File(getCollection().getDirectory() + itemPath);
         return new FileInputStream(f);
     }

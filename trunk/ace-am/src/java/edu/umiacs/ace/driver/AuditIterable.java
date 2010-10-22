@@ -28,7 +28,7 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-package edu.umiacs.ace.monitor.audit;
+package edu.umiacs.ace.driver;
 
 /**
  *
@@ -36,5 +36,6 @@ package edu.umiacs.ace.monitor.audit;
  */
 public interface AuditIterable<T> extends Iterable<T> {
 
+    public DriverStateBean[] getState();
     public void cancel();
 }

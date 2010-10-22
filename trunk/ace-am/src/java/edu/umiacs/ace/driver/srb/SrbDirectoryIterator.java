@@ -28,12 +28,13 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-
 package edu.umiacs.ace.driver.srb;
 
 import edu.umiacs.ace.driver.QueryThrottle;
 import edu.sdsc.grid.io.srb.SRBFileInputStream;
 import edu.sdsc.grid.io.srb.SRBFileSystem;
+import edu.umiacs.ace.driver.DriverStateBean;
+import edu.umiacs.ace.driver.DriverStateBean.State;
 import edu.umiacs.ace.driver.FileBean;
 import edu.umiacs.ace.driver.filter.PathFilter;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
@@ -54,6 +55,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
@@ -63,6 +66,7 @@ import org.apache.log4j.NDC;
  */
 public class SrbDirectoryIterator implements Iterator<FileBean> {
 
+    private DriverStateBean[] statebeans;
     private static final int MAX_THREADS = 5;
     private static final int RETRY = 5;
     private static final Logger LOG = Logger.getLogger(
@@ -78,6 +82,7 @@ public class SrbDirectoryIterator implements Iterator<FileBean> {
     private PathFilter filter;
     private Thread takingThread = null;
     private double lastDelay = 0;
+    private Lock loadLoack = new ReentrantLock();
 
     public SrbDirectoryIterator( Collection c, SrbSettings settings,
             MonitoredItem[] basePath, PathFilter filter, String digestAlgorithm ) {
@@ -88,7 +93,6 @@ public class SrbDirectoryIterator implements Iterator<FileBean> {
 
         SRBFileSystem sfs = null;
         try {
-
             pool.freeConnection(sfs = pool.getConnection());
 //            String startPath = root;
             if ( basePath != null ) {
@@ -108,9 +112,12 @@ public class SrbDirectoryIterator implements Iterator<FileBean> {
                 dirsToProcess.add(root);
             }
 
+            statebeans = new DriverStateBean[MAX_THREADS];
             for ( int i = 0; i < MAX_THREADS; i++ ) {
+                DriverStateBean sb = new DriverStateBean();
                 MessageDigest digest = MessageDigest.getInstance(digestAlgorithm);
-                Thread t = new Thread(new ProcessFileThread(digest, i));
+                Thread t = new Thread(new ProcessFileThread(digest, i, sb));
+                statebeans[i] = sb;
                 t.setName("SRB Reader " + i + " " + c.getName());
                 t.start();
 
@@ -133,6 +140,10 @@ public class SrbDirectoryIterator implements Iterator<FileBean> {
             throw new RuntimeException("Could not connect to the srb", ioe);
         }
 
+    }
+
+    public DriverStateBean[] getStatebeans() {
+        return statebeans;
     }
 
     /**
@@ -179,7 +190,7 @@ public class SrbDirectoryIterator implements Iterator<FileBean> {
      * Load next file
      * @return
      */
-    private synchronized String loadNext() {
+    private String loadNext() {
         while ( filesToProcess.isEmpty() && !dirsToProcess.isEmpty() && !pool.isShutdown() ) {
             String directory = dirsToProcess.poll();
             LOG.trace("Popping directory dirsToProcess: " + directory);
@@ -296,18 +307,21 @@ public class SrbDirectoryIterator implements Iterator<FileBean> {
 
     class ProcessFileThread implements Runnable {
 
+        private DriverStateBean stateBean;
         private byte[] buffer = new byte[2097152];
         private MessageDigest digest;
         private int id;
 
-        public ProcessFileThread( MessageDigest digest, int id ) {
+        public ProcessFileThread( MessageDigest digest, int id, DriverStateBean bean ) {
             this.id = id;
             this.digest = digest;
+            this.stateBean = bean;
         }
 
         @Override
         public void run() {
             NDC.push("[SRB" + id + "] ");
+            stateBean.setRunningThread(Thread.currentThread());
             LOG.debug("SRB Thread starting: " + Thread.currentThread().getName());
             synchronized ( threads ) {
                 threads.add(this);
@@ -318,12 +332,18 @@ public class SrbDirectoryIterator implements Iterator<FileBean> {
                     String nextFile = null;
                     int retry = 0;
 
+
                     while ( retry < RETRY ) {
+                        stateBean.setStateAndReset(State.WAITING_ON_FILE);
+                        loadLoack.lockInterruptibly();
                         try {
+                            stateBean.setStateAndReset(State.LISTING);
                             nextFile = loadNext();
                             retry = RETRY;
                         } catch ( Exception e ) {
                             LOG.error("loadNext threw error ", e);
+                        } finally {
+                            loadLoack.unlock();
                         }
                         retry++;
                     }
@@ -338,6 +358,7 @@ public class SrbDirectoryIterator implements Iterator<FileBean> {
                     fb = processFile(nextFile);
                     while ( count < RETRY && fb.isError() && !pool.isShutdown() ) {
                         fb = processFile(nextFile);
+                        stateBean.setStateAndReset(State.IDLE);
                         count++;
                     }
                     // if pool is down, errored items should not be returned
@@ -345,6 +366,8 @@ public class SrbDirectoryIterator implements Iterator<FileBean> {
                         readyList.offer(fb);
                     }
                 }
+            } catch ( InterruptedException e ) {
+                LOG.error("Interrupted, exiting ", e);
             } finally {
                 LOG.debug(
                         "SRB Thread finishing: " + Thread.currentThread().
@@ -365,6 +388,10 @@ public class SrbDirectoryIterator implements Iterator<FileBean> {
 
         @SuppressWarnings("empty-statement")
         private FileBean processFile( String file ) {
+            stateBean.setStateAndReset(State.OPENING_FILE);
+            stateBean.setFile(file);
+            stateBean.setRead(0);
+            
             String hash;
             long size = 0;
             LOG.trace("Processing file: " + file + " finished state: " + finished + " pool active: "
@@ -384,7 +411,11 @@ public class SrbDirectoryIterator implements Iterator<FileBean> {
                 dis = new DigestInputStream(tis, digest);
 //                LOG.trace("Opened srb input stream" + file);
                 int read = 0;
+                stateBean.setTotalSize(-1);
+                stateBean.setState(State.READING);
                 while ( (read = dis.read(buffer)) >= 0 ) {
+                    stateBean.setRead(size);
+                    stateBean.updateLastChange();
                     size += read;
                 }
 

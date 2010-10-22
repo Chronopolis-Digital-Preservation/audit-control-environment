@@ -35,8 +35,9 @@ import edu.sdsc.grid.io.srb.SRBAccount;
 import edu.sdsc.grid.io.srb.SRBFile;
 import edu.sdsc.grid.io.srb.SRBFileInputStream;
 import edu.sdsc.grid.io.srb.SRBFileSystem;
+import edu.umiacs.ace.driver.DriverStateBean;
 import edu.umiacs.ace.util.PersistUtil;
-import edu.umiacs.ace.monitor.audit.AuditIterable;
+import edu.umiacs.ace.driver.AuditIterable;
 import edu.umiacs.ace.driver.FileBean;
 import edu.umiacs.ace.driver.filter.PathFilter;
 import edu.umiacs.ace.driver.StorageDriver;
@@ -223,6 +224,12 @@ public class SrbAccess extends StorageDriver {
                     srbIterator.cancel(true);
                 }
             }
+
+            @Override
+            public DriverStateBean[] getState() {
+                return srbIterator.getStatebeans();
+            }
+
         };
 
     }

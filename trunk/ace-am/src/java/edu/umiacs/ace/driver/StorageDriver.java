@@ -30,7 +30,6 @@
 // $Id$
 package edu.umiacs.ace.driver;
 
-import edu.umiacs.ace.monitor.audit.AuditIterable;
 import edu.umiacs.ace.driver.filter.PathFilter;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.Collection;

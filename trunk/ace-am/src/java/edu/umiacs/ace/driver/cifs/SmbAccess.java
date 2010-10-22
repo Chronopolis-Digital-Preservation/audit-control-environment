@@ -31,7 +31,7 @@
 
 package edu.umiacs.ace.driver.cifs;
 
-import edu.umiacs.ace.monitor.audit.AuditIterable;
+import edu.umiacs.ace.driver.AuditIterable;
 import edu.umiacs.ace.driver.FileBean;
 import edu.umiacs.ace.driver.filter.PathFilter;
 import edu.umiacs.ace.driver.StorageDriver;
