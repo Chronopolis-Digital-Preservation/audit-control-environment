@@ -28,9 +28,10 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-
 package edu.umiacs.ace.driver.irods;
 
+import edu.umiacs.ace.driver.DriverStateBean;
+import edu.umiacs.ace.driver.DriverStateBean.State;
 import edu.umiacs.ace.driver.FileBean;
 import edu.umiacs.ace.driver.filter.PathFilter;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
@@ -51,6 +52,7 @@ import org.apache.log4j.Logger;
  */
 public class IrodsIterator implements Iterator<FileBean> {
 
+    private DriverStateBean stateBean;
     private IrodsHandler handler = null;
     private LinkedBlockingQueue<FileBean> readyList = new LinkedBlockingQueue<FileBean>();
     private Thread takingThread;
@@ -65,6 +67,7 @@ public class IrodsIterator implements Iterator<FileBean> {
             String digestAlgorithm ) {
         this.co = new ConnectOperation(ic.getServer(), ic.getPort(),
                 ic.getUsername(), ic.getPassword(), ic.getZone());
+        this.stateBean = new DriverStateBean();
         try {
 
             co.getConnection().closeConnection();
@@ -100,6 +103,10 @@ public class IrodsIterator implements Iterator<FileBean> {
         bfs.cancel();
     }
 
+    public DriverStateBean getStateBean() {
+        return stateBean;
+    }
+
     @Override
     public boolean hasNext() {
         return !readyList.isEmpty() || handler != null;
@@ -131,24 +138,38 @@ public class IrodsIterator implements Iterator<FileBean> {
 
     private class MyListener implements BulkTransferListener {
 
+        private long bytes;
+
         @Override
         public void startTransfer() {
+            stateBean.setStateAndReset(State.LISTING);
+            stateBean.setRunningThread(Thread.currentThread());
         }
 
         @Override
         public void startFile( String fullPath ) {
+            bytes = 0;
+            stateBean.setStateAndReset(State.READING);
+            stateBean.setFile(fullPath);
         }
 
         @Override
         public void bytesWritten( int bytesWritten ) {
+
+            bytes += bytesWritten;
+            stateBean.setRead(bytes);
+            stateBean.updateLastChange();
         }
 
         @Override
         public void endFile( String fullPath ) {
+            stateBean.setStateAndReset(State.LISTING);
+
         }
 
         @Override
         public void endTransfer() {
+            stateBean.setRunningThread(null);
             LOG.debug("endTransfer called on irods iterator");
             if ( !saverList.isEmpty() ) {
                 saverList.poll().execute(true);

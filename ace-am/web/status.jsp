@@ -46,6 +46,63 @@
                 color: red;
                 font-weight: bold;
             }
+
+            .statusrow:hover {
+                background-color: #e8e8e8;
+            }
+
+            .statusrow {
+                background-color: #FFFFFF;
+            }
+
+            #threaddetailsTD:hover div {
+                display: block;
+                
+                
+            }
+
+            #threaddetailsDIV {
+                left: 100px;
+                position: absolute;
+                background-color: #FFFFFF;
+                width: 600px;
+                z-index: 300;
+                display: none;
+                font-size: x-small;
+                border: solid 1px #000000;
+
+            }
+            #threaddetailsDIV table {
+                margin: 5px;
+
+                text-align: left;
+
+            }
+            #threaddetailsDIV table tr td {
+                background-color: #f1f1f1;
+                padding-right: 5px;
+                text-align: left;
+
+            }
+
+            #details {
+                z-index: 100;
+                position: relative;
+            }
+            #detailstbl1 tr td
+            {
+                vertical-align: top;
+                padding-left: 10px;
+                margin-top: 10px;
+            }
+            #detailstbl1 tr
+            {
+                background-color: #FFFFFF;
+            }
+            #detailstbl1 tr:hover
+            {
+                background-color: #e8e8e8;
+            }
         </style>
     </head>
 
@@ -56,6 +113,7 @@
             <div id="details">
                 <jsp:include page="statusdetails.jsp"/>
             </div>
+
         </c:if>
 
         <table id="statustable">
@@ -73,7 +131,7 @@
                     <tr><td class="groupheader" colspan="6">${item.collection.group}</td></tr>
                 </c:if>
 
-                <tr class="statusrow" onmouseout='javascript:this.style.background="#ffffff"; return false;' onmouseover='javascript:this.style.background="#e8e8e8"; return false;'>
+                <tr class="statusrow" >
                     <td>
 
                         <c:choose>

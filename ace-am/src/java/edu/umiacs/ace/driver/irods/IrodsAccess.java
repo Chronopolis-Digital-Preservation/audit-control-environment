@@ -31,8 +31,9 @@
 
 package edu.umiacs.ace.driver.irods;
 
+import edu.umiacs.ace.driver.DriverStateBean;
 import edu.umiacs.ace.util.PersistUtil;
-import edu.umiacs.ace.monitor.audit.AuditIterable;
+import edu.umiacs.ace.driver.AuditIterable;
 import edu.umiacs.ace.driver.FileBean;
 import edu.umiacs.ace.driver.filter.PathFilter;
 import edu.umiacs.ace.driver.StorageDriver;
@@ -118,6 +119,12 @@ public class IrodsAccess extends StorageDriver {
             public void cancel() {
                 it.cancel();
             }
+
+            @Override
+            public DriverStateBean[] getState() {
+                return new DriverStateBean[] {it.getStateBean()};
+            }
+
         };
 
     }
