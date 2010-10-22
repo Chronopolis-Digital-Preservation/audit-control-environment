@@ -31,8 +31,9 @@
 
 package edu.umiacs.ace.driver.benchmark;
 
+import edu.umiacs.ace.driver.DriverStateBean;
 import edu.umiacs.ace.util.PersistUtil;
-import edu.umiacs.ace.monitor.audit.AuditIterable;
+import edu.umiacs.ace.driver.AuditIterable;
 import edu.umiacs.ace.driver.FileBean;
 import edu.umiacs.ace.driver.filter.PathFilter;
 import edu.umiacs.ace.driver.StorageDriver;
@@ -201,6 +202,12 @@ public class BenchmarkAccess extends StorageDriver {
                 }
 
             }
+
+            @Override
+            public DriverStateBean[] getState() {
+                return new DriverStateBean[0];
+            }
+
         };
     }
 

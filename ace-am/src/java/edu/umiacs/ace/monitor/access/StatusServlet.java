@@ -51,6 +51,7 @@ public class StatusServlet extends EntityManagerServlet {
 
     private static final String PAGE_COLLECTIONS = "collections";
     private static final String SESSION_WORKINGCOLLECTION = "workingCollection";
+    private static final String PARAM_CSV = "csv";
 
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -110,9 +111,16 @@ public class StatusServlet extends EntityManagerServlet {
         request.setAttribute(PAGE_COLLECTIONS, collections);
         if ( hasJson(request) ) {
             dispatcher = request.getRequestDispatcher("status-json.jsp");
+        } else if ( hasCsv(request) ) {
+            dispatcher = request.getRequestDispatcher("status-csv.jsp");
         } else {
             dispatcher = request.getRequestDispatcher("status.jsp");
         }
         dispatcher.forward(request, response);
+    }
+
+    private boolean hasCsv( HttpServletRequest request ) {
+        String value = (String) request.getParameter(PARAM_CSV);
+        return !Strings.isEmpty(value);
     }
 }

@@ -30,6 +30,8 @@
 // $Id$
 package edu.umiacs.ace.monitor.audit;
 
+import edu.umiacs.ace.driver.AuditIterable;
+import edu.umiacs.ace.driver.DriverStateBean;
 import edu.umiacs.ace.driver.filter.PathFilter;
 import edu.umiacs.ace.driver.FileBean;
 import edu.umiacs.ace.driver.StorageDriver;
@@ -97,6 +99,8 @@ public final class AuditThread extends Thread implements CancelCallback {
     private Throwable abortException;
     private String tokenClassName;
     private LogEventManager logManager;
+    private AuditIterable<FileBean> iterableItems;
+
 
     AuditThread( Collection c, StorageDriver driver,
             MonitoredItem... startItem ) {
@@ -108,6 +112,14 @@ public final class AuditThread extends Thread implements CancelCallback {
         this.setName("audit: " + c.getName());
 
         this.start();
+    }
+
+    public DriverStateBean[] getDriverStatus()
+    {
+     if (iterableItems != null)
+         return iterableItems.getState();
+     else
+         return new DriverStateBean[0];
     }
 
     public void setTokenClassName( String tokenClassName ) {
@@ -151,6 +163,8 @@ public final class AuditThread extends Thread implements CancelCallback {
     @Override
     public void cancel() {
         cancel = true;
+        if (iterableItems != null)
+            iterableItems.cancel();
         this.interrupt();
 
     }
@@ -263,8 +277,7 @@ public final class AuditThread extends Thread implements CancelCallback {
     }
 
     private void performAudit() {
-        AuditIterable<FileBean> iterableItems;
-
+        
         // 1. Setup audit
         PathFilter filter = new SimpleFilter(coll);
         Date startDate = new Date();
@@ -287,7 +300,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                 }
 
                 if ( cancel || abortException != null ) {
-                    iterableItems.cancel();
+//                    iterableItems.cancel();
                     return;
                 }
 
@@ -475,7 +488,7 @@ public final class AuditThread extends Thread implements CancelCallback {
         if ( item.getState() != 'T' ) {
 
 //            lem.missingToken(item.getPath(), coll);
-            event = logManager.createItemEvent(LogEnum.MISSING_TOKEN, imsHost);
+            event = logManager.createItemEvent(LogEnum.MISSING_TOKEN, item.getPath());
             item.setStateChange(new Date());
             item.setState('T');
             item.setSize(currentFile.getFileSize());
