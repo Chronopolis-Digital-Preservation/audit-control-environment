@@ -28,7 +28,6 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-
 package edu.umiacs.ace.util;
 
 import edu.umiacs.ace.monitor.core.MonitoredItem;
@@ -41,6 +40,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
 /**
@@ -59,6 +59,7 @@ public abstract class EntityManagerServlet extends HttpServlet {
     public static final String PARAM_ITEM_ID = "itemid";
     public static final String PARAM_TOKEN_ID = "tokenid";
     private static final String PARAM_JSON = "json";
+    private static final Logger LOG = Logger.getLogger(EntityManagerServlet.class);
 
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -75,8 +76,23 @@ public abstract class EntityManagerServlet extends HttpServlet {
 
         EntityManager em = PersistUtil.getEntityManager();
         try {
-            NDC.push("[request " + Thread.currentThread().getName() + "] ");
+            NDC.push("[request " + request.getPathTranslated() + "] ");
+            if ( LOG.isDebugEnabled() ) {
+                LOG.trace("parameters: " + request.getQueryString());
+            }
             processRequest(request, response, em);
+        } catch ( Throwable t ) {
+            LOG.error("Uncaught exception in servlet", t);
+            if ( t instanceof ServletException ) {
+                throw (ServletException) t;
+            } else if ( t instanceof IOException ) {
+                throw (IOException) t;
+            } else if ( t instanceof RuntimeException ) {
+                throw (RuntimeException) t;
+            } else {
+                throw new RuntimeException(t);
+            }
+
         } finally {
             em.close();
             NDC.pop();
