@@ -69,19 +69,19 @@ public class FileSizeHandler extends SimpleTagSupport {
                         out.print(value + units[0]);
                         break;
                     case 'k':
-                        out.println(df.format((double) value / kb) + units[1]);
+                        out.print(df.format((double) value / kb) + units[1]);
                         break;
                     case 'm':
-                        out.println(df.format((double) value / mb) + units[2]);
+                        out.print(df.format((double) value / mb) + units[2]);
                         break;
                     case 'g':
-                        out.println(df.format((double) value / gb) + units[3]);
+                        out.print(df.format((double) value / gb) + units[3]);
                         break;
                     case 't':
-                        out.println(df.format((double) value / tb) + units[4]);
+                        out.print(df.format((double) value / tb) + units[4]);
                         break;
                     case 'p':
-                        out.println(df.format((double) value / pb) + units[5]);
+                        out.print(df.format((double) value / pb) + units[5]);
                         break;
                 }
             } else {
@@ -89,7 +89,7 @@ public class FileSizeHandler extends SimpleTagSupport {
                 long div = 1;
                 for ( int i = 0; i < 6; i++ ) {
                     if ( (testval >>>= 10) == 0 ) {
-                        out.println(df.format((double) value / div) + units[i]);
+                        out.print(df.format((double) value / div) + units[i]);
                         i = 6;
                     }
                     div <<= 10;
