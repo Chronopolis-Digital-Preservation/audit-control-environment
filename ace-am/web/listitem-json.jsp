@@ -23,7 +23,7 @@
                 <json:property name="lastSeen" value="${item.lastSeen}"/>
                 <json:property name="stateChange" value="${item.stateChange}"/>
                 <json:property name="lastVisited" value="${item.lastVisited}"/>
-                <json:property name="size" value="${parent.size}"/>
+                <json:property name="size" value="${item.size}"/>
             </json:object>
     </json:array>
 </json:object>
