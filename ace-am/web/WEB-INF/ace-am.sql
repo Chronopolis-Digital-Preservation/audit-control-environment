@@ -97,6 +97,19 @@ CREATE TABLE `srbsettings` (
   KEY `FK_srbsettings_COLLECTION_ID` (`COLLECTION_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+DROP TABLE IF EXISTS `swapsettings`;
+CREATE TABLE `swapsettings` (
+  `ID` bigint(20) NOT NULL auto_increment,
+  `USERNAME` varchar(255) NOT NULL,
+  `SERVERS` varchar(255) NOT NULL,
+  `PREFIX` varchar(255) NOT NULL,
+  `PORT` int(11) NOT NULL,
+  `PASSWORD` varchar(255) NOT NULL,
+  `COLLECTION_ID` bigint(20) NOT NULL,
+  PRIMARY KEY  (`ID`),
+  KEY `FK_srbsettings_COLLECTION_ID` (`COLLECTION_ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
 DROP TABLE IF EXISTS `irodssettings`;
 CREATE TABLE `irodssettings` (
   `ID` bigint(20) NOT NULL auto_increment,
