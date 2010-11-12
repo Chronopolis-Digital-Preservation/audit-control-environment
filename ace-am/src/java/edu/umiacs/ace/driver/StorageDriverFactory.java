@@ -34,6 +34,7 @@ import edu.umiacs.ace.driver.irods.IrodsAccess;
 import edu.umiacs.ace.driver.localfile.LocalFileAccess;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.driver.srb.SrbAccess;
+import edu.umiacs.ace.driver.swap.SwapFileAccess;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +62,7 @@ public final class StorageDriverFactory {
         implementationMap.put("irods", IrodsAccess.class);
         implementationMap.put("local", LocalFileAccess.class);
         implementationMap.put("srb", SrbAccess.class);
+        implementationMap.put("swap", SwapFileAccess.class);
 //        implementationMap.put("benchmark", BenchmarkAccess.class);
 //        implementationMap.put("smb", SmbAccess.class);
     }
