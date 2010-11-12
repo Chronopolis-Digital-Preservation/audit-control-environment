@@ -18,6 +18,7 @@
     <class>edu.umiacs.ace.monitor.peers.PartnerSite</class>
     <class>edu.umiacs.ace.monitor.core.Token</class>
     <class>edu.umiacs.ace.monitor.core.MonitoredItem</class>
+    <class>edu.umiacs.ace.driver.swap.SwapSettings</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="toplink.session.customizer" value="edu.umiacs.ace.util.DataSourceSessionCustomizer"/>

@@ -57,8 +57,8 @@
 
             #threaddetailsTD:hover div {
                 display: block;
-                
-                
+
+
             }
 
             #threaddetailsDIV {
@@ -125,10 +125,21 @@
             </thead>
             <c:set var="count" value="0" />
             <jsp:useBean id="today" class="java.util.Date"/>
+            <c:set var="counttotal" value="0" />
+            <c:set var="sizetotal" value="0" />
             <c:forEach var="item" items="${collections}">
 
                 <c:if test="${currgroup != item.collection.group && item.collection.group != null}">
-                    <tr><td class="groupheader" colspan="6">${item.collection.group}</td></tr>
+                    <script type="text/javascript">
+                        myp=document.getElementById("group${currgroup}");
+                        if (myp != null)
+                        {
+                            myp.innerHTML='${counttotal} / <c:choose><c:when test="${sizetotal > 0}"><d:FileSize value="${sizetotal}" /></c:when><c:otherwise>0 B</c:otherwise></c:choose>';
+                        }
+                    </script>
+                    <tr><td class="groupheader" colspan="3">${item.collection.group}</td><td class="groupheader" colspan="3" id="group${item.collection.group}"></td></tr>
+                    <c:set var="counttotal" value="0" />
+                    <c:set var="sizetotal" value="0" />
                 </c:if>
 
                 <tr class="statusrow" >
@@ -183,7 +194,14 @@
                 </tr>
                 <c:set var="count" value="${count + 1}" />
                 <c:set var="currgroup" value="${item.collection.group}" />
+                <c:set var="counttotal" value="${counttotal + item.totalFiles}" />
+                <c:set var="sizetotal" value="${sizetotal + item.totalSize}" />
             </c:forEach>
+            <script type="text/javascript">
+                myp=document.getElementById("group${currgroup}");
+                myp.innerHTML='${counttotal} / <c:choose><c:when test="${sizetotal > 0}"><d:FileSize value="${sizetotal}" /></c:when><c:otherwise>0 B</c:otherwise></c:choose>';
+            </script>
+
             <tr><td colspan="5"><br/><a href="ManageCollection">Add Collection</a> &nbsp;&nbsp;&nbsp&nbsp;&nbsp;
                     <c:choose>
                         <c:when test="${pause.paused}"><a href="Pause?pause=0">Enable Automated Auditing</a></c:when>
