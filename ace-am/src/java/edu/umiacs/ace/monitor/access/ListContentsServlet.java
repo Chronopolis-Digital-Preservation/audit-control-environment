@@ -57,8 +57,10 @@ import org.apache.log4j.Logger;
 public class ListContentsServlet extends EntityManagerServlet {
 
     private static final Logger LOG = Logger.getLogger(ListContentsServlet.class);
-    public static final String PARAM_WGET = "wget"; // display url paths that can be fed into wget
-    public static final String PARAM_ITEM = "item"; // directory ID to start with
+    public static final String PARAM_OUTPUT = "output"; // display url paths that can be fed into wget
+    public static final String TYPE_WGET = "wget";
+    public static final String TYPE_DIGEST = "digest";
+    public static final String TYPE_CHECKM = "checkm";
 
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -70,8 +72,7 @@ public class ListContentsServlet extends EntityManagerServlet {
             HttpServletResponse response, EntityManager em )
             throws ServletException, IOException {
         Collection c = getCollection(request, em);
-        long rootId = getParameter(request, PARAM_ITEM, 0);
-        boolean wgetFormet = getParameter(request, PARAM_WGET, false);
+        String output = getParameter(request, PARAM_OUTPUT, "digest");
         DataSource db;
         MonitoredItem mi;
         Connection conn = null;
@@ -79,17 +80,18 @@ public class ListContentsServlet extends EntityManagerServlet {
         response.setContentType("text/plain");
         ServletOutputStream os = response.getOutputStream();
 
+        if ( !(TYPE_CHECKM.equals(output) || TYPE_DIGEST.equals(output) || TYPE_WGET.equals(output)) ) {
+            throw new ServletException("Illegal type " + output);
+        }
+
         try {
-            try {
-                mi = em.getReference(MonitoredItem.class, rootId);
-            } catch ( EntityNotFoundException e ) {
-                mi = null;
-            }
+            mi = getItem(request, em);
 
             if ( mi != null && !c.equals(mi.getParentCollection()) ) {
                 throw new ServletException("Item not in collection");
             }
-            if ( !wgetFormet ) {
+            // header information
+            if ( TYPE_DIGEST.equals(output) ) {
                 StringBuffer header = new StringBuffer();
                 header.append(c.getDigestAlgorithm());
                 header.append(":");
@@ -99,7 +101,12 @@ public class ListContentsServlet extends EntityManagerServlet {
                     header.append(mi.getPath());
                 }
                 os.println(header.toString());
+            } else if ( TYPE_CHECKM.equals(output) ) {
+
+                os.println("#%checkm_0.7");
+                os.println("#Filename | Algorithm | Digest");
             }
+
 
             try {
                 db = PersistUtil.getDataSource();
@@ -127,17 +134,19 @@ public class ListContentsServlet extends EntityManagerServlet {
                 stmt.setFetchSize(Integer.MIN_VALUE);
                 ResultSet rs = stmt.executeQuery();
 
+                // Write results
                 while ( rs.next() ) {
-                    String line;
-                    if ( wgetFormet ) {
+                    String line = null;
+                    if ( TYPE_WGET.equals(output) ) {
                         String ctxPath = HttpUtils.getRequestURL(request).toString();
-//                    System.out.println("ctx path " + ctxPath + " uri " + HttpUtils.getRequestURL(
-//                            request));
                         String prefix = ctxPath.substring(
                                 0, ctxPath.lastIndexOf("/Sum"));
                         line = prefix + "/Path/" + c.getName() + rs.getString(1).replaceAll(
                                 "\\n", "\\n");
-                    } else {
+                    } else if ( TYPE_CHECKM.equals(output) ) {
+                        String digestAlg = checkmDigestAlgFormat(c.getDigestAlgorithm());
+                        line = rs.getString(1).replaceAll("\\n", "\\n") + " | " + digestAlg + " | " + rs.getString(2);
+                    } else if ( TYPE_DIGEST.equals(output) ) {
                         line = rs.getString(2) + "\t" + rs.getString(1).replaceAll(
                                 "\\n", "\\n");
                     }
@@ -147,18 +156,6 @@ public class ListContentsServlet extends EntityManagerServlet {
                 rs.close();
                 stmt.close();
                 conn.close();
-//        for ( Object o : q.getResultList() )
-//        {
-////            MonitoredItem mi = (MonitoredItem) o;
-////            if ( mi.getToken() != null )
-////            {
-//            Vector v = (Vector) o;
-//            String line = v.get(1) + "\t" + v.get(0) + "\n";
-//            os.write(line.getBytes());
-////                String line = mi.getToken().getFileDigest() + "\t" + mi.getPath() + "\n";
-////                os.write(line.getBytes());
-////            }
-//        }
                 os.close();
             } catch ( SQLException e ) {
                 throw new ServletException(e);
@@ -171,5 +168,10 @@ public class ListContentsServlet extends EntityManagerServlet {
 
         }
 
+    }
+
+    private String checkmDigestAlgFormat(String s)
+    {
+        return s.toLowerCase().replaceAll("[^a-z0-9]", "");
     }
 }
