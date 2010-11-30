@@ -166,9 +166,11 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                     </c:if>
                 </c:if>
                 <c:if test="${selectedFile.root.directory}">
-                    <a href="Summary?collectionid=${selectedFile.root.parentCollection.id}&amp;item=${selectedFile.root.id}">Download Digests</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a href="Summary?collectionid=${selectedFile.root.parentCollection.id}&amp;itemid=${selectedFile.root.id}&amp;output=digest">Download Digests</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a href="Summary?collectionid=${selectedFile.root.parentCollection.id}&amp;itemid=${selectedFile.root.id}&amp;output=checkm">Checkm Manifest</a>&nbsp;&nbsp;&nbsp;&nbsp;
+
                     <c:if test="${selectedFile.root.parentCollection.proxyData}">
-                        <a href="Summary?collectionid=${selectedFile.root.parentCollection.id}&amp;item=${selectedFile.root.id}&amp;wget=1">Web Crawler URL List</a>
+                        <a href="Summary?collectionid=${selectedFile.root.parentCollection.id}&amp;itemid=${selectedFile.root.id}&amp;output=wget">Web Crawler URL List</a>
                     </c:if>
                     
                     <!-- 
