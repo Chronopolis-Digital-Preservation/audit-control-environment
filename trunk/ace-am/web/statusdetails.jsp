@@ -24,7 +24,7 @@
                                         <tr>
                                             <td>${thread.runningThread.name}</td>
                                             <td>${thread.state}</td>
-                                            <td>${thread.read}<c:if test="${thread.totalSize > 0}">/${thread.totalSize}</c:if></td>
+                                            <td><um:FileSize value="${thread.read}"/><c:if test="${thread.totalSize > 0}">/<um:FileSize value="${thread.totalSize}"/></c:if></td>
                                             <td>${thread.idle/1000}s</td>
                                             <td>${thread.file}</td>
                                         </tr>
@@ -166,9 +166,10 @@
                             <a href="ManageFilters?collectionid=${workingCollection.collection.id}">Modify Filters</a><BR>
                             <a href="ReportConfiguration?collectionid=${workingCollection.collection.id}">Modify Reporting</a><br>
                         </c:if>
-                        <a href="Summary?collectionid=${workingCollection.collection.id}" title="Download a list of all digests in this collection">Download Digests</a><br>
+                        <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=digest" title="Download a list of all digests in this collection">Download Digests</a><br>
+                        <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=checkm" title="Download a checkm manifest of all items in this collection">Download checkm list</a><br>
                         <c:if test="${workingCollection.collection.proxyData}">
-                            <a href="Summary?collectionid=${workingCollection.collection.id}&amp;wget=1" title="Down wget-compatible list of files in this collection">Download wget file list</a><br>
+                            <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=wget" title="Down wget-compatible list of files in this collection">Download wget file list</a><br>
                         </c:if>
                         <a href="compare_form.jsp">Compare Collection</a><br>
                         <a href="ReportDuplicates?collectionid=${workingCollection.collection.id}">Show Duplicate Files</a>

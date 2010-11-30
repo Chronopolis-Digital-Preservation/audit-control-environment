@@ -38,7 +38,7 @@
     <Parameter name="throttle.maxaudit" value="3"/>
 
     <!-- minimum time between srb file reads in milliseconds, default 0 -->
-    <Parameter name="throttle.wait" value="2000"/>
+    <!--<Parameter name="throttle.wait" value="2000"/>-->
 
     <!-- maximum bytes per second per running audit, default = 0 = unlimited -->
     <!-- <Parameter name="throttle.bps" value="1048576"/> -->
