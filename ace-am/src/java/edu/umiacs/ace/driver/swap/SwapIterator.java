@@ -171,14 +171,18 @@ public class SwapIterator implements Iterator<FileBean> {
 
     private String[] extractPathList( SwapFile file ) throws InterruptedException {
         int substrLength = rootFile.getFullPath().length();
-
+if (rootFile.getFullPath().equals("/"))
+    substrLength = 0;
+        
         // build directory path
         List<String> dirPathList = new ArrayList<String>();
         String currFile = file.getFullPath();
         while ( !currFile.equals(rootFile.getFullPath()) ) {
-//            LOG.trace("Adding dir to path: " + currFile.substring(substrLength));
+            LOG.trace("Adding dir to path: " + currFile.substring(substrLength) + " subsr " + substrLength + " root " + rootFile.getFullPath() + " full " + currFile);
             dirPathList.add(currFile.substring(substrLength));
             currFile = currFile.substring(0, currFile.lastIndexOf('/'));
+            if (Strings.isEmpty(currFile))
+                currFile = "/";
         }
         return dirPathList.toArray(new String[dirPathList.size()]);
 
@@ -210,9 +214,13 @@ public class SwapIterator implements Iterator<FileBean> {
             try {
                 while ( !finished ) {
                     loadLoack.lockInterruptibly();
-                    SwapFile file;
+                    SwapFile file = null;
                     try {
                         file = loadNext();
+                    }
+                    catch (Exception e)
+                    {
+                        LOG.error("Uncaught listing exception ",e);
                     } finally {
                         loadLoack.unlock();
                     }

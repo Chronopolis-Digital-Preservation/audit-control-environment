@@ -1,10 +1,6 @@
 
 <%@page pageEncoding="UTF-8"%>
-<%--
-The taglib directive below imports the JSTL library. If you uncomment it,
-you must also add the JSTL library to the project. The Add Library... action
-on Libraries node in Projects view can be used to add the JSTL 1.1 library.
---%>
+
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%> 
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
@@ -61,14 +57,14 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                     <h3>Collection Differences</h3>
                 <pre>${results.message}</pre>
                     
-                    <h4>Files in original collection, but not in supplied</h4>
+                    <h4>Files monitored here, but not in supplied/remote</h4>
                     <ul>
                         <c:forEach items="${results.unseenTargetFiles}" var="item" >
                             <li> ${item} </li>
                         </c:forEach>
                     </ul>
                     
-                    <h4>Files in supplied file, but not original collection</h4>
+                    <h4>Files in supplied/remote, but not monitored here</h4>
                     <ul>
                         <c:forEach items="${results.unseenSuppliedFiles}" var="item" >
                             <li> ${item} </li>
@@ -80,8 +76,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                         <ul>
                             <li>Hash: ${item.digest}</li>
                             <ul>
-                                <li>Supplied:  ${item.destinationName}</li>
-                                <li>Collection: ${item.sourceName}</li>
+                                <li>Remote or Supplied:  ${item.destinationName}</li>
+                                <li>Local File: ${item.sourceName}</li>
                             </ul>
                         </ul>
                     </c:forEach>
@@ -91,8 +87,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                         <ul>
                             <li>Name: ${item.name}</li>
                             <ul>
-                                <li>Collection: ${item.targetDigest}</li>
-                                <li>Supplied: ${item.sourceDigest}</li>
+                                <li>Remote or Supplied: ${item.targetDigest}</li>
+                                <li>Local File: ${item.sourceDigest}</li>
                             </ul>
                             
                         </ul>

@@ -129,51 +129,64 @@
         </table>
         <table id="dettable">        
             <tr>
-                <c:if test="${!workingCollection.tokenAuditRunning && workingCollection.collection.storage != null}">
-                    <c:choose>
-                        <c:when test="${workingCollection.fileAuditRunning}">
-                            <td><a href="StopSync?type=file&amp;collectionid=${workingCollection.collection.id}" title="Stop File Audit" ><img src="images/stop.jpg" alt="Stop File Audit" ></a></td>
-                                </c:when>
-                                <c:otherwise>
-                            <td><a href="StartSync?type=file&amp;collectionid=${workingCollection.collection.id}" title="Start File Audit"><img src="images/file-audit-start.jpg" alt="Start File Audit" ></a></td>
-                                </c:otherwise>
-                            </c:choose>
-                        </c:if>
+                <um:Auth role="Audit">
+                    <c:if test="${!workingCollection.tokenAuditRunning && workingCollection.collection.storage != null}">
+                        <c:choose>
+                            <c:when test="${workingCollection.fileAuditRunning}">
+                                <td><a href="StopSync?type=file&amp;collectionid=${workingCollection.collection.id}" title="Stop File Audit" ><img src="images/stop.jpg" alt="Stop File Audit" ></a></td>
+                                    </c:when>
+                                    <c:otherwise>
+                                <td><a href="StartSync?type=file&amp;collectionid=${workingCollection.collection.id}" title="Start File Audit"><img src="images/file-audit-start.jpg" alt="Start File Audit" ></a></td>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:if>
 
 
-                <c:if test="${!workingCollection.fileAuditRunning}">
-                    <c:choose>
-                        <c:when test="${workingCollection.tokenAuditRunning}">
-                            <td><a href="StopSync?type=token&amp;collectionid=${workingCollection.collection.id}" title="Stop Token Audit" ><img src="images/stop.jpg" alt="Stop Token Audit" ></a></td>
-                                </c:when>
-                                <c:otherwise>
-                            <td><a href="StartSync?type=token&amp;collectionid=${workingCollection.collection.id}" title="Start Token Audit"><img src="images/token-audit-start.jpg" alt="Token File Audit" ></a></td>
-                                </c:otherwise>
-                            </c:choose>
-                        </c:if>
-
+                    <c:if test="${!workingCollection.fileAuditRunning}">
+                        <c:choose>
+                            <c:when test="${workingCollection.tokenAuditRunning}">
+                                <td><a href="StopSync?type=token&amp;collectionid=${workingCollection.collection.id}" title="Stop Token Audit" ><img src="images/stop.jpg" alt="Stop Token Audit" /></a></td>
+                                    </c:when>
+                                    <c:otherwise>
+                                <td><a href="StartSync?type=token&amp;collectionid=${workingCollection.collection.id}" title="Start Token Audit"><img src="images/token-audit-start.jpg" alt="Token File Audit" ></a></td>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:if>
+                        </um:Auth>
 
 <!--<td><a href="#" onclick="javascript:showBrowse(${workingCollection.collection.id}); return false;">Browse</a>-->
-                <td><a href="Browse?collection=${workingCollection.collection.id}" title="Browse"><img src="images/browse.jpg" alt="Browse"></a>
-                <td><a href="EventLog?collection=${workingCollection.collection.id}&amp;clear=1&amp;toggletype=sync"><img title="Event Log" src="images/log.jpg" alt="View Log"></a></td>
-                <td><a href="Report?collectionid=${workingCollection.collection.id}" title="Report"><img src="images/report.jpg" alt="Report"></a></td>
+                <um:Auth role="Browse"><td><a href="Browse?collection=${workingCollection.collection.id}" title="Browse"><img src="images/browse.jpg" alt="Browse"></a></td></um:Auth>
+                <um:Auth role="Log"><td><a href="EventLog?collection=${workingCollection.collection.id}&amp;clear=1&amp;toggletype=sync"><img title="Event Log" src="images/log.jpg" alt="View Log"></a></td></um:Auth>
+                <um:Auth role="Report"><td><a href="Report?collectionid=${workingCollection.collection.id}" title="Report"><img src="images/report.jpg" alt="Report"></a></td></um:Auth>
                 <td>
                     <fieldset id="dropmenu2" style="display: none; z-index: 2; position: absolute; background-color: #FFFFFF; width: 150px;">
                         <legend><span onclick="toggleVisibility('dropmenu1'); toggleVisibility('dropmenu2');">close</span></legend>
                         <c:if test="${!(workingCollection.fileAuditRunning || workingCollection.tokenAuditRunning)}">
-                            <a href="ManageCollection?collectionid=${workingCollection.collection.id}" title="Configure connection settings for this collection" >Collection Settings</a><br>
-                            <a href="collectionremove.jsp" title="Delete Collection">Remove Collection</a><br>              
-                            <a href="ManageFilters?collectionid=${workingCollection.collection.id}">Modify Filters</a><BR>
-                            <a href="ReportConfiguration?collectionid=${workingCollection.collection.id}">Modify Reporting</a><br>
+                            <um:Auth role="Collection Modify">
+                                <a href="ManageCollection?collectionid=${workingCollection.collection.id}" title="Configure connection settings for this collection" >Collection Settings</a><br>
+                                <a href="collectionremove.jsp" title="Delete Collection">Remove Collection</a><br>
+                                <a href="ManageFilters?collectionid=${workingCollection.collection.id}">Modify Filters</a><BR>
+                            </um:Auth>
+                            <um:Auth role="Modify Activity Reporting">
+                                <a href="ReportConfiguration?collectionid=${workingCollection.collection.id}">Modify Reporting</a><br>
+                            </um:Auth>
                         </c:if>
-                        <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=digest" title="Download a list of all digests in this collection">Download Digests</a><br>
-                        <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=checkm" title="Download a checkm manifest of all items in this collection">Download checkm list</a><br>
-                        <c:if test="${workingCollection.collection.proxyData}">
-                            <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=wget" title="Down wget-compatible list of files in this collection">Download wget file list</a><br>
-                        </c:if>
-                        <a href="compare_form.jsp">Compare Collection</a><br>
-                        <a href="ReportDuplicates?collectionid=${workingCollection.collection.id}">Show Duplicate Files</a>
-                        <a href="ViewSummary?collectionid=${workingCollection.collection.id}&amp;limit=50" title="View all activity reports">Activity Reports</a>
+                        <um:Auth role="Summary">
+                            <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=digest" title="Download a list of all digests in this collection">Download Digests</a><br>
+                            <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=checkm" title="Download a checkm manifest of all items in this collection">Download checkm list</a><br>
+                            <c:if test="${workingCollection.collection.proxyData}">
+                                <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=wget" title="Down wget-compatible list of files in this collection">Download wget file list</a><br>
+                            </c:if>
+                        </um:Auth>
+                        <um:Auth role="Compare">
+                            <a href="compare_form.jsp">Compare Collection</a><br>
+                        </um:Auth>
+                        <um:Auth role="Show Duplicates">
+                            <a href="ReportDuplicates?collectionid=${workingCollection.collection.id}">Show Duplicate Files</a>
+                        </um:Auth>
+                        <um:Auth role="View Audit Summaries">
+                            <a href="ViewSummary?collectionid=${workingCollection.collection.id}&amp;limit=50" title="View all activity reports">Activity Reports</a>
+                        </um:Auth>
                     </fieldset>
 
                     <div id="dropmenu1" style="display: block;" onclick="toggleVisibility('dropmenu1'); toggleVisibility('dropmenu2'); ">more...</div>
