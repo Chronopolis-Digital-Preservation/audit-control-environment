@@ -202,11 +202,13 @@
                 myp.innerHTML='${counttotal} / <c:choose><c:when test="${sizetotal > 0}"><d:FileSize value="${sizetotal}" /></c:when><c:otherwise>0 B</c:otherwise></c:choose>';
             </script>
 
-            <tr><td colspan="5"><br/><a href="ManageCollection">Add Collection</a> &nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-                    <c:choose>
-                        <c:when test="${pause.paused}"><a href="Pause?pause=0">Enable Automated Auditing</a></c:when>
-                        <c:otherwise><a href="Pause?pause=1">Pause Automated Auditing</a></c:otherwise>
-                    </c:choose>
+            <tr><td colspan="5"><br/><d:Auth role="Collection Modify"><a href="ManageCollection">Add Collection</a></d:Auth> &nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+                    <d:Auth role="Audit">
+                        <c:choose>
+                            <c:when test="${pause.paused}"><a href="Pause?pause=0">Enable Automated Auditing</a></c:when>
+                            <c:otherwise><a href="Pause?pause=1">Pause Automated Auditing</a></c:otherwise>
+                        </c:choose>
+                    </d:Auth>
                 </td></tr>
             <tr><td colspan="5"><br /><img src="images/running.jpg" alt="running"/> - Audit in progress&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/stopped.jpg" alt="stopped"/> - Audit idle</td></tr>
             <tr><td colspan="5">* - Total files and status not updated until after first sync.</td></tr>
