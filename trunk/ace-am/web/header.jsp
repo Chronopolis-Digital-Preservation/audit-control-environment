@@ -7,6 +7,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 --%>
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%> 
+<%@taglib uri="/WEB-INF/tlds/monitor" prefix="um"%>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
@@ -16,20 +17,29 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
         <tr>  
             <td align="center">
                 <div class="menucell">
-                    <a href="Status">Status</a><BR> 
+                    <um:Auth role="Status">
+                        <a href="Status">Status</a>
+                    </um:Auth>
+                    <BR>
                 </div>
             </td>
             <td align="center">
                 <div class="menucell">
-                    <a href="EventLog?clear=1">Event Log</a>
+                    <um:Auth role="Log">
+                        <a href="EventLog?clear=1">Event Log</a>
+                    </um:Auth>
+                    <BR>
                 </div>
             </td>
 
             <td align="center">
                 <div class="menucell">
-                    <c:if test="${authmanagement}">
-                        <a href="Users">Accounts</a><BR>
-                    </c:if>
+                    <um:Auth role="Users">
+                        <c:if test="${authmanagement}">
+                            <a href="Users">Accounts</a>
+                        </c:if>
+                    </um:Auth>
+                    <BR>
                 </div>
             </td>
 

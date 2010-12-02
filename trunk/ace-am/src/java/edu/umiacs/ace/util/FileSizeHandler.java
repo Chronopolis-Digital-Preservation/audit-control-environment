@@ -28,25 +28,22 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-package edu.umiacs.ace.monitor.access;
+package edu.umiacs.ace.util;
 
-import java.text.Format;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.text.DecimalFormat;
+import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.JspFragment;
-import javax.servlet.jsp.tagext.SimpleTagSupport;
 
 /**
  *
  * @author toaster
  */
-public class DateAdd extends SimpleTagSupport {
+public class FileSizeHandler extends SimpleTagSupport {
 
-    private Date date;
-    private int period;
-    private String format;
+    private static final String[] units = {" B", " KB", " MB", " GB", " TB", " PB"};
+    private long value;
+    private char unit;
 
     /**
      * Called by the container to invoke this tag. 
@@ -55,42 +52,61 @@ public class DateAdd extends SimpleTagSupport {
      */
     @Override
     public void doTag() throws JspException {
+
         JspWriter out = getJspContext().getOut();
+        long kb = 1 << 10;
+        long mb = kb << 10;
+        long gb = mb << 10;
+        long tb = gb << 10;
+        long pb = tb << 10;
 
         try {
+            DecimalFormat df = new DecimalFormat("###,###.#");
 
-            long day = 1000 * 60 * 60 * 24;
-            long nextCheck = (long) date.getTime() + (long) period * day;
-            Date nextAudit = new Date(nextCheck);
-            Format formatter;
-            formatter = new SimpleDateFormat(format);
-            out.write(formatter.format(nextAudit));
-//            table.setText(6, i, format.format(nextAudit));
-
-            JspFragment f = getJspBody();
-            if ( f != null ) {
-                f.invoke(out);
+            if ( unit > 0 ) {
+                switch ( unit ) {
+                    case 'b':
+                        out.print(value + units[0]);
+                        break;
+                    case 'k':
+                        out.print(df.format((double) value / kb) + units[1]);
+                        break;
+                    case 'm':
+                        out.print(df.format((double) value / mb) + units[2]);
+                        break;
+                    case 'g':
+                        out.print(df.format((double) value / gb) + units[3]);
+                        break;
+                    case 't':
+                        out.print(df.format((double) value / tb) + units[4]);
+                        break;
+                    case 'p':
+                        out.print(df.format((double) value / pb) + units[5]);
+                        break;
+                }
+            } else {
+                long testval = value;
+                long div = 1;
+                for ( int i = 0; i < 6; i++ ) {
+                    if ( (testval >>>= 10) == 0 ) {
+                        out.print(df.format((double) value / div) + units[i]);
+                        i = 6;
+                    }
+                    div <<= 10;
+                }
             }
 
-            // TODO: insert code to write html after writing the body content.
-            // e.g.:
-            //
-            // out.println("    </blockquote>");
-
         } catch ( java.io.IOException ex ) {
-            throw new JspException("Error in DateAdd tag", ex);
+            throw new JspException(ex.getMessage());
         }
+
     }
 
-    public void setFormat( String format ) {
-        this.format = format;
+    public void setValue( long value ) {
+        this.value = value;
     }
 
-    public void setDate( Date date ) {
-        this.date = date;
-    }
-
-    public void setPeriod( int period ) {
-        this.period = period;
+    public void setUnit( char unit ) {
+        this.unit = unit;
     }
 }

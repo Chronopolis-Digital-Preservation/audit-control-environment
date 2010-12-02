@@ -31,6 +31,7 @@ input {
 }
 .menuheader {
     float: right;
+   
 }
 .menuheader table {
     
@@ -71,7 +72,7 @@ width: 100%;
 
 .header {
     display: block;
-    margin-top: 0px;
+    margin-top: 25px;
     width: 100%;
     margin-left: auto;
     margin-right: auto;

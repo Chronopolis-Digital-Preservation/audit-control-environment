@@ -83,7 +83,7 @@
   </tag>
   <tag>
     <name>FileSize</name>
-    <tag-class>edu.umiacs.ace.monitor.access.FileSizeHandler</tag-class>
+    <tag-class>edu.umiacs.ace.util.FileSizeHandler</tag-class>
     <body-content>empty</body-content>
     <attribute>
       <name>value</name>
@@ -99,7 +99,7 @@
   </tag>
   <tag>
     <name>DateAdd</name>
-    <tag-class>edu.umiacs.ace.monitor.access.DateAdd</tag-class>
+    <tag-class>edu.umiacs.ace.util.DateAdd</tag-class>
     <body-content>empty</body-content>
     <attribute>
       <name>date</name>
@@ -116,6 +116,17 @@
     <attribute>
       <name>format</name>
       <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+    </attribute>
+  </tag>
+  <tag>
+    <name>Auth</name>
+    <tag-class>edu.umiacs.ace.util.AuthTagHandler</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>role</name>
+      <required>true</required>
       <rtexprvalue>true</rtexprvalue>
       <type>java.lang.String</type>
     </attribute>
