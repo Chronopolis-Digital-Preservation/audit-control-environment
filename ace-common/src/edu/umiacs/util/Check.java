@@ -31,6 +31,8 @@
 
 package edu.umiacs.util;
 
+import java.util.regex.Pattern;
+
 /*******************************************************************************
  *
  * Standard checks for method parameters.
@@ -45,6 +47,8 @@ package edu.umiacs.util;
  ******************************************************************************/
 public final class Check
 {
+        private static Pattern whitespacePattern = Pattern.compile("\\s");
+
     private Check()
     {
     }
@@ -158,5 +162,21 @@ public final class Check
             throw new IllegalArgumentException(name + " <= 0: " + value);
         }
         return value;
+    }
+
+
+    /**
+     * Checks that a string contains no whitespace
+     * 
+     * @param s string to check for whitespace
+     * @throws IllegalArgumentException if supplied string contains whitespace
+     */
+    public static final String noWhitespace(String name, String s)
+    {
+        if (whitespacePattern.matcher(s).matches())
+        {
+            throw new IllegalArgumentException(name + ": contains whitespace");
+        }
+        return s;
     }
 }

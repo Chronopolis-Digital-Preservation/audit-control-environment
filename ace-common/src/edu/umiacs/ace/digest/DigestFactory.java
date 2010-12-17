@@ -61,6 +61,20 @@ public class DigestFactory {
         return instance;
     }
 
+    public boolean isRegistered(String className)
+    {
+        if (Strings.isEmpty(className))
+            return false;
+
+        for (DigestProvider dp : digestProviders.values())
+        {
+            if (dp.getProvider().getClass().getCanonicalName().equals(className))
+                return true;
+        }
+        return false;
+    }
+
+
     public void registerProvider( String className ) {
         Check.notEmpty("className", className);
         try {

@@ -38,8 +38,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /*******************************************************************************
- * Proof object.
- *
+ * Proof object. comparison for equals/hashcode is only done on actual proof nodes
+ * and not metadata
  * 
  * @version {@code $Revision$ $Date$}
  *
@@ -84,7 +84,31 @@ public final class Proof implements Iterable<ProofNode>, Serializable {
 
     @Override
     public String toString() {
-        return new BigInteger(leafHash).toString() + ":"
+        return (leafHash != null ? new BigInteger(leafHash).toString() : "nullLeaf") + ":"
                 + new StringListBuilder().setDelimiter(",").append(nodes).toString();
     }
+
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 17 * hash + (this.nodes != null ? this.nodes.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( obj == null ) {
+            return false;
+        }
+        if ( getClass() != obj.getClass() ) {
+            return false;
+        }
+        final Proof other = (Proof) obj;
+        if ( this.nodes != other.nodes && (this.nodes == null || !this.nodes.equals(other.nodes)) ) {
+            return false;
+        }
+        return true;
+    }
+
 }
