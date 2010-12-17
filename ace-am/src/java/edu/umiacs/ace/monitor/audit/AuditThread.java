@@ -191,6 +191,8 @@ public final class AuditThread extends Thread implements CancelCallback {
                 }
 
                 performAudit();
+                // Let outstanding tokens finish, TODO, de-hackify this.
+                sleep(2000);
             } catch ( Throwable e ) {
                 LOG.fatal("UNcaught exception in performAudit()", e);
                 if ( abortException != null ) {

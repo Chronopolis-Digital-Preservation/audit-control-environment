@@ -31,6 +31,8 @@
 
 package edu.umiacs.ace.monitor.access.browse;
 
+import edu.umiacs.ace.ims.api.TokenValidator;
+import edu.umiacs.ace.ims.ws.TokenResponse;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
@@ -38,6 +40,8 @@ import edu.umiacs.ace.monitor.audit.AuditTokens;
 import edu.umiacs.ace.monitor.access.browse.DirectoryTree.DirectoryNode;
 import edu.umiacs.ace.monitor.core.Collection;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.RequestDispatcher;
@@ -107,7 +111,7 @@ public class BrowseServlet extends EntityManagerServlet {
                 isRunning = true;
             }
             session.setAttribute(SESSION_FILE,
-                    loadFileBean(dt.getDirectoryNode(itemId), em));
+                    loadFileBean(dt.getDirectoryNode(itemId), em,c));
             if ( dt.getDirectoryNode(itemId).isDirectory() ) {
                 dt.toggleItem(itemId);
 
@@ -123,7 +127,7 @@ public class BrowseServlet extends EntityManagerServlet {
         dispatcher.forward(request, response);
     }
 
-    private FileBean loadFileBean( DirectoryNode node, EntityManager em ) {
+    private FileBean loadFileBean( DirectoryNode node, EntityManager em,Collection c ) {
         FileBean retBean = new FileBean();
 
         try {
@@ -131,8 +135,19 @@ public class BrowseServlet extends EntityManagerServlet {
                     node.getId());
             retBean.root = master;
             retBean.name = node.getName();
+
+            if (master.getToken() != null)
+            {
+            TokenResponse resp = (TokenResponse)master.getToken().getToken();
+            MessageDigest digest = MessageDigest.getInstance(resp.getDigestService());
+            retBean.itemProof = TokenValidator.calculateRoot(digest, master.getFileDigest(), resp.getProofElements());
+            }
             return retBean;
         } catch ( EntityNotFoundException e ) {
+            return null;
+        } catch (NoSuchAlgorithmException e)
+        {
+            LOG.error("Cannot create ald",e);
             return null;
         }
 
@@ -143,6 +158,11 @@ public class BrowseServlet extends EntityManagerServlet {
 
         MonitoredItem root;
         String name;
+        String itemProof;
+
+        public String getItemProof() {
+            return itemProof;
+        }
 
         public String getName() {
             return name;

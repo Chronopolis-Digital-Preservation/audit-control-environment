@@ -172,6 +172,7 @@
                             </um:Auth>
                         </c:if>
                         <um:Auth role="Summary">
+                            <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=store" title="Download tokenstore for this collection">Download TokenStore</a><br>
                             <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=digest" title="Download a list of all digests in this collection">Download Digests</a><br>
                             <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=checkm" title="Download a checkm manifest of all items in this collection">Download checkm list</a><br>
                             <c:if test="${workingCollection.collection.proxyData}">

@@ -77,6 +77,11 @@ public class Token implements Serializable {
     @ManyToOne
     private Collection parentCollection;
 //    private String fileDigest;
+    // New items, from token itself
+//    private String proofText;
+//    private String imsService;
+//    private String proofAlgorithm;
+//    private long round;
 
     public void setId( Long id ) {
         this.id = id;
