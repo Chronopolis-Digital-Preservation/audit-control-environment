@@ -32,6 +32,7 @@ package edu.umiacs.ace.hashtree;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.Arrays;
 
 /*******************************************************************************
  *
@@ -64,4 +65,33 @@ public final class ProofHash implements Serializable {
     public String toString() {
         return new BigInteger(hash).toString() + "[" + index + "]";
     }
+
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 89 * hash + Arrays.hashCode(this.hash);
+        hash = 89 * hash + this.index;
+        return hash;
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( obj == null ) {
+            return false;
+        }
+        if ( getClass() != obj.getClass() ) {
+            return false;
+        }
+        final ProofHash other = (ProofHash) obj;
+        if ( !Arrays.equals(this.hash, other.hash) ) {
+            return false;
+        }
+        if ( this.index != other.index ) {
+            return false;
+        }
+        return true;
+    }
+
+
 }

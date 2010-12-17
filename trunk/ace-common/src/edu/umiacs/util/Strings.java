@@ -194,7 +194,19 @@ public final class Strings
         }
         return new String(c);
     }
-    
+
+    public static <T> String join(char delimiter, T ... items)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append(items[0]);
+        for (int i = 1; i < items.length; i++)
+        {
+            sb.append(delimiter);
+            sb.append(items[i]);
+        }
+        return sb.toString();
+    }
+
     /**
      * Returns a new string that is a substring of another string. Use this
      * method when it is more natural to get a substring based on an offset
