@@ -146,7 +146,8 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                         <c:if test="${!selectedFile.root.directory}">
                         <tr><td>Last Change</td><td>${selectedFile.root.stateChange}</td></tr>
                         <tr><td>${selectedFile.root.parentCollection.digestAlgorithm} Digest</td><td style="font-size: 10px;">${selectedFile.root.fileDigest}</td></tr>
-                    </c:if>
+                        <tr><td>Token Proof:</td><td style="font-size: 10px;">${selectedFile.itemProof}</td></tr>
+                        </c:if>
 
                 </table>
                 <c:if test="${!selectedFile.root.directory}">
@@ -180,6 +181,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                 </c:if>
                 <m:Auth role="Summary">
                     <c:if test="${selectedFile.root.directory}">
+                        <a href="Summary?collectionid=${selectedFile.root.parentCollection.id}&amp;itemid=${selectedFile.root.id}&amp;output=store">Download&nbsp;Token Store</a>&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="Summary?collectionid=${selectedFile.root.parentCollection.id}&amp;itemid=${selectedFile.root.id}&amp;output=digest">Download&nbsp;Digests</a>&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="Summary?collectionid=${selectedFile.root.parentCollection.id}&amp;itemid=${selectedFile.root.id}&amp;output=checkm">Checkm&nbsp;Manifest</a>&nbsp;&nbsp;&nbsp;&nbsp;
 
