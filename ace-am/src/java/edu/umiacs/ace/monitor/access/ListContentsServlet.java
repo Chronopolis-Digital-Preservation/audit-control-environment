@@ -30,10 +30,14 @@
 // $Id$
 package edu.umiacs.ace.monitor.access;
 
+import edu.umiacs.ace.ims.api.TokenResponseStoreWriter;
+import edu.umiacs.ace.ims.ws.TokenResponse;
+import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.Token;
 import edu.umiacs.sql.SQL;
 import java.io.IOException;
 import java.sql.Connection;
@@ -41,7 +45,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -61,6 +64,7 @@ public class ListContentsServlet extends EntityManagerServlet {
     public static final String TYPE_WGET = "wget";
     public static final String TYPE_DIGEST = "digest";
     public static final String TYPE_CHECKM = "checkm";
+    public static final String TYPE_STORE = "store";
 
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -80,9 +84,11 @@ public class ListContentsServlet extends EntityManagerServlet {
         response.setContentType("text/plain");
         ServletOutputStream os = response.getOutputStream();
 
-        if ( !(TYPE_CHECKM.equals(output) || TYPE_DIGEST.equals(output) || TYPE_WGET.equals(output)) ) {
+        if ( !(TYPE_CHECKM.equals(output) || TYPE_DIGEST.equals(output)
+                || TYPE_WGET.equals(output) || TYPE_STORE.equals(output)) ) {
             throw new ServletException("Illegal type " + output);
         }
+
 
         try {
             mi = getItem(request, em);
@@ -107,14 +113,16 @@ public class ListContentsServlet extends EntityManagerServlet {
                 os.println("#Filename | Algorithm | Digest");
             }
 
-
+            TokenResponseStoreWriter writer =
+                    new TokenResponseStoreWriter(os, AuditThreadFactory.getIMS());
+            // query for items
             try {
                 db = PersistUtil.getDataSource();
                 conn = db.getConnection();
                 if ( mi == null ) {
 
                     stmt = conn.prepareStatement(
-                            "SELECT monitored_item.PATH, monitored_item.FILEDIGEST "
+                            "SELECT monitored_item.PATH, monitored_item.FILEDIGEST, monitored_item.TOKEN_ID "
                             + "FROM monitored_item "
                             + "WHERE monitored_item.PARENTCOLLECTION_ID = ? "
                             + "AND monitored_item.DIRECTORY = 0",
@@ -122,7 +130,7 @@ public class ListContentsServlet extends EntityManagerServlet {
                             ResultSet.CONCUR_READ_ONLY);
                 } else {
                     stmt = conn.prepareStatement(
-                            "SELECT monitored_item.PATH, monitored_item.FILEDIGEST "
+                            "SELECT monitored_item.PATH, monitored_item.FILEDIGEST, monitored_item.TOKEN_ID "
                             + "FROM monitored_item "
                             + "WHERE monitored_item.PARENTCOLLECTION_ID = ? "
                             + "AND monitored_item.DIRECTORY = 0 " + "AND monitored_item.PATH like ?",
@@ -141,16 +149,24 @@ public class ListContentsServlet extends EntityManagerServlet {
                         String ctxPath = HttpUtils.getRequestURL(request).toString();
                         String prefix = ctxPath.substring(
                                 0, ctxPath.lastIndexOf("/Sum"));
-                        line = prefix + "/Path/" + c.getName() + rs.getString(1).replaceAll(
-                                "\\n", "\\n");
+                        line = prefix + "/Path/" + c.getName() + formatPath(rs.getString(1));
+                        os.println(line);
                     } else if ( TYPE_CHECKM.equals(output) ) {
                         String digestAlg = checkmDigestAlgFormat(c.getDigestAlgorithm());
-                        line = rs.getString(1).replaceAll("\\n", "\\n") + " | " + digestAlg + " | " + rs.getString(2);
+                        line = formatPath(rs.getString(1)) + " | " + digestAlg + " | "
+                                + rs.getString(2);
+                        os.println(line);
                     } else if ( TYPE_DIGEST.equals(output) ) {
-                        line = rs.getString(2) + "\t" + rs.getString(1).replaceAll(
-                                "\\n", "\\n");
+                        line = rs.getString(2) + "\t" + formatPath(rs.getString(1));
+                        os.println(line);
+                    } else if ( TYPE_STORE.equals(output) ) {
+                        Token tok = em.getReference(Token.class, rs.getLong(3));
+                        if ( tok != null ) {
+                            writer.startToken((TokenResponse) tok.getToken());
+                            writer.addIdentifier(formatPath(rs.getString(1)));
+                            writer.writeTokenEntry();
+                        }
                     }
-                    os.println(line);
 
                 }
                 rs.close();
@@ -170,8 +186,11 @@ public class ListContentsServlet extends EntityManagerServlet {
 
     }
 
-    private String checkmDigestAlgFormat(String s)
-    {
+private String formatPath(String raw)
+{
+    return raw.replaceAll("\\n", "\\n");
+}
+    private String checkmDigestAlgFormat( String s ) {
         return s.toLowerCase().replaceAll("[^a-z0-9]", "");
     }
 }

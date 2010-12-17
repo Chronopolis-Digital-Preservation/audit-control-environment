@@ -229,6 +229,7 @@ public class MonitoredItem implements Serializable, Comparable {
         return lastVisited;
     }
 
+    @Override
     public int compareTo( Object o ) {
 
         if ( equals(o) ) {
