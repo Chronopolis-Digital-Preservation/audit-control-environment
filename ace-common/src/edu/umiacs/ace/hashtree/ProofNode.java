@@ -72,4 +72,31 @@ public final class ProofNode implements Iterable<ProofHash>, Serializable {
         return String.valueOf(index) + "("
                 + new StringListBuilder().setDelimiter(",").append(proofItems).toString() + ")";
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 47 * hash + (this.proofItems != null ? this.proofItems.hashCode() : 0);
+        hash = 47 * hash + this.index;
+        return hash;
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( obj == null ) {
+            return false;
+        }
+        if ( getClass() != obj.getClass() ) {
+            return false;
+        }
+        final ProofNode other = (ProofNode) obj;
+        if ( this.proofItems != other.proofItems &&
+                (this.proofItems == null || !this.proofItems.equals(other.proofItems)) ) {
+            return false;
+        }
+        if ( this.index != other.index ) {
+            return false;
+        }
+        return true;
+    }
 }
