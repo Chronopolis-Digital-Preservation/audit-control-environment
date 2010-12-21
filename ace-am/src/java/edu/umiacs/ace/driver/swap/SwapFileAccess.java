@@ -248,7 +248,7 @@ public class SwapFileAccess extends StorageDriver {
             LOG.trace("Path parses to uuid, testing " + id);
             return client.getFileGroupList().get(id);
         } catch ( IllegalArgumentException e ) {
-            LOG.trace("Path does not parse to a uuid, checking namespaces for '" + name +"'");
+            LOG.trace("Path does not parse to a uuid, checking namespaces for '" + name + "'");
             for ( FileGroup fg : client.getFileGroupList() ) {
                 if ( fg.getCombinedNameSpace().equals(name) ) {
                     return fg;
@@ -271,14 +271,14 @@ public class SwapFileAccess extends StorageDriver {
                 SwapClient client = createClient();
                 try {
                     Thread.sleep(2000);
-                FileGroup group = groupByName(client, settings.getCollection().getDirectory());
-                if ( group == null ) {
-                    LOG.error("Could not extract swap filegroup '"
-                            + settings.getCollection().getDirectory() + "' ");
+                    FileGroup group = groupByName(client, settings.getCollection().getDirectory());
+                    if ( group == null ) {
+                        LOG.error("Could not extract swap filegroup '"
+                                + settings.getCollection().getDirectory() + "' ");
 
-                    throw new RuntimeException("Could not find swap file group");
-                }
-                
+                        throw new RuntimeException("Could not find swap file group");
+                    }
+
                     rootFile = group.getFileDetails(settings.getPrefix());
                 } catch ( InterruptedException e ) {
                     LOG.error("Could not lookup swap file '" + settings.getPrefix() + "' ");
@@ -286,9 +286,8 @@ public class SwapFileAccess extends StorageDriver {
                     throw new RuntimeException("Could not open " + settings.getPrefix());
                 }
 
-                if (rootFile == null)
-                {
-                     LOG.error("Could not lookup swap file '" + settings.getPrefix() + "' ");
+                if ( rootFile == null ) {
+                    LOG.error("Could not lookup swap file '" + settings.getPrefix() + "' ");
                     throw new RuntimeException("Could not open " + settings.getPrefix());
                 }
 
@@ -328,11 +327,19 @@ public class SwapFileAccess extends StorageDriver {
     public InputStream getItemInputStream( String itemPath ) throws IOException {
 
         SwapClient client = createClient();
-        FileGroup group = groupByName(client, settings.getCollection().getDirectory());
-        if ( group == null ) {
-            throw new IOException("Could not file swap file group");
+        FileGroup group;
+        SwapFile file;
+        
+        try {
+            Thread.sleep(2000);
+            group = groupByName(client, settings.getCollection().getDirectory());
+            if ( group == null ) {
+                throw new IOException("Could not open swap file group");
+            }
+        } catch ( InterruptedException e ) {
+            throw new IOException("Interrupted opening filegroup");
         }
-        SwapFile file = null;
+
         try {
             file = group.getFileDetails(settings.getPrefix() + itemPath);
         } catch ( InterruptedException e ) {
