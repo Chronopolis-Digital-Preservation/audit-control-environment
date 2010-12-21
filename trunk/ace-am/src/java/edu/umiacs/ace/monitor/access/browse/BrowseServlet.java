@@ -31,14 +31,16 @@
 
 package edu.umiacs.ace.monitor.access.browse;
 
-import edu.umiacs.ace.ims.api.TokenValidator;
-import edu.umiacs.ace.ims.ws.TokenResponse;
+import edu.umiacs.ace.hashtree.Proof;
+import edu.umiacs.ace.hashtree.ProofValidator;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.audit.AuditTokens;
 import edu.umiacs.ace.monitor.access.browse.DirectoryTree.DirectoryNode;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.util.HashValue;
+import edu.umiacs.ace.util.TokenUtil;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -138,9 +140,13 @@ public class BrowseServlet extends EntityManagerServlet {
 
             if (master.getToken() != null)
             {
-            TokenResponse resp = (TokenResponse)master.getToken().getToken();
-            MessageDigest digest = MessageDigest.getInstance(resp.getDigestService());
-            retBean.itemProof = TokenValidator.calculateRoot(digest, master.getFileDigest(), resp.getProofElements());
+//            TokenResponse resp = (TokenResponse)master.getToken().getToken();
+            MessageDigest digest = MessageDigest.getInstance(master.getToken().getProofAlgorithm());
+
+            ProofValidator pv = new ProofValidator();
+            Proof proof = TokenUtil.extractProof(master.getToken());
+            byte[] root = pv.rootHash(digest, proof, HashValue.asBytes(master.getFileDigest()));
+            retBean.itemProof = HashValue.asHexString(root);
             }
             return retBean;
         } catch ( EntityNotFoundException e ) {

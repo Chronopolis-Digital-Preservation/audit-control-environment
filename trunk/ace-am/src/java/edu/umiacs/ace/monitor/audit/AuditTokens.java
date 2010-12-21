@@ -36,10 +36,11 @@ import edu.umiacs.ace.ims.ws.TokenResponse;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.MonitoredItemManager;
-import edu.umiacs.ace.monitor.core.Token;
 import edu.umiacs.ace.monitor.log.LogEventManager;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.log.LogEnum;
+import edu.umiacs.ace.token.AceToken;
+import edu.umiacs.ace.util.TokenUtil;
 import edu.umiacs.util.Strings;
 import java.security.MessageDigest;
 import java.util.Date;
@@ -60,8 +61,8 @@ public class AuditTokens extends Thread implements CancelCallback {
     private static final Map<Collection, AuditTokens> runningThreads =
             new HashMap<Collection, AuditTokens>();
 //    private Map<TokenResponse, Token> tokenMap = new ConcurrentHashMap<TokenResponse, Token>();
-    private Map<TokenResponse, MonitoredItem> itemMap =
-            new ConcurrentHashMap<TokenResponse, MonitoredItem>();
+    private Map<AceToken, MonitoredItem> itemMap =
+            new ConcurrentHashMap<AceToken, MonitoredItem>();
     private static final Logger LOG = Logger.getLogger(AuditTokens.class);
     private Collection collection;
     private boolean cancel = false;
@@ -234,12 +235,12 @@ public class AuditTokens extends Thread implements CancelCallback {
 
             for ( Object o : q.getResultList() ) {
                 MonitoredItem item = (MonitoredItem) o;
-                Token t = item.getToken();
+                AceToken t = TokenUtil.convertToAceToken(item.getToken());
                 if ( t != null ) {
-                    TokenResponse response = (TokenResponse) t.getToken();
-                    itemMap.put(response, item);
+//                    TokenResponse response = IMSUtil.c;
+                    itemMap.put(t, item);
                     tokensSeen++;
-                    validator.add(item.getFileDigest(), response);
+                    validator.add(item.getFileDigest(), t);
                 }
                 if ( cancel ) {
                     break;

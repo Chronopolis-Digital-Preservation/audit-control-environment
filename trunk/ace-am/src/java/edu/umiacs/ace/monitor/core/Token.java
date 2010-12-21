@@ -31,7 +31,6 @@
 
 package edu.umiacs.ace.monitor.core;
 
-import edu.umiacs.ace.monitor.core.Collection;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
@@ -39,7 +38,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -53,7 +51,7 @@ import javax.persistence.TemporalType;
  * @author toaster
  */
 @Entity
-@Table(name = "token")
+@Table(name = "acetoken")
 @NamedQueries({
     @NamedQuery(name = "Token.listByCollection", query =
     "SELECT t FROM MonitoredItem i, Token t WHERE i.parentCollection = :coll AND i.token = t"),
@@ -71,17 +69,20 @@ public class Token implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDate;
     private boolean valid;
-    @Column(name = "java_token_response")
-    @Lob
-    private Serializable token;
+//    @Column(name = "java_token_response")
+//    @Lob
+//    private Serializable token;
     @ManyToOne
     private Collection parentCollection;
-//    private String fileDigest;
     // New items, from token itself
-//    private String proofText;
-//    private String imsService;
-//    private String proofAlgorithm;
-//    private long round;
+    @Column(name = "PROOFTEXT")
+    private String proofText;
+    @Column(name = "IMSSERVICE")
+    private String imsService;
+    @Column(name = "PROOFALGORITHM")
+    private String proofAlgorithm;
+    @Column(name = "ROUND")
+    private long round;
 
     public void setId( Long id ) {
         this.id = id;
@@ -115,6 +116,38 @@ public class Token implements Serializable {
         return "edu.umiacs.ace.monitor.items.Token[id=" + id + "]";
     }
 
+    public String getImsService() {
+        return imsService;
+    }
+
+    public String getProofAlgorithm() {
+        return proofAlgorithm;
+    }
+
+    public String getProofText() {
+        return proofText;
+    }
+
+    public long getRound() {
+        return round;
+    }
+
+    public void setImsService( String imsService ) {
+        this.imsService = imsService;
+    }
+
+    public void setProofAlgorithm( String proofAlgorithm ) {
+        this.proofAlgorithm = proofAlgorithm;
+    }
+
+    public void setProofText( String proofText ) {
+        this.proofText = proofText;
+    }
+
+    public void setRound( long round ) {
+        this.round = round;
+    }
+
     public Date getLastValidated() {
         return lastValidated;
     }
@@ -138,14 +171,14 @@ public class Token implements Serializable {
     public void setValid( boolean valid ) {
         this.valid = valid;
     }
-
-    public Serializable getToken() {
-        return token;
-    }
-
-    public void setToken( Serializable token ) {
-        this.token = token;
-    }
+//
+//    public Serializable getToken() {
+//        return token;
+//    }
+//
+//    public void setToken( Serializable token ) {
+//        this.token = token;
+//    }
 
     public void setParentCollection( Collection parentCollection ) {
         this.parentCollection = parentCollection;
@@ -154,13 +187,4 @@ public class Token implements Serializable {
     public Collection getParentCollection() {
         return parentCollection;
     }
-//    public String getFileDigest()
-//    {
-//        return fileDigest;
-//    }
-//
-//    public void setFileDigest(String fileDigest)
-//    {
-//        this.fileDigest = fileDigest;
-//    }
 }

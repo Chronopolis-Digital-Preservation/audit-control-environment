@@ -37,6 +37,10 @@
         <description>srb file opening throttle</description>
         <listener-class>edu.umiacs.ace.driver.QueryThrottle</listener-class>
     </listener>
+    <listener>
+        <description>ServletContextListener</description>
+        <listener-class>edu.umiacs.ace.monitor.core.TokenMigrationContextListener</listener-class>
+    </listener>
     <servlet>
         <servlet-name>ManageCollection</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.core.ManageCollectionServlet</servlet-class>
