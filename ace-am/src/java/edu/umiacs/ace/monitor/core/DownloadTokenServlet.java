@@ -28,13 +28,11 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-
 package edu.umiacs.ace.monitor.core;
 
-import edu.umiacs.ace.ims.api.XMLTokenWriter;
-import edu.umiacs.ace.ims.ws.TokenResponse;
+import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
+import edu.umiacs.ace.util.DbTokenWriter;
 import edu.umiacs.ace.util.EntityManagerServlet;
-import edu.umiacs.util.Strings;
 import java.io.IOException;
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
@@ -52,20 +50,16 @@ public class DownloadTokenServlet extends EntityManagerServlet {
     protected void processRequest( HttpServletRequest request,
             HttpServletResponse response, EntityManager em )
             throws ServletException, IOException {
-        String idStr = request.getParameter(PARAM_TOKEN_ID);
-        if ( !Strings.isValidLong(idStr) ) {
-            throw new ServletException("Must supply id");
-        }
-        long id = Long.parseLong(idStr);
-        Token token = em.getReference(Token.class, id);
+        Token token = getToken(request, em);
 
         if ( token == null ) {
-            throw new ServletException("No token for id: " + id);
+            throw new ServletException("No valid token ID specified");
         }
 
-        XMLTokenWriter writer = new XMLTokenWriter();
-
-        response.setContentType("text/xml");
-        writer.write(response.getOutputStream(), (TokenResponse) token.getToken());
+        DbTokenWriter writer =
+                new DbTokenWriter(AuditThreadFactory.getIMS(), response.getOutputStream());
+        writer.startToken(token);
+        response.setContentType("text/plain");
+        writer.writeTokenEntry();
     }
 }

@@ -32,6 +32,7 @@ package edu.umiacs.ace.util;
 
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.Token;
 import edu.umiacs.util.Strings;
 import java.io.IOException;
 import javax.persistence.EntityManager;
@@ -138,6 +139,19 @@ public abstract class EntityManagerServlet extends HttpServlet {
         } else {
             return defaultValue;
         }
+    }
+
+    public Token getToken( HttpServletRequest request, EntityManager em ) {
+        long tokenId;
+
+        if ( (tokenId = getParameter(request, PARAM_TOKEN_ID, 0)) > 0 ) {
+            try {
+                return em.getReference(Token.class, tokenId);
+            } catch ( EntityNotFoundException e ) {
+                return null;
+            }
+        }
+        return null;
     }
 
     public Collection getCollection( HttpServletRequest request, EntityManager em ) {
