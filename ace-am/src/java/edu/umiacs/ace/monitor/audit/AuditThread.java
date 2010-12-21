@@ -40,7 +40,6 @@ import edu.umiacs.ace.ims.api.IMSService;
 import edu.umiacs.ace.ims.api.TokenRequestBatch;
 import edu.umiacs.ace.ims.api.TokenValidator;
 import edu.umiacs.ace.ims.ws.TokenRequest;
-import edu.umiacs.ace.ims.ws.TokenResponse;
 import edu.umiacs.ace.monitor.access.CollectionCountContext;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.compare.CollectionCompare;
@@ -56,6 +55,8 @@ import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.log.LogEnum;
 import edu.umiacs.ace.monitor.log.LogEvent;
 import edu.umiacs.ace.monitor.peers.PeerCollection;
+import edu.umiacs.ace.token.AceToken;
+import edu.umiacs.ace.util.TokenUtil;
 import edu.umiacs.util.Strings;
 import java.io.InputStream;
 import java.security.MessageDigest;
@@ -78,8 +79,8 @@ import org.apache.log4j.NDC;
 public final class AuditThread extends Thread implements CancelCallback {
 
     private static final Logger LOG = Logger.getLogger(AuditThread.class);
-    private Map<TokenResponse, MonitoredItem> itemMap =
-            new ConcurrentHashMap<TokenResponse, MonitoredItem>();
+    private Map<AceToken, MonitoredItem> itemMap =
+            new ConcurrentHashMap<AceToken, MonitoredItem>();
     private String imsHost;
     private int imsport;
     private Collection coll;
@@ -213,7 +214,8 @@ public final class AuditThread extends Thread implements CancelCallback {
                 validator.close();
                 validator = null;
             }
-
+            lastFileSeen = "Setting collection state";
+            setCollectionState();
             logAuditFinish();
             generateAuditReport();
             NDC.pop();
@@ -327,6 +329,7 @@ public final class AuditThread extends Thread implements CancelCallback {
 
         // let token batch finish before processing or items waiting tokens
         // will appear as errors.
+//        Thread.sleep(2000);
         if ( batch != null ) {
             batch.close();
             batch = null;
@@ -338,8 +341,7 @@ public final class AuditThread extends Thread implements CancelCallback {
         // harvest remote collections
         lastFileSeen = "comparing to peer sites";
         compareToPeers();
-        lastFileSeen = "Setting collection state";
-        setCollectionState();
+        
 
     }
 
@@ -537,14 +539,15 @@ public final class AuditThread extends Thread implements CancelCallback {
             }
             item.setLastSeen(new Date());
             item.setSize(currentFile.getFileSize());
+            AceToken token = TokenUtil.convertToAceToken(item.getToken());
             // add to token check queue
             if ( validator != null ) {
-                TokenResponse tResp = (TokenResponse) item.getToken().
-                        getToken();
-                itemMap.put(tResp, item);
+//                TokenResponse tResp = (TokenResponse) item.getToken().
+//                        getToken();
+                itemMap.put(token, item);
                 try {
                     validator.add(
-                            item.getFileDigest(), tResp);
+                            item.getFileDigest(), token);
                 } catch ( InterruptedException e ) {
                     abortException = e;
                 }

@@ -47,31 +47,5 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
     </table>
 </div>
 <div class="header">
-
-    <img src="images/title.jpg" alt="ACE Audit Manager">
+    <img src="images/title.jpg" alt="ACE Audit Manager"><BR><div style="font-size: large; color: red">${globalMessage}</div>
 </div>
-<!--
-<div class="menubar">
-
-    <table>
-        <tr>  
-            <td  align="center">
-                <div class="menucell" id="status">
-                    <a href="Status">Status</a><BR> 
-                </div>
-            </td>
-            <td  align="center">
-                <div class="menucell" id="log">
-                    <a href="EventLog">Event Log</a>
-                </div>
-            </td>
-            <td  align="center">
-                <div class="menucell" id="users">
-                    <a href="Users">Accounts</a><BR>
-                </div>
-            </td>
-        </tr>
-    </table>
-
-</div>
--->

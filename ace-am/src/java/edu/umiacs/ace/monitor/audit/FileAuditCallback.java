@@ -31,6 +31,7 @@
 package edu.umiacs.ace.monitor.audit;
 
 import edu.umiacs.ace.exception.StatusCode;
+import edu.umiacs.ace.ims.api.IMSUtil;
 import edu.umiacs.ace.ims.api.RequestBatchCallback;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
@@ -41,6 +42,7 @@ import edu.umiacs.ace.ims.ws.TokenRequest;
 import edu.umiacs.ace.ims.ws.TokenResponse;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.log.LogEnum;
+import edu.umiacs.ace.token.AceToken;
 import edu.umiacs.util.Strings;
 import java.io.Serializable;
 import java.util.Date;
@@ -100,10 +102,18 @@ public class FileAuditCallback implements RequestBatchCallback {
                 item = mim.getItemByPath(tr.getName(), coll);
 
                 Token token = new Token();
-                token.setCreateDate(new Date());
+//                token.setCreateDate(new Date());
                 token.setValid(true);
-                token.setLastValidated(new Date());
-                token.setToken((Serializable) tr);
+
+//                AceToken at = IMSUtil.convertResponse(tr, AuditThreadFactory.getIMS());
+//                token.setLastValidated();
+//                token.setToken((Serializable) tr);
+                token.setImsService(tr.getTokenClassName());
+                token.setProofText(IMSUtil.formatProof(tr));
+                token.setRound(tr.getRoundId());
+                token.setProofAlgorithm(tr.getDigestService());
+                token.setCreateDate(tr.getTimestamp().toGregorianCalendar().getTime());
+                
                 token.setParentCollection(coll);
                 if ( !map.containsKey(tr.getName()) || item == null ) {
                     LOG.error("No request for response: " + tr.getName() + " or item null, item: "

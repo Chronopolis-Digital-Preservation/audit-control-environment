@@ -38,6 +38,7 @@ import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.Token;
+import edu.umiacs.ace.util.DbTokenWriter;
 import edu.umiacs.sql.SQL;
 import java.io.IOException;
 import java.sql.Connection;
@@ -113,8 +114,9 @@ public class ListContentsServlet extends EntityManagerServlet {
                 os.println("#Filename | Algorithm | Digest");
             }
 
-            TokenResponseStoreWriter writer =
-                    new TokenResponseStoreWriter(os, AuditThreadFactory.getIMS());
+//            TokenResponseStoreWriter writer =
+//                    new TokenResponseStoreWriter(os, AuditThreadFactory.getIMS());
+            DbTokenWriter writer = new DbTokenWriter(AuditThreadFactory.getIMS(),os);
             // query for items
             try {
                 db = PersistUtil.getDataSource();
@@ -162,7 +164,7 @@ public class ListContentsServlet extends EntityManagerServlet {
                     } else if ( TYPE_STORE.equals(output) ) {
                         Token tok = em.getReference(Token.class, rs.getLong(3));
                         if ( tok != null ) {
-                            writer.startToken((TokenResponse) tok.getToken());
+                            writer.startToken(tok);
                             writer.addIdentifier(formatPath(rs.getString(1)));
                             writer.writeTokenEntry();
                         }

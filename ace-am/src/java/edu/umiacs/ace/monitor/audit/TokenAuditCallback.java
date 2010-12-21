@@ -40,6 +40,7 @@ import java.util.Map;
 import edu.umiacs.ace.ims.ws.TokenResponse;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.log.LogEnum;
+import edu.umiacs.ace.token.AceToken;
 import edu.umiacs.util.Strings;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -52,14 +53,14 @@ import org.apache.log4j.Logger;
 public final class TokenAuditCallback implements ValidationCallback {
 
     private static final Logger LOG = Logger.getLogger(ValidationCallback.class);
-    private Map<TokenResponse, MonitoredItem> itemMap;
+    private Map<AceToken, MonitoredItem> itemMap;
     private long totalErrors = 0;
     private long validTokens = 0;
     private CancelCallback cancel;
 //    private Collection collection;
     LogEventManager logManager;
 
-    public TokenAuditCallback( Map<TokenResponse, MonitoredItem> itemMap,
+    public TokenAuditCallback( Map<AceToken, MonitoredItem> itemMap,
             CancelCallback callback, Collection collection, long session ) {
         this.itemMap = itemMap;
         this.cancel = callback;
@@ -92,7 +93,7 @@ public final class TokenAuditCallback implements ValidationCallback {
     }
 
     @Override
-    public void validToken( TokenResponse response ) {
+    public void validToken( AceToken response ) {
         MonitoredItem item = itemMap.get(response);
         if ( item == null ) {
             return;
@@ -107,8 +108,8 @@ public final class TokenAuditCallback implements ValidationCallback {
         if ( !token.getValid() ) {
             token.setValid(true);
 //            LogEventManager lem = new LogEventManager(session, collection);
-            String path = response.getName();
-            em.persist(logManager.createItemEvent(LogEnum.TOKEN_VALID, path));
+//            String path = response.getName();
+            em.persist(logManager.createItemEvent(LogEnum.TOKEN_VALID, item.getPath()));
 //            em.persist(lem.validToken(path, collection));
             if ( item.getState() == 'I' ) {
                 item.setState('A');
@@ -123,11 +124,11 @@ public final class TokenAuditCallback implements ValidationCallback {
         em.merge(item);
         trans.commit();
         em.close();
-        LOG.trace("Token valid: " + response.getName());
+        LOG.trace("Token valid: " + item.getPath());
     }
 
     @Override
-    public void invalidToken( TokenResponse response, String correctCSI,
+    public void invalidToken( AceToken response, String correctCSI,
             String calculatedCSI ) {
 
         MonitoredItem item = itemMap.get(response);
@@ -143,9 +144,9 @@ public final class TokenAuditCallback implements ValidationCallback {
         if ( token.getValid() ) {
             token.setValid(false);
 
-            String path = response.getName();
+//            String path = response.getName();
             String message = "Generated CSI: " + calculatedCSI + " IMS (correct) CSI: " + correctCSI;
-            em.persist(logManager.createItemEvent(LogEnum.TOKEN_INVALID, path, message));
+            em.persist(logManager.createItemEvent(LogEnum.TOKEN_INVALID, item.getPath(), message));
             if ( item.getState() == 'A' ) {
                 item.setState('I');
                 item.setStateChange(new Date());
@@ -161,6 +162,6 @@ public final class TokenAuditCallback implements ValidationCallback {
         em.close();
 
         totalErrors++;
-        LOG.trace("Token invalid: " + response.getName());
+        LOG.trace("Token invalid: " + item.getPath());
     }
 }
