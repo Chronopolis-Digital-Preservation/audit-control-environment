@@ -31,9 +31,10 @@
 
 package edu.umiacs.ace.ims.api;
 
+import edu.umiacs.ace.hashtree.ProofValidator;
 import edu.umiacs.ace.ims.ws.ProofElement;
 import edu.umiacs.ace.ims.ws.RoundSummary;
-import edu.umiacs.ace.ims.ws.TokenResponse;
+import edu.umiacs.ace.token.AceToken;
 import edu.umiacs.ace.util.HashValue;
 import edu.umiacs.util.Check;
 import java.security.MessageDigest;
@@ -56,7 +57,7 @@ import org.apache.log4j.NDC;
 public class TokenValidator extends Thread
 {
 
-    private Map<TokenResponse, String> requests = new HashMap<TokenResponse, String>();
+    private Map<AceToken, String> requests = new HashMap<AceToken, String>();
     private IMSService connection;
     private ValidationCallback callback;
     private static final Logger print =
@@ -85,7 +86,32 @@ public class TokenValidator extends Thread
         this.start();
     }
 
-    public void add(String fileHash, TokenResponse token) throws InterruptedException
+//    public void add(String fileHash, AceToken token) throws InterruptedException
+//    {
+//        Check.notNull("token", token);
+//        Check.notNull("fileHash", fileHash);
+//
+//        lock.lockInterruptibly();
+//        try
+//        {
+//            if ( shutdownRequested )
+//            {
+//                throw new IllegalStateException("Process shutdown");
+//            }
+//            print.trace("Adding work: " + fileHash);
+//            requests.put(IMSUtil.convertToken(token), fileHash);
+//            if ( requests.size() >= maxQueueLength )
+//            {
+//                processCondition.signal();
+//            }
+//        }
+//        finally
+//        {
+//            lock.unlock();
+//        }
+//    }
+
+    public void add(String fileHash, AceToken token) throws InterruptedException
     {
         Check.notNull("token", token);
         Check.notNull("fileHash", fileHash);
@@ -151,6 +177,7 @@ public class TokenValidator extends Thread
     private void processBatch()
     {
         List<Long> roundNumbers = new ArrayList<Long>();
+        ProofValidator pv = new ProofValidator();
 
         Map<Long, LinkedList<WorkUnit>> proofMap = new HashMap<Long, LinkedList<WorkUnit>>();
 
@@ -158,21 +185,21 @@ public class TokenValidator extends Thread
         try
         {
             print.trace("Processing batch of size: " + requests.size());
-            for ( TokenResponse token : requests.keySet() )
+            for ( AceToken token : requests.keySet() )
             {
                 String hash = requests.get(token);
                 WorkUnit unit = new WorkUnit();
                 unit.setHash(hash);
                 unit.setTokenResponse(token);
 
-                if ( !roundNumbers.contains(token.getRoundId()) )
+                if ( !roundNumbers.contains(token.getRound()) )
                 {
 
-                    roundNumbers.add(token.getRoundId());
-                    proofMap.put(token.getRoundId(), new LinkedList<WorkUnit>());
+                    roundNumbers.add(token.getRound());
+                    proofMap.put(token.getRound(), new LinkedList<WorkUnit>());
                 }
 
-                proofMap.get(token.getRoundId()).offer(unit);
+                proofMap.get(token.getRound()).offer(unit);
             }
             print.trace("batch load finished, calling clear, unlocking.");
             requests.clear();
@@ -194,12 +221,13 @@ public class TokenValidator extends Thread
 
             for ( WorkUnit unit : proofMap.get(round) )
             {
-                TokenResponse response = unit.getTokenResponse();
+                AceToken response = unit.getTokenResponse();
                 String localLeafHash = unit.getHash();
 
                 String imsSuppliedHash = summary.getHashValue();
-                String calculatedHash = calculateRoot(digest,
-                        localLeafHash, response.getProofElements());
+//                String calculatedHash = calculateRoot(digest,
+//                        localLeafHash, response.getProofElements());
+                String calculatedHash = HashValue.asHexString(pv.rootHash(digest, response.getProof(), HashValue.asBytes(localLeafHash)));
 
                 if ( imsSuppliedHash.equals(calculatedHash) )
                 {
@@ -330,18 +358,18 @@ public class TokenValidator extends Thread
     {
 
         private String hash;
-        private TokenResponse tokenResponse;
+        private AceToken tokenResponse;
 
         public WorkUnit()
         {
         }
 
-        public void setTokenResponse(TokenResponse tokenResponse)
+        public void setTokenResponse(AceToken tokenResponse)
         {
             this.tokenResponse = tokenResponse;
         }
 
-        public TokenResponse getTokenResponse()
+        public AceToken getTokenResponse()
         {
             return tokenResponse;
         }
