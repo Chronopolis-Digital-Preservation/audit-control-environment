@@ -31,7 +31,7 @@
 
 package edu.umiacs.ace.ims.api;
 
-import edu.umiacs.ace.ims.ws.TokenResponse;
+import edu.umiacs.ace.token.AceToken;
 
 /**
  *
@@ -42,7 +42,7 @@ public interface ValidationCallback
 
     public void unexpectedException(Throwable throwable);
 
-    public void validToken(TokenResponse response);
+    public void validToken(AceToken response);
 
     /**
      * Called if a hash did not validate. This will be called if either the localhash
@@ -52,6 +52,6 @@ public interface ValidationCallback
      * @param correctCSI IMS stored CSI
      * @param calculatedCSI CSI generated from local hash and token
      */
-    public void invalidToken(TokenResponse response, String correctCSI,
+    public void invalidToken(AceToken response, String correctCSI,
             String calculatedCSI);
 }
