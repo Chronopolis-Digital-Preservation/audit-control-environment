@@ -112,7 +112,7 @@ public final class RetrieveItemServlet extends EntityManagerServlet {
             writeItemToResponse(response, collectionPath, coll, em);
 
         }
-        LOG.debug("Collection: " + collection + " item: " + (item != null ? item.getPath() : ""));
+        LOG.debug("Retrieved item, Collection: " + collection + " item: " + item.getPath());
 
     }
 

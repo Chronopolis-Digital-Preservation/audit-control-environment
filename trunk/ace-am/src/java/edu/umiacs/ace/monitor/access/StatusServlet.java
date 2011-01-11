@@ -101,7 +101,7 @@ public class StatusServlet extends EntityManagerServlet {
                 request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, csb);
             } else if ( request.getSession().getAttribute(
                     SESSION_WORKINGCOLLECTION) != null && ((CollectionSummaryBean) request.getSession().getAttribute(
-                    SESSION_WORKINGCOLLECTION)).getCollection().getId() == col.getId() ) {
+                    SESSION_WORKINGCOLLECTION)).getCollection().getId().equals(col.getId()) ) {
                 request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, csb);
 
             }

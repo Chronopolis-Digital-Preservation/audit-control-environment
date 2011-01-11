@@ -160,11 +160,14 @@ public class BrowseServlet extends EntityManagerServlet {
 
     }
 
-    public class FileBean {
+    public static class FileBean {
 
         MonitoredItem root;
         String name;
         String itemProof;
+
+        private FileBean() {
+        }
 
         public String getItemProof() {
             return itemProof;

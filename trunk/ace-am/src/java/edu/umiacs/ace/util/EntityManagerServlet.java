@@ -35,6 +35,7 @@ import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.Token;
 import edu.umiacs.util.Strings;
 import java.io.IOException;
+import java.io.InputStream;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.ServletException;
@@ -70,6 +71,41 @@ public abstract class EntityManagerServlet extends HttpServlet {
     protected abstract void processRequest( HttpServletRequest request,
             HttpServletResponse response, EntityManager em )
             throws ServletException, IOException;
+
+    protected void processPut( HttpServletRequest request,
+            HttpServletResponse response, EntityManager em, InputStream is )
+    {
+        throw new UnsupportedOperationException("PUT Not implemented");
+    }
+
+    private void wrapPut(HttpServletRequest request,
+            HttpServletResponse response )
+            throws ServletException, IOException {
+
+        EntityManager em = PersistUtil.getEntityManager();
+        try {
+            NDC.push("[request " + request.getPathTranslated() + "] ");
+            if ( LOG.isDebugEnabled() ) {
+                LOG.trace("parameters: " + request.getQueryString());
+            }
+            processPut(request, response, em, request.getInputStream());
+        } catch ( Throwable t ) {
+            LOG.error("Uncaught exception in servlet", t);
+            if ( t instanceof ServletException ) {
+                throw (ServletException) t;
+            } else if ( t instanceof IOException ) {
+                throw (IOException) t;
+            } else if ( t instanceof RuntimeException ) {
+                throw (RuntimeException) t;
+            } else {
+                throw new RuntimeException(t);
+            }
+
+        } finally {
+            em.close();
+            NDC.pop();
+        }
+    }
 
     private void wrapRequest( HttpServletRequest request,
             HttpServletResponse response )
@@ -204,6 +240,12 @@ public abstract class EntityManagerServlet extends HttpServlet {
             throws ServletException, IOException {
         wrapRequest(request, response);
     }
+
+    @Override
+    protected void doPut( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException {
+        wrapPut(req, resp);
+    }
+
 
     /** 
      * Returns a short description of the servlet.

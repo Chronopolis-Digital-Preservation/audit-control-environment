@@ -32,6 +32,7 @@
 package edu.umiacs.ace.monitor.log;
 
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.util.Argument;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
@@ -146,10 +147,10 @@ public class LogEvent implements Serializable {
     }
 
     public Date getDate() {
-        return date;
+        return Argument.dateClone(date);
     }
 
     public void setDate( Date date ) {
-        this.date = date;
+        this.date = Argument.dateClone(date);
     }
 }

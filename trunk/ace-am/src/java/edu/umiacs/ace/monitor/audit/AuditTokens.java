@@ -32,7 +32,6 @@ package edu.umiacs.ace.monitor.audit;
 
 import edu.umiacs.ace.ims.api.IMSService;
 import edu.umiacs.ace.ims.api.TokenValidator;
-import edu.umiacs.ace.ims.ws.TokenResponse;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.MonitoredItemManager;
@@ -43,7 +42,6 @@ import edu.umiacs.ace.token.AceToken;
 import edu.umiacs.ace.util.TokenUtil;
 import edu.umiacs.util.Strings;
 import java.security.MessageDigest;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,7 +54,7 @@ import org.apache.log4j.Logger;
  * 
  * @author toaster
  */
-public class AuditTokens extends Thread implements CancelCallback {
+public final class AuditTokens extends Thread implements CancelCallback {
 
     private static final Map<Collection, AuditTokens> runningThreads =
             new HashMap<Collection, AuditTokens>();
@@ -78,7 +76,7 @@ public class AuditTokens extends Thread implements CancelCallback {
 
     private AuditTokens( Collection collection ) {
         this.collection = collection;
-        session = new Date().getTime();
+        session = System.currentTimeMillis();
         logManager = new LogEventManager(session, collection);
         this.start();
     }

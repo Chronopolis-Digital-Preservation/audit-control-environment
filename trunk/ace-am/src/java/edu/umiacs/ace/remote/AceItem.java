@@ -31,6 +31,7 @@
 
 package edu.umiacs.ace.remote;
 
+import edu.umiacs.util.Argument;
 import java.util.Date;
 import org.codehaus.jackson.annotate.JsonUseDeserializer;
 
@@ -123,7 +124,7 @@ public class AceItem {
      * @return the lastSeen
      */
     public Date getLastSeen() {
-        return lastSeen;
+        return Argument.dateClone(lastSeen);
     }
 
     /**
@@ -131,14 +132,14 @@ public class AceItem {
      */
     @JsonUseDeserializer(value = CustomDateDeserializer.class)
     public void setLastSeen( Date lastSeen ) {
-        this.lastSeen = lastSeen;
+        this.lastSeen = Argument.dateClone(lastSeen);
     }
 
     /**
      * @return the stateChange
      */
     public Date getStateChange() {
-        return stateChange;
+        return Argument.dateClone(stateChange);
     }
 
     /**
@@ -146,14 +147,14 @@ public class AceItem {
      */
     @JsonUseDeserializer(value = CustomDateDeserializer.class)
     public void setStateChange( Date stateChange ) {
-        this.stateChange = stateChange;
+        this.stateChange = Argument.dateClone(stateChange);
     }
 
     /**
      * @return the lastVisited
      */
     public Date getLastVisited() {
-        return lastVisited;
+        return Argument.dateClone(lastVisited);
     }
 
     /**
@@ -161,7 +162,7 @@ public class AceItem {
      */
     @JsonUseDeserializer(value = CustomDateDeserializer.class)
     public void setLastVisited( Date lastVisited ) {
-        this.lastVisited = lastVisited;
+        this.lastVisited = Argument.dateClone(lastVisited);
     }
 
     /**

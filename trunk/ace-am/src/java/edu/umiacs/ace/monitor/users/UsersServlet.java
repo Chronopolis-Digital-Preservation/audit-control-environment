@@ -78,7 +78,7 @@ public class UsersServlet extends EntityManagerServlet {
         Users user = null;
         String error = null;
         boolean refresh = false;
-        if ( !Boolean.valueOf(getServletContext().getInitParameter("auth.management")) ) {
+        if ( !(Boolean) getServletContext().getAttribute("authmanagement") ) {
             return;
         }
         

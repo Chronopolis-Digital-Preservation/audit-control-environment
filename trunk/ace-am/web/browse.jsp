@@ -147,6 +147,8 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                         <tr><td>Last Change</td><td>${selectedFile.root.stateChange}</td></tr>
                         <tr><td>${selectedFile.root.parentCollection.digestAlgorithm} Digest</td><td style="font-size: 10px;">${selectedFile.root.fileDigest}</td></tr>
                         <tr><td>Token Proof:</td><td style="font-size: 10px;">${selectedFile.itemProof}</td></tr>
+                        <tr><td>Token Round:</td><td>${selectedFile.root.token.round}</td></tr>
+                        <tr><td>Token Issued:</td><td>${selectedFile.root.token.createDate}</td></tr>
                         </c:if>
 
                 </table>

@@ -192,28 +192,6 @@ public class SwapFileAccess extends StorageDriver {
         return null;
     }
 
-    private class MyConnectListener implements ConnectionListener {
-
-        Operation result = null;
-
-        @Override
-        public synchronized void connectionEvent( InetSocketAddress isa, Operation oprtn ) {
-            if ( result == null && oprtn != Operation.DISCONNECT ) {
-                result = oprtn;
-                notifyAll();
-            }
-
-        }
-        // block till result
-
-        public synchronized Operation getResult() throws InterruptedException {
-            while ( result == null ) {
-                wait();
-            }
-            return result;
-        }
-    }
-
     private String getSingleParam( Map m, String paramName ) {
         Object o = m.get(paramName);
 
@@ -356,4 +334,28 @@ public class SwapFileAccess extends StorageDriver {
         return connection.getInputStream();
 
     }
+
+
+    private static class MyConnectListener implements ConnectionListener {
+
+        Operation result = null;
+
+        @Override
+        public synchronized void connectionEvent( InetSocketAddress isa, Operation oprtn ) {
+            if ( result == null && oprtn != Operation.DISCONNECT ) {
+                result = oprtn;
+                notifyAll();
+            }
+
+        }
+        // block till result
+
+        public synchronized Operation getResult() throws InterruptedException {
+            while ( result == null ) {
+                wait();
+            }
+            return result;
+        }
+    }
+
 }

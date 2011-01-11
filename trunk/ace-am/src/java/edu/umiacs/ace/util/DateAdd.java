@@ -30,6 +30,7 @@
 // $Id$
 package edu.umiacs.ace.util;
 
+import edu.umiacs.util.Argument;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -87,7 +88,7 @@ public class DateAdd extends SimpleTagSupport {
     }
 
     public void setDate( Date date ) {
-        this.date = date;
+        this.date = Argument.dateClone(date);
     }
 
     public void setPeriod( int period ) {

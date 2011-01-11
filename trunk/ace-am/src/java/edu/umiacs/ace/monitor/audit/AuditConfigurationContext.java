@@ -34,6 +34,7 @@ import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.driver.StorageDriverFactory;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.util.Strings;
 import java.util.List;
 import java.util.Timer;
@@ -119,9 +120,12 @@ public final class AuditConfigurationContext implements ServletContextListener {
         AuditTokens.cancellAll();
     }
 
-    public class PauseBean {
+    public static class PauseBean {
 
         private boolean paused = false;
+
+        private PauseBean() {
+        }
 
         public void setPaused( boolean paused ) {
             this.paused = paused;
@@ -137,11 +141,11 @@ public final class AuditConfigurationContext implements ServletContextListener {
         }
     }
 
-    class MyTimerTask extends TimerTask {
+    static class MyTimerTask extends TimerTask {
 
         private PauseBean pb;
 
-        public MyTimerTask( PauseBean pb ) {
+        private MyTimerTask( PauseBean pb ) {
             this.pb = pb;
         }
 
@@ -174,7 +178,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
                         LOG.debug("No last sync for " + c.getName() + " running");
                         sa = StorageDriverFactory.createStorageAccess(c,
                                 em);
-                        AuditThreadFactory.createThread(c, sa, null);
+                        AuditThreadFactory.createThread(c, sa, (MonitoredItem[])null);
                     } else {
                         long syncTime = c.getLastSync().getTime();
                         long currTime = System.currentTimeMillis();
@@ -184,7 +188,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
                                     + " greater than " + (c.getCheckPeriod() * HOUR * 24));
                             sa = StorageDriverFactory.createStorageAccess(c,
                                     em);
-                            AuditThreadFactory.createThread(c, sa, null);
+                            AuditThreadFactory.createThread(c, sa, (MonitoredItem[]) null);
                         } else {
                             LOG.trace("No Sync on " + c.getName());
                         }

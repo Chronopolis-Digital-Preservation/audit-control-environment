@@ -31,6 +31,7 @@
 
 package edu.umiacs.ace.remote;
 
+import edu.umiacs.util.Argument;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -163,7 +164,7 @@ public class StatusBean implements Serializable {
          * @return the lastSync
          */
         public Date getLastSync() {
-            return lastSync;
+            return Argument.dateClone(lastSync);
         }
 
         /**
@@ -171,7 +172,7 @@ public class StatusBean implements Serializable {
          */
         @JsonUseDeserializer(CustomDateDeserializer.class)
         public void setLastSync( Date lastSync ) {
-            this.lastSync = lastSync;
+            this.lastSync = Argument.dateClone(lastSync);
         }
 
         /**

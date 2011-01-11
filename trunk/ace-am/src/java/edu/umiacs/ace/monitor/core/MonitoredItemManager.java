@@ -126,7 +126,6 @@ public class MonitoredItemManager {
         Query q = em.createNamedQuery("MonitoredItem.listNullTokens");
         q.setParameter("coll", c);
 
-
         LogEventManager lem = new LogEventManager(session,c);
 
         for ( Object o : q.getResultList() ) {
