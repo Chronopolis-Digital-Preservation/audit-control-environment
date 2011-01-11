@@ -95,8 +95,7 @@ public class MonitoredItemManager {
     }
 
     /**
-     * Test to see if master item exists, master item is an item where replica is
-     * null
+     * 
      * 
      * @param path path to look for
      * @return true if item exists, false otherwise
