@@ -84,7 +84,7 @@ public abstract class EntityManagerServlet extends HttpServlet {
 
         EntityManager em = PersistUtil.getEntityManager();
         try {
-            NDC.push("[request " + request.getPathTranslated() + "] ");
+            NDC.push("[request " + request.getServletPath() + "] ");
             if ( LOG.isDebugEnabled() ) {
                 LOG.trace("parameters: " + request.getQueryString());
             }
@@ -113,8 +113,8 @@ public abstract class EntityManagerServlet extends HttpServlet {
 
         EntityManager em = PersistUtil.getEntityManager();
         try {
-            NDC.push("[request " + request.getPathTranslated() + "] ");
-            if ( LOG.isDebugEnabled() ) {
+            NDC.push("[request " + request.getServletPath() + "] ");
+            if ( LOG.isTraceEnabled() ) {
                 LOG.trace("parameters: " + request.getQueryString());
             }
             processRequest(request, response, em);
