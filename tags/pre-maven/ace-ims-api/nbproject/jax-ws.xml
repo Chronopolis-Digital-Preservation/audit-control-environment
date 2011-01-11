@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jax-ws xmlns="http://www.netbeans.org/ns/jax-ws/1">
+  <services/>
+  <clients>
+    <client name="IMSWebService">
+      <wsdl-url>http://ims.umiacs.umd.edu:8080/ace-ims/IMSWebService?wsdl</wsdl-url>
+      <local-wsdl-file>ims.umiacs.umd.edu_8080/ace-ims/IMSWebService.wsdl</local-wsdl-file>
+      <package-name>edu.umiacs.ace.ims.ws</package-name>
+      <catalog-file>catalog.xml</catalog-file>
+      <binding>
+        <file-name>binding2.xml</file-name>
+      </binding>
+    </client>
+  </clients>
+  <jsr109>false</jsr109>
+</jax-ws>
