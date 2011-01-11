@@ -39,7 +39,6 @@ import edu.umiacs.ace.monitor.access.browse.DirectoryTree;
 import edu.umiacs.ace.monitor.log.LogEnum;
 import edu.umiacs.util.Strings;
 import java.io.IOException;
-import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.servlet.RequestDispatcher;
@@ -74,7 +73,7 @@ public class RemoveItemServlet extends EntityManagerServlet {
             item = em.getReference(MonitoredItem.class, itemId);
             if ( item != null ) {
                 LogEventManager lem =
-                        new LogEventManager(new Date().getTime(), item.getParentCollection());
+                        new LogEventManager(System.currentTimeMillis(), item.getParentCollection());
                 lem.persistItemEvent(LogEnum.REMOVE_ITEM, item.getPath(), null, em);
                 if ( !item.isDirectory() ) {
                     String parent = item.getParentPath();
@@ -117,14 +116,14 @@ public class RemoveItemServlet extends EntityManagerServlet {
 
     }
 
-    private class MyDeleteThread extends Thread {
+    private static class MyDeleteThread extends Thread {
 
         private MonitoredItem item;
         private MonitoredItemManager mim;
         private EntityManager em;
         private DirectoryTree dt;
 
-        public MyDeleteThread( MonitoredItem item, DirectoryTree dt ) {
+        private MyDeleteThread( MonitoredItem item, DirectoryTree dt ) {
             super("Delete thread " + item.getId());
             this.item = item;
             this.dt = dt;

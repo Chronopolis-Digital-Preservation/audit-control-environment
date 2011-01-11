@@ -137,11 +137,11 @@ public class FilterServlet extends EntityManagerServlet {
         Map paramMap = request.getParameterMap();
 
         if ( !Strings.isEmpty(paramMap.get(PARAM_MODIFY)) ) {
-            for ( Object param : paramMap.keySet() ) {
-                String name = (String) param;
-                if ( name.startsWith(PARAM_REGEX_PREFIX) && !Strings.isEmpty(paramMap.get(
-                        param)) ) {
-                    String[] regex = (String[]) paramMap.get(param);
+            for ( Object o : paramMap.entrySet() ) {
+                Map.Entry entry = (Map.Entry) o;
+                String name = (String) entry.getKey();
+                if ( name.startsWith(PARAM_REGEX_PREFIX) && !Strings.isEmpty(entry.getValue()) ) {
+                    String[] regex = (String[]) entry.getValue();
                     String count = name.substring(PARAM_REGEX_PREFIX.length());
                     int type = Integer.parseInt(((String[]) paramMap.get(
                             PARAM_TYPE_PREFIX + count))[0]);
@@ -179,11 +179,11 @@ public class FilterServlet extends EntityManagerServlet {
         }
     }
 
-    public class ErrorList<T> extends ArrayList<T> {
+    public static class ErrorList<T> extends ArrayList<T> {
 
         private boolean error = false;
 
-        public ErrorList() {
+        private ErrorList() {
         }
 
         public ErrorList( List l ) {
@@ -195,12 +195,12 @@ public class FilterServlet extends EntityManagerServlet {
         }
     }
 
-    public class MyFilterEntry extends FilterEntry {
+    public static class MyFilterEntry extends FilterEntry {
 
         private String error = null;
         private boolean matchesTest = false;
 
-        public MyFilterEntry() {
+        private MyFilterEntry() {
         }
 
         public MyFilterEntry( FilterEntry fe ) {

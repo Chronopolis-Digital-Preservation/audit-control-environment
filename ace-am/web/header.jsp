@@ -17,7 +17,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
         <tr>  
             <td align="center">
                 <div class="menucell">
-                    <um:Auth role="Status">
+                    <um:Auth role="Status" showUnauthenticated="true">
                         <a href="Status">Status</a>
                     </um:Auth>
                     <BR>

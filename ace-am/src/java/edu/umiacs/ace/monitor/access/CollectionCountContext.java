@@ -82,7 +82,6 @@ public class CollectionCountContext implements ServletContextListener {
                 Thread.currentThread().setName("Startup Count Thread");
                 NDC.push("[Count]");
                 lock.lock();
-//                {
                 LOG.debug("Starting count for all collections");
                 try {
                     EntityManager em = PersistUtil.getEntityManager();
@@ -91,6 +90,7 @@ public class CollectionCountContext implements ServletContextListener {
 
                     for ( Object o : collQuery.getResultList() ) {
                         if ( abort ) {
+                            LOG.info("Collection count aborting, tomcat probably shutting down");
                             return;
                         }
                         queryCollection((Collection) o);
@@ -211,6 +211,8 @@ public class CollectionCountContext implements ServletContextListener {
             long totalErrors = 0;
 
             while ( rs.next() ) {
+                if (abort)
+                    return;
                 char state = rs.getString(1).charAt(0);
                 long count = rs.getLong(2);
 
@@ -271,7 +273,7 @@ public class CollectionCountContext implements ServletContextListener {
             SQL.release(rs);
             SQL.release(ps);
             SQL.release(connection);
-            LOG.debug("Finished count on " + c.getName());
+            LOG.trace("Finished count on " + c.getName());
 
         }
     }

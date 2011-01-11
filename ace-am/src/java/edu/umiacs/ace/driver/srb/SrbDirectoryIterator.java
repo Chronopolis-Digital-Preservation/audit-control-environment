@@ -64,14 +64,14 @@ import org.apache.log4j.NDC;
  *
  * @author toaster
  */
-public class SrbDirectoryIterator implements Iterator<FileBean> {
+public final class SrbDirectoryIterator implements Iterator<FileBean> {
 
     private DriverStateBean[] statebeans;
     private static final int MAX_THREADS = 5;
     private static final int RETRY = 5;
     private static final Logger LOG = Logger.getLogger(
             SrbDirectoryIterator.class);
-    private Collection collection;
+//    private Collection collection;
     private ConnectionPool pool;
     private boolean finished = false;
     private LinkedBlockingQueue<FileBean> readyList = new LinkedBlockingQueue<FileBean>();
@@ -86,7 +86,7 @@ public class SrbDirectoryIterator implements Iterator<FileBean> {
 
     public SrbDirectoryIterator( Collection c, SrbSettings settings,
             MonitoredItem[] basePath, PathFilter filter, String digestAlgorithm ) {
-        this.collection = c;
+//        this.collection = c;
         this.pool = settings.createPool();
         this.root = c.getDirectory();
         this.filter = filter;

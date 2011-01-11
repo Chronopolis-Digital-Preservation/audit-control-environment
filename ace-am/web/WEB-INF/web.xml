@@ -133,6 +133,10 @@
         <servlet-name>ClearResourceServlet</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.core.ClearResourceServlet</servlet-class>
     </servlet>
+    <!--<servlet>
+        <servlet-name>IngestStore</servlet-name>
+        <servlet-class>edu.umiacs.ace.monitor.register.IngestStore</servlet-class>
+    </servlet> -->
     <servlet-mapping>
         <servlet-name>ManageCollection</servlet-name>
         <url-pattern>/ManageCollection</url-pattern>
@@ -225,6 +229,10 @@
         <servlet-name>ClearResourceServlet</servlet-name>
         <url-pattern>/ClearResource</url-pattern>
     </servlet-mapping>
+    <!--<servlet-mapping>
+        <servlet-name>IngestStore</servlet-name>
+        <url-pattern>/IngestStore</url-pattern>
+    </servlet-mapping>-->
     <session-config>
         <session-timeout>
             30

@@ -30,6 +30,8 @@
 // $Id$
 package edu.umiacs.ace.driver;
 
+import java.util.Arrays;
+
 /**
  *
  * @author toaster
@@ -84,7 +86,11 @@ public class FileBean {
      * @param parentPathList
      */
     public void setPathList( String[] pathList ) {
-        this.pathList = pathList;
+        if ( pathList != null ) {
+            this.pathList = Arrays.copyOf(pathList, pathList.length);
+        } else {
+            this.pathList = null;
+        }
     }
 
     public String[] getPathList() {

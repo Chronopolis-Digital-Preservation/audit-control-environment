@@ -533,13 +533,13 @@ public class CollectionCompare {
         };
     }
 
-    class ReadIterator implements Iterator<SourceFile> {
+    static class ReadIterator implements Iterator<SourceFile> {
 
         private BufferedReader input;
         private SourceFile next = null;
         private String prefix = null;
 
-        public ReadIterator( InputStream input, String prefix ) {
+        private ReadIterator( InputStream input, String prefix ) {
             this.prefix = prefix;
             this.input = new BufferedReader(new InputStreamReader(input));
             next = readNext();
@@ -595,12 +595,12 @@ public class CollectionCompare {
         }
     }
 
-    class SourceFile {
+    static class SourceFile {
 
         private String name;
         private String digest;
 
-        public SourceFile( String name, String digest ) {
+        private SourceFile( String name, String digest ) {
             this.name = name;
             this.digest = digest;
         }
@@ -622,14 +622,14 @@ public class CollectionCompare {
         }
     }
 
-    public class DifferingName implements Comparable<DifferingName> {
+    public static class DifferingName implements Comparable<DifferingName> {
 
         private String compString;
         private String sourceName;
         private String destinationName;
         private String digest;
 
-        public DifferingName( String sourceName, String destinationName,
+        private DifferingName( String sourceName, String destinationName,
                 String digest ) {
             this.sourceName = sourceName;
             this.destinationName = destinationName;
@@ -681,14 +681,14 @@ public class CollectionCompare {
         }
     }
 
-    public class DifferingDigest implements Comparable<DifferingDigest> {
+    public static class DifferingDigest implements Comparable<DifferingDigest> {
 
         private String name;
         private String sourceDigest;
         private String targetDigest;
         private String compString;
 
-        public DifferingDigest( String name, String sourceDigest,
+        private DifferingDigest( String name, String sourceDigest,
                 String targetDigest ) {
             this.name = name;
             this.sourceDigest = sourceDigest;
@@ -720,6 +720,7 @@ public class CollectionCompare {
             this.sourceDigest = sourceDigest;
         }
 
+        @Override
         public int compareTo( DifferingDigest o ) {
             return compString.compareTo(o.compString);
         }

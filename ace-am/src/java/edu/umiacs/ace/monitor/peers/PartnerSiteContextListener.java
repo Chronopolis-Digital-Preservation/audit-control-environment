@@ -64,7 +64,10 @@ public class PartnerSiteContextListener implements ServletContextListener {
     public void contextDestroyed( ServletContextEvent arg0 ) {
     }
 
-    public class PartnerList {
+    public static class PartnerList {
+
+        private PartnerList() {
+        }
 
         public List<ExtendedPartnerSite> getSites() {
             EntityManager em = PersistUtil.getEntityManager();
@@ -82,11 +85,11 @@ public class PartnerSiteContextListener implements ServletContextListener {
         }
     }
 
-    public class ExtendedPartnerSite extends PartnerSite {
+    public static class ExtendedPartnerSite extends PartnerSite {
 
         private PartnerSite site;
 
-        public ExtendedPartnerSite( PartnerSite site ) {
+        private ExtendedPartnerSite( PartnerSite site ) {
             this.site = site;
         }
 

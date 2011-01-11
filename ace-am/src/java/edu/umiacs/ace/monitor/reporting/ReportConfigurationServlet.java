@@ -91,8 +91,9 @@ public class ReportConfigurationServlet extends EntityManagerServlet {
         if ( removeid > 0 ) {
             ReportPolicy removePolicy = em.getReference(ReportPolicy.class,
                     removeid);
-            LOG.debug("Removing report policy " + removePolicy.getName());
+            
             if ( removePolicy != null ) {
+                LOG.debug("Removing report policy " + removePolicy.getName());
                 coll = removePolicy.getCollection();
                 EntityTransaction trans = em.getTransaction();
                 trans.begin();

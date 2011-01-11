@@ -129,7 +129,7 @@ public class ManagePeerServlet extends EntityManagerServlet {
         List<PartnerSiteContextListener.ExtendedPartnerSite> partnerList = pl.getSites();
 
         for ( PartnerSiteContextListener.ExtendedPartnerSite partner : partnerList ) {
-            if ( site.getId() == partner.getId() ) {
+            if ( site.getId().equals(partner.getId()) ) {
                 for ( CollectionBean cb : partner.getCollections() ) {
                     if ( peerColl == cb.getId() ) {
                         return true;

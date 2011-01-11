@@ -32,6 +32,7 @@
 package edu.umiacs.ace.monitor.reporting;
 
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.util.Argument;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -124,27 +125,27 @@ public class ReportSummary implements Serializable {
     }
 
     public Date getGeneratedDate() {
-        return generatedDate;
+        return Argument.dateClone(generatedDate);
     }
 
     public void setGeneratedDate( Date generatedDate ) {
-        this.generatedDate = generatedDate;
+        this.generatedDate = Argument.dateClone(generatedDate);
     }
 
     public Date getStartDate() {
-        return startDate;
+        return Argument.dateClone(startDate);
     }
 
     public void setStartDate( Date startDate ) {
-        this.startDate = startDate;
+        this.startDate = Argument.dateClone(startDate);
     }
 
     public Date getEndDate() {
-        return endDate;
+        return Argument.dateClone(endDate);
     }
 
     public void setEndDate( Date endDate ) {
-        this.endDate = endDate;
+        this.endDate = Argument.dateClone(endDate);
     }
 
     public long getFirstLogEntry() {

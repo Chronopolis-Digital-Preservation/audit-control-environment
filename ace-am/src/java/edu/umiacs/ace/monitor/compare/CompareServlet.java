@@ -186,13 +186,13 @@ public class CompareServlet extends EntityManagerServlet {
 
     }
 
-    class TableCompareRunnable implements Runnable {
+    static class TableCompareRunnable implements Runnable {
 
         private CollectionCompare cc;
         private Collection c;
         private MonitoredItem baseItem;
 
-        public TableCompareRunnable( CollectionCompare cc, Collection c,
+        private TableCompareRunnable( CollectionCompare cc, Collection c,
                 MonitoredItem baseItem ) {
             this.cc = cc;
             this.c = c;

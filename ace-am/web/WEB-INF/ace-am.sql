@@ -1,5 +1,5 @@
 --
--- schema for ACE 1.4
+-- schema for ACE 1.6
 --
 DROP TABLE IF EXISTS `collection`;
 CREATE TABLE `collection` (
@@ -40,18 +40,6 @@ CREATE TABLE `monitored_item` (
   KEY `FK_monitored_item_TOKEN_ID` (`TOKEN_ID`),
   KEY `idx_monitored_item_digest` (`FILEDIGEST`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 MAX_ROWS=2431504384;
-
---DROP TABLE IF EXISTS `token`;
---CREATE TABLE `token` (
---  `ID` bigint(20) NOT NULL auto_increment,
---  `CREATEDATE` datetime default NULL,
---  `VALID` tinyint(1) default '0',
---  `LASTVALIDATED` datetime default NULL,
---  `java_token_response` blob,
---  `PARENTCOLLECTION_ID` bigint(20) NOT NULL,
---  PRIMARY KEY  (`ID`),
---  KEY `FK_token_PARENTCOLLECTION_ID` (`PARENTCOLLECTION_ID`)
---) ENGINE=MyISAM DEFAULT CHARSET=latin1 MAX_ROWS=2431504384;
 
 DROP TABLE IF EXISTS `acetoken`;
 CREATE TABLE `acetoken` (
