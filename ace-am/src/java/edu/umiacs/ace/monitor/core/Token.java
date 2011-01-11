@@ -31,6 +31,7 @@
 
 package edu.umiacs.ace.monitor.core;
 
+import edu.umiacs.util.Argument;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
@@ -149,19 +150,19 @@ public class Token implements Serializable {
     }
 
     public Date getLastValidated() {
-        return lastValidated;
+        return Argument.dateClone(lastValidated);
     }
 
     public void setLastValidated( Date lastValidated ) {
-        this.lastValidated = lastValidated;
+        this.lastValidated = Argument.dateClone(lastValidated);
     }
 
     public Date getCreateDate() {
-        return createDate;
+        return Argument.dateClone(createDate);
     }
 
     public void setCreateDate( Date createDate ) {
-        this.createDate = createDate;
+        this.createDate = Argument.dateClone(createDate);
     }
 
     public boolean getValid() {

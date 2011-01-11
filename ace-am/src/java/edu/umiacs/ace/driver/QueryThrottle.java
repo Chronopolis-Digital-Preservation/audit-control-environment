@@ -51,6 +51,18 @@ public class QueryThrottle implements ServletContextListener {
     private static final String PARAM_BPS = "throttle.bps";
     private static final Logger LOG = Logger.getLogger(QueryThrottle.class);
 
+    private static void setMinWait( long minWait ) {
+        QueryThrottle.minWait = minWait;
+    }
+
+    private static void setMaxBps( long maxBps ) {
+        QueryThrottle.maxBps = maxBps;
+    }
+
+    public static long getMaxBps() {
+        return maxBps;
+    }
+
     public static void waitToRun() throws InterruptedException {
         if ( minWait <= 0 ) {
             return;
@@ -68,9 +80,6 @@ public class QueryThrottle implements ServletContextListener {
 
     }
 
-    public static long getMaxBps() {
-        return maxBps;
-    }
 
     private static synchronized void workCheck() {
         synchronized ( PARAM_TIME ) {
@@ -84,13 +93,13 @@ public class QueryThrottle implements ServletContextListener {
 
 
         if ( Strings.isValidInt(time) ) {
-            minWait = Integer.parseInt(time);
+            setMinWait(Integer.parseInt(time));
             LOG.info("Setting query throttle minwait to " + minWait);
         }
 
         String maxBpsString = sce.getServletContext().getInitParameter(PARAM_BPS);
         if ( Strings.isValidLong(maxBpsString) ) {
-            maxBps = Long.parseLong(maxBpsString);
+           setMaxBps(Long.parseLong(maxBpsString));
         }
 
 

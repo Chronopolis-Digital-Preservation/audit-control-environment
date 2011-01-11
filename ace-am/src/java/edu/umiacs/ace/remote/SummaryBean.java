@@ -31,6 +31,7 @@
 
 package edu.umiacs.ace.remote;
 
+import edu.umiacs.util.Argument;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -142,7 +143,7 @@ public class SummaryBean implements Serializable {
          *
          */
         public Date getStart() {
-            return start;
+            return Argument.dateClone(start);
         }
 
         /**
@@ -150,14 +151,14 @@ public class SummaryBean implements Serializable {
          */
         @JsonUseDeserializer(CustomDateDeserializer.class)
         public void setStart( Date start ) {
-            this.start = start;
+            this.start = Argument.dateClone(start);
         }
 
         /**
          * @return the end
          */
         public Date getEnd() {
-            return end;
+            return Argument.dateClone(end);
         }
 
         /**
@@ -165,7 +166,7 @@ public class SummaryBean implements Serializable {
          */
         @JsonUseDeserializer(CustomDateDeserializer.class)
         public void setEnd( Date end ) {
-            this.end = end;
+            this.end = Argument.dateClone(end);
         }
 
         /**

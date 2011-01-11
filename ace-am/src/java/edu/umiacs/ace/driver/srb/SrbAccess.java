@@ -60,7 +60,7 @@ import org.apache.log4j.Logger;
  *
  * @author toaster
  */
-public class SrbAccess extends StorageDriver {
+public final class SrbAccess extends StorageDriver {
 
     private static final Logger LOG = Logger.getLogger(SrbAccess.class);
     private static final String PARAM_SERVER = "server";
@@ -254,7 +254,7 @@ public class SrbAccess extends StorageDriver {
         return new WrappedInputStream(sfis, sfs, cp);
     }
 
-    class WrappedInputStream extends FilterInputStream {
+    static class WrappedInputStream extends FilterInputStream {
 
         private ConnectionPool cp;
         private SRBFileSystem sfs;

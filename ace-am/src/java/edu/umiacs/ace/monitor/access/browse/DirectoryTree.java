@@ -150,7 +150,7 @@ public class DirectoryTree {
 
     }
 
-    public class DirectoryNode implements Comparable {
+    public static class DirectoryNode implements Comparable {
 
         private boolean expanded = false;
         private boolean directory = false;
@@ -158,6 +158,9 @@ public class DirectoryTree {
         private long id;
         List<DirectoryNode> children = new ArrayList<DirectoryNode>();
         private char status;
+
+        private DirectoryNode() {
+        }
 
         public boolean isExpanded() {
             return expanded;
@@ -187,6 +190,52 @@ public class DirectoryTree {
             return String.valueOf(status);
         }
 
+
+
+        @Override
+        public int hashCode() {
+            int hash = 5;
+            hash = 11 * hash + (this.expanded ? 1 : 0);
+            hash = 11 * hash + (this.directory ? 1 : 0);
+            hash = 11 * hash + (this.path != null ? this.path.hashCode() : 0);
+            hash = 11 * hash + (int) (this.id ^ (this.id >>> 32));
+            hash = 11 * hash + (this.children != null ? this.children.hashCode() : 0);
+            hash = 11 * hash + this.status;
+            return hash;
+        }
+
+        @Override
+        public boolean equals( Object obj ) {
+            if ( obj == null ) {
+                return false;
+            }
+            if ( getClass() != obj.getClass() ) {
+                return false;
+            }
+            final DirectoryNode other = (DirectoryNode) obj;
+            if ( this.expanded != other.expanded ) {
+                return false;
+            }
+            if ( this.directory != other.directory ) {
+                return false;
+            }
+            if ( (this.path == null) ? (other.path != null) : !this.path.equals(other.path) ) {
+                return false;
+            }
+            if ( this.id != other.id ) {
+                return false;
+            }
+            if ( this.children != other.children &&
+                    (this.children == null || !this.children.equals(other.children)) ) {
+                return false;
+            }
+            if ( this.status != other.status ) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
         public int compareTo( Object o ) {
             if ( o instanceof DirectoryNode ) {
                 DirectoryNode n = (DirectoryNode) o;

@@ -102,7 +102,7 @@ public class LogServlet extends EntityManagerServlet {
 
         // <editor-fold defaultstate="collapsed" desc="where clause setting. Click on the + sign on the left to edit the code.">
         List<String> queries = new ArrayList<String>();
-        String queryString;
+        StringBuilder queryString = new StringBuilder();
 
         if ( session > 0 ) {
             queries.add("l.session = :session");
@@ -134,26 +134,27 @@ public class LogServlet extends EntityManagerServlet {
 
 
         // build query string
-        queryString = "SELECT l FROM LogEvent l";
+        queryString.append("SELECT l FROM LogEvent l");
 
         if ( queries.size() > 0 ) {
-            queryString += " WHERE";
+            queryString.append(" WHERE");
         }
 
         int i = 0;
         for ( String s : queries ) {
-            queryString += " " + s;
+            queryString.append(" ");
+            queryString.append(s);
             i++;
             if ( i < queries.size() ) {
-                queryString += " AND";
+                queryString.append(" AND");
             }
         }
 
-        queryString += " ORDER BY l.id";
+        queryString.append(" ORDER BY l.id");
         // set order descending if we have no start and we have a count
         // otherwise we have a start, or blank page w/ no parameters given
         if ( start < 1 && count > 0 ) {
-            queryString += " DESC";
+            queryString.append(" DESC");
             reverseResults = true;
         }
 
@@ -162,7 +163,7 @@ public class LogServlet extends EntityManagerServlet {
         em = PersistUtil.getEntityManager();
 
         // Fill in query parameters
-        Query q = em.createQuery(queryString);
+        Query q = em.createQuery(queryString.toString());
         q.setMaxResults(count);
 
         // <editor-fold defaultstate="collapsed" desc="mirror from above where clause setting. Click on the + sign on the left to edit the code.">

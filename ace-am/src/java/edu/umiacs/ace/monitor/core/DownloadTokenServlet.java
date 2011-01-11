@@ -60,6 +60,7 @@ public class DownloadTokenServlet extends EntityManagerServlet {
                 new DbTokenWriter(AuditThreadFactory.getIMS(), response.getOutputStream());
         writer.startToken(token);
         response.setContentType("text/plain");
+
         writer.writeTokenEntry();
     }
 }

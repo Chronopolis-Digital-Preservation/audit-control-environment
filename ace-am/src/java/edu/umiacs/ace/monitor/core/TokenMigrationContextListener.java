@@ -95,8 +95,7 @@ public class TokenMigrationContextListener implements ServletContextListener {
 
                     clearTable(conn);
                     moveTokens(conn);
-
-                    //dropOldTable(conn);
+                    dropOldTable(conn);
                     pb.setPaused(oldState);
                     LOG.info("Token migration successfully finished");
 
@@ -117,13 +116,6 @@ public class TokenMigrationContextListener implements ServletContextListener {
             NDC.pop();
         }
     }
-//
-//    private Runnable migrationTask = new Runnable() {
-//
-//        @Override
-//        public void run() {
-//        }
-//    }
 
     @Override
     public void contextDestroyed( ServletContextEvent sce ) {
@@ -132,25 +124,46 @@ public class TokenMigrationContextListener implements ServletContextListener {
     private boolean hasMigrated( Connection conn ) throws SQLException {
         DatabaseMetaData dbm = conn.getMetaData();
         String types[] = {"TABLE"};
+        boolean newTable = false;
+        boolean migrated = true;
 
         ResultSet rs = dbm.getTables(null, null, null, types);
-        while ( rs.next() ) {
-            String tabName = rs.getString("TABLE_NAME");
-            if ( "token".equals(tabName) ) {
-                return false;
+        try {
+            while ( rs.next() ) {
+                String tabName = rs.getString("TABLE_NAME");
+                if ( "token".equals(tabName) ) {
+                    LOG.info("Old token table still exists, migration triggered");
+                    migrated = false;
+                }
+                if ( "acetoken".equals(tabName) ) {
+                    LOG.info("Found new acetoken table");
+                    newTable = true;
+                }
             }
+        } catch ( SQLException e ) {
+            LOG.error("Error retrieving table metadata");
+            throw e;
+        } finally {
+            SQL.release(rs);
         }
-
-        SQL.release(rs);
-        return true;
+        
+        if ( !newTable ) {
+            LOG.info("SQL patch to 1.6+ has not been installed, table 'acetoken' does no exist, shutting down!");
+            throw new IllegalStateException("SQL patch to 1.6+ has not been installed, table 'acetoken' does no exist");
+        }
+        return migrated;
     }
 
     private void dropOldTable( Connection conn ) throws SQLException {
         LOG.info("Starting old token table drop");
         try {
-//            PreparedStatement pstmt = conn.prepareStatement("DROP table token");
-//            pstmt.executeUpdate();
-//            SQL.release(pstmt);
+            PreparedStatement pstmt = conn.prepareStatement("DROP table token");
+            pstmt.executeUpdate();
+            SQL.release(pstmt);
+        } catch ( SQLException e ) {
+            LOG.error("Error dropping old table ");
+            throw e;
+
         } finally {
             LOG.info("Exiting old token table drop");
         }
@@ -203,22 +216,24 @@ public class TokenMigrationContextListener implements ServletContextListener {
                     writeStmt.addBatch();
                     i++;
                     if ( i % 10000 == 0 ) {
-                        LOG.info("Migrated: " + i + "/" + total + " batches: "
+                        LOG.info("Migrated: " + i + "/" + total + " tokens processed: "
                                 + writeStmt.executeBatch().length);
                         writeConn.commit();
                     }
                 }
-                LOG.info("Migrated: " + i + "/" + total + " batches: "
+                LOG.info("Migrated: " + i + "/" + total + " tokens processed: "
                         + writeStmt.executeBatch().length);
                 writeConn.commit();
-                
+
                 LOG.info("Entried processed: " + i);
             } catch ( SQLException e ) {
                 writeConn.rollback();
+                LOG.error("SQL Exception while moving tokens");
                 throw e;
             } finally {
                 SQL.release(rs);
                 SQL.release(pst);
+                SQL.release(writeStmt);
                 SQL.release(writeConn);
             }
         } finally {
@@ -240,6 +255,9 @@ public class TokenMigrationContextListener implements ServletContextListener {
             int rows = pstmt.executeUpdate();
             LOG.info("Clean new token table: " + rows);
             SQL.release(pstmt);
+        } catch ( SQLException e ) {
+            LOG.error("Error cleaning new acetoken table");
+            throw e;
         } finally {
             LOG.info("Exiting acetoken clear");
         }

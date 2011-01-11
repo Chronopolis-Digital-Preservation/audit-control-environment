@@ -31,6 +31,7 @@
 
 package edu.umiacs.ace.monitor.core;
 
+import edu.umiacs.util.Argument;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.CascadeType;
@@ -141,7 +142,7 @@ public class MonitoredItem implements Serializable, Comparable {
     }
 
     public Date getLastSeen() {
-        return lastSeen;
+        return Argument.dateClone(lastSeen);
     }
 
     public String getPath() {
@@ -157,7 +158,7 @@ public class MonitoredItem implements Serializable, Comparable {
     }
 
     public void setLastSeen( Date lastSeen ) {
-        this.lastSeen = lastSeen;
+        this.lastSeen = Argument.dateClone(lastSeen);
     }
 
     public void setPath( String path ) {
@@ -222,11 +223,11 @@ public class MonitoredItem implements Serializable, Comparable {
     }
 
     public void setLastVisited( Date lastVisited ) {
-        this.lastVisited = lastVisited;
+        this.lastVisited = Argument.dateClone(lastVisited);
     }
 
     public Date getLastVisited() {
-        return lastVisited;
+        return Argument.dateClone(lastVisited);
     }
 
     @Override
@@ -246,11 +247,11 @@ public class MonitoredItem implements Serializable, Comparable {
     }
 
     public Date getStateChange() {
-        return stateChange;
+        return Argument.dateClone(stateChange);
     }
 
     public void setStateChange( Date stateChange ) {
-        this.stateChange = stateChange;
+        this.stateChange = Argument.dateClone(stateChange);
     }
 
     public void setFileDigest( String fileDigest ) {

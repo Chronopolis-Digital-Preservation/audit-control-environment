@@ -36,7 +36,6 @@ import edu.umiacs.ace.monitor.log.LogEvent;
 import edu.umiacs.ace.monitor.log.LogEventManager;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import java.io.IOException;
-import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.servlet.RequestDispatcher;
@@ -59,7 +58,7 @@ public class ClearResourceServlet extends EntityManagerServlet {
         if ( c != null ) {
             if (c.getStorage() != null)
             {
-                LogEventManager lem = new LogEventManager(new Date().getTime(), c);
+                LogEventManager lem = new LogEventManager(System.currentTimeMillis(), c);
                 EntityTransaction t = em.getTransaction();
                 t.begin();
                 StorageDriver sd = StorageDriverFactory.createStorageAccess(c, em);

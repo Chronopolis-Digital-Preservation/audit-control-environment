@@ -109,6 +109,8 @@ public class DuplicateReportServlet extends EntityManagerServlet {
 
                 rs.close();
                 pst.close();
+                LOG.info("Duplicate report on " + collection.getName() + " time "
+                + (System.currentTimeMillis() - startTime) + " total dups " + totalDups);
 
             } catch ( SQLException e ) {
                 throw new ServletException(e);
@@ -125,8 +127,7 @@ public class DuplicateReportServlet extends EntityManagerServlet {
         request.setAttribute(PAGE_LIST, duplicateCount);
         request.setAttribute(PAGE_HISTO, histogram);
         request.setAttribute(PAGE_TIME, (System.currentTimeMillis() - startTime));
-        LOG.info("Duplicate report on " + collection.getName() + " time "
-                + (System.currentTimeMillis() - startTime) + " total dups " + totalDups);
+        
 
         if ( hasJson(request) ) {
             dispatcher = request.getRequestDispatcher("duplicatereport-json.jsp");
@@ -147,12 +148,12 @@ public class DuplicateReportServlet extends EntityManagerServlet {
         map.add(new HistEntry(idx));
     }
 
-    public class HistEntry implements Comparable<HistEntry> {
+    public static class HistEntry implements Comparable<HistEntry> {
 
         int digestCount;
         int instances;
 
-        public HistEntry( int digestCount ) {
+        private HistEntry( int digestCount ) {
             this.digestCount = digestCount;
             this.instances = 1;
         }
@@ -166,6 +167,32 @@ public class DuplicateReportServlet extends EntityManagerServlet {
         }
 
         @Override
+        public int hashCode() {
+            int hash = 5;
+            hash = 67 * hash + this.digestCount;
+            hash = 67 * hash + this.instances;
+            return hash;
+        }
+
+        @Override
+        public boolean equals( Object obj ) {
+            if ( obj == null ) {
+                return false;
+            }
+            if ( getClass() != obj.getClass() ) {
+                return false;
+            }
+            final HistEntry other = (HistEntry) obj;
+            if ( this.digestCount != other.digestCount ) {
+                return false;
+            }
+            if ( this.instances != other.instances ) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
         public int compareTo( HistEntry o ) {
             if ( digestCount == o.digestCount ) {
                 return digestCount - o.digestCount;
@@ -174,14 +201,40 @@ public class DuplicateReportServlet extends EntityManagerServlet {
         }
     }
 
-    public class MyEntry implements Comparable<MyEntry> {
+    public static class MyEntry implements Comparable<MyEntry> {
 
         int count;
         String digest;
 
-        public MyEntry( int count, String digest ) {
+        private MyEntry( int count, String digest ) {
             this.count = count;
             this.digest = digest;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 67 * hash + this.count;
+            hash = 67 * hash + (this.digest != null ? this.digest.hashCode() : 0);
+            return hash;
+        }
+
+        @Override
+        public boolean equals( Object obj ) {
+            if ( obj == null ) {
+                return false;
+            }
+            if ( getClass() != obj.getClass() ) {
+                return false;
+            }
+            final MyEntry other = (MyEntry) obj;
+            if ( this.count != other.count ) {
+                return false;
+            }
+            if ( (this.digest == null) ? (other.digest != null) : !this.digest.equals(other.digest) ) {
+                return false;
+            }
+            return true;
         }
 
         @Override

@@ -35,6 +35,7 @@ import edu.umiacs.ace.monitor.log.*;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.sql.SQL;
+import edu.umiacs.util.Argument;
 import edu.umiacs.util.Strings;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -69,7 +70,7 @@ public class SummaryGenerator extends ReportItemTypes {
     public SummaryGenerator( String reportName, Collection collection,
             Date startDate ) {
         this.collection = collection;
-        this.startDate = startDate;
+        this.startDate = Argument.dateClone(startDate);
 
         if ( Strings.isEmpty(reportName) ) {
             reportName = "Report Starting " + startDate;

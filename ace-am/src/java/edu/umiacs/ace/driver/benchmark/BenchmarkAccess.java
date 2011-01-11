@@ -240,10 +240,11 @@ public class BenchmarkAccess extends StorageDriver {
         private String[] createPathList() {
             String[] retString = new String[arrayCounter.length + 1];
 
-            String path = "";
+            StringBuilder path = new StringBuilder();
             for ( int idx = 0; idx < arrayCounter.length; idx++ ) {
-                path = path + "/dir-" + arrayCounter[idx];
-                retString[arrayCounter.length - idx] = path;
+                path.append("/dir-");
+                path.append(arrayCounter[idx]);
+                retString[arrayCounter.length - idx] = path.toString();
             }
             retString[0] = path + "/file-" + currFile;
 

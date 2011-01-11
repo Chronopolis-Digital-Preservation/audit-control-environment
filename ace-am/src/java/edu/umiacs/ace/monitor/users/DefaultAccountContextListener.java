@@ -31,9 +31,11 @@
 package edu.umiacs.ace.monitor.users;
 
 import edu.umiacs.ace.util.PersistUtil;
+import edu.umiacs.util.Strings;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.apache.log4j.Logger;
@@ -45,17 +47,25 @@ import org.apache.log4j.Logger;
 public class DefaultAccountContextListener implements ServletContextListener {
 
     private static final Logger LOG = Logger.getLogger(DefaultAccountContextListener.class);
-
+    private static final String PARAM_USER_AUTH = "auth.management";
     /**
      * Hack to add a default admin account if none is found
      * @param arg0
      */
     @Override
     public void contextInitialized( ServletContextEvent arg0 ) {
+        ServletContext ctx = arg0.getServletContext();
 
-        arg0.getServletContext().setAttribute("authmanagement", Boolean.valueOf(arg0.getServletContext().getInitParameter("auth.management")));
+        String authStr = ctx.getInitParameter(PARAM_USER_AUTH);
+        boolean isAuthMgt = true;
+
+        if (!Strings.isEmpty(authStr))
+        {
+            isAuthMgt = Boolean.valueOf(authStr);
+        }
+        ctx.setAttribute("authmanagement", isAuthMgt);
         
-        if ( Boolean.valueOf(arg0.getServletContext().getInitParameter("auth.management")) ) {
+        if ( isAuthMgt ) {
             try {
 //            LOG.trace("Testing for account setup");
                 EntityManager em = PersistUtil.getEntityManager();

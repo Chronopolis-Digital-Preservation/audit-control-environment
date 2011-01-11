@@ -64,7 +64,7 @@ import org.swap.client.SwapFile;
  *
  * @author toaster
  */
-public class SwapIterator implements Iterator<FileBean> {
+public final class SwapIterator implements Iterator<FileBean> {
 
     private Queue<SwapFile> dirsToProcess = new LinkedList<SwapFile>();
     private LinkedBlockingQueue<SwapFile> filesToProcess = new LinkedBlockingQueue<SwapFile>();
