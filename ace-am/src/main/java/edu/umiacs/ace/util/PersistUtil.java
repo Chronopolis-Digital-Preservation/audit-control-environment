@@ -28,7 +28,6 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-
 package edu.umiacs.ace.util;
 
 import javax.naming.Context;
@@ -40,39 +39,58 @@ import javax.persistence.Persistence;
 import javax.sql.DataSource;
 
 /**
+ * Utility class for accessing the entity manager stored as 'ace-amPU'.
  *
  * @author toaster
  */
-public class PersistUtil {
+public final class PersistUtil {
 
-    private static EntityManagerFactory emf = Persistence.createEntityManagerFactory(
-            "ace-amPU");
+    /** entity manager specified in app's persistence.xml. */
+    private static EntityManagerFactory emf
+            = Persistence.createEntityManagerFactory("ace-amPU");
+    /** db connection to aceamdb. */
     private static DataSource ds = null;
 
+    /**
+     *
+     */
+    private PersistUtil() {
+    }
+
+    /** Close and set stored entitymanager to null. */
     public static void closeFactory() {
         emf.close();
         emf = null;
     }
 
+    /**
+     *
+     * @return db connection located at 'java:comp/env/jdbc/aceamdb'
+     */
     public static DataSource getDataSource() {
-        if ( ds == null ) {
+        if (ds == null) {
             try {
                 Context ctx = new InitialContext();
                 ds = (DataSource) ctx.lookup("java:comp/env/jdbc/aceamdb");
-            } catch ( NamingException e ) {
+            } catch (NamingException e) {
                 throw new RuntimeException(e);
             }
         }
         return ds;
     }
 
-    public static void persist( Object object ) {
+    /**
+     * Persist a new  jpa entity using the embedded factory.
+     *
+     * @param object object to store
+     */
+    public static void persist(final Object object) {
         EntityManager em = getEntityManager();
         try {
             em.getTransaction().begin();
             em.persist(object);
             em.getTransaction().commit();
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             java.util.logging.Logger.getLogger(PersistUtil.class.getName()).log(
                     java.util.logging.Level.SEVERE, "exception caught", e);
             em.getTransaction().rollback();
@@ -81,8 +99,13 @@ public class PersistUtil {
         }
     }
 
+    /**
+     * return entiry manager, will reinitailize stored factory if it has been
+     * closed.
+     * @return new entitymanager
+     */
     public static EntityManager getEntityManager() {
-        if ( emf == null ) {
+        if (emf == null) {
             emf = Persistence.createEntityManagerFactory("ace-amPU");
         }
         return emf.createEntityManager();
