@@ -16,12 +16,128 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
+<repositories>
+  <repository>
+     <id>EclipseLink Repo</id>
+     <url>http://www.eclipse.org/downloads/download.php?r=1&amp;nf=1&amp;file=/rt/eclipselink/maven.repo</url>
+     <!-- use this for javax.persistence
+     <snapshots>
+        <enabled>true</enabled>
+     </snapshots> -->
+  </repository>    
+</repositories> 
+
   <dependencies>
+    <!-- local ace deps -->
+    <dependency>
+      <groupId>edu.umiacs.ace</groupId>
+      <artifactId>ace-ims-api</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
+
+    <!-- for persistence -->
+    <dependency>
+      <groupId>javax.persistence</groupId>
+      <artifactId>persistence-api</artifactId>
+      <version>1.0</version>
+    </dependency> 
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>eclipselink</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4.1</version>
+    </dependency>
+
+
+
+    <!-- for json -->
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-core-asl</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+
+    <!-- for Jstl / webapp stuff-->
+    <dependency>
+      <groupId>taglibs</groupId>
+      <artifactId>standard</artifactId>
+      <version>1.1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet.jsp</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>jstl</artifactId>
+      <version>1.1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>1.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>quartz</groupId>
+      <artifactId>quartz</artifactId>
+      <version>1.5.2</version>
+    </dependency>
+
+    <!-- local ones -->
+    <dependency>
+      <groupId>edu.umiacs</groupId>
+      <artifactId>jargon</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>edu.umiacs</groupId>
+      <artifactId>swap</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>edu.umiacs</groupId>
+      <artifactId>adapt-srb</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>edu.umiacs</groupId>
+      <artifactId>irods-api</artifactId>
+      <version>1.0</version>
+    </dependency>
+    
+    
+
   </dependencies>
 </project>
