@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
   <persistence-unit name="ace-amPU" transaction-type="RESOURCE_LOCAL">
-    <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <non-jta-data-source>java:comp/env/jdbc/aceamdb</non-jta-data-source>
     <class>edu.umiacs.ace.monitor.log.LogEvent</class>
     <class>edu.umiacs.ace.monitor.users.Users</class>
@@ -21,11 +21,11 @@
     <class>edu.umiacs.ace.driver.swap.SwapSettings</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
-      <property name="toplink.session.customizer" value="edu.umiacs.ace.util.DataSourceSessionCustomizer"/>
       <!-- <property name="toplink.logging.level" value="FINE"/> -->
-      <property name="toplink.create-ddl-jdbc-file-name" value="create.sql"/>
-      <property name="toplink.ddl-generation.output-mode" value="sql-script"/>
-      <property name="toplink.application-location" value="/tmp"/>
+      <property name="eclipselink.session.customizer" value="edu.umiacs.ace.util.DataSourceSessionCustomizer"/>
+      <!-- <property name="eclipselink.create-ddl-jdbc-file-name" value="create.sql"/>
+      <property name="eclipselink.ddl-generation.output-mode" value="sql-script"/>
+      <property name="eclipselink.application-location" value="/tmp"/>-->
     </properties>
   </persistence-unit>
 </persistence>

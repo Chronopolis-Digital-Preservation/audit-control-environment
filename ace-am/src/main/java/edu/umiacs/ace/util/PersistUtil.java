@@ -46,8 +46,8 @@ import javax.sql.DataSource;
 public final class PersistUtil {
 
     /** entity manager specified in app's persistence.xml. */
-    private static EntityManagerFactory emf
-            = Persistence.createEntityManagerFactory("ace-amPU");
+    private static EntityManagerFactory emf = null;
+            //= Persistence.createEntityManagerFactory("ace-amPU");
     /** db connection to aceamdb. */
     private static DataSource ds = null;
 

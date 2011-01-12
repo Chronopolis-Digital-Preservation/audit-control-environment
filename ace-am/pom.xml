@@ -15,6 +15,7 @@
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
   </properties>
 
 <repositories>
@@ -25,8 +26,8 @@
      <snapshots>
         <enabled>true</enabled>
      </snapshots> -->
-  </repository>    
-</repositories> 
+  </repository>
+</repositories>
 
   <dependencies>
     <!-- local ace deps -->
@@ -49,7 +50,7 @@
       <groupId>javax.persistence</groupId>
       <artifactId>persistence-api</artifactId>
       <version>1.0</version>
-    </dependency> 
+    </dependency>
     <dependency>
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>eclipselink</artifactId>
@@ -136,8 +137,9 @@
       <artifactId>irods-api</artifactId>
       <version>1.0</version>
     </dependency>
-    
-    
+
+
 
   </dependencies>
 </project>
+
