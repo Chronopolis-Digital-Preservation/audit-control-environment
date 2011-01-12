@@ -27,6 +27,18 @@
         <enabled>true</enabled>
      </snapshots> -->
   </repository>
+  <!--<repository>
+    <url>http://ftp.ing.umu.se/mirror/eclipse/rt/eclipselink/maven.repo</url>
+    <id>eclipselink</id>
+    <layout>default</layout>
+    <name>Repository for library Library[eclipselink]</name>
+  </repository>-->
+  <repository>
+    <url>http://ftp.ing.umu.se/mirror/eclipse/rt/eclipselink/maven.repo</url>
+    <id>eclipselink</id>
+    <layout>default</layout>
+    <name>Repository for library Library[eclipselink]</name>
+  </repository>
 </repositories>
 
   <dependencies>
@@ -46,16 +58,22 @@
     </dependency>
 
     <!-- for persistence -->
-    <dependency>
+    <!--<dependency>
       <groupId>javax.persistence</groupId>
       <artifactId>persistence-api</artifactId>
       <version>1.0</version>
-    </dependency>
+    </dependency>-->
     <dependency>
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>eclipselink</artifactId>
       <version>2.0.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>javax.persistence</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+
 
     <dependency>
       <groupId>javax.mail</groupId>
@@ -87,9 +105,10 @@
       <groupId>javax.servlet.jsp</groupId>
       <artifactId>jsp-api</artifactId>
       <version>2.1</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
+      <groupId>jstl</groupId>
       <artifactId>jstl</artifactId>
       <version>1.1.2</version>
     </dependency>
@@ -97,6 +116,7 @@
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <version>2.5</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -137,9 +157,8 @@
       <artifactId>irods-api</artifactId>
       <version>1.0</version>
     </dependency>
-
-
-
-  </dependencies>
+      </dependencies>
 </project>
+
+
 
