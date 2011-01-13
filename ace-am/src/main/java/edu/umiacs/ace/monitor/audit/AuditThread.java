@@ -102,12 +102,11 @@ public final class AuditThread extends Thread implements CancelCallback {
     private LogEventManager logManager;
     private AuditIterable<FileBean> iterableItems;
 
-
-    AuditThread( Collection c, StorageDriver driver,
-            MonitoredItem... startItem ) {
+    AuditThread(Collection c, StorageDriver driver,
+            MonitoredItem... startItem) {
         this.driver = driver;
         this.coll = c;
-        if ( startItem != null && startItem[0] != null ) {
+        if (startItem != null && startItem[0] != null) {
             baseItemPathList = Arrays.copyOf(startItem, startItem.length);
         }
         this.setName("audit: " + c.getName());
@@ -115,28 +114,28 @@ public final class AuditThread extends Thread implements CancelCallback {
         this.start();
     }
 
-    public DriverStateBean[] getDriverStatus()
-    {
-     if (iterableItems != null)
-         return iterableItems.getState();
-     else
-         return new DriverStateBean[0];
+    public DriverStateBean[] getDriverStatus() {
+        if (iterableItems != null) {
+            return iterableItems.getState();
+        } else {
+            return new DriverStateBean[0];
+        }
     }
 
-    public void setTokenClassName( String tokenClassName ) {
+    public void setTokenClassName(String tokenClassName) {
         this.tokenClassName = tokenClassName;
     }
 
-    void setImsHost( String imsHost ) {
+    void setImsHost(String imsHost) {
         this.imsHost = imsHost;
     }
 
-    void setImsport( int imsport ) {
+    void setImsport(int imsport) {
         this.imsport = imsport;
     }
 
     public long getTotalErrors() {
-        if ( callback != null ) {
+        if (callback != null) {
             return totalErrors + callback.getCallbackErrors();
         }
         return totalErrors;
@@ -155,7 +154,7 @@ public final class AuditThread extends Thread implements CancelCallback {
     }
 
     public long getTokensAdded() {
-        if ( callback != null ) {
+        if (callback != null) {
             return callback.getTokensAdded();
         }
         return 0;
@@ -164,8 +163,9 @@ public final class AuditThread extends Thread implements CancelCallback {
     @Override
     public void cancel() {
         cancel = true;
-        if (iterableItems != null)
+        if (iterableItems != null) {
             iterableItems.cancel();
+        }
         this.interrupt();
 
     }
@@ -174,7 +174,7 @@ public final class AuditThread extends Thread implements CancelCallback {
     public void run() {
         NDC.push("[Audit] ");
         try {
-            if ( hasRun ) {
+            if (hasRun) {
                 LOG.fatal("Cannot run thread, already executed");
                 throw new IllegalStateException("Thread has already run");
             }
@@ -186,31 +186,33 @@ public final class AuditThread extends Thread implements CancelCallback {
                 logAuditStart();
 
                 callback = new FileAuditCallback(coll, session, this);
-                if ( !openIms() || (coll.isAuditTokens() && !openTokenValidator(MessageDigest.getInstance(
-                        "SHA-256"))) ) {
+                if (!openIms() || (coll.isAuditTokens()
+                        && !openTokenValidator(MessageDigest.getInstance(
+                        "SHA-256")))) {
                     return;
                 }
 
                 performAudit();
                 // Let outstanding tokens finish, TODO, de-hackify this.
                 sleep(2000);
-            } catch ( Throwable e ) {
+            } catch (Throwable e) {
                 LOG.fatal("UNcaught exception in performAudit()", e);
-                if ( abortException != null ) {
+                if (abortException != null) {
                     abortException = e;
                 }
             }
         } finally {
-            LOG.info("Audit ending. exception: " + (abortException != null) + " null requester: " + (batch
+            LOG.info("Audit ending. exception: "
+                    + (abortException != null) + " null requester: " + (batch
                     == null) + " cancel: " + cancel);
             AuditThreadFactory.finished(coll);
 
             // make sure we don't leave these two open
-            if ( batch != null ) {
+            if (batch != null) {
                 batch.close();
                 batch = null;
             }
-            if ( validator != null ) {
+            if (validator != null) {
                 validator.close();
                 validator = null;
             }
@@ -232,14 +234,15 @@ public final class AuditThread extends Thread implements CancelCallback {
             batch = ims.createImmediateTokenRequestBatch(
                     tokenClassName, callback, 1000, 5000);
             return true;
-        } catch ( IMSException e ) {
+        } catch (IMSException e) {
             EntityManager em;
             LOG.error("Cannot connect to IMS ", e);
             em = PersistUtil.getEntityManager();
 
             EntityTransaction trans = em.getTransaction();
             trans.begin();
-            em.persist(logManager.createCollectionEvent(LogEnum.UNKNOWN_IMS_COMMUNICATION_ERROR, e));
+            em.persist(logManager.createCollectionEvent(
+                    LogEnum.UNKNOWN_IMS_COMMUNICATION_ERROR, e));
 //            em.persist(logManager.imsCommError("", coll, e));
             trans.commit();
             em.close();
@@ -248,7 +251,7 @@ public final class AuditThread extends Thread implements CancelCallback {
 
     }
 
-    private boolean openTokenValidator( MessageDigest digest ) {
+    private boolean openTokenValidator(MessageDigest digest) {
 //        TokenValidator validator = null;
 
         try {
@@ -261,7 +264,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                     5000, digest);
 //                    "SHA-256-0", new BatchCallback(), 1000, 5000);
             return true;
-        } catch ( IMSException e ) {
+        } catch (IMSException e) {
             EntityManager em;
             LOG.error("Cannot connect to IMS ", e);
 //            LogEventManager lem;
@@ -271,7 +274,8 @@ public final class AuditThread extends Thread implements CancelCallback {
             EntityTransaction trans = em.getTransaction();
             trans.begin();
 //            em.persist(lem.imsCommError("", coll, e));
-            em.persist(logManager.createCollectionEvent(LogEnum.UNKNOWN_IMS_COMMUNICATION_ERROR, e));
+            em.persist(logManager.createCollectionEvent(
+                    LogEnum.UNKNOWN_IMS_COMMUNICATION_ERROR, e));
 
             trans.commit();
             em.close();
@@ -281,7 +285,7 @@ public final class AuditThread extends Thread implements CancelCallback {
     }
 
     private void performAudit() {
-        
+
         // 1. Setup audit
         PathFilter filter = new SimpleFilter(coll);
         Date startDate = new Date();
@@ -291,19 +295,19 @@ public final class AuditThread extends Thread implements CancelCallback {
         try {
             iterableItems = driver.getWorkList(coll.getDigestAlgorithm(),
                     filter, baseItemPathList);
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             abortException = e;
             return;
         }
 
         // 3. Process files
         try {
-            for ( FileBean currentFile : iterableItems ) {
-                if ( currentFile == null ) {
+            for (FileBean currentFile : iterableItems) {
+                if (currentFile == null) {
                     continue;
                 }
 
-                if ( cancel || abortException != null ) {
+                if (cancel || abortException != null) {
 //                    iterableItems.cancel();
                     return;
                 }
@@ -312,25 +316,26 @@ public final class AuditThread extends Thread implements CancelCallback {
                 lastFileSeen = currentFile.getPathList()[0];
                 processFile(currentFile);
             }
-        } catch ( Exception e ) {
+        } catch (Exception e) {
 
             abortException = e;
             LOG.info("Exception caught processing items");
             return;
         } finally {
             // just in case, we really, really want to exit
-            LOG.trace("Calling cancel on file supply iterator");
+            LOG.trace("Exiting file supply iteration, Calling cancel on "
+                    + "file supply iterator (just in case)");
             iterableItems.cancel();
         }
 
-        if ( cancel || abortException != null ) {
+        if (cancel || abortException != null) {
             return;
         }
 
         // let token batch finish before processing or items waiting tokens
         // will appear as errors.
 //        Thread.sleep(2000);
-        if ( batch != null ) {
+        if (batch != null) {
             batch.close();
             batch = null;
         }
@@ -341,17 +346,18 @@ public final class AuditThread extends Thread implements CancelCallback {
         // harvest remote collections
         lastFileSeen = "comparing to peer sites";
         compareToPeers();
-        
+
 
     }
 
     private void generateAuditReport() {
-        LOG.trace("Generating audit report on " + session + " coll " + coll.getName());
+        LOG.trace("Generating audit report on " + session + " coll "
+                + coll.getName());
         CollectionCountContext.updateCollection(coll);
         ReportSummary rs = new SummaryGenerator(coll, session).generateReport();
         try {
             SchedulerContextListener.mailReport(rs, createMailList());
-        } catch ( MessagingException e ) {
+        } catch (MessagingException e) {
             LOG.error("Could not send report summary", e);
         }
     }
@@ -367,34 +373,38 @@ public final class AuditThread extends Thread implements CancelCallback {
 //        LogEventManager lem;
         EntityManager em = PersistUtil.getEntityManager();
 //        lem = new LogEventManager(em, session);
-        if ( abortException != null ) {
-            if ( abortException instanceof InterruptedException
-                    || abortException.getCause() instanceof InterruptedException ) {
+        if (abortException != null) {
+            if (abortException instanceof InterruptedException
+                    || abortException.getCause() instanceof InterruptedException) {
                 LOG.trace("Audit ending with Interrupt");
 //                new LogEventManager(em, session).finishFileAudit(coll,
 //                        "Audit Interrupted");
-                logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH, "Audit Interrupted", em);
+                logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH,
+                        "Audit Interrupted", em);
             } else {
                 LOG.error("Uncaught exception in audit thread", abortException);
 
 //                new LogEventManager(em, session).abortSite(coll,
 //                        "Uncaught audit thread exception ", abortException);
                 String message = Strings.exceptionAsString(abortException);
-                logManager.persistCollectionEvent(LogEnum.SYSTEM_ERROR, message, em);
-                logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH, "Uncaught audit thread exception ", em);
+                logManager.persistCollectionEvent(
+                        LogEnum.SYSTEM_ERROR, message, em);
+                logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH,
+                        "Uncaught audit thread exception ", em);
             }
 
-        } else if ( cancel ) {
-//            lem.finishFileAudit(coll, "Audit interrupted by user or token registration");
-            logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH, "Audit interrupted by user or token registration", em);
+        } else if (cancel) {
+            logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH,
+                    "Audit interrupted by user or token registration", em);
             LOG.trace("Audit ending on cancel request");
         } else {
             String finMsg = null;
-            if ( baseItemPathList != null ) {
-                finMsg = "Finish partial audit on list " + baseItemPathList.length;
+            if (baseItemPathList != null) {
+                finMsg = "Finish partial audit on list "
+                        + baseItemPathList.length;
             }
-//            new LogEventManager(em, session).finishFileAudit(coll, finMsg);
-            logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH, finMsg, em);
+            logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH,
+                    finMsg, em);
 
             LOG.trace("Audit ending successfully");
         }
@@ -407,32 +417,36 @@ public final class AuditThread extends Thread implements CancelCallback {
 
         EntityManager em = PersistUtil.getEntityManager();
         String message = null;
-        if ( baseItemPathList != null ) {
-            message = "Partial audit starting on list of size " + baseItemPathList.length;
+        if (baseItemPathList != null) {
+            message = "Partial audit starting on list of size "
+                    + baseItemPathList.length;
         }
-        logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_START, message, em);
+        logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_START,
+                message, em);
         em.close();
         em = null;
     }
 
-    private LogEvent setItemError( MonitoredItem item, String errorMessage ) {
+    private LogEvent setItemError(MonitoredItem item, String errorMessage) {
         totalErrors++;
         LOG.debug("Got error from currentFile: " + item.getPath());
 //        lem.errorReading(item.getPath(), coll,
 //                errorMessage);
         item.setState('M');
-        return logManager.createItemEvent(LogEnum.ERROR_READING, item.getPath(), errorMessage);
+        return logManager.createItemEvent(LogEnum.ERROR_READING,
+                item.getPath(), errorMessage);
 
     }
 
-    private void processFile( FileBean currentFile ) {
+    private void processFile(FileBean currentFile) {
         EntityManager em = PersistUtil.getEntityManager();
         MonitoredItemManager mim;
 //        LogEventManager lem;
 
         LOG.trace(
-                "Driver returned Item: " + currentFile.getPathList()[0] + " error: "
-                + currentFile.isError() + " error msg: " + currentFile.getErrorMessage() + " hash: "
+                "Driver returned Item: " + currentFile.getPathList()[0]
+                + " error: " + currentFile.isError() + " error msg: "
+                + currentFile.getErrorMessage() + " hash: "
                 + currentFile.getHash());
 
 //        lem = new LogEventManager(em, session);
@@ -446,34 +460,34 @@ public final class AuditThread extends Thread implements CancelCallback {
         try {
             String parentName = extractAndRegisterParent(mim, currentFile);
             MonitoredItem item = null;
-            if ( (item = mim.getItemByPath(fileName, coll)) != null ) {
+            if ((item = mim.getItemByPath(fileName, coll)) != null) {
                 LogEvent event;
                 LOG.trace("Updating existing item" + fileName);
                 item.setLastVisited(new Date());
                 // if item is in error, log a message and update its state to M
-                if ( currentFile.isError() ) {
+                if (currentFile.isError()) {
                     event = setItemError(item, currentFile.getErrorMessage());
 
                 } else {
-                    if ( item.getToken() != null ) {
+                    if (item.getToken() != null) {
                         event = validateIntegrity(currentFile, item);
-
-                    } // we have no token, so set state to T and enqueue
-                    else {
+                    } else {
+                        // we have no token, so set state to T and enqueue
                         event = requestNewToken(currentFile, item);
                     }
                 }
                 // merge item back in
                 EntityTransaction trans = em.getTransaction();
                 trans.begin();
-                if ( event != null ) {
+                if (event != null) {
                     em.persist(event);
                 }
                 em.merge(item);
                 trans.commit();
-            } // OK, no registered item, do the registration
-            else {
-                LogEvent event = addNewFile(currentFile, fileName, parentName, mim);
+            } else {
+                // OK, no registered item, do the registration
+                LogEvent event = addNewFile(currentFile, fileName,
+                        parentName, mim);
                 EntityTransaction trans = em.getTransaction();
                 trans.begin();
                 em.persist(event);
@@ -486,13 +500,14 @@ public final class AuditThread extends Thread implements CancelCallback {
 
     }
 
-    private LogEvent requestNewToken( FileBean currentFile, MonitoredItem item ) {
+    private LogEvent requestNewToken(FileBean currentFile, MonitoredItem item) {
 
         LogEvent event;
-        if ( item.getState() != 'T' ) {
+        if (item.getState() != 'T') {
 
 //            lem.missingToken(item.getPath(), coll);
-            event = logManager.createItemEvent(LogEnum.MISSING_TOKEN, item.getPath());
+            event = logManager.createItemEvent(LogEnum.MISSING_TOKEN,
+                    item.getPath());
             item.setStateChange(new Date());
             item.setState('T');
             item.setSize(currentFile.getFileSize());
@@ -505,31 +520,33 @@ public final class AuditThread extends Thread implements CancelCallback {
         TokenRequest request = new TokenRequest();
         request.setName(item.getPath());
         request.setHashValue(currentFile.getHash());
-        if ( !Strings.isEmpty(item.getPath()) && !Strings.isEmpty(
-                currentFile.getHash()) && batch != null ) {
+        if (!Strings.isEmpty(item.getPath()) && !Strings.isEmpty(
+                currentFile.getHash()) && batch != null) {
             try {
                 batch.add(request);
-            } catch ( InterruptedException e ) {
+            } catch (InterruptedException e) {
                 abortException = e;
             }
         }
         return event;
     }
 
-    private LogEvent validateIntegrity( FileBean currentFile, MonitoredItem item ) {
+    private LogEvent validateIntegrity(FileBean currentFile, MonitoredItem item) {
         LOG.trace(
-                "Generated checksum: " + currentFile.getHash() + " expected checksum: "
-                + item.getFileDigest());
+                "Generated checksum: " + currentFile.getHash()
+                + " expected checksum: " + item.getFileDigest());
         LogEvent event;
-        if ( currentFile.getHash().equals(
-                item.getFileDigest()) ) {
+        if (currentFile.getHash().equals(
+                item.getFileDigest())) {
             // File is active and intact
             // log the transition if it already isn't A
             // only toggle to A if state is not a remote error.
             // we handle those later
-            if ( item.getState() != 'A' && item.getState() != 'P' && item.getState() != 'D' ) {
+            if (item.getState() != 'A' && item.getState() != 'P'
+                    && item.getState() != 'D') {
 //                lem.fileOnline(item.getPath(), coll);
-                event = logManager.createItemEvent(LogEnum.FILE_ONLINE, item.getPath());
+                event = logManager.createItemEvent(LogEnum.FILE_ONLINE,
+                        item.getPath());
                 item.setState('A');
                 item.setStateChange(new Date());
                 LOG.trace(
@@ -541,25 +558,23 @@ public final class AuditThread extends Thread implements CancelCallback {
             item.setSize(currentFile.getFileSize());
             AceToken token = TokenUtil.convertToAceToken(item.getToken());
             // add to token check queue
-            if ( validator != null ) {
+            if (validator != null) {
 //                TokenResponse tResp = (TokenResponse) item.getToken().
 //                        getToken();
                 itemMap.put(token, item);
                 try {
                     validator.add(
                             item.getFileDigest(), token);
-                } catch ( InterruptedException e ) {
+                } catch (InterruptedException e) {
                     abortException = e;
                 }
             }
         } else {
-            if ( item.getState() != 'C' ) {
-                String msg = "Expected digest: " + item.getFileDigest() + " Saw: "
-                        + currentFile.getHash();
-                event = logManager.createItemEvent(LogEnum.FILE_CORRUPT, item.getPath(), msg);
-//                lem.corruptFile(item.getPath(), coll,
-//                        item.getFileDigest(),
-//                        currentFile.getHash());
+            if (item.getState() != 'C') {
+                String msg = "Expected digest: " + item.getFileDigest()
+                        + " Saw: " + currentFile.getHash();
+                event = logManager.createItemEvent(LogEnum.FILE_CORRUPT,
+                        item.getPath(), msg);
                 item.setState('C');
                 item.setStateChange(new Date());
                 LOG.trace(
@@ -572,13 +587,13 @@ public final class AuditThread extends Thread implements CancelCallback {
         return event;
     }
 
-    private LogEvent addNewFile( FileBean currentFile, String fileName,
-            String parentName, MonitoredItemManager mim ) {
+    private LogEvent addNewFile(FileBean currentFile, String fileName,
+            final String parentName, final MonitoredItemManager mim) {
 
         newFilesFound++;
         LogEvent event;
         LOG.trace("Registering new item " + fileName);
-        if ( currentFile.isError() ) {
+        if (currentFile.isError()) {
             mim.addItem(fileName, parentName, false, coll, 'M', 0);
 //            lem.errorReading(fileName, coll,
 //                    currentFile.getErrorMessage());
@@ -595,11 +610,11 @@ public final class AuditThread extends Thread implements CancelCallback {
             TokenRequest request = new TokenRequest();
             request.setName(fileName);
             request.setHashValue(currentFile.getHash());
-            if ( !Strings.isEmpty(fileName) && !Strings.isEmpty(
-                    currentFile.getHash()) && batch != null ) {
+            if (!Strings.isEmpty(fileName) && !Strings.isEmpty(
+                    currentFile.getHash()) && batch != null) {
                 try {
                     batch.add(request);
-                } catch ( InterruptedException e ) {
+                } catch (InterruptedException e) {
                     abortException = e;
                 }
             }
@@ -607,18 +622,18 @@ public final class AuditThread extends Thread implements CancelCallback {
         return event;
     }
 
-    private String extractAndRegisterParent( MonitoredItemManager mim,
-            FileBean currentFile ) {
-        String parentName = (currentFile.getPathList().length > 1 ? currentFile.getPathList()[1]
-                : null);
+    private String extractAndRegisterParent(MonitoredItemManager mim,
+            FileBean currentFile) {
+        String parentName = (currentFile.getPathList().length > 1
+                ? currentFile.getPathList()[1] : null);
 
 
         // 1. make sure directory path is registered
-        if ( parentName != null ) {
+        if (parentName != null) {
             parentName = Strings.cleanStringForXml(parentName, '_');
-            for ( int i = 1; i < currentFile.getPathList().length; i++ ) {
-                String parent = (currentFile.getPathList().length > i + 1 ? currentFile.getPathList()[i
-                        + 1] : null);
+            for (int i = 1; i < currentFile.getPathList().length; i++) {
+                String parent = (currentFile.getPathList().length > i + 1
+                        ? currentFile.getPathList()[i + 1] : null);
                 parent = Strings.cleanStringForXml(parent, '_');
                 mim.createDirectory(currentFile.getPathList()[i], parent,
                         coll);
@@ -629,15 +644,16 @@ public final class AuditThread extends Thread implements CancelCallback {
     }
 
     private String[] createMailList() {
-        return (coll.getEmailList() == null ? null : coll.getEmailList().split(
-                "\\s*,\\s*"));
+        String[] maillist = (coll.getEmailList() == null
+                ? null : coll.getEmailList().split("\\s*,\\s*"));
+        return maillist;
     }
 
     private void setCollectionState() {
         EntityManager em = PersistUtil.getEntityManager();
 
-        if ( baseItemPathList != null ) {
-            if ( coll.getState() == '\0' || coll.getState() == 'N' ) {
+        if (baseItemPathList != null) {
+            if (coll.getState() == '\0' || coll.getState() == 'N') {
                 return;
             }
         } else {
@@ -646,7 +662,7 @@ public final class AuditThread extends Thread implements CancelCallback {
 
         MonitoredItemManager mim = new MonitoredItemManager(em);
 
-        if ( mim.countErrorsInCollection(coll) == 0 ) {
+        if (mim.countErrorsInCollection(coll) == 0) {
             coll.setState('A');
         } else {
             coll.setState('E');
@@ -659,8 +675,8 @@ public final class AuditThread extends Thread implements CancelCallback {
         em.close();
     }
 
-    private void setInactiveBefore( Date d ) {
-        if ( baseItemPathList != null || cancel || abortException != null ) {
+    private void setInactiveBefore(Date d) {
+        if (baseItemPathList != null || cancel || abortException != null) {
             return;
         }
 
@@ -670,12 +686,13 @@ public final class AuditThread extends Thread implements CancelCallback {
 //        LogEventManager lem = new LogEventManager(em, session);
         trans.begin();
 
-        for ( MonitoredItem mi : mim.listItemsBefore(coll, d) ) {
-            if ( mi.getState() != 'M' && (mi.getStateChange() == null || d.after(
-                    mi.getStateChange())) ) {
+        for (MonitoredItem mi : mim.listItemsBefore(coll, d)) {
+            if (mi.getState() != 'M' && (mi.getStateChange() == null || d.after(
+                    mi.getStateChange()))) {
                 mi.setState('M');
                 mi.setStateChange(new Date());
-                em.persist(logManager.createItemEvent(LogEnum.FILE_MISSING, mi.getPath()));
+                em.persist(logManager.createItemEvent(LogEnum.FILE_MISSING,
+                        mi.getPath()));
 //                em.persist(lem.missingFile(mi.getPath(), coll));
             }
             mi.setLastVisited(new Date());
@@ -695,13 +712,14 @@ public final class AuditThread extends Thread implements CancelCallback {
         em.close();
         em = null;
 
-        for ( PeerCollection pc : coll.getPeerCollections() ) {
+        for (PeerCollection pc : coll.getPeerCollections()) {
             InputStream digestStream = JsonGateway.getGateway().getDigestList(
                     pc.getSite(),
                     pc.getPeerId());
-            if ( digestStream == null ) {
+            if (digestStream == null) {
                 em = PersistUtil.getEntityManager();
-                logManager.persistCollectionEvent(LogEnum.SYSTEM_ERROR, "Cannot collect digests from remote site: "
+                logManager.persistCollectionEvent(LogEnum.SYSTEM_ERROR,
+                        "Cannot collect digests from remote site: "
                         + pc.getSite().getRemoteURL(), em);
                 em.close();
                 em = null;
@@ -723,12 +741,12 @@ public final class AuditThread extends Thread implements CancelCallback {
                 mim = new MonitoredItemManager(em);
 //                LogEventManager lem = new LogEventManager(em, session);
 
-                for ( String unseenFile : cc.getUnseenTargetFiles() ) {
-                    LOG.trace(
-                            "Item missing at remote " + unseenFile + " " + pc.getSite());
+                for (String unseenFile : cc.getUnseenTargetFiles()) {
+                    LOG.trace("Item missing at remote "
+                            + unseenFile + " " + pc.getSite());
                     MonitoredItem mi = mim.getItemByPath(unseenFile, coll);
                     currentErrors.remove(mi);
-                    if ( mi.getState() == 'A' ) {
+                    if (mi.getState() == 'A') {
 
                         mi.setState('P');
                         mi.setStateChange(new Date());
@@ -736,16 +754,17 @@ public final class AuditThread extends Thread implements CancelCallback {
                         EntityTransaction trans = em.getTransaction();
                         trans.begin();
                         em.merge(mi);
-                        em.persist(logManager.createItemEvent(LogEnum.REMOTE_FILE_MISSING, unseenFile, pc.getSite().getRemoteURL()));
-//                        em.persist(lem.missingRemoteFile(unseenFile, coll, pc));
+                        em.persist(logManager.createItemEvent(
+                                LogEnum.REMOTE_FILE_MISSING, unseenFile,
+                                pc.getSite().getRemoteURL()));
                         trans.commit();
                     }
                 }
                 // State: D
-                for ( CollectionCompare.DifferingDigest dd : cc.getDifferingDigests() ) {
+                for (CollectionCompare.DifferingDigest dd : cc.getDifferingDigests()) {
                     MonitoredItem mi = mim.getItemByPath(dd.getName(), coll);
                     currentErrors.remove(mi);
-                    if ( mi.getState() == 'A' ) {
+                    if (mi.getState() == 'A') {
                         LOG.trace(
                                 "Item corrupt at remote " + mi.getPath() + " " + pc.getSite());
                         mi.setState('D');
@@ -766,7 +785,7 @@ public final class AuditThread extends Thread implements CancelCallback {
 
                 LOG.trace("Ending site compare " + pc.getSite());
             } finally {
-                if ( em != null ) {
+                if (em != null) {
                     em.close();
                     em = null;
                 }
@@ -778,16 +797,15 @@ public final class AuditThread extends Thread implements CancelCallback {
         em = PersistUtil.getEntityManager();
         EntityTransaction trans = em.getTransaction();
         Date currDate = new Date();
-//        LogEventManager lem = new LogEventManager(em, session);
 
         trans.begin();
-        for ( MonitoredItem mi : currentErrors ) {
+        for (MonitoredItem mi : currentErrors) {
             LOG.trace(
                     "Item online at remote " + mi.getPath());
             mi.setState('A');
             mi.setStateChange(currDate);
-            em.persist(logManager.createItemEvent(LogEnum.REMOTE_FILE_ONLINE, mi.getPath()));
-//            em.persist(lem.onlineRemoteFile(mi.getPath(), coll));
+            em.persist(logManager.createItemEvent(LogEnum.REMOTE_FILE_ONLINE,
+                    mi.getPath()));
             em.merge(mi);
         }
 
