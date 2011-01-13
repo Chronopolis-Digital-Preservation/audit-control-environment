@@ -76,7 +76,7 @@ public class SwapFileAccess extends StorageDriver {
     private SwapSettings settings;
     private EntityManager em;
 
-    public SwapFileAccess( Collection c, EntityManager em ) {
+    public SwapFileAccess(Collection c, EntityManager em) {
         super(c);
         try {
             this.em = em;
@@ -86,7 +86,7 @@ public class SwapFileAccess extends StorageDriver {
             try {
                 settings = (SwapSettings) q.getSingleResult();
                 LOG.debug("Loaded existing SWAP Settings");
-            } catch ( NoResultException e ) {
+            } catch (NoResultException e) {
                 settings = new SwapSettings();
                 settings.setPassword("");
                 settings.setUsername("");
@@ -100,14 +100,14 @@ public class SwapFileAccess extends StorageDriver {
                 et.commit();
                 LOG.trace("Persisted new SWAP Setting");
             }
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             LOG.error("Error loading settings: " + e);
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void setParameters( Map m ) {
+    public void setParameters(Map m) {
         boolean newTx;
         settings.setServers(getSingleParam(m, PARAM_SERVERS));
         settings.setUsername(getSingleParam(m, PARAM_USER));
@@ -117,17 +117,17 @@ public class SwapFileAccess extends StorageDriver {
 
         EntityTransaction et = em.getTransaction();
         newTx = et.isActive();
-        if ( !newTx ) {
+        if (!newTx) {
             et.begin();
         }
         PersistUtil.getEntityManager().merge(settings);
-        if ( !newTx ) {
+        if (!newTx) {
             et.commit();
         }
     }
 
     @Override
-    public String checkParameters( Map m, String path ) {
+    public String checkParameters(Map m, String path) {
 
         boolean good = false;
         String servers, username, password, prefix;
@@ -141,7 +141,7 @@ public class SwapFileAccess extends StorageDriver {
         LOG.trace("SWAP checkParameters");
         good = (!Strings.isEmpty(servers) && Strings.isValidInt(getSingleParam(m,
                 PARAM_PORT)) && !Strings.isEmpty(username) && !Strings.isEmpty(password));
-        if ( !good ) {
+        if (!good) {
             return "Please check all SWAP parameters, they have not been completely filled out";
         }
         port = Integer.parseInt(getSingleParam(m, PARAM_PORT));
@@ -150,8 +150,8 @@ public class SwapFileAccess extends StorageDriver {
                 + " user: "
                 + username);
 
-        for ( String svr : servers.split(",") ) {
-            if ( !svr.matches("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$") ) {
+        for (String svr : servers.split(",")) {
+            if (!svr.matches("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$")) {
                 return "Bad server name: " + svr;
             }
         }
@@ -160,11 +160,11 @@ public class SwapFileAccess extends StorageDriver {
         client.addConnectionListener(mcl);
 
         try {
-            for ( String svr : servers.split(",") ) {
+            for (String svr : servers.split(",")) {
                 client.addNode(new InetSocketAddress(svr, port), 2000);
             }
 
-            if ( mcl.getResult() != Operation.LOGIN_SUCCESS ) {
+            if (mcl.getResult() != Operation.LOGIN_SUCCESS) {
                 client.close();
                 return "Authentication Failed";
 
@@ -173,17 +173,17 @@ public class SwapFileAccess extends StorageDriver {
             Thread.sleep(2000);
 
             FileGroup group = groupByName(client, path);
-            if ( group == null ) {
+            if (group == null) {
                 return "File group " + path + " cannot be found";
             }
 
-            if ( !Strings.isEmpty(prefix) ) {
+            if (!Strings.isEmpty(prefix)) {
                 SwapFile sf = group.getFileDetails(prefix);
-                if ( sf == null || !sf.isDirectory() ) {
+                if (sf == null || !sf.isDirectory()) {
                     return "Prefix cannot be found in group";
                 }
             }
-        } catch ( InterruptedException e ) {
+        } catch (InterruptedException e) {
 
             return "Interrupted trying to check settings";
         } finally {
@@ -192,10 +192,10 @@ public class SwapFileAccess extends StorageDriver {
         return null;
     }
 
-    private String getSingleParam( Map m, String paramName ) {
+    private String getSingleParam(Map m, String paramName) {
         Object o = m.get(paramName);
 
-        if ( o == null ) {
+        if (o == null) {
             return null;
         }
 
@@ -204,7 +204,7 @@ public class SwapFileAccess extends StorageDriver {
     }
 
     @Override
-    public void remove( EntityManager em ) {
+    public void remove(EntityManager em) {
         LOG.trace("Removing srb parameters");
         em.remove(settings);
     }
@@ -218,17 +218,17 @@ public class SwapFileAccess extends StorageDriver {
         return settings;
     }
 
-    static FileGroup groupByName( SwapClient client, String name ) {
+    static FileGroup groupByName(SwapClient client, String name) {
 
         try {
 
             UUID id = UUID.fromString(name);
             LOG.trace("Path parses to uuid, testing " + id);
             return client.getFileGroupList().get(id);
-        } catch ( IllegalArgumentException e ) {
+        } catch (IllegalArgumentException e) {
             LOG.trace("Path does not parse to a uuid, checking namespaces for '" + name + "'");
-            for ( FileGroup fg : client.getFileGroupList() ) {
-                if ( fg.getCombinedNameSpace().equals(name) ) {
+            for (FileGroup fg : client.getFileGroupList()) {
+                if (fg.getCombinedNameSpace().equals(name)) {
                     return fg;
                 }
             }
@@ -237,8 +237,8 @@ public class SwapFileAccess extends StorageDriver {
     }
 
     @Override
-    public AuditIterable<FileBean> getWorkList( final String digestAlgorithm,
-            final PathFilter filter, final MonitoredItem[] startPathList ) {
+    public AuditIterable<FileBean> getWorkList(final String digestAlgorithm,
+            final PathFilter filter, final MonitoredItem[] startPathList) {
         return new AuditIterable<FileBean>() {
 
             private SwapIterator it;
@@ -250,7 +250,7 @@ public class SwapFileAccess extends StorageDriver {
                 try {
                     Thread.sleep(2000);
                     FileGroup group = groupByName(client, settings.getCollection().getDirectory());
-                    if ( group == null ) {
+                    if (group == null) {
                         LOG.error("Could not extract swap filegroup '"
                                 + settings.getCollection().getDirectory() + "' ");
 
@@ -258,13 +258,13 @@ public class SwapFileAccess extends StorageDriver {
                     }
 
                     rootFile = group.getFileDetails(settings.getPrefix());
-                } catch ( InterruptedException e ) {
+                } catch (InterruptedException e) {
                     LOG.error("Could not lookup swap file '" + settings.getPrefix() + "' ");
 
                     throw new RuntimeException("Could not open " + settings.getPrefix());
                 }
 
-                if ( rootFile == null ) {
+                if (rootFile == null) {
                     LOG.error("Could not lookup swap file '" + settings.getPrefix() + "' ");
                     throw new RuntimeException("Could not open " + settings.getPrefix());
                 }
@@ -278,7 +278,9 @@ public class SwapFileAccess extends StorageDriver {
             @Override
             public void cancel() {
                 LOG.debug("Cancel called on swapfile iterator");
-                it.cancel();
+                if (it != null) {
+                    it.cancel();
+                }
             }
 
             @Override
@@ -294,7 +296,7 @@ public class SwapFileAccess extends StorageDriver {
         SwapClient client = new SwapClient(new StoredCredCallback(
                 settings.getUsername(), settings.getPassword()));
 
-        for ( String server : settings.getServers().split(",") ) {
+        for (String server : settings.getServers().split(",")) {
             client.addNode(new InetSocketAddress(server, settings.getPort()), 2000);
         }
 
@@ -302,28 +304,28 @@ public class SwapFileAccess extends StorageDriver {
     }
 
     @Override
-    public InputStream getItemInputStream( String itemPath ) throws IOException {
+    public InputStream getItemInputStream(String itemPath) throws IOException {
 
         SwapClient client = createClient();
         FileGroup group;
         SwapFile file;
-        
+
         try {
             Thread.sleep(2000);
             group = groupByName(client, settings.getCollection().getDirectory());
-            if ( group == null ) {
+            if (group == null) {
                 throw new IOException("Could not open swap file group");
             }
-        } catch ( InterruptedException e ) {
+        } catch (InterruptedException e) {
             throw new IOException("Interrupted opening filegroup");
         }
 
         try {
             file = group.getFileDetails(settings.getPrefix() + itemPath);
-        } catch ( InterruptedException e ) {
+        } catch (InterruptedException e) {
             throw new IOException("Could not open " + itemPath);
         }
-        if ( file == null ) {
+        if (file == null) {
             throw new FileNotFoundException(itemPath);
         }
         URL outputURL = file.getURL(null);
@@ -335,14 +337,13 @@ public class SwapFileAccess extends StorageDriver {
 
     }
 
-
     private static class MyConnectListener implements ConnectionListener {
 
         Operation result = null;
 
         @Override
-        public synchronized void connectionEvent( InetSocketAddress isa, Operation oprtn ) {
-            if ( result == null && oprtn != Operation.DISCONNECT ) {
+        public synchronized void connectionEvent(InetSocketAddress isa, Operation oprtn) {
+            if (result == null && oprtn != Operation.DISCONNECT) {
                 result = oprtn;
                 notifyAll();
             }
@@ -351,11 +352,10 @@ public class SwapFileAccess extends StorageDriver {
         // block till result
 
         public synchronized Operation getResult() throws InterruptedException {
-            while ( result == null ) {
+            while (result == null) {
                 wait();
             }
             return result;
         }
     }
-
 }
