@@ -1,0 +1,50 @@
+Installation directions for the ACE Audit Manager.
+
+The ACE AM requires the following software:
+ - Java 1.6+ (http://java.sun.com)
+ - Tomcat 6.0+ (http://tomcat.apache.org)
+ - Mysql 4.0+ (http://www.mysql.org)
+ - MySQL Connector 5.0.7+ (http://www.mysql.com/products/connector/j/)
+
+In this file you should find the following:
+ - ace-am.sql - SQL installation files
+ - ace-am.war - webapp ACE Audit Manager
+ - ace-am.xml - XML configuration file for the ACE Audit Manager
+ - updates/ - directory containing SQL scripts which may be needed for updates
+              you can ignore these for new installations
+
+1. Create the ACE database and user
+ - Create a new database called aceam and grant permissions to the aceam user.
+ - As a mysql administrator run the following commands:
+    create database aceam;
+    grant all on aceam.* to 'aceam'@'localhost' identified by 'YOUR_PASSWORD';
+    use aceam;
+    source ace-am.sql;
+
+-----
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 2 to server version: 4.1.20
+
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql> create database aceam;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> grant all on aceam.* to 'aceam'@'localhost' identified by 'YOUR_PASSWORD';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> use aceam;
+Database changed
+mysql> source ace.sql;
+ERROR 1146 (42S02): Table 'aceam.ACTIVITY_LOG_ENTRY' doesn't exist
+ERROR 1146 (42S02): Table 'aceam.ACTIVITY_LOG_ENTRY' doesn't exist
+...
+...
+Query OK, 0 rows affected (0.00 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> exit
+Bye
+-----
+
+2. Install the Tomcat webapp and Mysql JDBC Driver
