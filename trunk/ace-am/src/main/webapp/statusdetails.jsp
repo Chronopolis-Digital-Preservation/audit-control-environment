@@ -160,7 +160,7 @@
                 <um:Auth role="Report"><td><a href="Report?collectionid=${workingCollection.collection.id}" title="Report"><img src="images/report.jpg" alt="Report"></a></td></um:Auth>
                 <td>
                     <fieldset id="dropmenu2" style="display: none; z-index: 2; position: absolute; background-color: #FFFFFF; width: 150px;">
-                        <legend><span onclick="toggleVisibility('dropmenu1'); toggleVisibility('dropmenu2');">close</span></legend>
+                        <legend><span onclick="toggleVisibility('dropmenu1','block'); toggleVisibility('dropmenu2','block');">close</span></legend>
                         <c:if test="${!(workingCollection.fileAuditRunning || workingCollection.tokenAuditRunning)}">
                             <um:Auth role="Collection Modify">
                                 <a href="ManageCollection?collectionid=${workingCollection.collection.id}" title="Configure connection settings for this collection" >Collection Settings</a><br>
@@ -190,7 +190,7 @@
                         </um:Auth>
                     </fieldset>
 
-                    <div id="dropmenu1" style="display: block;" onclick="toggleVisibility('dropmenu1'); toggleVisibility('dropmenu2'); ">more...</div>
+                    <div id="dropmenu1" style="display: block;" onclick="toggleVisibility('dropmenu1','block'); toggleVisibility('dropmenu2','block'); ">more...</div>
 
                 </td>
             </tr>
