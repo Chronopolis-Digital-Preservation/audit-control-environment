@@ -26,12 +26,37 @@
         <title>ACE Audit Manager</title>
         <script type="text/javascript" SRC="srbFunctions.js" ></script>
         <script type="text/javascript">
-            function toggleVisibility(id) {
+            function toggleVisibility(id,type) {
+
                 var t = document.getElementById(id);
-                if (t.style.display == "block") {
+                if (t.style.display == type) {
                     t.style.display = "none";
                 } else {
-                    t.style.display = "block";
+                    t.style.display = type;
+                }
+            }
+            function showGroup(id)
+            {
+                var divs = document.getElementsByTagName('tr');
+
+                for (i = 0; i < divs.length; i++)
+                {
+                    if (divs[i].className.indexOf(id) != -1)
+                    {
+                        divs[i].style.display = "";
+                    }
+                }
+            }
+            function hideGroup(id)
+            {
+                var divs = document.getElementsByTagName('tr');
+
+                for (i = 0; i < divs.length; i++)
+                {
+                    if (divs[i].className.indexOf(id) != -1)
+                    {
+                        divs[i].style.display = "none";
+                    }
                 }
             }
         </script>
@@ -137,12 +162,19 @@
                             myp.innerHTML='${counttotal} / <c:choose><c:when test="${sizetotal > 0}"><d:FileSize value="${sizetotal}" /></c:when><c:otherwise>0 B</c:otherwise></c:choose>';
                         }
                     </script>
-                    <tr><td class="groupheader" colspan="3">${item.collection.group}</td><td class="groupheader" colspan="3" id="group${item.collection.group}"></td></tr>
+                    <tr>
+                        <td class="groupheader" colspan="3" onclick="toggleVisibility('spexpand${item.collection.group}','inline'); toggleVisibility('sphide${item.collection.group}','inline');">
+                                <span onclick="showGroup('grouptr${item.collection.group}')" id="spexpand${item.collection.group}" style="display:none;float: left;width: 25px;" >[+]</span>
+                                <span onclick="hideGroup('grouptr${item.collection.group}')" id="sphide${item.collection.group}" style="display:inline;float: left;width: 25px;" >[-]</span>
+                                ${item.collection.group}
+                        </td>
+                        <td class="groupheader" colspan="3" id="group${item.collection.group}"></td>
+                    </tr>
                     <c:set var="counttotal" value="0" />
                     <c:set var="sizetotal" value="0" />
                 </c:if>
 
-                <tr class="statusrow" >
+                <tr class="statusrow grouptr${item.collection.group}" >
                     <td>
 
                         <c:choose>
@@ -202,7 +234,7 @@
                 myp.innerHTML='${counttotal} / <c:choose><c:when test="${sizetotal > 0}"><d:FileSize value="${sizetotal}" /></c:when><c:otherwise>0 B</c:otherwise></c:choose>';
             </script>
 
-                <tr><td colspan="5"><br/><d:Auth role="Collection Modify" showUnauthenticated="true"><a href="ManageCollection">Add Collection</a></d:Auth> &nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+            <tr><td colspan="5"><br/><d:Auth role="Collection Modify" showUnauthenticated="true"><a href="ManageCollection">Add Collection</a></d:Auth> &nbsp;&nbsp;&nbsp&nbsp;&nbsp;
                     <d:Auth role="Audit">
                         <c:choose>
                             <c:when test="${pause.paused}"><a href="Pause?pause=0">Enable Automated Auditing</a></c:when>
