@@ -143,7 +143,7 @@
 
         <table id="statustable">
             <thead>
-                <td></td><td>Collection Name</td>
+                <td></td><td width="45%">Collection Name</td>
                 <td>Type</td><td>Total Files*</td>
                 <td>Last Audit</td>
                 <td>Next Audit</td>
@@ -164,9 +164,9 @@
                     </script>
                     <tr>
                         <td class="groupheader" colspan="3" onclick="toggleVisibility('spexpand${item.collection.group}','inline'); toggleVisibility('sphide${item.collection.group}','inline');">
-                                <span onclick="showGroup('grouptr${item.collection.group}')" id="spexpand${item.collection.group}" style="display:none;float: left;width: 25px;" >[+]</span>
-                                <span onclick="hideGroup('grouptr${item.collection.group}')" id="sphide${item.collection.group}" style="display:inline;float: left;width: 25px;" >[-]</span>
-                                ${item.collection.group}
+                            <span onclick="showGroup('grouptr${item.collection.group}')" id="spexpand${item.collection.group}" style="display:none;float: left;width: 25px;" >[+]</span>
+                            <span onclick="hideGroup('grouptr${item.collection.group}')" id="sphide${item.collection.group}" style="display:inline;float: left;width: 25px;" >[-]</span>
+                            ${item.collection.group}
                         </td>
                         <td class="groupheader" colspan="3" id="group${item.collection.group}"></td>
                     </tr>
