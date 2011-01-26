@@ -27,6 +27,28 @@
     <project.license>umd</project.license>
   </properties>
 
+<repositories>
+  <!--<repository>
+     <id>EclipseLink Repo</id>
+     <url>http://www.eclipse.org/downloads/download.php?r=1&amp;nf=1&amp;file=/rt/eclipselink/maven.repo</url>
+     <snapshots>
+        <enabled>true</enabled>
+     </snapshots>
+  </repository>-->
+  <repository>
+    <url>http://www.umiacs.umd.edu/~toaster/mavenrepo</url>
+    <id>adaptcustom</id>
+    <layout>default</layout>
+    <name>Local scratch repo</name>
+  </repository>
+  <repository>
+    <url>http://ftp.ing.umu.se/mirror/eclipse/rt/eclipselink/maven.repo</url>
+    <id>eclipselink</id>
+    <layout>default</layout>
+    <name>Repository for library Library[eclipselink]</name>
+  </repository>
+</repositories>
+
   <dependencies>
     
     <dependency>
