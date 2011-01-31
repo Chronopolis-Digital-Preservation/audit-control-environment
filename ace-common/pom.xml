@@ -9,7 +9,6 @@
   </parent>
   <groupId>edu.umiacs.ace</groupId>
   <artifactId>ace-common</artifactId>
-  <version>1.6-SNAPSHOT</version>
   <name>ace-common</name>
   <url>http://maven.apache.org</url>
     <properties>

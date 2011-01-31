@@ -134,7 +134,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                         </c:choose>
                     </td>
                     <td class="datecol"><span>${fn:replace(item.lastSeen, " ", "&nbsp;")}</span></td>
-                    <td><a href="EventLog?logpath=${item.path}">log</a> <a href="RemoveItem?itemid=${item.id}&amp;redirect=Report">remove</a> </td>
+                    <td><a href="EventLog?logpath=${item.path}">log</a> <a href="RemoveItem?itemid=${item.id}&amp;redirect=Report%3Fcollectionid=${collection.collection.id}">remove</a> </td>
                 </tr>
             </c:forEach>
             <tr><td colspan="5">

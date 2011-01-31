@@ -60,11 +60,11 @@ public class IrodsIterator implements Iterator<FileBean> {
     private ConnectOperation co;
     private String root;
     private BulkFileSaver bfs;
-    private Queue<BulkFileSaver> saverList = new LinkedList<BulkFileSaver>();
+    private Queue<MonitoredItem> saverList = new LinkedList<MonitoredItem>();
 
-    public IrodsIterator( Collection c, IrodsSetting ic,
+    public IrodsIterator(Collection c, IrodsSetting ic,
             MonitoredItem[] startPathList, PathFilter filter,
-            String digestAlgorithm ) {
+            String digestAlgorithm) {
         this.co = new ConnectOperation(ic.getServer(), ic.getPort(),
                 ic.getUsername(), ic.getPassword(), ic.getZone());
         this.stateBean = new DriverStateBean();
@@ -75,31 +75,50 @@ public class IrodsIterator implements Iterator<FileBean> {
 
             handler = new IrodsHandler(readyList, filter, digestAlgorithm);
 
-            MyListener listener = new MyListener();
-            if ( startPathList != null ) {
-                String startPath;
 
-                for ( MonitoredItem mi : startPathList ) {
-                    startPath = root + mi.getPath();
-                    bfs = new BulkFileSaver(co, handler, startPath);
-                    bfs.addListener(listener);
-                    saverList.add(bfs);
+            if (startPathList != null) {
+//                String startPath;
+
+                for (MonitoredItem mi : startPathList) {
+                    saverList.offer(mi);
                 }
+                runNextItem();
+//                saverList.poll();
             } else {
+                MyListener listener = new MyListener();
                 bfs = new BulkFileSaver(co, handler, root);
                 bfs.addListener(listener);
-                saverList.add(bfs);
+//                saverList.add(bfs);
+                handler.setRoot("");
+                bfs.execute(true);
+
             }
 
-            saverList.poll().execute(true);
 
-        } catch ( IOException ioe ) {
+        } catch (IOException ioe) {
             LOG.error("Could not connect to irods", ioe);
             throw new RuntimeException("Could not connect to irods", ioe);
         }
     }
 
+    private void runNextItem() {
+        String startPath;
+        MonitoredItem mi = saverList.poll();
+        if (mi == null) {
+            bfs = null;
+            return;
+        }
+        MyListener listener = new MyListener();
+        startPath = root + mi.getPath();
+        handler.setRoot(mi.getPath());
+        bfs = new BulkFileSaver(co, handler, startPath);
+        bfs.addListener(listener);
+        bfs.execute(true);
+//                    saverList.add(bfs);
+    }
+
     public void cancel() {
+        saverList.clear();
         bfs.cancel();
     }
 
@@ -117,10 +136,10 @@ public class IrodsIterator implements Iterator<FileBean> {
         takingThread = Thread.currentThread();
         try {
             return readyList.take();
-        } catch ( InterruptedException ie ) {
+        } catch (InterruptedException ie) {
 
 
-            if ( readyList.isEmpty() ) {
+            if (readyList.isEmpty()) {
                 LOG.error("Interrupted Exception in next, return null");
                 return null;
             }
@@ -147,14 +166,14 @@ public class IrodsIterator implements Iterator<FileBean> {
         }
 
         @Override
-        public void startFile( String fullPath ) {
+        public void startFile(String fullPath) {
             bytes = 0;
             stateBean.setStateAndReset(State.READING);
             stateBean.setFile(fullPath);
         }
 
         @Override
-        public void bytesWritten( int bytesWritten ) {
+        public void bytesWritten(int bytesWritten) {
 
             bytes += bytesWritten;
             stateBean.setRead(bytes);
@@ -162,7 +181,7 @@ public class IrodsIterator implements Iterator<FileBean> {
         }
 
         @Override
-        public void endFile( String fullPath ) {
+        public void endFile(String fullPath) {
             stateBean.setStateAndReset(State.LISTING);
 
         }
@@ -171,22 +190,23 @@ public class IrodsIterator implements Iterator<FileBean> {
         public void endTransfer() {
             stateBean.setRunningThread(null);
             LOG.debug("endTransfer called on irods iterator");
-            if ( !saverList.isEmpty() ) {
-                saverList.poll().execute(true);
+            if (!saverList.isEmpty()) {
+                runNextItem();
+//                saverList.poll().execute(true);
                 return;
             } else {
                 handler = null;
-                if ( takingThread != null && readyList.isEmpty() ) {
+                if (takingThread != null && readyList.isEmpty()) {
                     takingThread.interrupt();
                 }
             }
         }
 
         @Override
-        public void handleException( Throwable t ) {
+        public void handleException(Throwable t) {
             cancel();
             handler = null;
-            if ( takingThread != null && readyList.isEmpty() ) {
+            if (takingThread != null && readyList.isEmpty()) {
                 takingThread.interrupt();
             }
             LOG.error("Error in bulk saver", t);
