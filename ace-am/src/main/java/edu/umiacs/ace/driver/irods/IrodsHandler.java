@@ -51,20 +51,32 @@ public class IrodsHandler implements BulkFileHandler {
     private LinkedBlockingQueue<FileBean> readyList;
     private PathFilter filter;
     private MessageDigest digest;
-//    private boolean ignore = false;
     private String workingFile;
     private long fileSize;
     private static final Logger LOG = Logger.getLogger(IrodsHandler.class);
+    private String root;
 
+    /**
+     *
+     * @param readyList
+     * @param filter
+     * @param digestAlgorithm
+     * @param base prefix to add to returned files (no trailing /)
+     */
     public IrodsHandler( LinkedBlockingQueue<FileBean> readyList,
             PathFilter filter, String digestAlgorithm ) {
         this.readyList = readyList;
         this.filter = filter;
+        this.root = "";
         try {
             digest = MessageDigest.getInstance(digestAlgorithm);
         } catch ( NoSuchAlgorithmException ex ) {
             throw new RuntimeException(ex);
         }
+    }
+
+    public void setRoot(String root) {
+        this.root = root;
     }
 
     @Override
@@ -130,7 +142,8 @@ public class IrodsHandler implements BulkFileHandler {
      * @return
      */
     private String[] extractPathList( String file ) {
-        String[] tmpPathList = file.split("/");
+        String completefile = root + file;
+        String[] tmpPathList = completefile.split("/");
 
         if ( tmpPathList.length == 1 ) {
             return tmpPathList;

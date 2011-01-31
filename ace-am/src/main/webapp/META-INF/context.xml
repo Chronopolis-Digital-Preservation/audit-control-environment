@@ -50,7 +50,7 @@
   <Parameter name="log4j.rootLogger" value="FATAL, A1"/>
   <Parameter name="log4j.appender.A1.layout" value="org.apache.log4j.PatternLayout"/>
   <Parameter name="log4j.appender.A1.layout.ConversionPattern" value="%d{[dd/MMM/yyyy:HH:mm:ss]} %x%m%n"/>
-  <Parameter name="log4j.logger.edu.umiacs.irods" value="TRACE"/>
+  <Parameter name="log4j.logger.edu.umiacs.irods" value="INFO"/>
   <Parameter name="log4j.logger.edu.umiacs" value="TRACE"/>
   <!--<Parameter name="log4j.logger.edu.umiacs.irods.api.IRodsConnection" value="TRACE"/>-->
 </Context>

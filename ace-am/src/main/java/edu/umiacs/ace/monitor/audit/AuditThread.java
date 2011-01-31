@@ -486,12 +486,20 @@ public final class AuditThread extends Thread implements CancelCallback {
                 trans.commit();
             } else {
                 // OK, no registered item, do the registration
-                LogEvent event = addNewFile(currentFile, fileName,
+                LogEvent[] event = addNewFile(currentFile, fileName,
                         parentName, mim);
-                EntityTransaction trans = em.getTransaction();
-                trans.begin();
-                em.persist(event);
-                trans.commit();
+
+                // transaction inside loop to ensure order of commits
+                // default, jpa ignores order of persist calls
+                for (LogEvent le : event) {
+                    if (le != null) {
+                        EntityTransaction trans = em.getTransaction();
+                        trans.begin();
+                        em.persist(le);
+                        trans.commit();
+                    }
+                }
+
             }
         } finally {
             em.close();
@@ -587,25 +595,27 @@ public final class AuditThread extends Thread implements CancelCallback {
         return event;
     }
 
-    private LogEvent addNewFile(FileBean currentFile, String fileName,
+    private LogEvent[] addNewFile(FileBean currentFile, String fileName,
             final String parentName, final MonitoredItemManager mim) {
 
         newFilesFound++;
-        LogEvent event;
+        LogEvent[] event = new LogEvent[2];
+
         LOG.trace("Registering new item " + fileName);
+        event[0] = logManager.createItemEvent(LogEnum.FILE_NEW, fileName,
+                coll.getDirectory() + fileName);
         if (currentFile.isError()) {
             mim.addItem(fileName, parentName, false, coll, 'M', 0);
 //            lem.errorReading(fileName, coll,
 //                    currentFile.getErrorMessage());
-            event = logManager.createItemEvent(LogEnum.ERROR_READING, fileName,
+            event[1] = logManager.createItemEvent(LogEnum.ERROR_READING, fileName,
                     currentFile.getErrorMessage());
             totalErrors++;
         } else {
             // create new item with state of missing token
             mim.addItem(fileName, parentName, false, coll, 'T',
                     currentFile.getFileSize());
-            event = logManager.createItemEvent(LogEnum.FILE_NEW, fileName,
-                    coll.getDirectory() + fileName);
+            event[1] = null;
 //            lem.foundNewFile(fileName, coll);
             TokenRequest request = new TokenRequest();
             request.setName(fileName);

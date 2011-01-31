@@ -9,7 +9,6 @@
   </parent>
   <groupId>edu.umiacs.ace</groupId>
   <artifactId>ace-ims-ws</artifactId>
-  <version>1.0-SNAPSHOT</version>
   <name>ace-ims-ws</name>
   <url>http://maven.apache.org</url>
   <build>
