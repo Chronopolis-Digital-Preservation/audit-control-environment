@@ -28,13 +28,6 @@
   </properties>
 
 <repositories>
-  <!--<repository>
-     <id>EclipseLink Repo</id>
-     <url>http://www.eclipse.org/downloads/download.php?r=1&amp;nf=1&amp;file=/rt/eclipselink/maven.repo</url>
-     <snapshots>
-        <enabled>true</enabled>
-     </snapshots>
-  </repository>-->
   <repository>
     <url>http://www.umiacs.umd.edu/~toaster/mavenrepo</url>
     <id>adaptcustom</id>
@@ -63,6 +56,7 @@
     <module>ace-ims-ws</module>
     <module>ace-ims-api</module>
     <module>ace-am</module>
+    <module>ace-dist</module>
   </modules>
 
     <!--<reporting>
