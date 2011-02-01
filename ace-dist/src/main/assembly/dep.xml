@@ -45,5 +45,9 @@
       <source>../LICENSE</source>
       <outputDirectory>ace-am-${project.version}</outputDirectory>
     </file>
+    <file>
+      <source>../README</source>
+      <outputDirectory>ace-am-${project.version}</outputDirectory>
+    </file>
   </files>
 </assembly>
