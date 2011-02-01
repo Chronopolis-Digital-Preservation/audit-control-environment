@@ -6,6 +6,9 @@
   <artifactId>ace</artifactId>
   <version>1.6-SNAPSHOT</version>
   <packaging>pom</packaging>
+  <scm>
+    <connection>scm:svn:https://subversion.umiacs.umd.edu/ace</connection>
+  </scm>
 
   <name>ace</name>
   <url>http://adapt.umiacs.umd.edu/ace</url>
