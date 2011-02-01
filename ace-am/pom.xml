@@ -18,6 +18,33 @@
     <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
   </properties>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <configuration>
+          <warSourceExcludes>**/footer.jsp</warSourceExcludes>
+          <webResources>
+            <resource>
+              <directory>src/main/webapp</directory>
+              <filtering>true</filtering>
+              <includes>
+                <include>**/footer.jsp</include>
+              </includes>
+            </resource>
+            <!--<resource>
+              <directory>src/main/webapp</directory>
+              <filtering>false</filtering>
+              <excludes>
+                <exclude>**/footer.jsp</exclude>
+              </excludes>
+            </resource>-->
+          </webResources>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
   <dependencies>
     <!-- local ace deps -->
