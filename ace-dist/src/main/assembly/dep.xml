@@ -22,6 +22,10 @@
       </includes>
       <outputDirectory>ace-am-${project.version}/updates</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>../Licenses</directory>
+      <outputDirectory>ace-am-${project.version}/Licenses</outputDirectory>
+    </fileSet>
   </fileSets>
   <files>
     <file>
@@ -35,6 +39,10 @@
     </file>
     <file>
       <source>../INSTALL</source>
+      <outputDirectory>ace-am-${project.version}</outputDirectory>
+    </file>
+    <file>
+      <source>../LICENSE</source>
       <outputDirectory>ace-am-${project.version}</outputDirectory>
     </file>
   </files>
