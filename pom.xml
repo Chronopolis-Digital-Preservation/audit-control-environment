@@ -7,7 +7,7 @@
   <version>1.6</version>
   <packaging>pom</packaging>
   <scm>
-    <connection>scm:svn:https://subversion.umiacs.umd.edu/ace/tags/ace-1.6</connection>
+    <connection>scm:svn:https://subversion.umiacs.umd.edu/ace/tags/1.6</connection>
   </scm>
 
   <name>ace</name>
