@@ -119,13 +119,13 @@ Author     : toaster
             <td>Audit tokens</td>
             <td>
                 <c:choose>
-                    <c:when test="${collection.auditTokens}">
-                        <input type="radio" name="audittokens" value="true" checked>Check Digests
-                        <input type="radio" name="audittokens" value="false">Do Not Check Digests
+                    <c:when test="${!collection.auditTokens && collection.id > 0}">
+                        <input type="radio" name="audittokens" value="true" >Check Digests
+                        <input type="radio" name="audittokens" value="false" checked>Do Not Check Digests
                     </c:when>
                     <c:otherwise>
-                        <input type="radio" name="audittokens" value="true">Check Digests
-                        <input type="radio" name="audittokens" value="false" checked>Do Not Check Digests
+                        <input type="radio" name="audittokens" value="true" checked>Check Digests
+                        <input type="radio" name="audittokens" value="false">Do Not Check Digests
                     </c:otherwise>
                 </c:choose>
             </td>

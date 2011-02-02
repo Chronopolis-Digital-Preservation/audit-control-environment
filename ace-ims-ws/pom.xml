@@ -27,6 +27,9 @@
 http://ims.umiacs.umd.edu:8080/ace-ims/IMSWebService?wsdl
                    </wsdlUrl>
                  </wsdlUrls>
+                 <bindingFiles>
+                   <bindingFile>${basedir}/src/main/resources/jaxb-bindings.xml</bindingFile>
+                 </bindingFiles>
              <packageName>edu.umiacs.ace.ims.ws</packageName>
                </configuration>
              </execution>
