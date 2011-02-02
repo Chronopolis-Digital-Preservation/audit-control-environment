@@ -1,0 +1,49 @@
+
+1. Stop tomcat.
+ - $TOMCAT/bin/shutdown.sh or $TOMCAT/bin/shutdown.bat
+
+2. Apply any sql patches from the updates directory.
+ - run patches in order (example: updating from 1.4 to 1.6)
+ mysql> source 1.4-1.4.2.updates.sql;
+ mysql> source 1.5-1.6.updates.sql;
+
+3. Remove old versions
+  - $TOMCAT/webapps/ace-am
+  - $TOMCAT/webapps/ace-am.war
+  - $TOMCAT/work/Catalina/localhost/ace-am
+
+4. Drop in new ace-am.war
+ - copy ace-am.war to $TOMCAT/webapps/ace-am.war
+
+5. Restart tomcat
+ - $TOMCAT/bin/startup.sh or $TOMCAT/bin/startup.bat
+
+-------------------
+Notes for specific versions.
+ - if updating from versions prior to 1.6, see the 1.6 notes.
+
+1.6
+ The 1.6 version changed how the ACE tokens are stored in the database.
+When you start the new version after an upgrade, ACE will attempt to
+migrate your existing tokens to the new format. This will result in ACE
+not being available immediately. Depending on how many files you monitor 
+this migration may take several minutes. You can monitor the progress of
+an upgrade by looking at the ace log file (/tmp/aceam.log).
+
+You will see lines that look like:
+[MIGRATION]Old token table still exists, migration triggered
+[MIGRATION]Token Migration starting
+...
+[MIGRATION]Migrated: 50000/567832 tokens processed: 10000
+...
+[MIGRATION]Token migration successfully finished
+
+If you have not installed the required sql patches, ace will not start and
+you will see the following error in the log file:
+
+[MIGRATION]SQL patch to 1.6+ has not been installed, table 'acetoken' does no exist, shutting down!
+
+---
+
+
+
