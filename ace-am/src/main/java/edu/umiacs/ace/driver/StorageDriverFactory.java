@@ -36,6 +36,8 @@ import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.driver.srb.SrbAccess;
 import edu.umiacs.ace.driver.swap.SwapFileAccess;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +70,9 @@ public final class StorageDriverFactory {
     }
 
     public static final List<String> listResources() {
-        return new ArrayList<String>(implementationMap.keySet());
+        List<String> lt = new ArrayList<String>(implementationMap.keySet());
+        Collections.sort(lt,comp);
+        return lt;
     }
 
     public static final StorageDriver createStorageAccess( Collection c,
@@ -86,4 +90,15 @@ public final class StorageDriverFactory {
             throw new RuntimeException(ex);
         }
     }
+
+    private static final Comparator<String> comp = new Comparator<String>() {
+
+        public int compare(String o1, String o2) {
+            if ("local".equals(o1))
+                return -1;
+            if ("local".equals(o2))
+                return 1;
+            return o1.compareTo(o2);
+        }
+    };
 }
