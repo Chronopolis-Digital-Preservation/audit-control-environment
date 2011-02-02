@@ -49,5 +49,9 @@
       <source>../README</source>
       <outputDirectory>ace-am-${project.version}</outputDirectory>
     </file>
+    <file>
+      <source>../UPGRADE</source>
+      <outputDirectory>ace-am-${project.version}</outputDirectory>
+    </file>
   </files>
 </assembly>
