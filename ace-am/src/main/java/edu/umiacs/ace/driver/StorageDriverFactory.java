@@ -30,6 +30,7 @@
 // $Id$
 package edu.umiacs.ace.driver;
 
+import edu.umiacs.ace.driver.benchmark.BenchmarkAccess;
 import edu.umiacs.ace.driver.irods.IrodsAccess;
 import edu.umiacs.ace.driver.localfile.LocalFileAccess;
 import edu.umiacs.ace.monitor.core.Collection;
@@ -65,7 +66,7 @@ public final class StorageDriverFactory {
         implementationMap.put("local", LocalFileAccess.class);
         implementationMap.put("srb", SrbAccess.class);
         implementationMap.put("swap", SwapFileAccess.class);
-//        implementationMap.put("benchmark", BenchmarkAccess.class);
+        implementationMap.put("benchmark", BenchmarkAccess.class);
 //        implementationMap.put("smb", SmbAccess.class);
     }
 

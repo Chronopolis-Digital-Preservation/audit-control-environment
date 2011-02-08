@@ -120,11 +120,11 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                     <tr><td>Last Checked</td><td>${selectedFile.root.lastVisited}</td></tr>
                     <tr><td>Last Seen Intact</td><td>${selectedFile.root.lastSeen}</td></tr>
                     <tr><td>Path</td><td>${selectedFile.root.path}</td></tr>
-                    <tr><td>Size</td><td><m:FileSize value="${selectedFile.root.size}" /></td></tr>
+                    <c:if test="${!selectedFile.root.directory}"><tr><td>Size</td><td><m:FileSize value="${selectedFile.root.size}" /></td></tr></c:if>
                     <tr><td>State</td><td>
                             <c:choose>
                                 <c:when test="${selectedFile.root.state eq 'A'}">
-                                    <img src="images/file-ok.jpg">
+                                    <img src="images/file-ok.jpg"/>
                                     </c:when>
                                     <c:when test="${selectedFile.root.state eq 'C'}">
                                         Corrupt

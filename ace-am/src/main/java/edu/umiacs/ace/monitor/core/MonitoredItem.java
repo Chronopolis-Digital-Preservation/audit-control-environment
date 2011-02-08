@@ -69,7 +69,7 @@ import javax.persistence.TemporalType;
     //@NamedQuery(name = "MonitoredItem.setItemState", query = "UPDATE MonitoredItem m set m.state = :state, m.lastSeen = :date WHERE m.path = :path AND m.parentCollection = :coll"),
     //@NamedQuery(name = "MonitoredItem.setItemStateAndChange", query = "UPDATE MonitoredItem m set m.state = :state, m.stateChange = :date WHERE m.path = :path AND m.parentCollection = :coll"),
     @NamedQuery(name = "MonitoredItem.listItemsBefore", query =
-    "SELECT m FROM MonitoredItem m WHERE m.lastSeen < :date AND m.parentCollection = :coll"),
+    "SELECT m FROM MonitoredItem m WHERE m.lastVisited < :date AND m.parentCollection = :coll"),
     @NamedQuery(name = "MonitoredItem.deleteByCollection", query =
     "DELETE FROM MonitoredItem WHERE parentCollection = :coll"),
     @NamedQuery(name = "MonitoredItem.listByCollection", query =

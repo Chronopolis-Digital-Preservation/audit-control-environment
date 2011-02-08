@@ -30,8 +30,6 @@
 // $Id$
 package edu.umiacs.ace.monitor.access;
 
-import edu.umiacs.ace.ims.api.TokenResponseStoreWriter;
-import edu.umiacs.ace.ims.ws.TokenResponse;
 import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.EntityManagerServlet;

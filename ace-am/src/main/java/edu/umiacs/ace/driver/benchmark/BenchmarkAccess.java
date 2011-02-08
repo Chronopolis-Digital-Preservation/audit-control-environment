@@ -281,6 +281,7 @@ public class BenchmarkAccess extends StorageDriver {
             fb.setError(false);
             fb.setHash(getHash());
             fb.setPathList(createPathList());
+            fb.setFileSize(settings.getFileLength());
 
             incrementFile();
             return fb;

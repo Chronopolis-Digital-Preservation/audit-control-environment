@@ -105,9 +105,14 @@ public class IrodsAccess extends StorageDriver {
     @Override
     public AuditIterable<FileBean> getWorkList( final String digestAlgorithm,
             final PathFilter filter, final MonitoredItem[] startPathList ) {
-        final IrodsIterator it = new IrodsIterator(getCollection(),
-                ic, startPathList, filter, digestAlgorithm);
-
+        
+        final DriverStateBean statlist = new DriverStateBean();
+        final ConnectOperation co = new ConnectOperation(ic.getServer(), ic.getPort(),
+                ic.getUsername(), ic.getPassword(), ic.getZone());
+        final IrodsIterator2 it = new IrodsIterator2(startPathList, filter,
+                digestAlgorithm, statlist, ic.getCollection().getDirectory(), co);
+        
+        
         return new AuditIterable<FileBean>() {
 
             @Override
@@ -122,7 +127,7 @@ public class IrodsAccess extends StorageDriver {
 
             @Override
             public DriverStateBean[] getState() {
-                return new DriverStateBean[] {it.getStateBean()};
+                return new DriverStateBean[] {statlist};
             }
 
         };

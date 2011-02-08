@@ -131,7 +131,7 @@ public class IrodsHandler implements BulkFileHandler {
      */
     @Override
     public void writeBytes( byte[] bytes, long offset, int length ) {
-//        LOG.trace("digesting chunk, offset: " + offset + " length " + length);
+        LOG.trace("digesting chunk, offset: " + offset + " length " + length);
         digest.update(bytes, 0, length);
         fileSize += length;
     }

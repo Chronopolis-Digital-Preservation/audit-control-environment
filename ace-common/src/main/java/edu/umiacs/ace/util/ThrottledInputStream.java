@@ -28,7 +28,6 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-
 package edu.umiacs.ace.util;
 
 import java.io.FilterInputStream;
@@ -47,7 +46,7 @@ public class ThrottledInputStream extends FilterInputStream {
     private byte[] oneByte = new byte[1];
     private double sleepTime;
 
-    public ThrottledInputStream( InputStream in, long maxBps, double startPause ) {
+    public ThrottledInputStream(InputStream in, long maxBps, double startPause) {
         super(in);
         this.maxBps = maxBps;
         bytes = 0;
@@ -66,8 +65,16 @@ public class ThrottledInputStream extends FilterInputStream {
     }
 
     @Override
-    public int read( byte[] b, int off, int len ) throws IOException {
+    public int read(byte[] b, int off, int len) throws IOException {
         int read = in.read(b, off, len);
+        if (maxBps > 0) {
+            pauseStream(read);
+        }
+
+        return read;
+    }
+
+    private void pauseStream(int read) throws IOException {
         bytes += read;
 
         long elapsed = System.currentTimeMillis() - start;
@@ -75,25 +82,23 @@ public class ThrottledInputStream extends FilterInputStream {
         double bps = bytes * 1000L / elapsed;
 
 
-        if ( maxBps > 0 && bps > maxBps ) {
+        if (maxBps > 0 && bps > maxBps) {
             sleepTime = 1 + sleepTime * 1.05;
 
-        } else if ( maxBps > 0 ) {
+        } else if (maxBps > 0) {
             sleepTime = sleepTime * .95;
         }
 
-        if ( sleepTime > 0 && maxBps > 0 ) {
+        if (sleepTime > 0 && maxBps > 0) {
             try {
 //                System.out.println("Sleeping for " + sleepTime
 //                        + " bps " + bps + " elapsed " + elapsed
 //                        + " bytes " + bytes + " length " + len + " maxBPS " + maxBps);
                 Thread.sleep((long) sleepTime);
-            } catch ( InterruptedException ignore ) {
+            } catch (InterruptedException ignore) {
                 Thread.currentThread().interrupt();
                 throw new IOException(ignore);
             }
         }
-
-        return read;
     }
 }
