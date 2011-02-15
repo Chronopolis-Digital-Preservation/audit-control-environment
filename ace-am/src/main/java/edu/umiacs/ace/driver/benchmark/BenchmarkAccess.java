@@ -63,7 +63,7 @@ import org.apache.log4j.Logger;
  * 
  * @author toaster
  */
-public class BenchmarkAccess extends StorageDriver {
+public final class BenchmarkAccess extends StorageDriver {
 
     private static final String PAGE = "benchmark.jsp";
     private BenchmarkSettings settings;
@@ -350,6 +350,7 @@ public class BenchmarkAccess extends StorageDriver {
                 }
             }
             long totalTime = System.currentTimeMillis() - start;
+            if (LOG.isTraceEnabled())
             LOG.trace(
                     "Time: " + (totalTime / 1000) + "s " + ((settings.getFileLength() / 1024)
                     / totalTime) / 1000 + "K/s");
