@@ -92,7 +92,11 @@ public final class SwapIterator implements Iterator<FileBean> {
             if ( basePath != null ) {
                 for ( MonitoredItem mi : basePath ) {
                     String startFile;
+                    if (rootFile.getFullPath().equals("/"))
+                    startFile = mi.getPath();
+                    else
                     startFile = rootFile.getFullPath() + mi.getPath();
+                    LOG.trace("Supplied file for processing: " + startFile);
                     SwapFile sf = rootFile.getFileGroup().getFileDetails(startFile);
 
                     if ( mi.isDirectory() ) {
@@ -290,7 +294,7 @@ if (rootFile.getFullPath().equals("/"))
                         new ThrottledInputStream(connection.getInputStream(), QueryThrottle.getMaxBps(), lastDelay);
                 dis = new DigestInputStream(tis, digest);
                 int read = 0;
-                while ( (read = dis.read(buffer)) >= 0 && !finished ) {
+                while ( (read = dis.read(buffer)) >= 0) {
                     fileSize += read;
                     statebean.updateLastChange();
                     statebean.setRead(fileSize);
