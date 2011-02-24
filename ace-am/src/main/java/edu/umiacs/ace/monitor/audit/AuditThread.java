@@ -697,6 +697,7 @@ public final class AuditThread extends Thread implements CancelCallback {
         trans.begin();
 
         for (MonitoredItem mi : mim.listItemsBefore(coll, d)) {
+            LOG.trace("Updating missing item: " + mi.getPath());
             if (mi.getState() != 'M' && (mi.getStateChange() == null || d.after(
                     mi.getStateChange()))) {
                 mi.setState('M');

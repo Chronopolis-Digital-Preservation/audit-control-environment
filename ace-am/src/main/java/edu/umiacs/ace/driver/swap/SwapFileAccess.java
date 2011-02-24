@@ -285,7 +285,11 @@ public class SwapFileAccess extends StorageDriver {
 
             @Override
             public DriverStateBean[] getState() {
-                return it.getStateBeans();
+                if (it == null) {
+                    return new DriverStateBean[0];
+                } else {
+                    return it.getStateBeans();
+                }
             }
         };
 

@@ -83,7 +83,9 @@ public class MonitoredItemManager {
         if ( (mi = getItemByPath(directory, c)) != null ) {
             EntityTransaction trans = em.getTransaction();
             trans.begin();
-            mi.setLastSeen(new Date());
+            Date d = new Date();
+            mi.setLastSeen(d);
+            mi.setLastVisited(d);
             mi.setState('A');
             em.merge(mi);
             trans.commit();
