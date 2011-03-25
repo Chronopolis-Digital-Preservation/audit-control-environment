@@ -32,10 +32,9 @@
 
 <repositories>
   <repository>
-    <url>http://www.umiacs.umd.edu/~toaster/mavenrepo</url>
-    <id>adaptcustom</id>
-    <layout>default</layout>
-    <name>Local scratch repo</name>
+    <url>https://scm.umiacs.umd.edu/maven/adapt/content/repositories/releases/</url>
+    <id>adapt-sonatype</id>
+    <name>ADAPT Project Repository</name>
   </repository>
   <repository>
     <url>http://ftp.ing.umu.se/mirror/eclipse/rt/eclipselink/maven.repo</url>
