@@ -28,7 +28,6 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-
 package edu.umiacs.ace.driver.irods;
 
 import edu.umiacs.ace.driver.DriverStateBean;
@@ -71,7 +70,7 @@ public class IrodsAccess extends StorageDriver {
     private IrodsSetting ic;
     private EntityManager em;
 
-    public IrodsAccess( Collection c, EntityManager em ) {
+    public IrodsAccess(Collection c, EntityManager em) {
         super(c);
         try {
             this.em = em;
@@ -81,7 +80,7 @@ public class IrodsAccess extends StorageDriver {
             try {
                 ic = (IrodsSetting) q.getSingleResult();
                 LOG.trace("Loaded existing irodsSetting");
-            } catch ( NoResultException e ) {
+            } catch (NoResultException e) {
                 ic = new IrodsSetting();
                 ic.setZone("tempZone");
                 ic.setPassword("rods");
@@ -95,7 +94,7 @@ public class IrodsAccess extends StorageDriver {
                 et.commit();
                 LOG.trace("Persisted new irodsSetting");
             }
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             LOG.error("Error loading settings: " + e);
             throw new RuntimeException(e);
         }
@@ -103,16 +102,19 @@ public class IrodsAccess extends StorageDriver {
     }
 
     @Override
-    public AuditIterable<FileBean> getWorkList( final String digestAlgorithm,
-            final PathFilter filter, final MonitoredItem[] startPathList ) {
-        
-        final DriverStateBean statlist = new DriverStateBean();
+    public AuditIterable<FileBean> getWorkList(final String digestAlgorithm,
+            final PathFilter filter, final MonitoredItem[] startPathList) {
+
+//        final DriverStateBean statlist = new DriverStateBean();
         final ConnectOperation co = new ConnectOperation(ic.getServer(), ic.getPort(),
                 ic.getUsername(), ic.getPassword(), ic.getZone());
-        final IrodsIterator2 it = new IrodsIterator2(startPathList, filter,
-                digestAlgorithm, statlist, ic.getCollection().getDirectory(), co);
-        
-        
+//        final IrodsIterator2 it = new IrodsIterator2(startPathList, filter,
+//                digestAlgorithm, statlist, ic.getCollection().getDirectory(), co);
+        final IrodsThreadedDirectoryIterator it = new IrodsThreadedDirectoryIterator(getCollection(), startPathList, filter, co);
+        //Collection c,
+        //MonitoredItem[] basePath, PathFilter filter, String digestAlgorithm,
+        //ConnectOperation co
+
         return new AuditIterable<FileBean>() {
 
             @Override
@@ -127,9 +129,9 @@ public class IrodsAccess extends StorageDriver {
 
             @Override
             public DriverStateBean[] getState() {
-                return new DriverStateBean[] {statlist};
+//                return new DriverStateBean[] {statlist};
+                return it.getStatebeans();
             }
-
         };
 
     }
@@ -139,7 +141,7 @@ public class IrodsAccess extends StorageDriver {
     }
 
     @Override
-    public void setParameters( Map m ) {
+    public void setParameters(Map m) {
         boolean newTx;
         LOG.trace("Setting irods parameters");
 
@@ -150,17 +152,17 @@ public class IrodsAccess extends StorageDriver {
         ic.setZone(getSingleParam(m, PARAM_ZONE));
         EntityTransaction et = em.getTransaction();
         newTx = et.isActive();
-        if ( !newTx ) {
+        if (!newTx) {
             et.begin();
         }
         PersistUtil.getEntityManager().merge(ic);
-        if ( !newTx ) {
+        if (!newTx) {
             et.commit();
         }
     }
 
     @Override
-    public String checkParameters( Map m, String path ) {
+    public String checkParameters(Map m, String path) {
         boolean good = false;
         String server, username, password, zone;
         int port;
@@ -173,7 +175,7 @@ public class IrodsAccess extends StorageDriver {
         LOG.trace("IRODS checkParameters");
         good = (!Strings.isEmpty(server) && !Strings.isEmpty(zone) && Strings.isValidInt(getSingleParam(m,
                 PARAM_PORT)) && !Strings.isEmpty(username) && !Strings.isEmpty(password));
-        if ( !good ) {
+        if (!good) {
             return "Settings empty, check settings";
         }
         port = Integer.parseInt(getSingleParam(m, PARAM_PORT));
@@ -190,14 +192,14 @@ public class IrodsAccess extends StorageDriver {
 
             IrodsOperations ops = new IrodsOperations(co);
             RodsObjStat_PI stat = ops.stat(path);
-            if ( stat == null || stat.getObjType() != ObjTypeEnum.COLL_OBJ_T ) {
+            if (stat == null || stat.getObjType() != ObjTypeEnum.COLL_OBJ_T) {
                 return "Directory listed does not exist in IRODS";
             }
 
             connect.closeConnection();
 
             return null;
-        } catch ( IOException ioe ) {
+        } catch (IOException ioe) {
             LOG.info("Exception thrown attempting to validate settings", ioe);
             return "Error connecting to irods: " + ioe.getMessage();
 
@@ -207,10 +209,10 @@ public class IrodsAccess extends StorageDriver {
 
     }
 
-    private String getSingleParam( Map m, String paramName ) {
+    private String getSingleParam(Map m, String paramName) {
         Object o = m.get(paramName);
 
-        if ( o == null ) {
+        if (o == null) {
             return null;
         }
 
@@ -219,7 +221,7 @@ public class IrodsAccess extends StorageDriver {
     }
 
     @Override
-    public void remove( EntityManager em ) {
+    public void remove(EntityManager em) {
         LOG.trace("Removing irods parameters");
         em.remove(ic);
     }
@@ -230,7 +232,7 @@ public class IrodsAccess extends StorageDriver {
     }
 
     @Override
-    public InputStream getItemInputStream( String itemPath ) throws IOException {
+    public InputStream getItemInputStream(String itemPath) throws IOException {
         //TODO: iRODS getItemInputStream
 //        throw new UnsupportedOperationException("Not supported yet.");
         ConnectOperation co = new ConnectOperation(ic.getServer(), ic.getPort(),

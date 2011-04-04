@@ -9,13 +9,17 @@
        or the username.
 
        url - machine name and database name
+         - in the form jdbc:mysql://<YOUR_DB_SERVER>/<ACE_DB>
        username - username used to connect to database
        password - password used for database
 
        'name' is the resource name used by the web app to refer to this
        database and NOT the database name, do not change unless you want bad
        things to happen.-->
-  <Resource auth="Container" driverClassName="com.mysql.jdbc.Driver" maxActive="20" maxIdle="10" maxWait="-1" name="jdbc/aceamdb" password="password" testOnBorrow="true" type="javax.sql.DataSource" url="jdbc:mysql://naraapp12/aceam2" username="aceam" validationQuery="SELECT 1"/>
+  <Resource auth="Container" testOnBorrow="true" type="javax.sql.DataSource"  
+  validationQuery="SELECT 1" driverClassName="com.mysql.jdbc.Driver" maxActive="20"
+  maxIdle="10" maxWait="-1" name="jdbc/aceamdb"
+  password="password" url="jdbc:mysql://naraapp12/aceam2" username="aceam" />
   <!--Mail server to use when mailing reports. You will need to set this if
     you want reports to be mailed properly.-->
   <Parameter name="mail.server" value="localhost.localdomain"/>
