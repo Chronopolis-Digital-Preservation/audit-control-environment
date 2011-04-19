@@ -23,22 +23,26 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                     <BR>
                 </div>
             </td>
+
             <td align="center">
-                <div class="menucell">
-                    <um:Auth role="Log">
+                <um:Auth role="Log">
+                    <div class="menucell">
                         <a href="EventLog?clear=1">Event Log</a>
-                    </um:Auth>
-                    <BR>
-                </div>
+                        <BR>
+                    </div>
+                </um:Auth>
             </td>
 
             <td align="center">
                 <div class="menucell">
-                    <um:Auth role="Users">
-                        <c:if test="${authmanagement}">
+                    <c:if test="${authmanagement}">
+                        <um:Auth role="Users">
                             <a href="Users">Accounts</a>
-                        </c:if>
-                    </um:Auth>
+                        </um:Auth>
+                        <um:Auth role="!Users">
+                            <a href="passwordchange.jsp">Change Password</a>
+                        </um:Auth>
+                    </c:if>
                     <BR>
                 </div>
             </td>

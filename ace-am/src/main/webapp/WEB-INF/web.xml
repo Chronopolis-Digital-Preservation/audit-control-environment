@@ -137,6 +137,10 @@
         <servlet-name>IngestStore</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.register.IngestStore</servlet-class>
     </servlet> -->
+    <servlet>
+        <servlet-name>ChangePassword</servlet-name>
+        <servlet-class>edu.umiacs.ace.monitor.users.ChangePasswordServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ManageCollection</servlet-name>
         <url-pattern>/ManageCollection</url-pattern>
@@ -233,6 +237,10 @@
         <servlet-name>IngestStore</servlet-name>
         <url-pattern>/IngestStore</url-pattern>
     </servlet-mapping>-->
+    <servlet-mapping>
+        <servlet-name>ChangePassword</servlet-name>
+        <url-pattern>/ChangePassword</url-pattern>
+    </servlet-mapping>
     <session-config>
         <session-timeout>
             30

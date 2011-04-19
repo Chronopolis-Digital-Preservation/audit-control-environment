@@ -60,6 +60,12 @@
             <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>catalina</artifactId>
+            <version>6.0.32</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- for persistence -->
         <dependency>
@@ -92,6 +98,12 @@
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
             <version>1.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.java.dev.rome</groupId>
+            <artifactId>rome</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
         <!-- for Jstl / webapp stuff-->
@@ -170,7 +182,7 @@
         <dependency>
             <groupId>edu.umiacs.irods</groupId>
             <artifactId>irods-api</artifactId>
-            <version>1.4</version>
+            <version>1.5</version>
         </dependency>
     </dependencies>
 </project>

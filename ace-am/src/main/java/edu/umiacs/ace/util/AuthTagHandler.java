@@ -15,24 +15,29 @@ public class AuthTagHandler extends TagSupport {
 
     @Override
     public int doStartTag() throws JspException {
+        boolean match = true;
         HttpServletRequest req = (HttpServletRequest) pageContext.getRequest();
-
-        if ( req.getAuthType() == null && showUnauthenticated ) {
+        if (req.getAuthType() == null && showUnauthenticated) {
             return EVAL_BODY_INCLUDE;
         }
 
-        if ( req.isUserInRole(role) ) {
+        if (role.startsWith("!")) {
+            match = false;
+            role = role.substring(1);
+        }
+
+        if (match && req.isUserInRole(role) || !match && !req.isUserInRole(role)) {
             return EVAL_BODY_INCLUDE;
         } else {
             return SKIP_BODY;
         }
     }
 
-    public void setShowUnauthenticated( boolean showUnauthenticated ) {
+    public void setShowUnauthenticated(boolean showUnauthenticated) {
         this.showUnauthenticated = showUnauthenticated;
     }
 
-    public void setRole( String role ) {
+    public void setRole(String role) {
         this.role = role;
     }
 }

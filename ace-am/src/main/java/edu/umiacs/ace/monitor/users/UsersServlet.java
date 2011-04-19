@@ -85,8 +85,6 @@ public class UsersServlet extends EntityManagerServlet {
         String paramPass = request.getParameter(PARAM_PASSWORD);
 
         // existing userId, lets load and update password
-//        if ( Strings.isValidLong(request.getParameter(PARAM_ID)) && (id = Long.parseLong(request.getParameter(PARAM_ID))) > 0 && (user = em.find(Users.class,
-//                id)) != null )
         if ( (id = getParameter(request, PARAM_ID, 0)) > 0 && (user = em.find(
                 Users.class, id)) != null ) {
             // if password is set, update, otherwise we just filled in user
