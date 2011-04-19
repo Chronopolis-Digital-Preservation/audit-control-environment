@@ -79,7 +79,7 @@ public class ViewReportSummaryServlet extends EntityManagerServlet {
             summaries.add(summary);
             coll = summary.getCollection();
         }
-        else if(coll != null) {
+        else if (coll != null) {
             if (latest) {
                 query = em.createNamedQuery("ReportSummary.listByCollectionRecent");
             } else {

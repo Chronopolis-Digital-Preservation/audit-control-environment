@@ -10,15 +10,27 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 <%@taglib uri="/WEB-INF/tlds/monitor" prefix="m"%> 
 
 <!DOCTYPE html
-PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html>
-    
+
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Summary Reports</title>
         <link rel="stylesheet" type="text/css" href="style.css" />
+        <c:choose>
+            <c:when test="${coll != null}">
+                <link rel="alternate" type="application/atom+xml"
+                      href="ViewSummary?rss=1&amp;collectionid=${coll.id}" title="RSS feed for  ${coll.name}"/>
+            </c:when>
+            <c:otherwise>
+                <link rel="alternate" type="application/atom+xml"
+                      href="ViewSummary?rss=1" title="RSS feed all collection"/>
+            </c:otherwise>
+        </c:choose>
+
+
         <script type="text/javascript">
             function toggleVisibility(id) {
                 var t = document.getElementById(id);
@@ -70,7 +82,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 color: #003388;
             }
             .expandspan a {
-                
+
                 font-size: xx-small;
                 color: #003388;
             }
@@ -110,8 +122,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                                                         <tr><td>${item.attribute}</td><td>${item.value}</td></tr>
                                                     </c:if>
                                                 </c:forEach> 
-                                        </table></fieldset>  
-                                </td></tr>
+                                            </table></fieldset>
+                                    </td></tr>
                             </table>
                         </div>
                     </li>
@@ -119,16 +131,16 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             </ul>
             <span class="expandspan" onclick="showAll();">Expand all</span> <span class="expandspan" onclick="showNone();">Collapse all</span> <span class="expandspan">
                 <c:choose>
-                <c:when test="${coll != null}">
-                    <a href="ViewSummary?collectionid=${coll.id}">Load All</a>
-                </c:when>
-                <c:otherwise>
-                    <a href="ViewSummary">Load All</a>
-                </c:otherwise>
-            </c:choose></span>
-            
+                    <c:when test="${coll != null}">
+                        <a href="ViewSummary?collectionid=${coll.id}">Load All</a>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="ViewSummary">Load All</a>
+                    </c:otherwise>
+                </c:choose></span>
+
         </div>
-        
+
         <jsp:include page="footer.jsp" />
     </body>
 </html>
