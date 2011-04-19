@@ -27,22 +27,23 @@
     </build>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <build.identifier>${project.version}</build.identifier>
     <project.license>umd</project.license>
   </properties>
 
-<repositories>
-  <repository>
-    <url>https://scm.umiacs.umd.edu/maven/adapt/content/repositories/releases/</url>
-    <id>adapt-sonatype</id>
-    <name>ADAPT Project Repository</name>
-  </repository>
-  <repository>
-    <url>http://ftp.ing.umu.se/mirror/eclipse/rt/eclipselink/maven.repo</url>
-    <id>eclipselink</id>
-    <layout>default</layout>
-    <name>Repository for library Library[eclipselink]</name>
-  </repository>
-</repositories>
+  <repositories>
+    <repository>
+      <url>https://scm.umiacs.umd.edu/maven/adapt/content/repositories/releases/</url>
+      <id>adapt-sonatype</id>
+      <name>ADAPT Project Repository</name>
+    </repository>
+    <repository>
+      <url>http://ftp.ing.umu.se/mirror/eclipse/rt/eclipselink/maven.repo</url>
+      <id>eclipselink</id>
+      <layout>default</layout>
+      <name>Repository for library Library[eclipselink]</name>
+    </repository>
+  </repositories>
 
   <dependencies>
     
@@ -53,6 +54,17 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <profiles>
+    <profile>
+       <id>hudson</id>
+       <activation>
+         <property><name>BUILD_NUMBER</name></property>
+       </activation>
+       <properties>
+         <build.identifier>${project.version}-${BUILD_NUMBER}-rev:${SVN_REVISION}</build.identifier>
+       </properties>
+    </profile>
+  </profiles>
   <modules>
     <module>ace-common</module>
     <module>ace-ims-ws</module>

@@ -5,5 +5,5 @@
    "http://www.w3.org/TR/html4/loose.dtd">
 
 <div class="footer">
-    Version ${project.version} &copy; 2010, University of Maryland Institute for Advanced Computer Studies.  All Rights Reserved. <a href="http://adapt.umiacs.umd.edu/ace">ACE Website</a>
+    Version ${build.identifier} &copy; 2011, University of Maryland Institute for Advanced Computer Studies.  All Rights Reserved. <a href="http://adapt.umiacs.umd.edu/ace">ACE Website</a>
 </div>
