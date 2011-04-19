@@ -69,7 +69,7 @@
          <property><name>BUILD_NUMBER</name></property>
        </activation>
        <properties>
-         <build.identifier>${project.version}-${BUILD_NUMBER}-rev:${SVN_REVISION}</build.identifier>
+         <build.identifier>${project.version} (hudson build:${BUILD_NUMBER} revision:${SVN_REVISION})</build.identifier>
        </properties>
     </profile>
   </profiles>
