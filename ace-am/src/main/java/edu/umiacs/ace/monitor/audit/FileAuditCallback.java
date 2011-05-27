@@ -117,7 +117,6 @@ public class FileAuditCallback implements RequestBatchCallback {
                             + item);
                 }
 
-
                 em.persist(token);
                 item.setFileDigest(map.get(tr.getName()));
                 item.setToken(token);

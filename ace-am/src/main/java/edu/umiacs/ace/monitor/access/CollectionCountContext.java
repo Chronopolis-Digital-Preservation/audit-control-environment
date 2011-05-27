@@ -57,6 +57,7 @@ import org.apache.log4j.NDC;
  */
 public class CollectionCountContext implements ServletContextListener {
 
+    public static final String CTX_STARTUP = "startup_complete";
     private static final Logger LOG = Logger.getLogger(
             CollectionCountContext.class);
     private static Map<Collection, Long> fileCountMap = new HashMap<Collection, Long>();
@@ -73,37 +74,44 @@ public class CollectionCountContext implements ServletContextListener {
     private static boolean abort = false;
 
     @Override
-    public void contextInitialized( ServletContextEvent arg0 ) {
+    public void contextInitialized(final ServletContextEvent arg0) {
         abort = false;
         Runnable r = new Runnable() {
 
             @Override
             public void run() {
-                Thread.currentThread().setName("Startup Count Thread");
-                NDC.push("[Count]");
-                lock.lock();
-                LOG.debug("Starting count for all collections");
                 try {
-                    EntityManager em = PersistUtil.getEntityManager();
-                    Query collQuery = em.createNamedQuery(
-                            "Collection.listAllCollections");
 
-                    for ( Object o : collQuery.getResultList() ) {
-                        if ( abort ) {
-                            LOG.info("Collection count aborting, tomcat probably shutting down");
-                            return;
+                    arg0.getServletContext().setAttribute(CTX_STARTUP, false);
+
+                    Thread.currentThread().setName("Startup Count Thread");
+                    NDC.push("[Count]");
+                    lock.lock();
+                    LOG.debug("Starting count for all collections");
+                    try {
+                        EntityManager em = PersistUtil.getEntityManager();
+                        Query collQuery = em.createNamedQuery(
+                                "Collection.listAllCollections");
+
+                        for (Object o : collQuery.getResultList()) {
+                            if (abort) {
+                                LOG.info("Collection count aborting, tomcat probably shutting down");
+                                return;
+                            }
+                            queryCollection((Collection) o);
                         }
-                        queryCollection((Collection) o);
+                        em.close();
+                    } catch (Exception e) {
+                        LOG.error("Error starting up, collection count", e);
+                    } finally {
+                        lock.unlock();
                     }
-                    em.close();
-                } catch ( Exception e ) {
-                    LOG.error("Error starting up, collection count", e);
-                } finally {
-                    lock.unlock();
-                }
 
-                LOG.debug("Finished startup count");
-                NDC.pop();
+                    LOG.debug("Finished startup count");
+                    NDC.pop();
+                } finally {
+                    arg0.getServletContext().setAttribute(CTX_STARTUP, true);
+                }
             }
         };
         new Thread(r).start();
@@ -112,76 +120,76 @@ public class CollectionCountContext implements ServletContextListener {
     }
 
     @Override
-    public void contextDestroyed( ServletContextEvent arg0 ) {
+    public void contextDestroyed(ServletContextEvent arg0) {
         abort = true;
     }
 
-    public static long getTokenMismatchCount( Collection c ) {
-        if ( fileTokenMismatchMap.containsKey(c) ) {
+    public static long getTokenMismatchCount(Collection c) {
+        if (fileTokenMismatchMap.containsKey(c)) {
             return fileTokenMismatchMap.get(c);
         }
         return -1;
     }
 
-    public static long getMissingTokenCount( Collection c ) {
-        if ( fileMissingTokenMap.containsKey(c) ) {
+    public static long getMissingTokenCount(Collection c) {
+        if (fileMissingTokenMap.containsKey(c)) {
             return fileMissingTokenMap.get(c);
         }
         return -1;
     }
 
-    public static long getMissingCount( Collection c ) {
-        if ( fileMissingMap.containsKey(c) ) {
+    public static long getMissingCount(Collection c) {
+        if (fileMissingMap.containsKey(c)) {
             return fileMissingMap.get(c);
         }
         return -1;
     }
 
-    public static long getCorruptCount( Collection c ) {
-        if ( fileCorruptMap.containsKey(c) ) {
+    public static long getCorruptCount(Collection c) {
+        if (fileCorruptMap.containsKey(c)) {
             return fileCorruptMap.get(c);
         }
         return -1;
 
     }
 
-    public static long getActiveCount( Collection c ) {
-        if ( fileActiveMap.containsKey(c) ) {
+    public static long getActiveCount(Collection c) {
+        if (fileActiveMap.containsKey(c)) {
             return fileActiveMap.get(c);
         }
         return -1;
     }
 
-    public static long getTotalErrors( Collection c ) {
-        if ( totalErrorMap.containsKey(c) ) {
+    public static long getTotalErrors(Collection c) {
+        if (totalErrorMap.containsKey(c)) {
             return totalErrorMap.get(c);
         }
         return -1;
     }
 
-    public static long getFileCount( Collection c ) {
-        if ( fileCountMap.containsKey(c) ) {
+    public static long getFileCount(Collection c) {
+        if (fileCountMap.containsKey(c)) {
             return fileCountMap.get(c);
         }
         return -1;
     }
 
-    public static long getTotelSize( Collection c ) {
-        if ( totalSizeMap.containsKey(c) ) {
+    public static long getTotelSize(Collection c) {
+        if (totalSizeMap.containsKey(c)) {
             return totalSizeMap.get(c);
         }
         return -1;
     }
 
-    public static long getRemoteMissing( Collection c ) {
-        if ( fileRemoteMissing.containsKey(c) ) {
+    public static long getRemoteMissing(Collection c) {
+        if (fileRemoteMissing.containsKey(c)) {
             return fileRemoteMissing.get(c);
         }
         return -1;
     }
 
-    public static long getRemoteCorrupt( Collection c ) {
-        if ( fileRemoteCorrupt.containsKey(c) ) {
+    public static long getRemoteCorrupt(Collection c) {
+        if (fileRemoteCorrupt.containsKey(c)) {
             return fileRemoteCorrupt.get(c);
         }
         return -1;
@@ -192,7 +200,7 @@ public class CollectionCountContext implements ServletContextListener {
      * 
      * @param c
      */
-    private static void queryCollection( Collection c ) {
+    private static void queryCollection(Collection c) {
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -210,16 +218,17 @@ public class CollectionCountContext implements ServletContextListener {
             long total = 0;
             long totalErrors = 0;
 
-            while ( rs.next() ) {
-                if (abort)
+            while (rs.next()) {
+                if (abort) {
                     return;
+                }
                 char state = rs.getString(1).charAt(0);
                 long count = rs.getLong(2);
 
                 total += count;
 
 
-                switch ( state ) {
+                switch (state) {
                     case 'A':
                         fileActiveMap.put(c, count);
                         break;
@@ -267,7 +276,7 @@ public class CollectionCountContext implements ServletContextListener {
             long totalSize = rs.getLong(1);
             totalSizeMap.put(c, totalSize);
 
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             LOG.error("Error starting up, collection count", e);
         } finally {
             SQL.release(rs);
@@ -278,7 +287,7 @@ public class CollectionCountContext implements ServletContextListener {
         }
     }
 
-    public static void updateCollection( final Collection c ) {
+    public static void updateCollection(final Collection c) {
         LOG.debug("Starting update for: " + c.getName());
         Runnable r = new Runnable() {
 

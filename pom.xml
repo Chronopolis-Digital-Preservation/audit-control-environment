@@ -79,6 +79,7 @@
     <module>ace-ims-api</module>
     <module>ace-am</module>
     <module>ace-dist</module>
+    <module>audit-core</module>
   </modules>
 
     <!--<reporting>

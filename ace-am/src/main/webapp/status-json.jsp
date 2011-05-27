@@ -2,6 +2,7 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%> 
 <%@page contentType="text/plain" pageEncoding="UTF-8"%>
 <json:object>
+    <json:property name="startup_complete" value="${startup_complete}"/>
     <json:property name="paused" value="${pause.paused}"/>
     <json:array name="collections" items="${collections}" var="item">
         <json:object>
