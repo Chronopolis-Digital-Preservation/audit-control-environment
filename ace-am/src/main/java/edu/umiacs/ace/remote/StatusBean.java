@@ -28,7 +28,6 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-
 package edu.umiacs.ace.remote;
 
 import edu.umiacs.util.Argument;
@@ -45,6 +44,16 @@ public class StatusBean implements Serializable {
 
     private List<CollectionBean> collections;
     private boolean paused;
+    private boolean startup_complete;
+
+    public boolean isStartup_complete() {
+        return startup_complete;
+    }
+
+    @JsonUseDeserializer(CustomBooleanDeserializer.class)
+    public void setStartup_complete(boolean startup_complete) {
+        this.startup_complete = startup_complete;
+    }
 
     /**
      * @return the collections
@@ -60,12 +69,12 @@ public class StatusBean implements Serializable {
     /**
      * @param collections the collections to set
      */
-    public void setCollections( List<CollectionBean> collections ) {
+    public void setCollections(List<CollectionBean> collections) {
         this.collections = collections;
     }
 
     @JsonUseDeserializer(CustomBooleanDeserializer.class)
-    public void setPaused( boolean paused ) {
+    public void setPaused(boolean paused) {
         this.paused = paused;
     }
 
@@ -106,7 +115,7 @@ public class StatusBean implements Serializable {
         /**
          * @param id the id to set
          */
-        public void setId( long id ) {
+        public void setId(long id) {
             this.id = id;
         }
 
@@ -114,7 +123,7 @@ public class StatusBean implements Serializable {
             return totalSize;
         }
 
-        public void setTotalSize( long totalSize ) {
+        public void setTotalSize(long totalSize) {
             this.totalSize = totalSize;
         }
 
@@ -128,7 +137,7 @@ public class StatusBean implements Serializable {
         /**
          * @param name the name to set
          */
-        public void setName( String name ) {
+        public void setName(String name) {
             this.name = name;
         }
 
@@ -142,7 +151,7 @@ public class StatusBean implements Serializable {
         /**
          * @param group the group to set
          */
-        public void setGroup( String group ) {
+        public void setGroup(String group) {
             this.group = group;
         }
 
@@ -156,7 +165,7 @@ public class StatusBean implements Serializable {
         /**
          * @param directory the directory to set
          */
-        public void setDirectory( String directory ) {
+        public void setDirectory(String directory) {
             this.directory = directory;
         }
 
@@ -171,7 +180,7 @@ public class StatusBean implements Serializable {
          * @param lastSync the lastSync to set
          */
         @JsonUseDeserializer(CustomDateDeserializer.class)
-        public void setLastSync( Date lastSync ) {
+        public void setLastSync(Date lastSync) {
             this.lastSync = Argument.dateClone(lastSync);
         }
 
@@ -185,7 +194,7 @@ public class StatusBean implements Serializable {
         /**
          * @param storage the storage to set
          */
-        public void setStorage( String storage ) {
+        public void setStorage(String storage) {
             this.storage = storage;
         }
 
@@ -199,7 +208,7 @@ public class StatusBean implements Serializable {
         /**
          * @param checkPeriod the checkPeriod to set
          */
-        public void setCheckPeriod( int checkPeriod ) {
+        public void setCheckPeriod(int checkPeriod) {
             this.checkPeriod = checkPeriod;
         }
 
@@ -213,7 +222,7 @@ public class StatusBean implements Serializable {
         /**
          * @param proxyData the proxyData to set
          */
-        public void setProxyData( boolean proxyData ) {
+        public void setProxyData(boolean proxyData) {
             this.proxyData = proxyData;
         }
 
@@ -227,7 +236,7 @@ public class StatusBean implements Serializable {
         /**
          * @param auditTokens the auditTokens to set
          */
-        public void setAuditTokens( boolean auditTokens ) {
+        public void setAuditTokens(boolean auditTokens) {
             this.auditTokens = auditTokens;
         }
 
@@ -241,7 +250,7 @@ public class StatusBean implements Serializable {
         /**
          * @param state the state to set
          */
-        public void setState( char state ) {
+        public void setState(char state) {
             this.state = state;
         }
 
@@ -255,7 +264,7 @@ public class StatusBean implements Serializable {
         /**
          * @param totalFiles the totalFiles to set
          */
-        public void setTotalFiles( long totalFiles ) {
+        public void setTotalFiles(long totalFiles) {
             this.totalFiles = totalFiles;
         }
 
@@ -269,7 +278,7 @@ public class StatusBean implements Serializable {
         /**
          * @param fileAuditRunning the fileAuditRunning to set
          */
-        public void setFileAuditRunning( boolean fileAuditRunning ) {
+        public void setFileAuditRunning(boolean fileAuditRunning) {
             this.fileAuditRunning = fileAuditRunning;
         }
 
@@ -283,7 +292,7 @@ public class StatusBean implements Serializable {
         /**
          * @param tokenAuditRunning the tokenAuditRunning to set
          */
-        public void setTokenAuditRunning( boolean tokenAuditRunning ) {
+        public void setTokenAuditRunning(boolean tokenAuditRunning) {
             this.tokenAuditRunning = tokenAuditRunning;
         }
 
@@ -291,7 +300,7 @@ public class StatusBean implements Serializable {
             return fileAudit;
         }
 
-        public void setFileAudit( FileAudit fileAudit ) {
+        public void setFileAudit(FileAudit fileAudit) {
             this.fileAudit = fileAudit;
         }
 
@@ -299,7 +308,7 @@ public class StatusBean implements Serializable {
             return tokenAudit;
         }
 
-        public void setTokenAudit( TokenAudit tokenAudit ) {
+        public void setTokenAudit(TokenAudit tokenAudit) {
             this.tokenAudit = tokenAudit;
         }
 
@@ -313,7 +322,7 @@ public class StatusBean implements Serializable {
         /**
          * @param totalErrors the totalErrors to set
          */
-        public void setTotalErrors( long totalErrors ) {
+        public void setTotalErrors(long totalErrors) {
             this.totalErrors = totalErrors;
         }
 
@@ -327,7 +336,7 @@ public class StatusBean implements Serializable {
         /**
          * @param missingTokens the missingTokens to set
          */
-        public void setMissingTokens( long missingTokens ) {
+        public void setMissingTokens(long missingTokens) {
             this.missingTokens = missingTokens;
         }
 
@@ -341,7 +350,7 @@ public class StatusBean implements Serializable {
         /**
          * @param missingFiles the missingFiles to set
          */
-        public void setMissingFiles( long missingFiles ) {
+        public void setMissingFiles(long missingFiles) {
             this.missingFiles = missingFiles;
         }
 
@@ -355,7 +364,7 @@ public class StatusBean implements Serializable {
         /**
          * @param activeFiles the activeFiles to set
          */
-        public void setActiveFiles( long activeFiles ) {
+        public void setActiveFiles(long activeFiles) {
             this.activeFiles = activeFiles;
         }
 
@@ -369,7 +378,7 @@ public class StatusBean implements Serializable {
         /**
          * @param corruptFiles the corruptFiles to set
          */
-        public void setCorruptFiles( long corruptFiles ) {
+        public void setCorruptFiles(long corruptFiles) {
             this.corruptFiles = corruptFiles;
         }
 
@@ -383,7 +392,7 @@ public class StatusBean implements Serializable {
         /**
          * @param invalidDigests the invalidDigests to set
          */
-        public void setInvalidDigests( long invalidDigests ) {
+        public void setInvalidDigests(long invalidDigests) {
             this.invalidDigests = invalidDigests;
         }
 
@@ -397,7 +406,7 @@ public class StatusBean implements Serializable {
         /**
          * @param remoteMissing the remoteMissing to set
          */
-        public void setRemoteMissing( long remoteMissing ) {
+        public void setRemoteMissing(long remoteMissing) {
             this.remoteMissing = remoteMissing;
         }
 
@@ -411,7 +420,7 @@ public class StatusBean implements Serializable {
         /**
          * @param remoteCorrupt the remoteCorrupt to set
          */
-        public void setRemoteCorrupt( long remoteCorrupt ) {
+        public void setRemoteCorrupt(long remoteCorrupt) {
             this.remoteCorrupt = remoteCorrupt;
         }
 
@@ -434,7 +443,7 @@ public class StatusBean implements Serializable {
             /**
              * @param totalErrors the totalErrors to set
              */
-            public void setTotalErrors( long totalErrors ) {
+            public void setTotalErrors(long totalErrors) {
                 this.totalErrors = totalErrors;
             }
 
@@ -448,7 +457,7 @@ public class StatusBean implements Serializable {
             /**
              * @param newFilesFounr the newFilesFounr to set
              */
-            public void setNewFilesFound( long newFilesFounr ) {
+            public void setNewFilesFound(long newFilesFounr) {
                 this.newFilesFound = newFilesFounr;
             }
 
@@ -462,7 +471,7 @@ public class StatusBean implements Serializable {
             /**
              * @param filesSeen the filesSeen to set
              */
-            public void setFilesSeen( long filesSeen ) {
+            public void setFilesSeen(long filesSeen) {
                 this.filesSeen = filesSeen;
             }
 
@@ -476,11 +485,11 @@ public class StatusBean implements Serializable {
             /**
              * @param tokensAdded the tokensAdded to set
              */
-            public void setTokensAdded( long tokensAdded ) {
+            public void setTokensAdded(long tokensAdded) {
                 this.tokensAdded = tokensAdded;
             }
 
-            public void setLastFileSeen( String lastFileSeen ) {
+            public void setLastFileSeen(String lastFileSeen) {
                 this.lastFileSeen = lastFileSeen;
             }
 
@@ -506,7 +515,7 @@ public class StatusBean implements Serializable {
             /**
              * @param totalErrors the totalErrors to set
              */
-            public void setTotalErrors( long totalErrors ) {
+            public void setTotalErrors(long totalErrors) {
                 this.totalErrors = totalErrors;
             }
 
@@ -520,7 +529,7 @@ public class StatusBean implements Serializable {
             /**
              * @param tokensSeen the tokensSeen to set
              */
-            public void setTokensSeen( long tokensSeen ) {
+            public void setTokensSeen(long tokensSeen) {
                 this.tokensSeen = tokensSeen;
             }
 
@@ -534,7 +543,7 @@ public class StatusBean implements Serializable {
             /**
              * @param validTokens the validTokens to set
              */
-            public void setValidTokens( long validTokens ) {
+            public void setValidTokens(long validTokens) {
                 this.validTokens = validTokens;
             }
         }
