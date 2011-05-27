@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>edu.umiacs.ace</groupId>
-  <artifactId>ace</artifactId>
-  <version>1.7-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <scm>
-    <connection>scm:svn:https://subversion.umiacs.umd.edu/ace/trunk</connection>
-  </scm>
+    <groupId>edu.umiacs.ace</groupId>
+    <artifactId>ace</artifactId>
+    <version>1.7-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <scm>
+        <connection>scm:svn:https://subversion.umiacs.umd.edu/ace/trunk</connection>
+    </scm>
 
-  <name>ace</name>
-  <url>http://adapt.umiacs.umd.edu/ace</url>
+    <name>ace</name>
+    <url>http://adapt.umiacs.umd.edu/ace</url>
     <build>
         <plugins>
             <plugin>
@@ -25,62 +25,68 @@
             </plugin>
         </plugins>
     </build>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.license>umd</project.license>
-  </properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.license>umd</project.license>
+    </properties>
 
-  <repositories>
-    <repository>
-      <url>https://scm.umiacs.umd.edu/maven/adapt/content/repositories/releases/</url>
-      <id>adapt-sonatype</id>
-      <name>ADAPT Project Repository</name>
-    </repository>
-    <repository>
-      <url>http://ftp.ing.umu.se/mirror/eclipse/rt/eclipselink/maven.repo</url>
-      <id>eclipselink</id>
-      <layout>default</layout>
-      <name>Repository for library Library[eclipselink]</name>
-    </repository>
-  </repositories>
+    <repositories>
+        <repository>
+            <url>https://scm.umiacs.umd.edu/maven/adapt/content/repositories/releases/</url>
+            <id>adapt-sonatype</id>
+            <name>ADAPT Project Repository</name>
+        </repository>
+        <repository>
+            <url>http://ftp.ing.umu.se/mirror/eclipse/rt/eclipselink/maven.repo</url>
+            <id>eclipselink</id>
+            <layout>default</layout>
+            <name>Repository for library Library[eclipselink]</name>
+        </repository>
+    </repositories>
 
-  <dependencies>
-    
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-  <profiles>
-    <profile>
-       <id>default</id>
-       <activation>
-         <activeByDefault>true</activeByDefault>
-       </activation>
-       <properties>
-         <build.identifier>${project.version}</build.identifier>
-       </properties>
-    </profile>
-    <profile>
-       <id>hudson</id>
-       <activation>
-         <property><name>BUILD_NUMBER</name></property>
-       </activation>
-       <properties>
-         <build.identifier>${project.version} (hudson build:${BUILD_NUMBER} revision:${SVN_REVISION})</build.identifier>
-       </properties>
-    </profile>
-  </profiles>
-  <modules>
-    <module>ace-common</module>
-    <module>ace-ims-ws</module>
-    <module>ace-ims-api</module>
-    <module>ace-am</module>
-    <module>ace-dist</module>
-    <module>audit-core</module>
-  </modules>
+    <dependencies>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <build.identifier>${project.version}</build.identifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>hudson</id>
+            <activation>
+                <property>
+                    <name>BUILD_NUMBER</name>
+                </property>
+            </activation>
+            <properties>
+                <build.identifier>${project.version} (hudson build:${BUILD_NUMBER} revision:${SVN_REVISION})</build.identifier>
+            </properties>
+        </profile>
+    </profiles>
+    <modules>
+        <module>ace-common</module>
+        <module>ace-ims-ws</module>
+        <module>ace-ims-api</module>
+        <module>ace-am</module>
+        <module>ace-dist</module>
+        <module>audit-core</module>
+    </modules>
 
     <!--<reporting>
         <plugins>

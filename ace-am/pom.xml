@@ -54,7 +54,7 @@
         </dependency>
 
 
-                <dependency>
+        <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>catalina</artifactId>
             <version>6.0.32</version>
@@ -73,14 +73,11 @@
             <version>2.0.3</version>
         </dependency>
 
-
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
             <version>1.4.1</version>
         </dependency>
-
-
 
         <!-- for json -->
         <dependency>

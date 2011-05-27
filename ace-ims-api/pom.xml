@@ -16,11 +16,7 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.16</version>
-    </dependency>
+    
 
     <dependency>
       <groupId>edu.umiacs.ace</groupId>
@@ -31,13 +27,6 @@
       <groupId>edu.umiacs.ace</groupId>
       <artifactId>ace-common</artifactId>
       <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
     </dependency>
 
   </dependencies>
