@@ -581,7 +581,7 @@ public class CollectionCompare {
                 if ( line == null ) {
                     return null;
                 }
-                String[] tokens = line.split("\t");
+                String[] tokens = line.split("\\s+");
                 return tokens;
 
             } catch ( IOException e ) {
