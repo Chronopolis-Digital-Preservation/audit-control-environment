@@ -154,12 +154,13 @@ public class CompareServlet extends EntityManagerServlet {
                     LOG.debug(
                             "item " + monItem + " filter " + inputFilter + " loading attached file");
 
-                    CollectionCompare cc = new CollectionCompare(
+                    CollectionCompare2 cc = new CollectionCompare2(
                             item.openStream(), inputFilter);
-                    Thread t = new Thread(new TableCompareRunnable(cc, c,
+                    CompareResults cr = new CompareResults(cc);
+                    Thread t = new Thread(new TableCompareRunnable(cr,cc, c,
                             monItem), "Compare Thread " + c.getName());
                     t.start();
-                    session.setAttribute(PAGE_RESULTS, cc);
+                    session.setAttribute(PAGE_RESULTS, cr);
                 }
             }
 
@@ -169,13 +170,15 @@ public class CompareServlet extends EntityManagerServlet {
             // we have no attached file, load remote
             if ( !fileAttached && partner != null && remoteCollection > 0 ) {
                 LOG.debug("Remote digest request " + partner.getRemoteURL());
-                CollectionCompare cc = new CollectionCompare(
+                CollectionCompare2 cc = new CollectionCompare2(
                         JsonGateway.getGateway().getDigestList(partner,
                         remoteCollection), inputFilter);
-                Thread t = new Thread(new TableCompareRunnable(cc, c,
+                                    CompareResults cr = new CompareResults(cc);
+
+                Thread t = new Thread(new TableCompareRunnable(cr,cc, c,
                         monItem), "Compare Thread " + c.getName());
                 t.start();
-                session.setAttribute(PAGE_RESULTS, cc);
+                session.setAttribute(PAGE_RESULTS, cr);
             }
         } catch ( FileUploadException ful ) {
             throw new ServletException(ful);
@@ -188,12 +191,14 @@ public class CompareServlet extends EntityManagerServlet {
 
     static class TableCompareRunnable implements Runnable {
 
-        private CollectionCompare cc;
+        private CollectionCompare2 cc;
         private Collection c;
         private MonitoredItem baseItem;
+        private CompareResults cr;
 
-        private TableCompareRunnable( CollectionCompare cc, Collection c,
+        private TableCompareRunnable( CompareResults cr,CollectionCompare2 cc, Collection c,
                 MonitoredItem baseItem ) {
+            this.cr = cr;
             this.cc = cc;
             this.c = c;
             this.baseItem = baseItem;
@@ -202,12 +207,13 @@ public class CompareServlet extends EntityManagerServlet {
         @Override
         public void run() {
             try {
-                cc.loadCollectionTable(c, baseItem);
-                cc.doCompare();
-                cc.getUnseenTargetFiles();
-                cc.getUnseenSuppliedFiles();
+                cc.compareTo(cr,c, baseItem);
+//                cc.loadCollectionTable(c, baseItem);
+//                cc.doCompare();
+//                cc.getUnseenTargetFiles();
+//                cc.getUnseenSuppliedFiles();
             } finally {
-                cc.cleanup();
+//                cc.cleanup();
             }
         }
     }

@@ -82,6 +82,8 @@ import javax.persistence.TemporalType;
     "SELECT m.parentCollection, count(m) FROM MonitoredItem m WHERE m.directory = false GROUP BY m.parentCollection"),
     @NamedQuery(name = "MonitoresItem.countFilesInCollection", query =
     "SELECT count(m) FROM MonitoredItem m WHERE m.directory = false AND m.parentCollection = :coll"),
+    @NamedQuery(name = "MonitoredItem.listFilesInCollection", query =
+    "SELECT m FROM MonitoredItem m WHERE m.directory = false AND m.parentCollection = :coll"),
     @NamedQuery(name = "MonitoresItem.countDirectoriesInAllCollections", query =
     "SELECT m.parentCollection, count(m) FROM MonitoredItem m WHERE m.directory = true GROUP BY m.parentCollection"),
     @NamedQuery(name = "MonitoresItem.countDirectoriesCollection", query =
