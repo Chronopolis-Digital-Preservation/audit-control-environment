@@ -42,8 +42,9 @@ import edu.umiacs.ace.ims.api.TokenValidator;
 import edu.umiacs.ace.ims.ws.TokenRequest;
 import edu.umiacs.ace.monitor.access.CollectionCountContext;
 import edu.umiacs.ace.util.PersistUtil;
-import edu.umiacs.ace.monitor.compare.CollectionCompare;
 import edu.umiacs.ace.driver.filter.SimpleFilter;
+import edu.umiacs.ace.monitor.compare.CollectionCompare2;
+import edu.umiacs.ace.monitor.compare.CompareResults;
 import edu.umiacs.ace.remote.JsonGateway;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.MonitoredItemManager;
@@ -738,12 +739,14 @@ public final class AuditThread extends Thread implements CancelCallback {
                         getRemoteURL());
                 continue;
             }
-            CollectionCompare cc = new CollectionCompare(digestStream, null);
+            CollectionCompare2 cc = new CollectionCompare2(digestStream, null);
             LOG.trace("Starting remote compare for " + pc.getSite());
 
             try {
-                cc.loadCollectionTable(coll, null);
-                cc.doCompare();
+                CompareResults cr = new CompareResults(cc);
+                cc.compareTo(cr, coll, null);
+//                cc.loadCollectionTable(coll, null);
+//                cc.doCompare();
                 // For now, we don't care about files that only exist remotely
 //                cc.getUnseenTargetFiles();
                 // State: P, only set if file is currently active as local errors
@@ -752,7 +755,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                 mim = new MonitoredItemManager(em);
 //                LogEventManager lem = new LogEventManager(em, session);
 
-                for (String unseenFile : cc.getUnseenTargetFiles()) {
+                for (String unseenFile : cr.getUnseenTargetFiles()) {
                     LOG.trace("Item missing at remote "
                             + unseenFile + " " + pc.getSite());
                     MonitoredItem mi = mim.getItemByPath(unseenFile, coll);
@@ -772,7 +775,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                     }
                 }
                 // State: D
-                for (CollectionCompare.DifferingDigest dd : cc.getDifferingDigests()) {
+                for (CompareResults.DifferingDigest dd : cr.getDifferingDigests()) {
                     MonitoredItem mi = mim.getItemByPath(dd.getName(), coll);
                     currentErrors.remove(mi);
                     if (mi.getState() == 'A') {
@@ -800,7 +803,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                     em.close();
                     em = null;
                 }
-                cc.cleanup();
+//                cc.cleanup();
             }
         }
         // Any files remaining in currentErrors should transition back
