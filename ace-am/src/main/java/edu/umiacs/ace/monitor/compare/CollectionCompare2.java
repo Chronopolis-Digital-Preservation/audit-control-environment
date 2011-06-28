@@ -98,7 +98,7 @@ public final class CollectionCompare2 {
                     cr.fileExistsAtTarget(acePath);
 
                     if (sourceMap.get(acePath).matches(aceDigest)) {
-//Perfect file, 
+//Perfect file, no-op
                     } else {
                         cr.mismatchedDigests(acePath, sourceMap.get(acePath), aceDigest);
                     }
@@ -126,6 +126,7 @@ public final class CollectionCompare2 {
         BufferedReader input = new BufferedReader(new InputStreamReader(sourceFile));
         String line = input.readLine();
 
+        // ignore ace manifest header
         if (line != null && line.matches("^[A-Z0-9\\-]+:.+$")) {
             line = input.readLine();
         }
@@ -136,8 +137,12 @@ public final class CollectionCompare2 {
                 LOG.error("Error processing line: " + line);
                 parseErrors.add("Corrupt Line: " + line);
             } else {
-                sourceMap.put(tokens[1], tokens[0]);
-                sourceReverseMap.put(tokens[0], tokens[1]);
+                String path = tokens[1];
+                // temp hack to make sure all paths start w/ / as ace expectes
+                if (!path.startsWith("/"))
+                    path = "/" + path;
+                sourceMap.put(path, tokens[0]);
+                sourceReverseMap.put(tokens[0], path);
             }
             line = input.readLine();
         }
