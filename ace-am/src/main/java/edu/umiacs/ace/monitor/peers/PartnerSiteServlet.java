@@ -91,7 +91,7 @@ public final class PartnerSiteServlet extends EntityManagerServlet {
             EntityTransaction et = em.getTransaction();
             et.begin();
             Query q = em.createNamedQuery("PeerCollection.deleteByPeerSite");
-            q.setParameter("sire", partner);
+            q.setParameter("site", partner);
             q.executeUpdate();
             em.remove(partner);
 
