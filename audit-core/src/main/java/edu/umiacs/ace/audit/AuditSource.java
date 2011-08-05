@@ -4,6 +4,9 @@
  */
 package edu.umiacs.ace.audit;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  *
  * @author toaster
@@ -11,14 +14,9 @@ package edu.umiacs.ace.audit;
 public abstract class AuditSource {
 
     private long lastTake = 0;
-    private int processingTasks = 0;
+//    private int processingTasks = 0;
     private Policy auditPolicy;
     private boolean aborted;
-
-
-    protected abstract AuditItem loadNext();
-    protected abstract boolean moreItems();
-
 
     public Policy getAuditPolicy() {
         return auditPolicy;
@@ -34,15 +32,18 @@ public abstract class AuditSource {
     }
 
     /**
-     * 
-     * @return next item or null if none
+     * Immediately return next item.
+     *
+     * @return next item or null if nothing is immediately available
      */
-    public AuditItem nextItem() {
-        if (!hasNext()) {
-            return null;
+    public final AuditItem nextItem() {
+
+        AuditItem next = getNext();
+
+        if (next != null) {
+            lastTake = System.currentTimeMillis();
         }
-        lastTake = System.currentTimeMillis();
-        return loadNext();
+        return next;
     }
 
     /**
@@ -51,31 +52,21 @@ public abstract class AuditSource {
      * 
      * @return
      */
-    public long getLastTake() {
+    public final long getLastTake() {
         return lastTake;
     }
 
     /**
      * Tell all items from this source to immediately stop processing.
      */
-    public final void abort()
-    {
+    public final void abort() {
         aborted = true;
         notifyAbort();
-    }
-    /**
-     * No-op method. Implementers may override to receive 
-     * 
-     */
-    protected void notifyAbort()
-    {
-
     }
 
     public final boolean isAborted() {
         return aborted;
     }
-
 
     /**
      * Determine if any more items will ever be available from this queue.
@@ -83,12 +74,57 @@ public abstract class AuditSource {
      * 
      * @return false if aborted or driver has no more items, true otherwise
      */
-    public final boolean hasNext()
-    {
-        if (aborted)
+    public final boolean hasNext() {
+        if (aborted) {
             return false;
-        return moreItems();
+        }
+        return !finished();
 
+    }
+
+    /**
+     *
+     * @return true if driver has exhausted all items and will never return more
+     */
+    protected abstract boolean finished();
+
+    /**
+     * Return next immediately available item. If this call will block, implementers
+     * should override available and queueNext to allow for background loading
+     * 
+     * @return next immediately available item or null if none available.
+     */
+    public abstract AuditItem getNext();
+
+    /**
+     * No-op method. Implementers may override to receive notification of
+     * an abort
+     *
+     */
+    protected void notifyAbort() {
+    }
+
+    /**
+     * For long running audits, this should load the next item(s). This will be
+     * called in a separate thread from the thread calling hasNext. Requesters may
+     * hint at a preferred number of items to load. Overriding methods may ignore
+     * the preferred request.
+     * 
+     * Default implementation is a no-op.
+     * @param auditPolicy preferred items that should be available after this completes
+     */
+    public void queueNext(int preferred) {
+    }
+
+    /**
+     * Return how many items are currently available. This is used to determine
+     * if a background request to queueNext is required. Default implementation
+     * returns -1. If you have long-running metadata listings, you should override
+     *
+     * @return items immediately available or -1 if items are always available.
+     */
+    public int available() {
+        return -1;
     }
 
     /**

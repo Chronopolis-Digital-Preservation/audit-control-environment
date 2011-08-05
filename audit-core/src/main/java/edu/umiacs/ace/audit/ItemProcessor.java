@@ -5,6 +5,9 @@
 
 package edu.umiacs.ace.audit;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  *
  * @author toaster
@@ -12,13 +15,32 @@ package edu.umiacs.ace.audit;
 public class ItemProcessor implements Runnable{
 
     private AuditItem ai;
+    private AuditQueue parent;
 
-    public ItemProcessor(AuditItem ai) {
+    public ItemProcessor(AuditItem ai,AuditQueue parent) {
         this.ai = ai;
+        this.parent = parent;
     }
 
     public void run() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try
+        {
+        InputStream is = ai.openStream();
+        
+
+        }
+        catch (IOException e)
+        {
+            
+        }
+        catch (Throwable t)
+        {
+            
+        }
+        finally
+        {
+            parent.notifyItemEnd(ai);
+        }
     }
 
 

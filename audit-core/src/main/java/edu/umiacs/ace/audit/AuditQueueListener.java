@@ -9,8 +9,8 @@ package edu.umiacs.ace.audit;
  *
  * @author toaster
  */
-public interface AuditItemListener {
+public interface AuditQueueListener {
 
-    public void startItem(AuditItem item);
-    public void endItem(AuditItem item);
+    public void sourceStart(AuditSource as);
+    public void sourceFinish(AuditSource as);
 }

@@ -36,12 +36,17 @@ import edu.umiacs.util.Argument;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -80,14 +85,15 @@ public class Collection implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastSync;
     private String storage;
-    private int checkPeriod;
-    private boolean proxyData;
-    private boolean auditTokens;
     private char state;
     @Column(name = "COLGROUP")
     private String group;
-    private String emailList;
     private String digestAlgorithm;
+    @ElementCollection
+    @CollectionTable(name="settings", joinColumns=@JoinColumn(name="COLLECTION_ID"))
+    @MapKeyColumn(name="ATTR")
+    @Column(name="VALUE")
+    private Map<String,String> settings;
 
     public void setId( Long id ) {
         this.id = id;
@@ -97,6 +103,13 @@ public class Collection implements Serializable {
         return id;
     }
 
+    public Map<String, String> getSettings() {
+        return settings;
+    }
+
+    public void setSettings(Map<String, String> settings) {
+        this.settings = settings;
+    }
     public void setPeerCollections( List<PeerCollection> peerCollections ) {
         this.peerCollections = peerCollections;
     }
@@ -179,30 +192,6 @@ public class Collection implements Serializable {
         this.storage = storage;
     }
 
-    public int getCheckPeriod() {
-        return checkPeriod;
-    }
-
-    public void setCheckPeriod( int checkPeriod ) {
-        this.checkPeriod = checkPeriod;
-    }
-
-    public boolean isProxyData() {
-        return proxyData;
-    }
-
-    public void setProxyData( boolean proxyData ) {
-        this.proxyData = proxyData;
-    }
-
-    public void setAuditTokens( boolean auditTokens ) {
-        this.auditTokens = auditTokens;
-    }
-
-    public boolean isAuditTokens() {
-        return auditTokens;
-    }
-
     public String getGroup() {
         return group;
     }
@@ -211,11 +200,4 @@ public class Collection implements Serializable {
         this.group = group;
     }
 
-    public String getEmailList() {
-        return emailList;
-    }
-
-    public void setEmailList( String emailList ) {
-        this.emailList = emailList;
-    }
 }

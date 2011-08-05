@@ -210,16 +210,16 @@
                             <c:when test="${item.fileAuditRunning || item.tokenAuditRunning}">
                                 In Progress
                             </c:when>
-                            <c:when test="${item.collection.lastSync == null || item.collection.checkPeriod < 1 || pause.paused}">
+                            <c:when test="${item.collection.lastSync == null || item.collection.settings['audit.period'] < 1 || pause.paused}">
                                 Unknown
                             </c:when>
-                            <c:when test="${today.time > (item.collection.lastSync.time + item.collection.checkPeriod * 1000 * 60 * 60 * 24)}">
+                            <c:when test="${today.time > (item.collection.lastSync.time + item.collection.settings['audit.period'] * 1000 * 60 * 60 * 24)}">
                                 <span style="color: red; font-weight: bold">
-                                    <d:DateAdd date="${item.collection.lastSync}" format="MMM dd yyyy" period="${item.collection.checkPeriod}"/>
+                                    <d:DateAdd date="${item.collection.lastSync}" format="MMM dd yyyy" period="${item.collection.settings['audit.period']}"/>
                                 </span>
                             </c:when>
                             <c:otherwise>
-                                <d:DateAdd date="${item.collection.lastSync}" format="MMM dd yyyy" period="${item.collection.checkPeriod}"/>
+                                <d:DateAdd date="${item.collection.lastSync}" format="MMM dd yyyy" period="${item.collection.settings['audit.period']}"/>
                             </c:otherwise>
                         </c:choose>
                     </td>

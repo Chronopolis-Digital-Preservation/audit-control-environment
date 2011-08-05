@@ -32,11 +32,13 @@
 package edu.umiacs.ace.remote;
 
 import java.util.List;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  *
  * @author toaster
  */
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class ParentChildBean {
 
     private AceItem parent;

@@ -34,6 +34,7 @@ package edu.umiacs.ace.monitor.reporting;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Properties;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -140,7 +141,7 @@ public class SchedulerContextListener implements ServletContextListener {
         }
     }
 
-    public static final void mailReport( ReportSummary report, String[] mailList )
+    public static void mailReport( ReportSummary report, String[] mailList )
             throws MessagingException {
         if ( report == null || mailList == null || mailList.length == 0 ) {
             return;
@@ -173,6 +174,7 @@ public class SchedulerContextListener implements ServletContextListener {
         msg.setSubject("Ace Report: " + report.getReportName());
         msg.setContent(report.createReport(), "text/plain");
         Transport.send(msg);
+        LOG.trace("Successfully mailed report to: " + Strings.join(',', mailList));
 
     }
 }

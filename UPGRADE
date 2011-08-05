@@ -22,6 +22,19 @@
 Notes for specific versions.
  - if updating from versions prior to 1.6, see the 1.6 notes.
 
+1.7
+ ACE 1.7 changed how collections are stored. This will require a a migration
+to run prior to ace starting up. You MUST install the 1.6-1.7 patch prior
+to running ace 1.7. Failure to install the sql patch will result in ace not
+starting. This update should take less than a second and you will see log
+lines that look similar to:
+[05/Aug/2011:12:46:36] [SETTINGS]Found new settings table
+[05/Aug/2011:12:46:36] [SETTINGS]Found old column name, migration triggered
+...
+...
+[05/Aug/2011:12:46:38] [SETTINGS]Settings migration successfully finished
+
+
 1.6
  The 1.6 version changed how the ACE tokens are stored in the database.
 When you start the new version after an upgrade, ACE will attempt to

@@ -34,12 +34,14 @@ import edu.umiacs.util.Argument;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import org.codehaus.jackson.annotate.JsonUseDeserializer;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 /**
  *
  * @author toaster
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StatusBean implements Serializable {
 
     private List<CollectionBean> collections;
@@ -50,7 +52,7 @@ public class StatusBean implements Serializable {
         return startup_complete;
     }
 
-    @JsonUseDeserializer(CustomBooleanDeserializer.class)
+    @JsonDeserialize(using = CustomBooleanDeserializer.class)
     public void setStartup_complete(boolean startup_complete) {
         this.startup_complete = startup_complete;
     }
@@ -73,11 +75,12 @@ public class StatusBean implements Serializable {
         this.collections = collections;
     }
 
-    @JsonUseDeserializer(CustomBooleanDeserializer.class)
+    @JsonDeserialize(using = CustomBooleanDeserializer.class)
     public void setPaused(boolean paused) {
         this.paused = paused;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class CollectionBean implements Serializable {
 
         private long id;
@@ -179,7 +182,7 @@ public class StatusBean implements Serializable {
         /**
          * @param lastSync the lastSync to set
          */
-        @JsonUseDeserializer(CustomDateDeserializer.class)
+        @JsonDeserialize(using = CustomDateDeserializer.class)
         public void setLastSync(Date lastSync) {
             this.lastSync = Argument.dateClone(lastSync);
         }

@@ -52,7 +52,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 var partnerArray = [];
                 collectionArray[${pstatus.index + 1}] = partnerArray;
                 <c:forEach var="collection" items="${partner.collections}" varStatus="cstatus">
-                        partnerArray[${cstatus.index}] = {'id':${collection.id}, 'name': '${collection.group} ${collection.name}'};
+                        partnerArray[${cstatus.index}] = {'id':${collection.id}, 'name': '${collection.group} ${collection.name}', 'shortname':${collection.name}};
                 </c:forEach>
             </c:forEach>
                 
@@ -76,7 +76,12 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                             
                                 for (i = 0; i < collectionArray[site].length ; i++)
                                 {
-                                    document.compareform.remotecollectionid[i] = new Option(collectionArray[site][i].name, collectionArray[site][i].id,false,false);
+                                    var def = false;
+                                    if (collectionArray[site][i].shortname == ${workingCollection.collection.name})
+                                    {
+                                        def = true
+                                    }
+                                    document.compareform.remotecollectionid[i] = new Option(collectionArray[site][i].name, collectionArray[site][i].id,def,false);
                                 }
                                 elem.style.display = "block";
                             }

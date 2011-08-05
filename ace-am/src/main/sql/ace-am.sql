@@ -5,15 +5,11 @@ DROP TABLE IF EXISTS `collection`;
 CREATE TABLE `collection` (
   `ID` bigint(20) NOT NULL auto_increment,
   `STORAGE` varchar(255) default NULL,
-  `CHECKPERIOD` int(11) default NULL,
   `DIRECTORY` varchar(255) NOT NULL,
-  `PROXYDATA` tinyint(1) default '0',
   `NAME` varchar(255) NOT NULL,
   `COLGROUP` varchar(255) default NULL,
-  `AUDITTOKENS` tinyint(1) default '0',
   `LASTSYNC` datetime default NULL,
   `STATE` char(1) default NULL,
-  `EMAILLIST` text default NULL,
   `DIGESTALGORITHM` varchar(20) default 'SHA-256',
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -132,6 +128,16 @@ CREATE TABLE `userroles` (
   `USERNAME` varchar(255) default NULL,
   `ROLENAME` varchar(255) default NULL,
   PRIMARY KEY  (`ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+DROP TABLE IF EXISTS `settings`;
+CREATE TABLE `settings` (
+  `ID` bigint(20) NOT NULL auto_increment,
+  `ATTR` varchar(255) default NULL,
+  `VALUE` varchar(255) default NULL,
+  `COLLECTION_ID` bigint(20) NOT NULL,
+  PRIMARY KEY  (`ID`),
+  UNIQUE idx_coll_setting (`COLLECTION_ID`,`ATTR`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `users`;

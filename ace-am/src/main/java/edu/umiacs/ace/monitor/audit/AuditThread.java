@@ -53,6 +53,8 @@ import edu.umiacs.ace.monitor.reporting.ReportSummary;
 import edu.umiacs.ace.monitor.reporting.SchedulerContextListener;
 import edu.umiacs.ace.monitor.reporting.SummaryGenerator;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.ConfigConstants;
+import edu.umiacs.ace.monitor.core.SettingsUtil;
 import edu.umiacs.ace.monitor.log.LogEnum;
 import edu.umiacs.ace.monitor.log.LogEvent;
 import edu.umiacs.ace.monitor.peers.PeerCollection;
@@ -187,7 +189,8 @@ public final class AuditThread extends Thread implements CancelCallback {
                 logAuditStart();
 
                 callback = new FileAuditCallback(coll, session, this);
-                if (!openIms() || (coll.isAuditTokens()
+                boolean auditTokens = SettingsUtil.getBoolean(coll, ConfigConstants.ATTR_AUDIT_TOKENS);
+                if (!openIms() || (auditTokens
                         && !openTokenValidator(MessageDigest.getInstance(
                         "SHA-256")))) {
                     return;
@@ -288,6 +291,7 @@ public final class AuditThread extends Thread implements CancelCallback {
     private void performAudit() {
 
         // 1. Setup audit
+        //TODO Clean up filtering creation
         PathFilter filter = new SimpleFilter(coll);
         Date startDate = new Date();
 
@@ -371,22 +375,16 @@ public final class AuditThread extends Thread implements CancelCallback {
      * 
      */
     private void logAuditFinish() {
-//        LogEventManager lem;
         EntityManager em = PersistUtil.getEntityManager();
-//        lem = new LogEventManager(em, session);
         if (abortException != null) {
             if (abortException instanceof InterruptedException
                     || abortException.getCause() instanceof InterruptedException) {
                 LOG.trace("Audit ending with Interrupt");
-//                new LogEventManager(em, session).finishFileAudit(coll,
-//                        "Audit Interrupted");
                 logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH,
                         "Audit Interrupted", em);
             } else {
                 LOG.error("Uncaught exception in audit thread", abortException);
 
-//                new LogEventManager(em, session).abortSite(coll,
-//                        "Uncaught audit thread exception ", abortException);
                 String message = Strings.exceptionAsString(abortException);
                 logManager.persistCollectionEvent(
                         LogEnum.SYSTEM_ERROR, message, em);
@@ -431,8 +429,6 @@ public final class AuditThread extends Thread implements CancelCallback {
     private LogEvent setItemError(MonitoredItem item, String errorMessage) {
         totalErrors++;
         LOG.debug("Got error from currentFile: " + item.getPath());
-//        lem.errorReading(item.getPath(), coll,
-//                errorMessage);
         item.setState('M');
         return logManager.createItemEvent(LogEnum.ERROR_READING,
                 item.getPath(), errorMessage);
@@ -442,7 +438,6 @@ public final class AuditThread extends Thread implements CancelCallback {
     private void processFile(FileBean currentFile) {
         EntityManager em = PersistUtil.getEntityManager();
         MonitoredItemManager mim;
-//        LogEventManager lem;
 
         LOG.trace(
                 "Driver returned Item: " + currentFile.getPathList()[0]
@@ -450,7 +445,6 @@ public final class AuditThread extends Thread implements CancelCallback {
                 + currentFile.getErrorMessage() + " hash: "
                 + currentFile.getHash());
 
-//        lem = new LogEventManager(em, session);
         mim = new MonitoredItemManager(em);
 
         String fileName = currentFile.getPathList()[0];
@@ -514,7 +508,6 @@ public final class AuditThread extends Thread implements CancelCallback {
         LogEvent event;
         if (item.getState() != 'T') {
 
-//            lem.missingToken(item.getPath(), coll);
             event = logManager.createItemEvent(LogEnum.MISSING_TOKEN,
                     item.getPath());
             item.setStateChange(new Date());
@@ -553,7 +546,6 @@ public final class AuditThread extends Thread implements CancelCallback {
             // we handle those later
             if (item.getState() != 'A' && item.getState() != 'P'
                     && item.getState() != 'D') {
-//                lem.fileOnline(item.getPath(), coll);
                 event = logManager.createItemEvent(LogEnum.FILE_ONLINE,
                         item.getPath());
                 item.setState('A');
@@ -568,8 +560,6 @@ public final class AuditThread extends Thread implements CancelCallback {
             AceToken token = TokenUtil.convertToAceToken(item.getToken());
             // add to token check queue
             if (validator != null) {
-//                TokenResponse tResp = (TokenResponse) item.getToken().
-//                        getToken();
                 itemMap.put(token, item);
                 try {
                     validator.add(
@@ -607,8 +597,6 @@ public final class AuditThread extends Thread implements CancelCallback {
                 coll.getDirectory() + fileName);
         if (currentFile.isError()) {
             mim.addItem(fileName, parentName, false, coll, 'M', 0);
-//            lem.errorReading(fileName, coll,
-//                    currentFile.getErrorMessage());
             event[1] = logManager.createItemEvent(LogEnum.ERROR_READING, fileName,
                     currentFile.getErrorMessage());
             totalErrors++;
@@ -617,7 +605,6 @@ public final class AuditThread extends Thread implements CancelCallback {
             mim.addItem(fileName, parentName, false, coll, 'T',
                     currentFile.getFileSize());
             event[1] = null;
-//            lem.foundNewFile(fileName, coll);
             TokenRequest request = new TokenRequest();
             request.setName(fileName);
             request.setHashValue(currentFile.getHash());
@@ -655,8 +642,8 @@ public final class AuditThread extends Thread implements CancelCallback {
     }
 
     private String[] createMailList() {
-        String[] maillist = (coll.getEmailList() == null
-                ? null : coll.getEmailList().split("\\s*,\\s*"));
+        String addrs = SettingsUtil.getString(coll, ConfigConstants.ATTR_EMAIL_RECIPIENTS);
+        String[] maillist = (addrs == null ? null : addrs.split("\\s*,\\s*"));
         return maillist;
     }
 
@@ -694,7 +681,6 @@ public final class AuditThread extends Thread implements CancelCallback {
         EntityManager em = PersistUtil.getEntityManager();
         MonitoredItemManager mim = new MonitoredItemManager(em);
         EntityTransaction trans = em.getTransaction();
-//        LogEventManager lem = new LogEventManager(em, session);
         trans.begin();
 
         for (MonitoredItem mi : mim.listItemsBefore(coll, d)) {
@@ -705,7 +691,6 @@ public final class AuditThread extends Thread implements CancelCallback {
                 mi.setStateChange(new Date());
                 em.persist(logManager.createItemEvent(LogEnum.FILE_MISSING,
                         mi.getPath()));
-//                em.persist(lem.missingFile(mi.getPath(), coll));
             }
             mi.setLastVisited(new Date());
             em.merge(mi);
@@ -753,7 +738,6 @@ public final class AuditThread extends Thread implements CancelCallback {
                 // take precedence
                 em = PersistUtil.getEntityManager();
                 mim = new MonitoredItemManager(em);
-//                LogEventManager lem = new LogEventManager(em, session);
 
                 for (String unseenFile : cr.getUnseenTargetFiles()) {
                     LOG.trace("Item missing at remote "
@@ -791,8 +775,6 @@ public final class AuditThread extends Thread implements CancelCallback {
                         String errorMsg = "Expected digest: " + mi.getFileDigest() + " Saw: "
                                 + dd.getTargetDigest() + " site: " + pc.getSite().getRemoteURL();
                         em.persist(logManager.createItemEvent(LogEnum.REMOTE_FILE_CORRUPT, dd.getName(), errorMsg));
-//                        em.persist(lem.corruptRemoteFile(dd.getName(), coll,
-//                                mi.getFileDigest(), dd.getTargetDigest(), pc));
                         trans.commit();
                     }
                 }
@@ -803,7 +785,6 @@ public final class AuditThread extends Thread implements CancelCallback {
                     em.close();
                     em = null;
                 }
-//                cc.cleanup();
             }
         }
         // Any files remaining in currentErrors should transition back

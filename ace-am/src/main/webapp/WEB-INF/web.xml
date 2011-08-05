@@ -13,14 +13,25 @@
         <description>listener to close factory on shutdown</description>
         <listener-class>edu.umiacs.ace.util.PersistenceContextListener</listener-class>
     </listener>
-    <listener>
-        <listener-class>edu.umiacs.ace.monitor.access.CollectionCountContext</listener-class>
-    </listener>
+    
     <listener>
         <listener-class>edu.umiacs.ace.monitor.audit.AuditConfigurationContext</listener-class>
     </listener>
+    <!-- migration, initialization listeners -->
     <listener>
         <listener-class>edu.umiacs.ace.monitor.users.DefaultAccountContextListener</listener-class>
+    </listener>
+    <listener>
+        <description>ServletContextListener</description>
+        <listener-class>edu.umiacs.ace.monitor.core.TokenMigrationContextListener</listener-class>
+    </listener>
+    <listener>
+        <description>ServletContextListener</description>
+        <listener-class>edu.umiacs.ace.monitor.core.CollectionSettingsMigrationListener</listener-class>
+    </listener>
+    <!-- normal startup listeners, shedulers, etc -->
+    <listener>
+        <listener-class>edu.umiacs.ace.monitor.access.CollectionCountContext</listener-class>
     </listener>
     <listener>
         <description>HttpSessionListener</description>
@@ -37,10 +48,7 @@
         <description>srb file opening throttle</description>
         <listener-class>edu.umiacs.ace.driver.QueryThrottle</listener-class>
     </listener>
-    <listener>
-        <description>ServletContextListener</description>
-        <listener-class>edu.umiacs.ace.monitor.core.TokenMigrationContextListener</listener-class>
-    </listener>
+    
     <servlet>
         <servlet-name>ManageCollection</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.core.ManageCollectionServlet</servlet-class>

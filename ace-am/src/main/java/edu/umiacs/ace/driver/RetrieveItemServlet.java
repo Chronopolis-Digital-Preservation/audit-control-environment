@@ -30,6 +30,8 @@
 // $Id$
 package edu.umiacs.ace.driver;
 
+import edu.umiacs.ace.monitor.core.ConfigConstants;
+import edu.umiacs.ace.monitor.core.SettingsUtil;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
@@ -88,7 +90,8 @@ public final class RetrieveItemServlet extends EntityManagerServlet {
             return;
         }
 
-        if ( !coll.isProxyData() ) {
+        if (SettingsUtil.getBoolean(coll, ConfigConstants.ATTR_PROXY_DATA)) {
+//        if ( !coll.isProxyData() ) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
         }

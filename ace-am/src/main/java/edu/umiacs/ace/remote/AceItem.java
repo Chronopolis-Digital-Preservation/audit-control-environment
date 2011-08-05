@@ -33,8 +33,9 @@ package edu.umiacs.ace.remote;
 
 import edu.umiacs.util.Argument;
 import java.util.Date;
-import org.codehaus.jackson.annotate.JsonUseDeserializer;
-
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class AceItem {
 
     private long id;
@@ -57,7 +58,7 @@ public class AceItem {
     /**
      * @param id the id to set
      */
-    @JsonUseDeserializer(value = CustomLongDeserializer.class)
+    @JsonDeserialize(using = CustomLongDeserializer.class)
     public void setId( long id ) {
         this.id = id;
     }
@@ -72,7 +73,7 @@ public class AceItem {
     /**
      * @param state the state to set
      */
-    @JsonUseDeserializer(value = CustomCharDeserializer.class)
+    @JsonDeserialize(using = CustomCharDeserializer.class)
     public void setState( char state ) {
         this.state = state;
     }
@@ -87,7 +88,7 @@ public class AceItem {
     /**
      * @param directory the directory to set
      */
-    @JsonUseDeserializer(value = CustomBooleanDeserializer.class)
+    @JsonDeserialize(using = CustomBooleanDeserializer.class)
     public void setDirectory( boolean directory ) {
         this.directory = directory;
     }
@@ -130,7 +131,7 @@ public class AceItem {
     /**
      * @param lastSeen the lastSeen to set
      */
-    @JsonUseDeserializer(value = CustomDateDeserializer.class)
+    @JsonDeserialize(using = CustomDateDeserializer.class)
     public void setLastSeen( Date lastSeen ) {
         this.lastSeen = Argument.dateClone(lastSeen);
     }
@@ -145,7 +146,7 @@ public class AceItem {
     /**
      * @param stateChange the stateChange to set
      */
-    @JsonUseDeserializer(value = CustomDateDeserializer.class)
+    @JsonDeserialize(using = CustomDateDeserializer.class)
     public void setStateChange( Date stateChange ) {
         this.stateChange = Argument.dateClone(stateChange);
     }
@@ -160,7 +161,7 @@ public class AceItem {
     /**
      * @param lastVisited the lastVisited to set
      */
-    @JsonUseDeserializer(value = CustomDateDeserializer.class)
+    @JsonDeserialize(using = CustomDateDeserializer.class)
     public void setLastVisited( Date lastVisited ) {
         this.lastVisited = Argument.dateClone(lastVisited);
     }

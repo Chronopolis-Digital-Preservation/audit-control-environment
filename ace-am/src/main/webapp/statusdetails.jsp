@@ -43,7 +43,7 @@
             </tr>
             <tr >
                 <td>Allow Outside Data Access</td>
-                <td>${workingCollection.collection.proxyData}</td>
+                <td>${workingCollection.collection.settings['proxy.data']}</td>
             </tr>
             <tr>
                 <td>Directory</td>
@@ -67,7 +67,7 @@
             </tr>
             <tr>
                 <td>Audit Period</td>
-                <td>${workingCollection.collection.checkPeriod} <c:if test="${pause.paused && workingCollection.collection.checkPeriod > 0}">Automated auditing is paused</c:if></td>
+                <td>${workingCollection.collection.settings['audit.period']} <c:if test="${pause.paused && workingCollection.collection.settings['audit.period'] > 0}">Automated auditing is paused</c:if></td>
             </tr>
             <tr>
                 <td>Total Monitored Files</td>
@@ -175,7 +175,7 @@
                             <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=store" title="Download tokenstore for this collection">Download TokenStore</a><br>
                             <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=digest" title="Download a list of all digests in this collection">Download Digests</a><br>
                             <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=checkm" title="Download a checkm manifest of all items in this collection">Download checkm list</a><br>
-                            <c:if test="${workingCollection.collection.proxyData}">
+                            <c:if test="${workingCollection.collection.settings['proxy.data']}">
                                 <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=wget" title="Down wget-compatible list of files in this collection">Download wget file list</a><br>
                             </c:if>
                         </um:Auth>

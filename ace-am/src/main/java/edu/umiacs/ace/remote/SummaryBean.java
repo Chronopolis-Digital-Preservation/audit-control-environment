@@ -28,7 +28,6 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-
 package edu.umiacs.ace.remote;
 
 import edu.umiacs.util.Argument;
@@ -38,12 +37,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.codehaus.jackson.annotate.JsonAnySetter;
-import org.codehaus.jackson.annotate.JsonUseDeserializer;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 /**
  *
  * @author toaster
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SummaryBean implements Serializable {
 
     private String collection;
@@ -59,7 +60,7 @@ public class SummaryBean implements Serializable {
     /**
      * @param collection the collection to set
      */
-    public void setCollection( String collection ) {
+    public void setCollection(String collection) {
         this.collection = collection;
     }
 
@@ -73,10 +74,11 @@ public class SummaryBean implements Serializable {
     /**
      * @param summaries the summaries to set
      */
-    public void setSummaries( List<Summary> summaries ) {
+    public void setSummaries(List<Summary> summaries) {
         this.summaries = summaries;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Summary implements Serializable {
 
         private String reportName;
@@ -88,7 +90,7 @@ public class SummaryBean implements Serializable {
         private CollectionState collectionState;
         private LogSummary logSummary;
 
-        public void setReportName( String reportName ) {
+        public void setReportName(String reportName) {
             this.reportName = reportName;
         }
 
@@ -106,7 +108,7 @@ public class SummaryBean implements Serializable {
         /**
          * @param id the id to set
          */
-        public void setId( long id ) {
+        public void setId(long id) {
             this.id = id;
         }
 
@@ -120,7 +122,7 @@ public class SummaryBean implements Serializable {
         /**
          * @param collection the collection to set
          */
-        public void setCollection( long collection ) {
+        public void setCollection(long collection) {
             this.collection = collection;
         }
 
@@ -134,7 +136,7 @@ public class SummaryBean implements Serializable {
         /**
          * @param collectionName the collectionName to set
          */
-        public void setCollectionName( String collectionName ) {
+        public void setCollectionName(String collectionName) {
             this.collectionName = collectionName;
         }
 
@@ -149,8 +151,8 @@ public class SummaryBean implements Serializable {
         /**
          * @param start the start to set
          */
-        @JsonUseDeserializer(CustomDateDeserializer.class)
-        public void setStart( Date start ) {
+        @JsonDeserialize(using = CustomDateDeserializer.class)
+        public void setStart(Date start) {
             this.start = Argument.dateClone(start);
         }
 
@@ -164,8 +166,8 @@ public class SummaryBean implements Serializable {
         /**
          * @param end the end to set
          */
-        @JsonUseDeserializer(CustomDateDeserializer.class)
-        public void setEnd( Date end ) {
+        @JsonDeserialize(using = CustomDateDeserializer.class)
+        public void setEnd(Date end) {
             this.end = Argument.dateClone(end);
         }
 
@@ -179,7 +181,7 @@ public class SummaryBean implements Serializable {
         /**
          * @param collectionState the collectionState to set
          */
-        public void setCollectionState( CollectionState collectionState ) {
+        public void setCollectionState(CollectionState collectionState) {
             this.collectionState = collectionState;
         }
 
@@ -193,23 +195,24 @@ public class SummaryBean implements Serializable {
         /**
          * @param logSummary the logSummary to set
          */
-        public void setLogSummary( LogSummary logSummary ) {
+        public void setLogSummary(LogSummary logSummary) {
             this.logSummary = logSummary;
         }
 
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class CollectionState implements Serializable {
 
             private Map<String, String> itemMap;
 
             @JsonAnySetter
-            public void unknownItem( String name, String value ) {
-                if ( itemMap == null ) {
+            public void unknownItem(String name, String value) {
+                if (itemMap == null) {
                     itemMap = new HashMap<String, String>();
                 }
                 itemMap.put(name, value);
             }
 
-            public void setItemMap( Map<String, String> itemMap ) {
+            public void setItemMap(Map<String, String> itemMap) {
                 this.itemMap = itemMap;
             }
 
@@ -218,19 +221,20 @@ public class SummaryBean implements Serializable {
             }
         }
 
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class LogSummary implements Serializable {
 
             private Map<String, String> itemMap;
 
             @JsonAnySetter
-            public void unknownItem( String name, String value ) {
-                if ( itemMap == null ) {
+            public void unknownItem(String name, String value) {
+                if (itemMap == null) {
                     itemMap = new HashMap<String, String>();
                 }
                 itemMap.put(name, value);
             }
 
-            public void setItemMap( Map<String, String> itemMap ) {
+            public void setItemMap(Map<String, String> itemMap) {
                 this.itemMap = itemMap;
             }
 

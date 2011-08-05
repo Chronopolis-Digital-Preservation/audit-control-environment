@@ -12,9 +12,9 @@
             <json:property name="directory" value="${item.collection.directory}"/>
             <json:property name="lastSync" value="${item.collection.lastSync}"/>
             <json:property name="storage" value="${item.collection.storage}"/>
-            <json:property name="checkPeriod" value="${item.collection.checkPeriod}"/>
-            <json:property name="proxyData" value="${item.collection.proxyData}"/>
-            <json:property name="auditTokens" value="${item.collection.auditTokens}"/>
+            <json:property name="checkPeriod" value="${item.collection.settings['audit.period']}"/>
+            <json:property name="proxyData" value="${item.collection.settings['proxy.data']}"/>
+            <json:property name="auditTokens" value="${item.collection.settings['audit.tokens']}"/>
             <json:property name="state" value="${item.collection.state}"/>
             <json:property name="totalFiles" value="${item.totalFiles}"/>
             <json:property name="totalSize" value="${item.totalSize}"/>

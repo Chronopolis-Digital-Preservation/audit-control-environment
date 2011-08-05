@@ -81,7 +81,7 @@ Author     : toaster
         
         <tr>
             <td>Audit Collection</td>
-            <td><input type="text" size="3" name="checkperiod" value="${collection.checkPeriod}"/> days</td>
+            <td><input type="text" size="3" name="checkperiod" value="${collection.settings['audit.period']}"/> days</td>
         </tr>
         <tr>
             <td>Collection Group</td>
@@ -113,13 +113,13 @@ Author     : toaster
         </tr>
         <tr>
             <td>E-mail audit notifications</td>
-            <td><input type="text" size="50" name="emaillist" value="${collection.emailList}" /></td>
+            <td><input type="text" size="50" name="emaillist" value="${collection.settings['email.recipients']}" /></td>
         </tr>
         <tr>
             <td>Audit tokens</td>
             <td>
                 <c:choose>
-                    <c:when test="${!collection.auditTokens && collection.id > 0}">
+                    <c:when test="${!collection.settings['audit.tokens'] && collection.id > 0}">
                         <input type="radio" name="audittokens" value="true" >Check Digests
                         <input type="radio" name="audittokens" value="false" checked>Do Not Check Digests
                     </c:when>
@@ -135,7 +135,7 @@ Author     : toaster
             <td>Allow outside access to data</td>
             <td>
                 <c:choose>
-                    <c:when test="${collection.proxyData}">
+                    <c:when test="${collection.settings['proxy.data']}">
                         <input type="radio" name="proxy" value="true" checked>Allow
                         <input type="radio" name="proxy" value="false">Disallow
                     </c:when>

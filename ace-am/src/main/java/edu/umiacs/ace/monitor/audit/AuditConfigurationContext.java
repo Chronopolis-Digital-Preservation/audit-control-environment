@@ -30,6 +30,7 @@
 // $Id$
 package edu.umiacs.ace.monitor.audit;
 
+import edu.umiacs.ace.monitor.core.SettingsUtil;
 import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.driver.StorageDriverFactory;
 import edu.umiacs.ace.util.PersistUtil;
@@ -168,9 +169,10 @@ public final class AuditConfigurationContext implements ServletContextListener {
 
                 for ( Collection c : items ) {
                     StorageDriver sa;
-                    if ( c.getCheckPeriod() < 1 ) {
+                    int checkperiod = SettingsUtil.getInt(c, PARAM_IMS, 0);
+                    if ( checkperiod < 1 ) {
                         LOG.trace("Skipping auditing for collection: " + c.getName()
-                                + " check period: " + c.getCheckPeriod());
+                                + " check period: " + checkperiod);
                         continue;
                     }
                     // if last sync is null, fire away since we haven't run yet
@@ -182,10 +184,10 @@ public final class AuditConfigurationContext implements ServletContextListener {
                     } else {
                         long syncTime = c.getLastSync().getTime();
                         long currTime = System.currentTimeMillis();
-                        if ( ((long) (currTime - syncTime)) > ((long) (c.getCheckPeriod() * HOUR
+                        if ( ((long) (currTime - syncTime)) > ((long) (checkperiod * HOUR
                                 * 24)) ) {
                             LOG.debug("last sync difference: " + (currTime - syncTime)
-                                    + " greater than " + (c.getCheckPeriod() * HOUR * 24));
+                                    + " greater than " + (checkperiod * HOUR * 24));
                             sa = StorageDriverFactory.createStorageAccess(c,
                                     em);
                             AuditThreadFactory.createThread(c, sa, (MonitoredItem[]) null);

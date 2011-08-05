@@ -33,12 +33,14 @@ package edu.umiacs.ace.remote;
 
 import java.io.Serializable;
 import java.util.List;
-import org.codehaus.jackson.annotate.JsonUseDeserializer;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 /**
  * representation of ace report json
  * @author toaster
  */
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class ReportBean implements Serializable {
 
     private String collection;
@@ -84,7 +86,7 @@ public class ReportBean implements Serializable {
     /**
      * @param next the next to set
      */
-    @JsonUseDeserializer(CustomLongDeserializer.class)
+    @JsonDeserialize(using=CustomLongDeserializer.class)
     public void setNext( long next ) {
         this.next = next;
     }

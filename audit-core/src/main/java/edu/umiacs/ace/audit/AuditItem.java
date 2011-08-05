@@ -14,12 +14,12 @@ import java.io.InputStream;
  */
 public abstract class AuditItem {
 
-    private String name;
+    private String[] pathList;
     private long created;
     private AuditSource source;
 
-    public AuditItem(String name, AuditSource source) {
-        this.name = name;
+    public AuditItem(String[] pathList, AuditSource source) {
+        this.pathList = pathList;
         this.created = System.currentTimeMillis();
         this.source = source;
     }
@@ -30,8 +30,8 @@ public abstract class AuditItem {
 
     public abstract InputStream openStream() throws IOException;
 
-    public final String getName() {
-        return name;
+    public final String[] getPathList() {
+        return pathList;
     }
 
     public final long getCreated() {

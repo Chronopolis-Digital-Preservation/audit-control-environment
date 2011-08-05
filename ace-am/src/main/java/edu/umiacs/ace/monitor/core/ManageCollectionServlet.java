@@ -82,8 +82,8 @@ public class ManageCollectionServlet extends EntityManagerServlet {
      * @throws IOException
      */
     @Override
-    protected void processRequest( HttpServletRequest request,
-            HttpServletResponse response, EntityManager em )
+    protected void processRequest(HttpServletRequest request,
+            HttpServletResponse response, EntityManager em)
             throws ServletException, IOException {
 
         EntityTransaction trans;
@@ -97,20 +97,20 @@ public class ManageCollectionServlet extends EntityManagerServlet {
          * Modification, view, or removal of an existing collection       
          *  if we have an int, and its > 0, and it is the key for a resource
          */
-        if ( (collection = getCollection(request, em)) != null ) {
+        if ((collection = getCollection(request, em)) != null) {
             populateCollection(request, collection);
 
-            if ( collection.getStorage() != null ) {
+            if (collection.getStorage() != null) {
                 storage = StorageDriverFactory.createStorageAccess(collection, em);
-                
+
             }
 
 
             /**
              * Tst to see if we're removing a collection
              */
-            if ( !Strings.isEmpty(request.getParameter(PARAM_REMOVE))
-                    && request.getParameter(PARAM_REMOVE).toLowerCase().equals("yes") ) {
+            if (!Strings.isEmpty(request.getParameter(PARAM_REMOVE))
+                    && request.getParameter(PARAM_REMOVE).toLowerCase().equals("yes")) {
                 LOG.debug("removing collection" + collection.getName());
                 removeCollection(em, collection, storage);
                 response.sendRedirect("Status?collectionid=-1");
@@ -118,13 +118,13 @@ public class ManageCollectionServlet extends EntityManagerServlet {
             } /**
              * otherwise, are we updating?
              */
-            else if ( checkParameters(request)
-                    && ((paramCheckResponse = checkStorage(storage, request, collection)) == null) ) {
+            else if (checkParameters(request)
+                    && ((paramCheckResponse = checkStorage(storage, request, collection)) == null)) {
                 LOG.debug("updating collection: " + collection.getName());
                 trans = em.getTransaction();
                 trans.begin();
                 em.merge(collection);
-                if ( storage != null ) {
+                if (storage != null) {
                     storage.setParameters(request.getParameterMap());
                 }
                 trans.commit();
@@ -148,7 +148,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
             populateCollection(request, collection);
 
             // is all the collection params match, commit and create a storage
-            if ( checkParameters(request) && hasDigest(request) ) {
+            if (checkParameters(request) && hasDigest(request)) {
                 LOG.debug("creating collection, empty driver: " + collection.getName());
                 PersistUtil.persist(collection);
                 storage = StorageDriverFactory.createStorageAccess(collection,
@@ -168,9 +168,9 @@ public class ManageCollectionServlet extends EntityManagerServlet {
 
     }
 
-    private String checkStorage( StorageDriver sd, ServletRequest request, Collection collection ) {
+    private String checkStorage(StorageDriver sd, ServletRequest request, Collection collection) {
         String result = null;
-        if ( sd == null ) {
+        if (sd == null) {
             //result = "No Storage Configured";
         } else {
             result = sd.checkParameters(request.getParameterMap(), collection.getDirectory());
@@ -178,7 +178,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
         return result;
     }
 
-    private void removeCollection( EntityManager em, Collection collection, StorageDriver storage ) {
+    private void removeCollection(EntityManager em, Collection collection, StorageDriver storage) {
         EntityTransaction trans;
         Query q;
         trans = em.getTransaction();
@@ -201,65 +201,69 @@ public class ManageCollectionServlet extends EntityManagerServlet {
         q = em.createNamedQuery("PeerCollection.deleteByCollection");
         q.setParameter("coll", collection);
         q.executeUpdate();
-        if ( storage != null ) {
+        if (storage != null) {
             storage.remove(em);
         }
         em.remove(collection);
         trans.commit();
     }
 
-    private boolean hasDigest( HttpServletRequest req ) {
+    private boolean hasDigest(HttpServletRequest req) {
         String digest = req.getParameter(PARAM_DIGEST);
-        if ( !Strings.isEmpty(digest) ) {
+        if (!Strings.isEmpty(digest)) {
             try {
                 MessageDigest.getInstance(digest);
                 return true;
-            } catch ( NoSuchAlgorithmException e ) {
+            } catch (NoSuchAlgorithmException e) {
                 LOG.error("Attempt to register unfound provider: " + digest, e);
             }
         }
         return false;
     }
 
-    public void populateCollection( HttpServletRequest req, Collection col ) {
-        if ( !Strings.isEmpty(req.getParameter(PARAM_NAME)) ) {
+    public void populateCollection(HttpServletRequest req, Collection col) {
+        if (!Strings.isEmpty(req.getParameter(PARAM_NAME))) {
             col.setName(req.getParameter(PARAM_NAME));
         }
-        if ( !Strings.isEmpty(req.getParameter(PARAM_DIR)) ) {
+        if (!Strings.isEmpty(req.getParameter(PARAM_DIR))) {
             col.setDirectory(req.getParameter(PARAM_DIR));
         }
-        if ( !Strings.isEmpty(req.getParameter(PARAM_DRIVER)) ) {
+        if (!Strings.isEmpty(req.getParameter(PARAM_DRIVER))) {
             col.setStorage(req.getParameter(PARAM_DRIVER));
         }
-        if ( !Strings.isEmpty(req.getParameter(PARAM_DIGEST)) && col.getId() < 1 ) {
+        if (!Strings.isEmpty(req.getParameter(PARAM_DIGEST)) && col.getId() < 1) {
             // do not allow changes
             col.setDigestAlgorithm(req.getParameter(PARAM_DIGEST));
         }
 
-        if ( !Strings.isEmpty(req.getParameter(PARAM_GROUP)) ) {
+        if (!Strings.isEmpty(req.getParameter(PARAM_GROUP))) {
             col.setGroup(req.getParameter(PARAM_GROUP));
         }
 
-        if ( !Strings.isEmpty(req.getParameter(PARAM_EMAILLIST)) ) {
-            col.setEmailList(req.getParameter(PARAM_EMAILLIST));
+        if (!Strings.isEmpty(req.getParameter(PARAM_EMAILLIST))) {
+//            col.setEmailList(req.getParameter(PARAM_EMAILLIST));
+            col.getSettings().put(ConfigConstants.ATTR_EMAIL_RECIPIENTS, req.getParameter(PARAM_EMAILLIST));
         }
-
-        if ( Strings.isValidInt(req.getParameter(PARAM_CHECKPERIOD)) ) {
-            col.setCheckPeriod(Integer.parseInt(req.getParameter(PARAM_CHECKPERIOD)));
+//
+        if (Strings.isValidInt(req.getParameter(PARAM_CHECKPERIOD))) {
+            col.getSettings().put(ConfigConstants.ATTR_AUDIT_PERIOD, req.getParameter(PARAM_CHECKPERIOD));
+//            col.setCheckPeriod(Integer.parseInt(req.getParameter(PARAM_CHECKPERIOD)));
         }
-
-        if ( req.getParameter(PARAM_PROXY_DATA) != null ) {
-            col.setProxyData("true".equals(req.getParameter(PARAM_PROXY_DATA).toLowerCase()));
+//
+        if (req.getParameter(PARAM_PROXY_DATA) != null) {
+            col.getSettings().put(ConfigConstants.ATTR_PROXY_DATA, req.getParameter(PARAM_PROXY_DATA));
+//            col.setProxyData("true".equals(req.getParameter(PARAM_PROXY_DATA).toLowerCase()));
         }
-
-        if ( req.getParameter(PARAM_AUDIT_TOKENS) != null ) {
-            col.setAuditTokens("true".equals(req.getParameter(PARAM_AUDIT_TOKENS).toLowerCase()));
+//
+        if (req.getParameter(PARAM_AUDIT_TOKENS) != null) {
+            col.getSettings().put(ConfigConstants.ATTR_AUDIT_TOKENS, req.getParameter(PARAM_AUDIT_TOKENS));
+//            col.setAuditTokens("true".equals(req.getParameter(PARAM_AUDIT_TOKENS).toLowerCase()));
         }
 
 
     }
 
-    public boolean checkParameters( HttpServletRequest req ) {
+    public boolean checkParameters(HttpServletRequest req) {
         return (!Strings.isEmpty(req.getParameter(PARAM_NAME))
                 && !Strings.isEmpty(req.getParameter(PARAM_DIR))
                 && StorageDriverFactory.listResources().contains(req.getParameter(PARAM_DRIVER)));
