@@ -5,6 +5,16 @@
         <param-name>checkPeriod</param-name>
         <param-value>5</param-value>
     </context-param>
+     <filter>
+        <filter-name>PersistenceFilter</filter-name>
+        <filter-class>edu.umiacs.ace.rest.PersistenceServiceFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>PersistenceFilter</filter-name>
+        <url-pattern>/rest/*</url-pattern>
+    </filter-mapping>
+
     <listener>
         <description>listener to configure log4j properties</description>
         <listener-class>edu.umiacs.ace.util.LogContextListener</listener-class>
@@ -48,7 +58,16 @@
         <description>srb file opening throttle</description>
         <listener-class>edu.umiacs.ace.driver.QueryThrottle</listener-class>
     </listener>
-    
+    <servlet>
+        <servlet-name>ServletAdaptor</servlet-name>
+        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>com.sun.jersey.config.property.packages</param-name>
+            <param-value>edu.umiacs.ace.rest</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
     <servlet>
         <servlet-name>ManageCollection</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.core.ManageCollectionServlet</servlet-class>
@@ -149,6 +168,11 @@
         <servlet-name>ChangePassword</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.users.ChangePasswordServlet</servlet-class>
     </servlet>
+    <servlet-mapping>
+        <servlet-name>ServletAdaptor</servlet-name>
+        <url-pattern>/rest/*</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>ManageCollection</servlet-name>
         <url-pattern>/ManageCollection</url-pattern>

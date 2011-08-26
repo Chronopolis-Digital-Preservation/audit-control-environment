@@ -51,9 +51,28 @@ public final class PersistUtil {
     /** db connection to aceamdb. */
     private static DataSource ds = null;
 
+    private static ThreadLocal<EntityManager> localEntityManager = new ThreadLocal<EntityManager>();
     /**
      *
      */
+
+    public static EntityManager getLocalManager()
+    {
+        if (localEntityManager.get() == null)
+        {
+            localEntityManager.set(getEntityManager());
+        }
+        return localEntityManager.get();
+    }
+
+    public static void closeLocalManager()
+    {
+        if (localEntityManager.get() != null)
+        {
+            localEntityManager.get().close();
+            localEntityManager.remove();
+        }
+    }
     private PersistUtil() {
     }
 

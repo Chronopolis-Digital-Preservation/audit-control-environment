@@ -8,7 +8,8 @@ import edu.umiacs.ace.token.AceToken;
 import edu.umiacs.ace.token.AceTokenBuilder;
 
 /**
- *
+ * Convert DB stored token to an AceToken compatible object.
+ * 
  * @author toaster
  */
 public class TokenUtil {

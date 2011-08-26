@@ -175,6 +175,18 @@
             <artifactId>irods-api</artifactId>
             <version>1.6</version>
         </dependency>
+        <!-- web services -->
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>1.6</version>
+        </dependency>
+
     </dependencies>
 </project>
 
