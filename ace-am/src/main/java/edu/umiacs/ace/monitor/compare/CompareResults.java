@@ -20,20 +20,20 @@ import java.util.TreeSet;
 public final class CompareResults {
 
     private Set<String> unseenSupplied;
-    private Set<String> unseenTarget = new HashSet<String>();
+    private Set<String> unseenTarget;
     private Set<DifferingName> differingNames = new TreeSet<DifferingName>();
     private Set<DifferingDigest> differingDigests = new TreeSet<DifferingDigest>();
     private boolean running = true;
     private String message = null;
-    
-    public CompareResults(CollectionCompare2 cc2) {
 
-        unseenSupplied = new HashSet<String>(cc2.getSourceMap().keySet());
+    public CompareResults(CollectionCompare2 cc2, int hint) {
+        unseenTarget = new TreeSet<String>();
+//differingNames = new TreeSet<DifferingName>(hint);
+        unseenSupplied = new TreeSet<String>(cc2.getSourceMap().keySet());
     }
 
-    void finished()
-    {
-       running = false;
+    void finished() {
+        running = false;
     }
 
     public boolean isRunning() {
@@ -43,6 +43,7 @@ public final class CompareResults {
     public String getMessage() {
         return message;
     }
+
     void fileExistsAtTarget(String file) {
         unseenSupplied.remove(file);
     }

@@ -36,14 +36,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.sql.DataSource;
 import org.apache.log4j.Logger;
+import org.eclipse.persistence.config.QueryHints;
+import org.eclipse.persistence.queries.ScrollableCursor;
 
 /**
  * Currently does all comparison in memory, this limits collections to a million
@@ -54,12 +60,15 @@ import org.apache.log4j.Logger;
  */
 public final class CollectionCompare2 {
 
-    private Map<String, String> sourceMap = new HashMap<String, String>();
-    private Map<String, String> sourceReverseMap = new HashMap<String, String>();
+    private Map<String, String> sourceMap;
+    private Map<String, String> sourceReverseMap;
     private static final Logger LOG = Logger.getLogger(CollectionCompare2.class);
     private List<String> parseErrors = new ArrayList<String>();
 
-    public CollectionCompare2(InputStream sourceFile, String prefix) {
+    public CollectionCompare2(InputStream sourceFile, String prefix, int hint) {
+        sourceMap = new TreeMap<String, String>();
+        sourceReverseMap = new TreeMap<String, String>();
+        LOG.trace("initializing collection compare with hint: " + hint);
         try {
             parseInputStream(sourceFile, prefix);
         } catch (IOException e) {
@@ -80,19 +89,48 @@ public final class CollectionCompare2 {
         EntityManager em = PersistUtil.getEntityManager();
         long time = System.currentTimeMillis();
         long total = 0;
+        DataSource db;
+        MonitoredItem mi;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
 
         try {
             LOG.info("Starting collection compare on " + c.getName() + " source size: " + sourceMap.size());
-
-            Query q = em.createNamedQuery("MonitoredItem.listFilesInCollection");
-            q.setParameter("coll", c);
-            List items = q.getResultList();
-
-            for (Object o : items) {
+            db = PersistUtil.getDataSource();
+            conn = db.getConnection();
+            stmt = conn.prepareStatement(
+                    "SELECT monitored_item.PATH, monitored_item.FILEDIGEST, monitored_item.TOKEN_ID "
+                    + "FROM monitored_item "
+                    + "WHERE monitored_item.PARENTCOLLECTION_ID = ? "
+                    + "AND monitored_item.DIRECTORY = 0",
+                    ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY);
+            stmt.setLong(1, c.getId());
+            stmt.setFetchSize(Integer.MIN_VALUE);
+            rs = stmt.executeQuery();
+//            Query q = em.createNamedQuery("MonitoredItem.listFilesInCollection");
+////            q.setLockMode(LockModeType.NONE);
+//            q.setHint(QueryHints.JDBC_FETCH_SIZE, 5000);
+////            q.setHint(QueryHints.RESULT_SET_TYPE, ResultSetType.ForwardOnly);
+//            q.setHint("eclipselink.cursor.scrollable",true);
+//            q.setParameter("coll", c);
+////            em.getTransaction().begin();
+//            ScrollableCursor cursor = (ScrollableCursor) q.getSingleResult();
+////            List items = q.getResultList();
+//
+////            for (Object o : items) {
+//            Object o;
+//            while ((o = cursor.next()) != null) {
+            while (rs.next()) {
                 total++;
-                MonitoredItem aceItem = (MonitoredItem) o;
-                String acePath = aceItem.getPath();
-                String aceDigest = aceItem.getFileDigest();
+
+                if ((total % 100000) == 0) {
+                    LOG.trace("Compared " + total);
+                }
+//                MonitoredItem aceItem = (MonitoredItem) o;
+                String acePath = rs.getString(1);//aceItem.getPath();
+                String aceDigest = rs.getString(2);//aceItem.getFileDigest();
 
                 if (sourceMap.containsKey(acePath)) {
                     cr.fileExistsAtTarget(acePath);
@@ -113,12 +151,13 @@ public final class CollectionCompare2 {
             LOG.error("Error during load and compare: ", e);
 
         } finally {
+        SQL.release(rs);
+        SQL.release(conn);
             LOG.info("Finished collection compare on: "
                     + c.getName() + " time: " + (System.currentTimeMillis() - time) + " tested: " + total);
             cr.finished();
             em.close();
         }
-
     }
 
     private void parseInputStream(InputStream sourceFile, String prefix) throws IOException {
@@ -126,25 +165,50 @@ public final class CollectionCompare2 {
         BufferedReader input = new BufferedReader(new InputStreamReader(sourceFile));
         String line = input.readLine();
 
+
+        long total = 0;
+
         // ignore ace manifest header
+
+
         if (line != null && line.matches("^[A-Z0-9\\-]+:.+$")) {
             line = input.readLine();
+
+
         }
 
         while (line != null) {
+            total++;
+
+
+            if ((total % 100000) == 0) {
+                LOG.trace("Loaded " + total);
+
+
+            }
             String tokens[] = line.split("\\s+", 2);
+
+
             if (tokens == null || tokens.length != 2) {
                 LOG.error("Error processing line: " + line);
                 parseErrors.add("Corrupt Line: " + line);
+
+
             } else {
                 String path = tokens[1];
                 // temp hack to make sure all paths start w/ / as ace expectes
-                if (!path.startsWith("/"))
+
+
+                if (!path.startsWith("/")) {
                     path = "/" + path;
+                }
                 sourceMap.put(path, tokens[0]);
                 sourceReverseMap.put(tokens[0], path);
+
+
             }
             line = input.readLine();
+
         }
     }
 }

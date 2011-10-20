@@ -28,7 +28,6 @@
  * Maryland Institute for Advanced Computer Study.
  */
 // $Id$
-
 package edu.umiacs.ace.monitor.reporting;
 
 import edu.umiacs.ace.util.PersistUtil;
@@ -72,13 +71,13 @@ public class SchedulerContextListener implements ServletContextListener {
     private static String mailfrom;
 
     @Override
-    public void contextInitialized( ServletContextEvent event ) {
+    public void contextInitialized(ServletContextEvent event) {
         NDC.push("[schedstartup]");
         try {
             mailserver = event.getServletContext().getInitParameter(
                     PARAM_SMTP_SERVER);
             mailfrom = event.getServletContext().getInitParameter(PARAM_FROM);
-            if ( Strings.isEmpty(mailserver) ) {
+            if (Strings.isEmpty(mailserver)) {
                 mailserver = "127.0.0.1";
             }
 
@@ -89,10 +88,10 @@ public class SchedulerContextListener implements ServletContextListener {
 
             EntityManager em = PersistUtil.getEntityManager();
             Query q = em.createNamedQuery("ReportPolicy.listAll");
-            for ( Object o : q.getResultList() ) {
+            for (Object o : q.getResultList()) {
                 addJob((ReportPolicy) o);
             }
-        } catch ( Exception ex ) {
+        } catch (Exception ex) {
             LOG.error("Error starting report scheduling", ex);
         } finally {
             NDC.pop();
@@ -101,26 +100,28 @@ public class SchedulerContextListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(
-            ServletContextEvent arg0 ) {
+            ServletContextEvent arg0) {
         try {
-            sched.shutdown();
+            if (sched != null) { // npe if startup never worked
+                sched.shutdown();
+            }
             LOG.debug("Shutting down the scheduler");
-        } catch ( Exception ex ) {
+        } catch (Exception ex) {
             LOG.error("Error stopping report scheduling", ex);
         }
     }
 
-    public static final void removeJob( ReportPolicy job ) {
+    public static final void removeJob(ReportPolicy job) {
         try {
             LOG.debug("Removing job " + job.getName());
             sched.deleteJob("report-" + job.getId(), null);
-        } catch ( SchedulerException e ) {
+        } catch (SchedulerException e) {
             LOG.error("Error removing " + job.getName(), e);
             throw new RuntimeException("Error removeing job " + job.getName());
         }
     }
 
-    public static final void addJob( ReportPolicy job ) {
+    public static final void addJob(ReportPolicy job) {
         JobDetail detail = new JobDetail("report-" + job.getId(), null,
                 ReportJob.class);
         detail.getJobDataMap().put(ReportJob.ATTR_POLICY, job);
@@ -131,19 +132,19 @@ public class SchedulerContextListener implements ServletContextListener {
             LOG.debug(
                     "Adding job " + job.getName() + " cron " + job.getCronString());
             sched.scheduleJob(detail, cronTrig);
-        } catch ( ParseException pe ) {
+        } catch (ParseException pe) {
             LOG.error("Error creating trigger", pe);
             throw new RuntimeException(
                     "Error parsing cron trigger in job" + job.getName());
-        } catch ( SchedulerException e ) {
+        } catch (SchedulerException e) {
             LOG.error("Error adding " + job.getName(), e);
             throw new RuntimeException("Error adding job " + job.getName());
         }
     }
 
-    public static void mailReport( ReportSummary report, String[] mailList )
+    public static void mailReport(ReportSummary report, String[] mailList)
             throws MessagingException {
-        if ( report == null || mailList == null || mailList.length == 0 ) {
+        if (report == null || mailList == null || mailList.length == 0) {
             return;
         }
 
@@ -165,7 +166,7 @@ public class SchedulerContextListener implements ServletContextListener {
         msg.setFrom(addressFrom);
 
         InternetAddress[] addressTo = new InternetAddress[mailList.length];
-        for ( int i = 0; i < mailList.length; i++ ) {
+        for (int i = 0; i < mailList.length; i++) {
             addressTo[i] = new InternetAddress(mailList[i]);
         }
         msg.setRecipients(Message.RecipientType.TO, addressTo);
