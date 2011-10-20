@@ -32,6 +32,7 @@ package edu.umiacs.ace.monitor.compare;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.PersistUtil;
+import edu.umiacs.sql.SQL;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,11 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.sql.DataSource;
 import org.apache.log4j.Logger;
-import org.eclipse.persistence.config.QueryHints;
-import org.eclipse.persistence.queries.ScrollableCursor;
 
 /**
  * Currently does all comparison in memory, this limits collections to a million
