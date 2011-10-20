@@ -63,10 +63,10 @@ public final class CollectionCompare2 {
     private static final Logger LOG = Logger.getLogger(CollectionCompare2.class);
     private List<String> parseErrors = new ArrayList<String>();
 
-    public CollectionCompare2(InputStream sourceFile, String prefix, int hint) {
+    public CollectionCompare2(InputStream sourceFile, String prefix) {
         sourceMap = new TreeMap<String, String>();
         sourceReverseMap = new TreeMap<String, String>();
-        LOG.trace("initializing collection compare with hint: " + hint);
+        LOG.trace("initializing collection compare with");
         try {
             parseInputStream(sourceFile, prefix);
         } catch (IOException e) {

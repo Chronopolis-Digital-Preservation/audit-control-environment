@@ -26,7 +26,7 @@ public final class CompareResults {
     private boolean running = true;
     private String message = null;
 
-    public CompareResults(CollectionCompare2 cc2, int hint) {
+    public CompareResults(CollectionCompare2 cc2) {
         unseenTarget = new TreeSet<String>();
 //differingNames = new TreeSet<DifferingName>(hint);
         unseenSupplied = new TreeSet<String>(cc2.getSourceMap().keySet());

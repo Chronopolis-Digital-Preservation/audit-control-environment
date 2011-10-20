@@ -76,7 +76,6 @@ public class CompareServlet extends EntityManagerServlet {
     protected void processRequest( HttpServletRequest request,
             HttpServletResponse response, EntityManager em )
             throws ServletException, IOException {
-        int hint = 0;
         Collection c = null;
         MonitoredItem monItem = null;
         RequestDispatcher dispatcher;
@@ -110,11 +109,6 @@ public class CompareServlet extends EntityManagerServlet {
                                 throw new ServletException(
                                         "Collection does not exist: " + colId);
                             }
-
-                            hint = (int)CollectionCountContext.getFileCount(c);
-                            if (hint == -1)
-                                hint = 10000;
-
 
                         }
                     } else if ( PARAM_ITEM_ID.equals(item.getFieldName()) ) {
@@ -161,8 +155,8 @@ public class CompareServlet extends EntityManagerServlet {
                             "item " + monItem + " filter " + inputFilter + " loading attached file");
 
                     CollectionCompare2 cc = new CollectionCompare2(
-                            item.openStream(), inputFilter,hint);
-                    CompareResults cr = new CompareResults(cc,hint);
+                            item.openStream(), inputFilter);
+                    CompareResults cr = new CompareResults(cc);
                     Thread t = new Thread(new TableCompareRunnable(cr,cc, c,
                             monItem), "Compare Thread " + c.getName());
                     t.start();
@@ -178,8 +172,8 @@ public class CompareServlet extends EntityManagerServlet {
                 LOG.debug("Remote digest request " + partner.getRemoteURL());
                 CollectionCompare2 cc = new CollectionCompare2(
                         JsonGateway.getGateway().getDigestList(partner,
-                        remoteCollection), inputFilter,hint);
-                                    CompareResults cr = new CompareResults(cc,hint);
+                        remoteCollection), inputFilter);
+                                    CompareResults cr = new CompareResults(cc);
 
                 Thread t = new Thread(new TableCompareRunnable(cr,cc, c,
                         monItem), "Compare Thread " + c.getName());
