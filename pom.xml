@@ -37,7 +37,7 @@
             <name>ADAPT Project Repository</name>
         </repository>
         <repository>
-            <url>http://ftp.ing.umu.se/mirror/eclipse/rt/eclipselink/maven.repo</url>
+            <url>http://download.eclipse.org/rt/eclipselink/maven.repo</url>
             <id>eclipselink</id>
             <layout>default</layout>
             <name>Repository for library Library[eclipselink]</name>
