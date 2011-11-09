@@ -38,6 +38,7 @@ import edu.umiacs.util.Strings;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
@@ -239,6 +240,9 @@ public class ManageCollectionServlet extends EntityManagerServlet {
         if (!Strings.isEmpty(req.getParameter(PARAM_GROUP))) {
             col.setGroup(req.getParameter(PARAM_GROUP));
         }
+
+        if (col.getSettings() == null)
+            col.setSettings(new HashMap<String, String>());
 
         if (!Strings.isEmpty(req.getParameter(PARAM_EMAILLIST))) {
 //            col.setEmailList(req.getParameter(PARAM_EMAILLIST));
