@@ -162,7 +162,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                         </c:if>
                     </m:Auth>
                     <m:Auth role="Download Item">
-                        <c:if test="${selectedFile.root.parentCollection.proxyData}">
+                        <c:if test="${selectedFile.root.parentCollection.settings['proxy.data']}">
                             <a href="Path/${selectedFile.root.parentCollection.name}${selectedFile.root.path}">Download Item</a>&nbsp;&nbsp;&nbsp;&nbsp;
                         </c:if>
                     </m:Auth>
