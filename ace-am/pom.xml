@@ -137,13 +137,13 @@
 
     <!-- local ones -->
     <dependency>
-      <groupId>edu.umiacs</groupId>
+      <groupId>edu.umiacs.srb</groupId>
       <artifactId>jargon</artifactId>
       <version>1.0</version>
     </dependency>
     <dependency>
-      <groupId>edu.umiacs</groupId>
-      <artifactId>swap</artifactId>
+      <groupId>edu.umiacs.swap</groupId>
+      <artifactId>swap-lib</artifactId>
       <version>1.0</version>
     </dependency>
     <dependency>
@@ -159,14 +159,14 @@
 
 
     <dependency>
-      <groupId>edu.umiacs</groupId>
-      <artifactId>adapt-srb</artifactId>
+      <groupId>edu.umiacs.srb</groupId>
+      <artifactId>srb-lib</artifactId>
       <version>1.0</version>
     </dependency>
     <dependency>
-      <groupId>edu.umiacs</groupId>
+      <groupId>edu.umiacs.irods</groupId>
       <artifactId>irods-api</artifactId>
-      <version>1.1</version>
+      <version>1.6</version>
     </dependency>
   </dependencies>
 </project>
