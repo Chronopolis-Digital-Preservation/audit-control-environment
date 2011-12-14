@@ -56,7 +56,9 @@ public class ThrottledInputStream extends FilterInputStream {
 
     @Override
     public int read() throws IOException {
-        read(oneByte, 0, 1);
+        int result = read(oneByte, 0, 1);
+        if (result == -1)
+            return -1;
         return oneByte[0];
     }
 

@@ -35,6 +35,7 @@ import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.driver.StorageDriverFactory;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.ConfigConstants;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.util.Strings;
 import java.util.List;
@@ -169,7 +170,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
 
                 for ( Collection c : items ) {
                     StorageDriver sa;
-                    int checkperiod = SettingsUtil.getInt(c, PARAM_IMS, 0);
+                    int checkperiod = SettingsUtil.getInt(c, ConfigConstants.ATTR_AUDIT_PERIOD, 0);
                     if ( checkperiod < 1 ) {
                         LOG.trace("Skipping auditing for collection: " + c.getName()
                                 + " check period: " + checkperiod);
