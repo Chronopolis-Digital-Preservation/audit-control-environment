@@ -187,7 +187,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                         <a href="Summary?collectionid=${selectedFile.root.parentCollection.id}&amp;itemid=${selectedFile.root.id}&amp;output=digest">Download&nbsp;Digests</a>&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="Summary?collectionid=${selectedFile.root.parentCollection.id}&amp;itemid=${selectedFile.root.id}&amp;output=checkm">Checkm&nbsp;Manifest</a>&nbsp;&nbsp;&nbsp;&nbsp;
 
-                        <c:if test="${selectedFile.root.parentCollection.proxyData}">
+                        <c:if test="${selectedFile.root.parentCollection.settings['proxy.data']}">
                             <a href="Summary?collectionid=${selectedFile.root.parentCollection.id}&amp;itemid=${selectedFile.root.id}&amp;output=wget">Web&nbsp;Crawler&nbsp;URL&nbsp;List</a>
                         </c:if>
 

@@ -57,21 +57,21 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                     <h3>Collection Differences</h3>
                 <pre>${results.message}</pre>
                     
-                    <h4>Files monitored here, but not in supplied/remote</h4>
+                    <h4>Files monitored here, but not in supplied/remote (${results.unseenTargetFilesSize})</h4>
                     <ul>
                         <c:forEach items="${results.unseenTargetFiles}" var="item" >
                             <li> ${item} </li>
                         </c:forEach>
                     </ul>
                     
-                    <h4>Files in supplied/remote, but not monitored here</h4>
+                    <h4>Files in supplied/remote, but not monitored here (${results.unseenSuppliedFilesSize})</h4>
                     <ul>
                         <c:forEach items="${results.unseenSuppliedFiles}" var="item" >
                             <li> ${item} </li>
                         </c:forEach>
                     </ul>
                     
-                    <h4>Files with different names, but same digests</h4>
+                    <h4>Files with different names, but same digests (${results.differingNamesSize})</h4>
                     <c:forEach items="${results.differingNames}" var="item" >
                         <ul>
                             <li>Hash: ${item.digest}</li>
@@ -82,7 +82,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                         </ul>
                     </c:forEach>
                     
-                    <h4>Files with same names, but different digests</h4>
+                    <h4>Files with same names, but different digests (${results.differingDigestsSize})</h4>
                     <c:forEach items="${results.differingDigests}" var="item" >
                         <ul>
                             <li>Name: ${item.name}</li>

@@ -69,6 +69,9 @@ public final class CompareResults {
         return unseenSupplied;
     }
 
+    public int getUnseenSuppliedFilesSize() {
+        return unseenSupplied.size();
+    }
     /**
      * Files that exist in the target but not collection
      * @return
@@ -78,12 +81,26 @@ public final class CompareResults {
         return Collections.unmodifiableSet(unseenTarget);
     }
 
+    public int getUnseenTargetFilesSize()
+    {
+        return unseenTarget.size();
+    }
+
     public Set<DifferingDigest> getDifferingDigests() {
         return differingDigests;
     }
 
+    public int getDifferingDigestsSize()
+    {
+        return differingDigests.size();
+    }
+
     public Set<DifferingName> getDifferingNames() {
         return differingNames;
+    }
+
+    public int getDifferingNamesSize() {
+        return differingNames.size();
     }
 
     public static class DifferingName implements Comparable<DifferingName> {

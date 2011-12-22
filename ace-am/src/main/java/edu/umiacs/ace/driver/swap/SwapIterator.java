@@ -294,15 +294,15 @@ if (rootFile.getFullPath().equals("/"))
                         new ThrottledInputStream(connection.getInputStream(), QueryThrottle.getMaxBps(), lastDelay);
                 dis = new DigestInputStream(tis, digest);
                 int read = 0;
-                while ( (read = dis.read(buffer)) >= 0) {
+                while ( (read = dis.read(buffer)) != -1) {
                     fileSize += read;
                     statebean.updateLastChange();
                     statebean.setRead(fileSize);
                 }
                 lastDelay = tis.getSleepTime();
 
-                byte[] hashValue = digest.digest();
                 dis.close();
+                byte[] hashValue = digest.digest();
                 fb.setHash(HashValue.asHexString(hashValue));
                 fb.setFileSize(fileSize);
                 connection.disconnect();

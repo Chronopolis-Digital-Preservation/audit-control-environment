@@ -1,0 +1,18 @@
+ACE uses Maven 3 to compile all sources and create releases. 
+
+Quick build guide:
+ - svn co https://subversion.umiacs.umd.edu/ace/trunk ace
+ - cd ace
+ - mvn package
+ - Look in ace-dist/target for package artifacts 
+  - If you just want the audit manager war, look in ace-am/target
+ - Follow the ACE INSTALL document using the build artifacts
+
+
+Details on ACE Packages used by the maven build:
+ - ace - top level package 
+ - ace-dist - mvn project to create releasable artifacts (packages zip,tgz,etc)
+ - ace-common - common libraries for ace token parsing
+ - ace-ims-api - API for communicating with the ACE IMS (depends on common,ims-ws)
+ - ace-ims-ws - mvn project for autogenerating webservice code from IMS wsdl
+ - ace-am - core audit manager web application
