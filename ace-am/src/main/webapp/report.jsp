@@ -20,6 +20,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Collection Errors</title>
         <link rel="stylesheet" type="text/css" href="style.css" />
+        <script src="jquery-1.7.1.min.js" type="text/javascript"></script>
         <style type="text/css">
             #summaryTable {
                 margin-left: 50px;
@@ -61,7 +62,6 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
     </head>
     <body>
         <jsp:include page="header.jsp" />
-
         <table id="summaryTable">
             <tr>
                 <td class="lblTd">Active Files</td>
@@ -90,9 +90,15 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
             </tr>
         </table>
 
+            <span>Select All:&nbsp;</span>    <input type="checkbox" id="selectall" />
+
+        <form method="GET" action="RemoveItem">
+            <input type="hidden" name="redirect" value="Report"/>
+            <input type="hidden" name="collectionid" value="${collection.collection.id}" />
         <table id="reportTable">
             <thead>
                 <tr>
+                    <td>Remove</td>
                     <td>State</td>
                     <td>Path</td>
                     <td>Last Seen</td>
@@ -101,6 +107,9 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
             </thead>
             <c:forEach var="item" items="${items}">
                 <tr>
+                    <td>
+                          <input type="checkbox" name="removal" value="${item.id}" />
+                    </td>
                     <td>
                         <c:choose>
                             <c:when test="${item.state eq 'C'}">
@@ -148,8 +157,17 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                     </table>
                 </td></tr>
         </table>
+        <input type="submit" value="Remove Selected Items" onclick="document.location = 'report.jsp';"/>
+        </form>
 
-
+    <script type="text/javascript">
+        $("#selectall").click(function(){
+            if($("#selectall").attr("checked")=="checked")
+                $('input[name="removal"]').attr('checked', 'checked');
+            else
+                $('input[name="removal"]').removeAttr('checked');
+        });
+    </script>
 
         <jsp:include page="footer.jsp" />
     </body>

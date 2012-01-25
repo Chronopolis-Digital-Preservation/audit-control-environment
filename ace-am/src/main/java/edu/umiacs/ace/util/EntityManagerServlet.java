@@ -158,6 +158,21 @@ public abstract class EntityManagerServlet extends HttpServlet {
         }
     }
 
+    public long[] getParameterList(HttpServletRequest request, String paramName, long defaultValue){
+        String[] strValues = request.getParameterValues(paramName);
+        if(strValues == null)
+            return null;
+        long[] longValues = new long[strValues.length];
+        for(int counter=0; counter<strValues.length; counter++){
+            String s = strValues[counter];
+            if(Strings.isValidLong(s))
+                longValues[counter] = Long.parseLong(s);
+            else
+                longValues[counter] = defaultValue;
+        }
+        return longValues;
+    }
+
     public boolean getParameter( HttpServletRequest request, String paramName,
             boolean defaultValue ) {
         if ( Strings.isValidInt(request.getParameter(paramName)) ) {

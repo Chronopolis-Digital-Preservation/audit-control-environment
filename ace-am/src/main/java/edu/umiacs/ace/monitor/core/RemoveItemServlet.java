@@ -58,12 +58,14 @@ public class RemoveItemServlet extends EntityManagerServlet {
 
     public static final String PARAM_REDIRECT = "redirect";
     public static final String DEFAULT_REDIRECT = "browse.jsp";
+    public static final String REMOVAL = "removal";
     private static final Logger LOG = Logger.getLogger(RemoveItemServlet.class);
 
     @Override
     protected void processRequest( HttpServletRequest request,
             HttpServletResponse response, EntityManager em ) throws ServletException, IOException {
         MonitoredItem item;
+        long[] itemIds;
         HttpSession session = request.getSession();
         DirectoryTree dt =
                 (DirectoryTree) session.getAttribute(BrowseServlet.SESSION_DIRECTORY_TREE);
@@ -71,7 +73,49 @@ public class RemoveItemServlet extends EntityManagerServlet {
         long itemId = getParameter(request, PARAM_ITEM_ID, 0);
         if ( itemId > 0 ) {
             item = em.getReference(MonitoredItem.class, itemId);
-            if ( item != null ) {
+            removeItem(item, em, dt);
+            /*if ( item != null ) {
+                LogEventManager lem =
+                        new LogEventManager(System.currentTimeMillis(), item.getParentCollection());
+                lem.persistItemEvent(LogEnum.REMOVE_ITEM, item.getPath(), null, em);
+                if ( !item.isDirectory() ) {
+                    String parent = item.getParentPath();
+                    Collection c = item.getParentCollection();
+                    EntityTransaction trans = em.getTransaction();
+                    trans.begin();
+                    if ( item.getToken() != null ) {
+                        em.remove(item.getToken());
+                    }
+                    em.remove(item);
+                    trans.commit();
+                    reloadTree(dt, parent, c, em);
+                } else {
+                    new MyDeleteThread(item, dt).start();
+                }
+            }*/
+        }
+        else{
+            itemIds = getParameterList(request,REMOVAL, 0);
+            if(itemIds != null){
+                for(long l:itemIds){
+                    if(l > 0){
+                        item =  em.getReference(MonitoredItem.class, l);
+                        removeItem(item, em, dt);
+                    }
+                }
+            }
+        }
+        String redirect = request.getParameter(PARAM_REDIRECT);
+        if ( Strings.isEmpty(redirect) ) {
+            redirect = DEFAULT_REDIRECT;
+        }
+
+        RequestDispatcher dispatcher = request.getRequestDispatcher(redirect);
+        dispatcher.forward(request, response);
+    }
+
+    private void removeItem(MonitoredItem item, EntityManager em, DirectoryTree dt){
+        if ( item != null ) {
                 LogEventManager lem =
                         new LogEventManager(System.currentTimeMillis(), item.getParentCollection());
                 lem.persistItemEvent(LogEnum.REMOVE_ITEM, item.getPath(), null, em);
@@ -90,15 +134,6 @@ public class RemoveItemServlet extends EntityManagerServlet {
                     new MyDeleteThread(item, dt).start();
                 }
             }
-        }
-
-        String redirect = request.getParameter(PARAM_REDIRECT);
-        if ( Strings.isEmpty(redirect) ) {
-            redirect = DEFAULT_REDIRECT;
-        }
-
-        RequestDispatcher dispatcher = request.getRequestDispatcher(redirect);
-        dispatcher.forward(request, response);
     }
 
     private static void reloadTree( DirectoryTree dt, String parent,
