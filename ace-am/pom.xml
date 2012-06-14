@@ -202,8 +202,13 @@
                     <artifactId>jersey-json</artifactId>
                     <version>1.6</version>
                 </dependency>
-
-            </dependencies>
+        <dependency>
+            <groupId>edu.umiacs.ace</groupId>
+            <artifactId>ace-ims-ws</artifactId>
+            <version>1.7-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
         </project>
 
 

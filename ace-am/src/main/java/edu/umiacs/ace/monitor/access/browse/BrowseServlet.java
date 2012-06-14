@@ -56,7 +56,7 @@ import org.apache.log4j.Logger;
 /**
  * Servlet to manage browsing a collection. This will store a directorytree in
  * a users session
- * 
+ *
  * @author toaster
  */
 public class BrowseServlet extends EntityManagerServlet {
@@ -70,7 +70,7 @@ public class BrowseServlet extends EntityManagerServlet {
     public static final String SESSION_DIRECTORY_TREE = "directoryTree";
     public static final String PAGE_ISAUDITING = "auditing";
 
-    /** 
+    /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
      * @param request servlet request
      * @param response servlet response
@@ -118,11 +118,11 @@ public class BrowseServlet extends EntityManagerServlet {
                 dt.toggleItem(itemId);
 
             }
-//            else
-//            {
-//                session.setAttribute(SESSION_FILE,
-//                        loadFileBean(dt.getDirectoryNode(itemId)));
-//            }
+            //            else
+            //            {
+            //                session.setAttribute(SESSION_FILE,
+            //                        loadFileBean(dt.getDirectoryNode(itemId)));
+            //            }
         }
         request.setAttribute(PAGE_ISAUDITING, isRunning);
         RequestDispatcher dispatcher = request.getRequestDispatcher("browse.jsp");
@@ -138,21 +138,24 @@ public class BrowseServlet extends EntityManagerServlet {
             retBean.root = master;
             retBean.name = node.getName();
 
-            if (master.getToken() != null)
-            {
-//            TokenResponse resp = (TokenResponse)master.getToken().getToken();
-            MessageDigest digest = MessageDigest.getInstance(master.getToken().getProofAlgorithm());
+            if (master.getToken() != null) {
+                //            TokenResponse resp = (TokenResponse)master.getToken().getToken();
+                MessageDigest digest = MessageDigest.getInstance(master.getToken().getProofAlgorithm());
 
-            ProofValidator pv = new ProofValidator();
-            Proof proof = TokenUtil.extractProof(master.getToken());
-            byte[] root = pv.rootHash(digest, proof, HashValue.asBytes(master.getFileDigest()));
-            retBean.itemProof = HashValue.asHexString(root);
+                ProofValidator pv = new ProofValidator();
+                Proof proof = TokenUtil.extractProof(master.getToken());
+                String fileDigest = master.getFileDigest();
+                if ( fileDigest != null ){
+                    byte[] root = pv.rootHash(digest, proof, HashValue.asBytes(master.getFileDigest()));
+                    retBean.itemProof = HashValue.asHexString(root);
+                }else {
+                    retBean.itemProof = null;
+                }
             }
             return retBean;
         } catch ( EntityNotFoundException e ) {
             return null;
-        } catch (NoSuchAlgorithmException e)
-        {
+        } catch (NoSuchAlgorithmException e) {
             LOG.error("Cannot create ald",e);
             return null;
         }

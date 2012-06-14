@@ -160,10 +160,10 @@
         <servlet-name>ClearResourceServlet</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.core.ClearResourceServlet</servlet-class>
     </servlet>
-    <!--<servlet>
+    <servlet>
         <servlet-name>IngestStore</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.register.IngestStore</servlet-class>
-    </servlet> -->
+    </servlet>
     <servlet>
         <servlet-name>ChangePassword</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.users.ChangePasswordServlet</servlet-class>
@@ -272,6 +272,10 @@
     <servlet-mapping>
         <servlet-name>ChangePassword</servlet-name>
         <url-pattern>/ChangePassword</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>IngestStore</servlet-name>
+        <url-pattern>/Ingest</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
@@ -717,5 +721,5 @@
     <security-role>
         <description>Add/edit/remove stuff in /PartnerSite</description>
         <role-name>Modify Partner Sites</role-name>
-    </security-role>
-</web-app>
+    </security-role> --&gt;
+    </web-app>

@@ -99,7 +99,7 @@ public class ProofBuilder {
     public void addProofLevel( int suppliedIndex, byte[]... hashes ) {
 
         if ( hashes == null || hashes.length < 1 ) {
-            throw new IllegalArgumentException("hashe list must contain at leaset 1 hash");
+            throw new IllegalArgumentException("hash list must contain at leaset 1 hash");
         }
 
         newLevel(hashes.length + 1);

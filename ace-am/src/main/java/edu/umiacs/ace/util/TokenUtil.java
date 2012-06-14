@@ -2,14 +2,15 @@ package edu.umiacs.ace.util;
 
 import edu.umiacs.ace.hashtree.Proof;
 import edu.umiacs.ace.hashtree.ProofBuilder;
+import edu.umiacs.ace.hashtree.ProofNode;
 import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.Token;
+import edu.umiacs.ace.monitor.core.TokenBuilder;
 import edu.umiacs.ace.token.AceToken;
 import edu.umiacs.ace.token.AceTokenBuilder;
-
 /**
  * Convert DB stored token to an AceToken compatible object.
- * 
+ *
  * @author toaster
  */
 public class TokenUtil {
@@ -43,6 +44,33 @@ public class TokenUtil {
         }
 
         return tokenBuilder.createToken();
+    }
+
+    public static Token convertFromAceToken( AceToken aceToken ){
+        if ( aceToken == null ){
+            return null;
+        }
+
+        //Token something = new Token? Maybe a TokenBuilder instead
+        TokenBuilder builder = new TokenBuilder();
+
+        // Set Date, Algorithm (Digest), IMS, IMSService, Round, Rebuild Proof?
+        builder.setDate(aceToken.getDate());
+        builder.setImsService(aceToken.getImsService());
+        builder.setDigestAlgorithm(aceToken.getDigestType());
+        builder.setRound(aceToken.getRound());
+
+        Proof tokenProof = aceToken.getProof();
+
+        for (ProofNode node : tokenProof.getProofNodes()){
+            int inheritIdx = node.getIndex();
+            builder.startProofLevel();
+            builder.addHashLevel(inheritIdx, node);
+//            builder.writeLevel();
+        }
+        builder.writeProof();
+
+        return builder.createToken();
     }
 
     public static Proof extractProof( Token token ) {

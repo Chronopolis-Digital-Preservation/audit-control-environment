@@ -81,12 +81,12 @@ public final class TokenAuditCallback implements ValidationCallback {
         totalErrors++;
         LOG.error("Exception throw registering", throwable);
         EntityManager em = PersistUtil.getEntityManager();
-        EntityTransaction trans = em.getTransaction();
-        trans.begin();
+        // EntityTransaction trans = em.getTransaction();
+        // trans.begin();
         String msg = "Exception in batch thread" + Strings.exceptionAsString(throwable);
         logManager.persistCollectionEvent(LogEnum.SYSTEM_ERROR, msg, em);
 //        lem.abortSite(collection, "Exception in batch thread", throwable);
-        trans.commit();
+        // trans.commit();
         em.close();
         cancel.cancel();
 

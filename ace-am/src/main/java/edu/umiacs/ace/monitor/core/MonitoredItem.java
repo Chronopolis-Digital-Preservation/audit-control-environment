@@ -60,6 +60,8 @@ import javax.persistence.TemporalType;
  * P - partner does not have this file
  * D - partner file has different digest
  * @author toaster
+ * 1.6+
+ * R - file registered but not ready for auditing
  */
 @Entity
 @Table(name = "monitored_item")
