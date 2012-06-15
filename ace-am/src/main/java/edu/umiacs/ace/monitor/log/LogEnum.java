@@ -171,6 +171,8 @@ public enum LogEnum {
                 return TOKEN_AUDIT_FINISH;
             case 24:
                 return TOKEN_INGEST_UPDATE;
+            case 25:
+                return FILE_REGISTER;
 
             case 99:
                 return SYSTEM_ERROR;
