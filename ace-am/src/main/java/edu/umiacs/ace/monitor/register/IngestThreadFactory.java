@@ -32,6 +32,7 @@ package edu.umiacs.ace.monitor.register;
 
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.Token;
+import edu.umiacs.ace.util.PersistUtil;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -40,6 +41,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 
 /**
  *
@@ -49,12 +52,14 @@ public class IngestThreadFactory extends Thread{
     private Map<String, Token> tokens;
     private List<IngestThread> threads;
     private IngestDirectory idThread;
+    private Collection coll;
     // private EntityTransaction trans;
     // private EntityManager em = PersistUtil.getEntityManager();
 
 
     public IngestThreadFactory(Map<String, Token> tokens, Collection coll){
         this.tokens = tokens;
+        this.coll = coll;
         //this.trans = em.getTransaction();
         threads = new ArrayList<IngestThread>();
 
@@ -95,7 +100,16 @@ public class IngestThreadFactory extends Thread{
             Logger.getLogger(
                     IngestThreadFactory.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
-            // System.out.println("All threads finished");
+            if ( !getNewTokens().isEmpty() ) {
+                System.out.println("Setting collection to errrrr");
+                coll.setState('E');
+                EntityManager em = PersistUtil.getEntityManager();
+                EntityTransaction trans = em.getTransaction();
+                trans.begin();
+                em.merge(coll);
+                trans.commit();
+                trans = null;
+            }
         }
     }
 
@@ -116,13 +130,6 @@ public class IngestThreadFactory extends Thread{
             t.start();
         }
         joinThreads();
-    }
-
-    private void removeThreads() {
-        for ( IngestThread it: threads ) {
-            threads.remove(it);
-            it = null;
-        }
     }
 
     public Set<String> getUpdatedTokens() {

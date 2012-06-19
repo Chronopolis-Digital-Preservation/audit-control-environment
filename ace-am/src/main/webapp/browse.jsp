@@ -135,6 +135,9 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                                     <c:when test="${selectedFile.root.state eq 'M'}">
                                         File Missing
                                     </c:when>
+                                    <c:when test="${selectedFile.root.state eq 'R'}">
+                                        File Registered
+                                    </c:when>
                                     <c:when test="${selectedFile.root.state eq 'P'}">
                                         Remote File Missing
                                     </c:when>

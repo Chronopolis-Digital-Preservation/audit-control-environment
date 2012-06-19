@@ -170,7 +170,7 @@ public class IngestThread extends Thread {
                     updateToken(em, token, item, coll, identifier);
                 }
 
-                // With large Token Stores, we can get a large number of transactions
+                // With large Token Stores, we get a large number of transactions
                 // Flusing and Clearing the EM helps to clear some memory
                 if ( numTransactions > 7000 ) {
                     em.flush();
@@ -184,7 +184,6 @@ public class IngestThread extends Thread {
             trans = null;
             em = null;
             finished();
-            // System.out.println("Thread finished: " + numTransactions);
         }
     }
 

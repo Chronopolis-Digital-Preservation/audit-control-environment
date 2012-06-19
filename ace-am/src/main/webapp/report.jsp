@@ -130,6 +130,9 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                             <c:when test="${item.state eq 'D'}">
                                 Remote Corrupt
                             </c:when>
+                            <c:when test="${item.state eq 'R'}">
+                                File Registered
+                            </c:when>
                             <c:otherwise>
                                 ${item.state}
                             </c:otherwise>

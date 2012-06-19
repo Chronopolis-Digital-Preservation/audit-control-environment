@@ -76,7 +76,8 @@ public class IngestStore extends EntityManagerServlet {
         Map<String, Token> batchTokens = new HashMap<String, Token>();
 
         if (item != null && !item.isDirectory())
-            throw new ServletException("Selected item is not a directory " + item.getPath());
+            throw new ServletException( "Selected item is not a directory "
+                    + item.getPath() );
 
         if (!ServletFileUpload.isMultipartContent(request)) {
             throw new ServletException("No file attached");

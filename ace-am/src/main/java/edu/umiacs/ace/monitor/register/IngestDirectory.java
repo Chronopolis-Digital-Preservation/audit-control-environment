@@ -45,6 +45,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 /**
+ * Class to register directories from a token store
  *
  * @author shake
  */

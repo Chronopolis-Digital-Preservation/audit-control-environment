@@ -562,8 +562,7 @@ public final class AuditThread extends Thread implements CancelCallback {
             if (validator != null) {
                 itemMap.put(token, item);
                 try {
-                    validator.add(
-                            item.getFileDigest(), token);
+                    validator.add(item.getFileDigest(), token);
                 } catch (InterruptedException e) {
                     abortException = e;
                 }
