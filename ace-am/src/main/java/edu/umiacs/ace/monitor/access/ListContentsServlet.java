@@ -97,7 +97,7 @@ public class ListContentsServlet extends EntityManagerServlet {
             }
             // header information
             if ( TYPE_DIGEST.equals(output) ) {
-                StringBuffer header = new StringBuffer();
+                StringBuilder header = new StringBuilder();
                 header.append(c.getDigestAlgorithm());
                 header.append(":");
                 header.append(c.getName());
@@ -155,10 +155,12 @@ public class ListContentsServlet extends EntityManagerServlet {
                         String digestAlg = checkmDigestAlgFormat(c.getDigestAlgorithm());
                         line = formatPath(rs.getString(1)) + " | " + digestAlg + " | "
                                 + rs.getString(2);
-                        os.println(line);
+                        os.write(line.getBytes("UTF-8"));
+                        os.println();
                     } else if ( TYPE_DIGEST.equals(output) ) {
                         line = rs.getString(2) + "\t" + formatPath(rs.getString(1));
-                        os.println(line);
+                        os.write(line.getBytes("UTF-8"));
+                        os.println();
                     } else if ( TYPE_STORE.equals(output) ) {
                         Token tok = em.getReference(Token.class, rs.getLong(3));
                         if ( tok != null ) {
