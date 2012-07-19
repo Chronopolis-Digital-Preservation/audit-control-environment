@@ -101,7 +101,6 @@ public class IngestThreadFactory extends Thread{
                     IngestThreadFactory.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
             if ( !getNewTokens().isEmpty() ) {
-                System.out.println("Setting collection to errrrr");
                 coll.setState('E');
                 EntityManager em = PersistUtil.getEntityManager();
                 EntityTransaction trans = em.getTransaction();

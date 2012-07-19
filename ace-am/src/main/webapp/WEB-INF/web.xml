@@ -10,6 +10,11 @@
         <filter-class>edu.umiacs.ace.rest.PersistenceServiceFilter</filter-class>
     </filter>
 
+    <filter>
+        <description>Force utf8 as the charset</description>
+        <filter-name>CharsetFilter</filter-name>
+        <filter-class>edu.umiacs.ace.rest.CharsetFilter</filter-class>
+    </filter>
     <filter-mapping>
         <filter-name>PersistenceFilter</filter-name>
         <url-pattern>/rest/*</url-pattern>
