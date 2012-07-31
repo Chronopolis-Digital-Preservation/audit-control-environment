@@ -209,3 +209,11 @@ CREATE TABLE `peer_collection` (
   `PEERID` bigint(20) NOT NULL,
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `system_settings` (
+  `ID` bigint(20) NOT NULL auto_increment,
+  `ATTR` varchar(255) default NULL,
+  `VALUE` varchar(255) default NULL,
+  PRIMARY KEY  (`ID`),
+  UNIQUE (`ATTR`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
