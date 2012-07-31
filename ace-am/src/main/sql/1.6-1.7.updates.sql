@@ -7,6 +7,13 @@ CREATE TABLE `settings` (
   UNIQUE idx_coll_setting (`COLLECTION_ID`,`ATTR`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+CREATE TABLE `system_settings` (
+  `ID` bigint(20) NOT NULL auto_increment,
+  `ATTR` varchar(255) default NULL,
+  `VALUE` varchar(255) default NULL,
+  PRIMARY KEY  (`ID`),
+  UNIQUE (`ATTR`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 ALTER TABLE monitored_item CHARACTER SET utf8;
 ALTER TABLE monitored_item MODIFY `PARENTPATH` varchar(512) CHARACTER SET utf8;

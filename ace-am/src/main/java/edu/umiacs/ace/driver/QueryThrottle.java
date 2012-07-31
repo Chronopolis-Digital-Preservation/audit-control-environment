@@ -30,9 +30,13 @@
 // $Id$
 package edu.umiacs.ace.driver;
 
+import edu.umiacs.ace.monitor.settings.SettingsParameter;
+import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.apache.log4j.Logger;
@@ -89,15 +93,22 @@ public class QueryThrottle implements ServletContextListener {
 
     @Override
     public void contextInitialized( ServletContextEvent sce ) {
-        String time = sce.getServletContext().getInitParameter(PARAM_TIME);
-
+        System.out.println("[QUERY]");
+        EntityManager em = PersistUtil.getEntityManager();
+        Query q = em.createNamedQuery("SettingsParameter.getAttr");
+        q.setParameter("attr", PARAM_TIME);
+        SettingsParameter s = (SettingsParameter) q.getSingleResult();
+        String time = s.getValue();
+        System.out.println("[QUERY] RESULT " + s.getName() + " " + s.getValue());
 
         if ( Strings.isValidInt(time) ) {
             setMinWait(Integer.parseInt(time));
             LOG.info("Setting query throttle minwait to " + minWait);
         }
 
-        String maxBpsString = sce.getServletContext().getInitParameter(PARAM_BPS);
+        q.setParameter("attr", PARAM_BPS);
+        s = (SettingsParameter) q.getSingleResult();
+        String maxBpsString = s.getValue();
         if ( Strings.isValidLong(maxBpsString) ) {
            setMaxBps(Long.parseLong(maxBpsString));
         }

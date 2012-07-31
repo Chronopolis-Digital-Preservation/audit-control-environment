@@ -49,7 +49,7 @@
              <input  type="hidden" name="collectionid" value="${workingCollection.collection.id}">
 
              Select token store to ingest: <input type="file" name="ingested"/><br><br>
-            <input type="submit" value="Submit"/>
+            <input type="submit" value="Submit" class="submitLink"/>
         </FORM>
         </div>
         <jsp:include page="footer.jsp" />

@@ -68,7 +68,8 @@ import javax.persistence.TemporalType;
     "SELECT c FROM Collection c ORDER BY c.group"),
     @NamedQuery(name = "Collection.getCollectionByName", query =
     "SELECT c FROM Collection c WHERE c.name = :name"),
-    @NamedQuery(name = "Collection.listGroups", query = "SELECT DISTINCT c.group FROM Collection c")
+    @NamedQuery(name = "Collection.listGroups", query =
+    "SELECT DISTINCT c.group FROM Collection c")
 })
 public class Collection implements Serializable {
 

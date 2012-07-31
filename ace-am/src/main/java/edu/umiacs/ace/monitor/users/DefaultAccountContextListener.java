@@ -30,6 +30,7 @@
 // $Id$
 package edu.umiacs.ace.monitor.users;
 
+import edu.umiacs.ace.monitor.settings.SettingsParameter;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
 import javax.persistence.EntityManager;
@@ -55,24 +56,26 @@ public class DefaultAccountContextListener implements ServletContextListener {
     @Override
     public void contextInitialized( ServletContextEvent arg0 ) {
         ServletContext ctx = arg0.getServletContext();
+        EntityManager em = PersistUtil.getEntityManager();
 
-        String authStr = ctx.getInitParameter(PARAM_USER_AUTH);
+        Query q1 = em.createNamedQuery("SettingsParameter.getAttr");
+        q1.setParameter("attr", PARAM_USER_AUTH);
+        SettingsParameter s = (SettingsParameter) q1.getSingleResult();
+        String authStr = s.getValue();
         boolean isAuthMgt = true;
 
-        if (!Strings.isEmpty(authStr))
-        {
+        if (!Strings.isEmpty(authStr)) {
             isAuthMgt = Boolean.valueOf(authStr);
         }
         ctx.setAttribute("authmanagement", isAuthMgt);
-        
+
         if ( isAuthMgt ) {
             try {
-//            LOG.trace("Testing for account setup");
-                EntityManager em = PersistUtil.getEntityManager();
+                //            LOG.trace("Testing for account setup");
 
                 Query q = em.createNamedQuery("Users.listAllUsers");
 
-                if ( q.getResultList() == null || q.getResultList().size() == 0 ) {
+                if ( q.getResultList() == null || q.getResultList().isEmpty() ) {
                     LOG.debug("No accounts found, creating default admin");
                     Users u = new Users();
                     u.setPassword("admin");
@@ -142,6 +145,10 @@ public class DefaultAccountContextListener implements ServletContextListener {
                     partnerSite.setRolename("Modify Partner Sites");
                     partnerSite.setUsername("admin");
 
+                    UserRoles updateSysSettings = new UserRoles();
+                    updateSysSettings.setRolename("Modify System Settings");
+                    updateSysSettings.setUsername("system");
+
 
                     EntityTransaction et = em.getTransaction();
                     et.begin();
@@ -162,13 +169,38 @@ public class DefaultAccountContextListener implements ServletContextListener {
                     em.persist(auditSummaries);
                     em.persist(actReporting);
                     em.persist(partnerSite);
+                    em.persist(updateSysSettings);
                     et.commit();
+
+                    persistSystemUser();
                 }
             } catch ( Exception e ) {
 
                 LOG.error("Error creating default account", e);
             }
         }
+    }
+
+    private void persistSystemUser() {
+        EntityManager em = PersistUtil.getEntityManager();
+
+        Users u = new Users();
+        u.setUsername("system");
+        u.setPassword("system");
+
+        UserRoles log = new UserRoles();
+        log.setRolename("Log");
+        log.setUsername("system");
+
+        UserRoles updateSysSettings = new UserRoles();
+        updateSysSettings.setRolename("Modify System Settings");
+        updateSysSettings.setUsername("system");
+
+        EntityTransaction trans = em.getTransaction();
+        trans.begin();
+        em.persist(u);
+        em.persist(log);
+        em.persist(updateSysSettings);
     }
 
     @Override

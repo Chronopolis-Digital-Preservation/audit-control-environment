@@ -37,6 +37,7 @@ import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.ConfigConstants;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
+import edu.umiacs.ace.monitor.settings.SettingsParameter;
 import edu.umiacs.util.Strings;
 import java.util.List;
 import java.util.Timer;
@@ -71,22 +72,33 @@ public final class AuditConfigurationContext implements ServletContextListener {
 
     @Override
     public void contextInitialized( ServletContextEvent arg0 ) {
+        EntityManager em = PersistUtil.getEntityManager();
+        Query q = em.createNamedQuery("SettingsParameter.getAttr");
+        SettingsParameter s = null;
 
         ServletContext ctx = arg0.getServletContext();
         // set IMS for audit Thread from server parameter
-        AuditThreadFactory.setIMS(ctx.getInitParameter(PARAM_IMS));
+        q.setParameter("attr", PARAM_IMS);
+        s = (SettingsParameter) q.getSingleResult();
+        AuditThreadFactory.setIMS(s.getValue());
         if ( Strings.isEmpty(AuditThreadFactory.getIMS()) ) {
             throw new RuntimeException("IMS is empty");
         }
 
-        if ( !Strings.isEmpty(ctx.getInitParameter(PARAM_IMS_TOKEN_CLASS)) ) {
-            String tokenClass = ctx.getInitParameter(PARAM_IMS_TOKEN_CLASS);
+        q.setParameter("attr", PARAM_IMS_TOKEN_CLASS);
+        s = (SettingsParameter) q.getSingleResult();
+        if ( !Strings.isEmpty(s.getValue()) ) {
+            String tokenClass = s.getValue();
+            System.out.println("IMS TOKEN CLASS: " + tokenClass);
             AuditThreadFactory.setTokenClass(tokenClass);
         }
 
 
-        if ( Strings.isValidInt(ctx.getInitParameter(PARAM_IMS_PORT)) ) {
-            int port = Integer.parseInt(ctx.getInitParameter(PARAM_IMS_PORT));
+        q.setParameter("attr", PARAM_IMS_PORT);
+        s = (SettingsParameter) q.getSingleResult();
+        if ( Strings.isValidInt(s.getValue()) ) {
+            int port = Integer.parseInt(s.getValue());
+            System.out.println("IMS PORT: " + port);
             if ( port > 1 && port < 32768 ) {
                 AuditThreadFactory.setImsPort(port);
             } else {
@@ -97,10 +109,14 @@ public final class AuditConfigurationContext implements ServletContextListener {
         PauseBean pb = new PauseBean();
         ctx.setAttribute(ATTRIBUTE_PAUSE, pb);
 
-        String startPaused = ctx.getInitParameter(PARAM_DISABLE_AUDIT);
+        q.setParameter("attr", PARAM_DISABLE_AUDIT);
+        s = (SettingsParameter) q.getSingleResult();
+        String startPaused = s.getValue();
         pb.setPaused(Boolean.valueOf(startPaused));
 
-        String maxRun = ctx.getInitParameter(PARAM_THROTTLE_MAXAUDIT);
+        q.setParameter("attr", PARAM_THROTTLE_MAXAUDIT);
+        s = (SettingsParameter) q.getSingleResult();
+        String maxRun = s.getValue();
         if ( Strings.isValidInt(maxRun) ) {
             int audit = Integer.parseInt(maxRun);
             if ( audit > 0 ) {

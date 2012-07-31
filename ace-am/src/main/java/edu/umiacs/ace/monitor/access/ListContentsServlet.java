@@ -150,7 +150,8 @@ public class ListContentsServlet extends EntityManagerServlet {
                         String prefix = ctxPath.substring(
                                 0, ctxPath.lastIndexOf("/Sum"));
                         line = prefix + "/Path/" + c.getName() + formatPath(rs.getString(1));
-                        os.println(line);
+                        os.write(line.getBytes("UTF-8"));
+                        os.println();
                     } else if ( TYPE_CHECKM.equals(output) ) {
                         String digestAlg = checkmDigestAlgFormat(c.getDigestAlgorithm());
                         line = formatPath(rs.getString(1)) + " | " + digestAlg + " | "

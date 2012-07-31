@@ -80,15 +80,15 @@ import javax.persistence.TemporalType;
     "SELECT m FROM MonitoredItem m WHERE m.parentCollection = :coll AND m.parentPath IS NULL"),
     @NamedQuery(name = "MonitoredItem.listChildren", query =
     "SELECT m FROM MonitoredItem m WHERE m.parentCollection = :coll AND m.parentPath = :parent"),
-    @NamedQuery(name = "MonitoresItem.countFilesInAllCollections", query =
+    @NamedQuery(name = "MonitoredItem.countFilesInAllCollections", query =
     "SELECT m.parentCollection, count(m) FROM MonitoredItem m WHERE m.directory = false GROUP BY m.parentCollection"),
-    @NamedQuery(name = "MonitoresItem.countFilesInCollection", query =
+    @NamedQuery(name = "MonitoredItem.countFilesInCollection", query =
     "SELECT count(m) FROM MonitoredItem m WHERE m.directory = false AND m.parentCollection = :coll"),
     @NamedQuery(name = "MonitoredItem.listFilesInCollection", query =
     "SELECT m FROM MonitoredItem m WHERE m.directory = false AND m.parentCollection = :coll"),
-    @NamedQuery(name = "MonitoresItem.countDirectoriesInAllCollections", query =
+    @NamedQuery(name = "MonitoredItem.countDirectoriesInAllCollections", query =
     "SELECT m.parentCollection, count(m) FROM MonitoredItem m WHERE m.directory = true GROUP BY m.parentCollection"),
-    @NamedQuery(name = "MonitoresItem.countDirectoriesCollection", query =
+    @NamedQuery(name = "MonitoredItem.countDirectoriesCollection", query =
     "SELECT count(m) FROM MonitoredItem m WHERE m.directory = true AND m.parentCollection = :coll"),
     @NamedQuery(name = "MonitoredItem.countErrorsInCollection", query =
     "SELECT count(m) FROM MonitoredItem m WHERE m.state <> 'A' AND m.parentCollection = :coll"),

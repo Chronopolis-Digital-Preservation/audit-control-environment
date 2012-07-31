@@ -47,6 +47,12 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                 </div>
             </td>
 
+            <td align="center">
+                <div class="menucell">
+                    <a href="settings.jsp">System Settings</a>
+                </div>
+            </td>
+
         </tr>
     </table>
 </div>

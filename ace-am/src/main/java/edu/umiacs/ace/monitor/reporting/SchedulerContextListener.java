@@ -30,6 +30,7 @@
 // $Id$
 package edu.umiacs.ace.monitor.reporting;
 
+import edu.umiacs.ace.monitor.settings.SettingsParameter;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
 import java.text.ParseException;
@@ -74,9 +75,16 @@ public class SchedulerContextListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent event) {
         NDC.push("[schedstartup]");
         try {
-            mailserver = event.getServletContext().getInitParameter(
-                    PARAM_SMTP_SERVER);
-            mailfrom = event.getServletContext().getInitParameter(PARAM_FROM);
+            EntityManager em = PersistUtil.getEntityManager();
+            Query q1 = em.createNamedQuery("SettingsParameter.getAttr");
+
+            q1.setParameter("attr", PARAM_SMTP_SERVER);
+            SettingsParameter s = (SettingsParameter)q1.getSingleResult();
+            mailserver = s.getValue();
+
+            q1.setParameter("attr", PARAM_FROM);
+            s = (SettingsParameter) q1.getSingleResult();
+            mailfrom = s.getValue();
             if (Strings.isEmpty(mailserver)) {
                 mailserver = "127.0.0.1";
             }
@@ -86,9 +94,8 @@ public class SchedulerContextListener implements ServletContextListener {
             sched.start();
             LOG.debug("Starting the scheduler, registering all jobs");
 
-            EntityManager em = PersistUtil.getEntityManager();
-            Query q = em.createNamedQuery("ReportPolicy.listAll");
-            for (Object o : q.getResultList()) {
+            Query q2 = em.createNamedQuery("ReportPolicy.listAll");
+            for (Object o : q2.getResultList()) {
                 addJob((ReportPolicy) o);
             }
         } catch (Exception ex) {

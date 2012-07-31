@@ -19,6 +19,7 @@
     <class>edu.umiacs.ace.monitor.core.Token</class>
     <class>edu.umiacs.ace.monitor.core.MonitoredItem</class>
     <class>edu.umiacs.ace.driver.swap.SwapSettings</class>
+    <class>edu.umiacs.ace.monitor.settings.SettingsParameter</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <!-- <property name="toplink.logging.level" value="FINE"/> -->

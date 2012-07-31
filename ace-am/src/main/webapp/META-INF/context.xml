@@ -16,42 +16,44 @@
        'name' is the resource name used by the web app to refer to this
        database and NOT the database name, do not change unless you want bad
        things to happen.-->
-  <Resource auth="Container" driverClassName="com.mysql.jdbc.Driver" maxActive="20" maxIdle="10" maxWait="-1" name="jdbc/aceamdb" password="ace" testOnBorrow="true" type="javax.sql.DataSource" url="jdbc:mysql://localhost/aceam?characterEncoding=UTF-8" username="ace" validationQuery="SELECT 1"/>
+  <Resource auth="Container" driverClassName="com.mysql.jdbc.Driver" maxActive="20" maxIdle="10" maxWait="-1" name="jdbc/aceamdb" password="ace" testOnBorrow="true" type="javax.sql.DataSource" url="jdbc:mysql://localhost/aceam2?characterEncoding=UTF-8" username="ace" validationQuery="SELECT 1"/>
   <!--Mail server to use when mailing reports. You will need to set this if
     you want reports to be mailed properly.-->
+  <!--
   <Parameter name="mail.server" value="localhost.localdomain"/>
-  <!-- Set this e-mail address to an address e-mail should originate from -->
+  Set this e-mail address to an address e-mail should originate from 
   <Parameter name="mail.from" value="acemail@localhost"/>
-  <!-- max number of running audits, default 3 -->
+  max number of running audits, default 3 
   <Parameter name="throttle.maxaudit" value="3"/>
-  <!-- minimum time between srb file reads in milliseconds, default 0 -->
-  <!--<Parameter name="throttle.wait" value="2000"/>-->
-  <!-- maximum bytes per second per running audit, default = 0 = unlimited -->
-  <!-- <Parameter name="throttle.bps" value="1048576"/> -->
-  <!-- start automated auditing -->
+  minimum time between srb file reads in milliseconds, default 0 
+  <Parameter name="throttle.wait" value="2000"/>
+  maximum bytes per second per running audit, default = 0 = unlimited 
+  <Parameter name="throttle.bps" value="1048576"/> 
+  start automated auditing 
   <Parameter name="auto.audit.disable" value="true"/>
-  <!-- IMS hostname to use. Unless you deployed your own IMS, this should
-       probably not be changed -->
+  IMS hostname to use. Unless you deployed your own IMS, this should
+       probably not be changed 
   <Parameter name="ims" value="ims.umiacs.umd.edu"/>
-  <!-- Set this to true to disable internal user management. This should only be used
+  Set this to true to disable internal user management. This should only be used
     in conjunction with changes to the Authentication realm listed above.
     Default: true;
-    -->
+    
   <Parameter name="auth.management" value="true"/>
-  <!-- log4j logging properties -->
-  <!-- change the A1.File value to a location of your logfile -->
+  <log4j logging properties 
+  change the A1.File value to a location of your logfile
   <Parameter name="log4j.appender.A1.File" value="/tmp/aceam.log"/>
-  <!-- Uncomment the following line to log everything to one file, will grow to infinity -->
-  <!-- <Parameter name="log4j.appender.A1" value="org.apache.log4j.FileAppender"/> -->
-  <!-- The following 3 lines configure a rolling log file -->
+  Uncomment the following line to log everything to one file, will grow to infinity 
+  <Parameter name="log4j.appender.A1" value="org.apache.log4j.FileAppender"/> 
+  The following 3 lines configure a rolling log file 
   <Parameter name="log4j.appender.A1" value="org.apache.log4j.RollingFileAppender"/>
   <Parameter name="log4j.appender.A1.maxFileSize" value="100000KB"/>
   <Parameter name="log4j.appender.A1.maxBackupIndex" value="5"/>
-  <!-- generic logging properties, change only if you know what you are doing -->
+  generic logging properties, change only if you know what you are doing 
   <Parameter name="log4j.rootLogger" value="FATAL, A1"/>
   <Parameter name="log4j.appender.A1.layout" value="org.apache.log4j.PatternLayout"/>
   <Parameter name="log4j.appender.A1.layout.ConversionPattern" value="%d{[dd/MMM/yyyy:HH:mm:ss]} %x%m%n"/>
   <Parameter name="log4j.logger.edu.umiacs.irods" value="ERROR"/>
   <Parameter name="log4j.logger.edu.umiacs" value="TRACE"/>
-  <!--<Parameter name="log4j.logger.edu.umiacs.irods.api.IRodsConnection" value="TRACE"/>-->
+  Parameter name="log4j.logger.edu.umiacs.irods.api.IRodsConnection" value="TRACE"/>
+  -->
 </Context>

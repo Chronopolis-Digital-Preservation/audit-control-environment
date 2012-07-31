@@ -31,8 +31,11 @@
 
 package edu.umiacs.ace.util;
 
+import edu.umiacs.ace.monitor.settings.SettingsParameter;
+import java.util.List;
 import java.util.Properties;
-import javax.servlet.ServletContext;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.apache.log4j.PropertyConfigurator;
@@ -46,17 +49,15 @@ public class LogContextListener implements ServletContextListener {
 
     @Override
     public void contextInitialized( ServletContextEvent arg0 ) {
-        java.util.Enumeration<?> paramNames;
-        ServletContext context = arg0.getServletContext();
         Properties log4jProp = new Properties();
 
-        paramNames = context.getInitParameterNames();
+        EntityManager em = PersistUtil.getEntityManager();
+        Query q = em.createNamedQuery("SettingsParameter.getAttrList");
+        q.setParameter("attr", "%log4j%");
+        List<SettingsParameter> l = q.getResultList();
 
-        while ( paramNames.hasMoreElements() ) {
-            String paramName;
-
-            paramName = (String) paramNames.nextElement();
-            log4jProp.setProperty(paramName, context.getInitParameter(paramName));
+        for(SettingsParameter s: l ) {
+            log4jProp.setProperty(s.getName(), s.getValue());
         }
 
         PropertyConfigurator.configure(log4jProp);
