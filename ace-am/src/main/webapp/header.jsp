@@ -49,7 +49,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 
             <td align="center">
                 <div class="menucell">
-                    <a href="settings.jsp">System Settings</a>
+                    <a href="UpdateSettings">System Settings</a>
                 </div>
             </td>
 

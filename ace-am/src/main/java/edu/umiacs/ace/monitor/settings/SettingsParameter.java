@@ -19,7 +19,9 @@ import javax.persistence.Table;
     @NamedQuery(name = "SettingsParameter.getAttr", query =
     "SELECT p FROM SettingsParameter p WHERE p.attr = :attr"),
     @NamedQuery(name = "SettingsParameter.getAttrList", query =
-    "SELECT p FROM SettingsParameter p WHERE p.attr LIKE :attr")
+    "SELECT p FROM SettingsParameter p WHERE p.attr LIKE :attr"),
+    @NamedQuery(name = "SettingsParameter.getCurrentSettings", query =
+    "SELECT p FROM SettingsParameter p")
 })
 public class SettingsParameter implements Serializable {
     @Id

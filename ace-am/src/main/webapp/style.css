@@ -144,9 +144,6 @@ vertical-align: top;
     width: 650px;
 }
 
-
-
-
 #dettable tr td {
     padding-top: 15px;
     padding-left: 15px;
@@ -163,4 +160,15 @@ vertical-align: top;
 .logtypeselection {
     margin-top: 20px;
     margin-bottom: 5px;
+}
+
+#settingstable {
+  font-size: small;
+  border: 1px solid #000000;
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+#settingsitem {
+  margin-left: 25%;
 }

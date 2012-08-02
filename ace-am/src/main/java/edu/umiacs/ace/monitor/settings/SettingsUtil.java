@@ -31,18 +31,24 @@ public class SettingsUtil {
         return null;
     }
 
+    public static List<SettingsParameter> getCurrentSettings() {
+        EntityManager em = PersistUtil.getEntityManager();
+        Query q = em.createNamedQuery("SettingsParameter.getCurrentSettings");
+
+        return q.getResultList();
+    }
+
     public static void updateSettings(Map<String, String> settings) {
         EntityManager em = PersistUtil.getEntityManager();
         EntityTransaction trans = em.getTransaction();
         trans.begin();
 
-        for ( String attr : settings.keySet() ) {
-            SettingsParameter item = getItemByAttr(attr);
+        for ( String name : settings.keySet() ) {
+            SettingsParameter item = getItemByAttr(name);
             if ( item == null ) {
-                System.out.println("Item es nool");
-                em.persist(new SettingsParameter(attr, settings.get(attr)));
+                em.persist(new SettingsParameter(name, settings.get(name)));
             } else {
-                item.setValue(settings.get(attr));
+                item.setValue(settings.get(name));
                 em.merge(item);
             }
         }
