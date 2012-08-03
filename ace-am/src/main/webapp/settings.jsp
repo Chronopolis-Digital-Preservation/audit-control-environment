@@ -19,121 +19,113 @@
         <jsp:include page="header.jsp"/>
         <h1>System Settings</h1>
         <FORM name="settingsform" METHOD="POST" ENCTYPE="multipart/form-data" ACTION="UpdateSettings">
-            <div id="settingstable">
-                <table border="0">
-                    <tr>
-                        <td>Mail Server:</td>
-                        <td><input type=text name="mail.server" value="${currSettings['mail.server']}"></td>
-                        <td><img src="images/help.png" title="Mail server to use when mailing reports. You will need to set this if you want reports to be mailed properly."></td>
-                    </tr>
-                    <tr>
-                        <td>Mail From:</td>
-                        <td><input type=text name="mail.from" value="${currSettings['mail.from']}"></td>
-                        <td><img src="images/help.png" title="Set this e-mail address to an address e-mail should originate from"></td>
-                    </tr>
-                    <tr>
-                        <td>Max Audit:</td>
-                        <td><input type=text name="throttle.maxaudit" value="${currSettings['throttle.maxaudit']}"></td>
-                        <td><img src="images/help.png" title="Max number of running audits"></td>
-                    </tr>
-                    <tr>
-                        <td>Audit Wait Time:</td>
-                        <td><input type=text name="throttle.wait" value="${currSettings['throttle.wait']}"></td>
-                        <td><img src="images/help.png" title="Minimum time between srb file reads in milliseconds"></td>
-                    </tr>
-                    <tr>
-                        <td>Audit BPS:</td>
-                        <td><input type=text name="throttle.bps" value="${currSettings['throttle.bps']}"></td>
-                        <td><img src="images/help.png" title="Maximum bytes per second per running audit, default = 0 = unlimited"></td>
-                    </tr>
-                    <tr>
-                        <td>Auto Audit:</td>
-                        <td><input type=text name="auto.audit.disable" value="${currSettings['auto.audit.disable']}"></td>
-                        <td><img src="images/help.png" title="Start automated auditing"></td>
-                    </tr>
-                    <tr>
-                        <td>IMS Host:</td>
-                        <td><input type=text name="ims" value="${currSettings['ims']}"></td>
-                        <td><img src="images/help.png" title="IMS hostname to use. Unless you deployed your own IMS, this should probably not be changed"></td>
-                    </tr>
-                    <tr>
-                        <td>User Management:</td>
-                        <td><input type=text name="auth.management" value="${currSettings['auth.management']}"></td>
-                        <td><img src="images/help.png" title="Set this to true to disable internal user management. This should only be used in conjunction with changes to the Authentication realm listed above."></td>
-                    </tr>
-                    <tr>
-                        <td>Log Location:</td>
-                        <td><input type=text name="log4j.appender.A1.File" value="${currSettings['log4j.appender.A1.File']}"></td>
-                        <td><img src="images/help.png" title="The location of your logfile"></td>
-                    </tr>
-                    <c:choose>
-                        <c:when test="${fileAppender}">
-                            <tr>
-                                <td>Log Type:</td>
-                                <td><input type=text name="log4j.appender.A1" value="${currSettings['log4j.appender.A1']}"></td>
-                                <td><img src="images/help.png"></td>
-                            </tr>
-                        </c:when>
-                        <c:otherwise>
-                            <tr>
-                                <td>Log Type:</td>
-                                <td><input type=text name="log4j.appender.A1" value="${currSettings['log4j.appender.A1']}"></td>
-                                <td><img src="images/help.png"></td>
-                            </tr>
-                            <tr>
-                                <td>Log File Size:</td>
-                                <td><input type=text name="log4j.appender.A1.maxFileSize" value="${currSettings['log4j.appender.A1.maxFileSize']}"></td>
-                                <td><img src="images/help.png" title="File size of your log"></td>
-                            </tr>
-                            <tr>
-                                <td>Log Backup Index:</td>
-                                <td><input type=text name="log4j.appender.A1.maxBackupIndex" value="${currSettings['log4j.appender.A1.maxBackupIndex']}"></td>
-                                <td><img src="images/help.png"></td>
-                            </tr>
-                        </c:otherwise>
-                    </c:choose>
-                    <tr></tr>
-                    <tr>
-                        <td>Generic logging properties </td>
-                    </tr>
-                    <tr>
-                        <td> change only if you know what you are doing</td>
-                    </tr>
-
-                    <tr>
-                        <td>Root Logger:</td>
-                        <td><input type=text name="log4j.rootLogger" value="${currSettings['log4j.rootLogger']}"></td>
-                        <td><img src="images/help.png"></td>
-                    </tr>
-                    <tr>
-                        <td>Pattern Layout:</td>
-                        <td><input type=text name="log4j.appender.A1.layout" value="${currSettings['log4j.appender.A1.layout']}"></td>
-                        <td><img src="images/help.png"></td>
-                    </tr>
-                    <tr>
-                        <td>Conversion Pattern:</td>
-                        <td><input type=text name="log4j.appender.A1.layout.ConversionPattern" value="${currSettings['log4j.appender.A1.layout.ConversionPattern']}"></td>
-                        <td><img src="images/help.png"></td>
-                    </tr>
-                    <tr>
-                        <td>IRods:</td>
-                        <td><input type=text name="log4j.logger.edu.umiacs.irods" value="${currSettings['log4j.logger.edu.umiacs.irods']}"></td>
-                        <td><img src="images/help.png"></td>
-                    </tr>
-                    <tr>
-                        <td>umiacs:</td>
-                        <td><input type=text name="log4j.logger.edu.umiacs" value="${currSettings['log4j.logger.edu.umiacs']}"></td>
-                        <td><img src="images/help.png"></td>
-                    </tr>
-                    <tr>
-                        <td>IRods Connection:</td>
-                        <td><input type=text name="irods.connection" value="${currSettings['irods.connection']}"></td>
-                        <td><img src="images/help.png"></td>
-                    </tr>
-                </table>
+            <div id="settingsTable">
+                <div class="settingsRow">
+                    <div class="settingsName">Mail Server:</div>
+                    <div class="settingsVal"><input type=text name="mail.server" value="${currSettings['mail.server']}"></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Mail server to use when mailing reports. You will need to set this if you want reports to be mailed properly."></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">Mail From:</div>
+                    <div class="settingsVal"><input type=text name="mail.from" value="${currSettings['mail.from']}"></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Set this e-mail address to an address e-mail should originate from"></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">Max Audit:</div>
+                    <div class="settingsVal"><input type=text name="throttle.maxaudit" value="${currSettings['throttle.maxaudit']}"></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Max number of running audits"></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">Audit Wait Time:</div>
+                    <div class="settingsVal"><input type=text name="throttle.wait" value="${currSettings['throttle.wait']}"></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Minimum time between srb file reads in milliseconds"></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">Audit BPS:</div>
+                    <div class="settingsVal"><input type=text name="throttle.bps" value="${currSettings['throttle.bps']}"></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Maximum bytes per second per running audit, default = 0 = unlimited"></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">Auto Audit:</div>
+                    <div class="settingsVal"><input type=text name="auto.audit.disable" value="${currSettings['auto.audit.disable']}"></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Start automated auditing"></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">IMS Host:</div>
+                    <div class="settingsVal"><input type=text name="ims" value="${currSettings['ims']}"></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="IMS hostname to use. Unless you deployed your own IMS, this should probably not be changed"></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">User Management:</div>
+                    <div class="settingsVal"><input type=text name="auth.management" value="${currSettings['auth.management']}"></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Set this to true to disable internal user management. This should only be used in conjunction with changes to the Authentication realm listed above."></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">Log Location:</div>
+                    <div class="settingsVal"><input type=text name="log4j.appender.A1.File" value="${currSettings['log4j.appender.A1.File']}"></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="The location of your logfile"></div>
+                </div>
+                <c:choose>
+                    <c:when test="${fileAppender}">
+                        <div class="settingsRow">
+                            <div class="settingsName">Log Type:</div>
+                            <div class="settingsVal"><input type=text name="log4j.appender.A1" value="${currSettings['log4j.appender.A1']}"></div>
+                            <div class="settingsHelp"><img src="images/help.png" title="Log everything to one file, will grow to infinity"></div>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="settingsRow">
+                            <div class="settingsName">Log Type:</div>
+                            <div class="settingsVal"><input type=text name="log4j.appender.A1" value="${currSettings['log4j.appender.A1']}"></div>
+                            <div class="settingsHelp"><img src="images/help.png" title="Rolling log file"></div>
+                        </div>
+                        <div class="settingsRow">
+                            <div class="settingsName">Log File Size:</div>
+                            <div class="settingsVal"><input type=text name="log4j.appender.A1.maxFileSize" value="${currSettings['log4j.appender.A1.maxFileSize']}"></div>
+                            <div class="settingsHelp"><img src="images/help.png" title="File size of your log"></div>
+                        </div>
+                        <div class="settingsRow">
+                            <div class="settingsName">Log Backup Index:</div>
+                            <div class="settingsVal"><input type=text name="log4j.appender.A1.maxBackupIndex" value="${currSettings['log4j.appender.A1.maxBackupIndex']}"></div>
+                            <div class="settingsHelp"><img src="images/help.png" title="Maximum backup index"></div>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+                <br>
+                <div class="settingsRow">
+                    <div>Generic logging properties,
+                        change only if you know what you are doing</div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">Root Logger:</div>
+                    <div class="settingsVal"><input type=text name="log4j.rootLogger" value="${currSettings['log4j.rootLogger']}"></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">Pattern Layout:</div>
+                    <div class="settingsVal"><input type=text name="log4j.appender.A1.layout" value="${currSettings['log4j.appender.A1.layout']}"></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">Conversion Pattern:</div>
+                    <div class="settingsVal"><input type=text name="log4j.appender.A1.layout.ConversionPattern" value="${currSettings['log4j.appender.A1.layout.ConversionPattern']}"></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">IRods:</div>
+                    <div class="settingsVal"><input type=text name="log4j.logger.edu.umiacs.irods" value="${currSettings['log4j.logger.edu.umiacs.irods']}"></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">UMIACS Connection:</div>
+                    <div class="settingsVal"><input type=text name="log4j.logger.edu.umiacs" value="${currSettings['log4j.logger.edu.umiacs']}"></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">IRods Connection:</div>
+                    <div class="settingsVal"><input type=text name="irods.connection" value="${currSettings['irods.connection']}"></div>
+                </div>
             </div>
 
-            <input type=submit value="Submit" name="update" class="submitLink" style="margin-left: 50px;"> <input type=submit value="Default" name="default" class="submitLink"> <a href="Status">Cancel</a>
+            <br>
+            <input type=submit value="Submit" name="update" class="submitLink" style="margin-left: 5%">
+            <input type=submit value="Default" name="default" class="submitLink">
+            <a href="Status" style="font-size: medium; text-decoration: underline;">Cancel</a>
         </FORM>
 
         <jsp:include page="footer.jsp"/>

@@ -162,13 +162,35 @@ vertical-align: top;
     margin-bottom: 5px;
 }
 
-#settingstable {
+#settingsTable {
   font-size: small;
   border: 1px solid #000000;
-  margin-left: 50px;
-  margin-right: 50px;
+  margin-left: 5%;
+  margin-right: 5%;
+  width: 90%;
 }
 
-#settingsitem {
-  margin-left: 25%;
+.settingsRow {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    height: 20px;
+    width: 100%;
+    clear: both;
+}
+
+.settingsName {
+  width: 200px;
+  float: left;
+  margin-left: 2px;
+  margin-top: 5px;
+}
+
+.settingsVal {
+    width: 250px;
+    float: left;
+    text-align: center;
+}
+
+.settingsHelp {
+    float: left;
 }
