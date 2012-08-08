@@ -698,6 +698,11 @@
             <http-method>TRACE</http-method>
             <http-method>DELETE</http-method>
         </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Add Setting</web-resource-name>
+            <description/>
+            <url-pattern>/addsetting.jsp</url-pattern>
+        </web-resource-collection>
         <auth-constraint>
             <description/>
             <role-name>Modify System Settings</role-name>
