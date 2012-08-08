@@ -93,13 +93,11 @@ public class QueryThrottle implements ServletContextListener {
 
     @Override
     public void contextInitialized( ServletContextEvent sce ) {
-        System.out.println("[QUERY]");
         EntityManager em = PersistUtil.getEntityManager();
         Query q = em.createNamedQuery("SettingsParameter.getAttr");
         q.setParameter("attr", PARAM_TIME);
         SettingsParameter s = (SettingsParameter) q.getSingleResult();
         String time = s.getValue();
-        System.out.println("[QUERY] RESULT " + s.getName() + " " + s.getValue());
 
         if ( Strings.isValidInt(time) ) {
             setMinWait(Integer.parseInt(time));

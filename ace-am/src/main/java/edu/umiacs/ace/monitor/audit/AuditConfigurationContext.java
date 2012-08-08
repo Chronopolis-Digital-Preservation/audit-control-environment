@@ -89,7 +89,6 @@ public final class AuditConfigurationContext implements ServletContextListener {
         s = (SettingsParameter) q.getSingleResult();
         if ( !Strings.isEmpty(s.getValue()) ) {
             String tokenClass = s.getValue();
-            System.out.println("IMS TOKEN CLASS: " + tokenClass);
             AuditThreadFactory.setTokenClass(tokenClass);
         }
 
@@ -98,7 +97,6 @@ public final class AuditConfigurationContext implements ServletContextListener {
         s = (SettingsParameter) q.getSingleResult();
         if ( Strings.isValidInt(s.getValue()) ) {
             int port = Integer.parseInt(s.getValue());
-            System.out.println("IMS PORT: " + port);
             if ( port > 1 && port < 32768 ) {
                 AuditThreadFactory.setImsPort(port);
             } else {

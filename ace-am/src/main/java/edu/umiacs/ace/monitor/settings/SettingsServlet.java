@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,20 +62,19 @@ public class SettingsServlet extends EntityManagerServlet {
             }
 
             if ( update ) {
-                SettingsUtil.updateSettings(settings);
+                SettingsUtil.updateSettings(settings, false);
             } else {
-                SettingsUtil.updateSettings(SettingsUtil.getDefaultMap());
+                SettingsUtil.updateSettings(SettingsUtil.getDefaultMap(), false);
             }
         }
 
-        List<SettingsParameter> currentSettings = SettingsUtil.getCurrentSettings();
-        HashMap<String, String> settingsMap = new HashMap<String, String>();
-
-        for ( SettingsParameter s : currentSettings ) {
-            settingsMap.put(s.getName(), s.getValue());
-        }
+        Map<String, String> settingsMap =
+                settingsToMap(SettingsUtil.getCurrentSettings());
+        Map<String, String> customMap =
+                settingsToMap(SettingsUtil.getCustomSettings());
 
         request.setAttribute("currSettings", settingsMap);
+        request.setAttribute("customSettings", customMap);
 
         if ( settingsMap.get(SettingsConstants.PARAM_4J_APPENDER).equals(LOG_CLASS)) {
             request.setAttribute("fileAppender", true);
@@ -86,5 +86,15 @@ public class SettingsServlet extends EntityManagerServlet {
         RequestDispatcher dispatcher = request.getRequestDispatcher("settings.jsp");
         dispatcher.forward(request, response);
 
+    }
+
+    private Map<String, String> settingsToMap( List<SettingsParameter> settings) {
+        HashMap<String, String> settingsMap = new HashMap<String, String>();
+
+        for ( SettingsParameter s : settings ) {
+            settingsMap.put(s.getName(), s.getValue());
+        }
+
+        return settingsMap;
     }
 }

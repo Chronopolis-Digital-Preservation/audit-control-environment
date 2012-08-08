@@ -187,6 +187,10 @@
         <servlet-name>SettingsServlet</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.settings.SettingsServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AddSettingServlet</servlet-name>
+        <servlet-class>edu.umiacs.ace.monitor.settings.AddSettingServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ServletAdaptor</servlet-name>
         <url-pattern>/rest/*</url-pattern>
@@ -299,6 +303,10 @@
     <servlet-mapping>
         <servlet-name>SettingsServlet</servlet-name>
         <url-pattern>/UpdateSettings</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddSettingServlet</servlet-name>
+        <url-pattern>/AddSettings</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
@@ -677,6 +685,24 @@
             <role-name>Compare</role-name>
         </auth-constraint>
     </security-constraint>
+    <security-constraint>
+        <display-name>System Settings</display-name>
+        <web-resource-collection>
+            <web-resource-name>System</web-resource-name>
+            <description/>
+            <url-pattern>/UpdateSettings</url-pattern>
+            <http-method>PUT</http-method>
+            <http-method>HEAD</http-method>
+            <http-method>POST</http-method>
+            <http-method>OPTIONS</http-method>
+            <http-method>TRACE</http-method>
+            <http-method>DELETE</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <description/>
+            <role-name>Modify System Settings</role-name>
+        </auth-constraint>
+    </security-constraint>
     <login-config>
         <auth-method>BASIC</auth-method>
         <realm-name>Audit Manager</realm-name>
@@ -745,4 +771,8 @@
         <description>Add/edit/remove stuff in /PartnerSite</description>
         <role-name>Modify Partner Sites</role-name>
     </security-role> --&gt;
+    <security-role>
+        <description>Role used to modify system settings</description>
+        <role-name>Modify System Settings</role-name>
+    </security-role>
     </web-app>

@@ -214,6 +214,7 @@ CREATE TABLE `system_settings` (
   `ID` bigint(20) NOT NULL auto_increment,
   `ATTR` varchar(255) default NULL,
   `VALUE` varchar(255) default NULL,
+  `CUSTOM` BOOLEAN default FALSE,
   PRIMARY KEY  (`ID`),
   UNIQUE (`ATTR`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

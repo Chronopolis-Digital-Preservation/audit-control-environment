@@ -150,6 +150,12 @@ Author     : toaster
                                 <input type="checkbox" name="role" value="Download Item" ${roles['Download Item']} />Retrieve items from collections
                             </td>
                         </tr>
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="role" value="Modify System Settings" ${roles['Modify System Settings']} />Modify System Settings
+                            </td>
+                        </tr>
+
                     </table>
 
                     <input type="submit" name="commit" value="Save" class="submitLink" />

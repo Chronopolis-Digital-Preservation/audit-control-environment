@@ -167,7 +167,6 @@ vertical-align: top;
   border: 1px solid #000000;
   margin-left: 5%;
   margin-right: 5%;
-  width: 90%;
 }
 
 .settingsRow {
@@ -182,7 +181,6 @@ vertical-align: top;
   width: 200px;
   float: left;
   margin-left: 2px;
-  margin-top: 5px;
 }
 
 .settingsVal {

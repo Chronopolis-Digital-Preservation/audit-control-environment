@@ -21,7 +21,10 @@ import javax.persistence.Table;
     @NamedQuery(name = "SettingsParameter.getAttrList", query =
     "SELECT p FROM SettingsParameter p WHERE p.attr LIKE :attr"),
     @NamedQuery(name = "SettingsParameter.getCurrentSettings", query =
-    "SELECT p FROM SettingsParameter p")
+    "SELECT p FROM SettingsParameter p"),
+    @NamedQuery(name = "SettingsParameter.getCustomSettings", query =
+    "SELECT p FROM SettingsParameter p WHERE p.custom = TRUE")
+
 })
 public class SettingsParameter implements Serializable {
     @Id
@@ -29,15 +32,17 @@ public class SettingsParameter implements Serializable {
     private Long id;
     private String attr;
     private String value;
+    private boolean custom;
 
     public SettingsParameter() {
         this.attr = null;
         this.value = null;
     }
 
-    public SettingsParameter(String attr, String value) {
+    public SettingsParameter(String attr, String value, boolean custom) {
         this.attr = attr;
         this.value = value;
+        this.custom = custom;
     }
 
     public Long getId() {
@@ -52,6 +57,10 @@ public class SettingsParameter implements Serializable {
         return attr;
     }
 
+    public boolean getCustom() {
+        return custom;
+    }
+
     public String getValue() {
         return value;
     }
@@ -62,6 +71,10 @@ public class SettingsParameter implements Serializable {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public void setCustom(boolean custom) {
+        this.custom = custom;
     }
 
     @Override

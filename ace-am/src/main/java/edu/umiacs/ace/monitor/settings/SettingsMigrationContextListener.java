@@ -34,7 +34,7 @@ public class SettingsMigrationContextListener implements ServletContextListener{
             //System.out.println("[MIGRATION] " + migrated);
             if ( !migrated ) {
                 //System.out.println("[MIGRATION] Inserting tables");
-                SettingsUtil.updateSettings(SettingsUtil.getDefaultMap());
+                SettingsUtil.updateSettings(SettingsUtil.getDefaultMap(), false);
             }
         } catch (SQLException ex) {
             Logger.getLogger(SettingsMigrationContextListener.class.getName())

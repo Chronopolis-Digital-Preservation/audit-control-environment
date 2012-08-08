@@ -147,7 +147,7 @@ public class DefaultAccountContextListener implements ServletContextListener {
 
                     UserRoles updateSysSettings = new UserRoles();
                     updateSysSettings.setRolename("Modify System Settings");
-                    updateSysSettings.setUsername("system");
+                    updateSysSettings.setUsername("admin");
 
 
                     EntityTransaction et = em.getTransaction();
