@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright (c) 2007-2010, University of Maryland
  * All rights reserved.
  *
@@ -33,6 +34,7 @@ package edu.umiacs.ace.monitor.users;
 import edu.umiacs.ace.monitor.settings.SettingsParameter;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
@@ -172,35 +174,40 @@ public class DefaultAccountContextListener implements ServletContextListener {
                     em.persist(updateSysSettings);
                     et.commit();
 
-                    persistSystemUser();
                 }
             } catch ( Exception e ) {
 
                 LOG.error("Error creating default account", e);
             }
+
+            checkSystemSettings(em);
         }
     }
 
-    private void persistSystemUser() {
-        EntityManager em = PersistUtil.getEntityManager();
+    // It's possible to already have an admin account and not have the
+    // system settings option yet, so check that here
+    private void checkSystemSettings(EntityManager em) {
+        boolean settingsMigration = false;
+        Query roleQuery = em.createNamedQuery("UserRoles.listRolesForUser");
+        roleQuery.setParameter("user", "admin");
 
-        Users u = new Users();
-        u.setUsername("system");
-        u.setPassword("system");
+        List<UserRoles> adminRoles = roleQuery.getResultList();
+        for ( UserRoles role: adminRoles ) {
+            if ( role.getRolename().equals("Modify System Settings") ) {
+                settingsMigration = true;
+            }
+        }
 
-        UserRoles log = new UserRoles();
-        log.setRolename("Log");
-        log.setUsername("system");
-
-        UserRoles updateSysSettings = new UserRoles();
-        updateSysSettings.setRolename("Modify System Settings");
-        updateSysSettings.setUsername("system");
-
-        EntityTransaction trans = em.getTransaction();
-        trans.begin();
-        em.persist(u);
-        em.persist(log);
-        em.persist(updateSysSettings);
+        if ( !settingsMigration ) {
+            System.out.println("Adding modify system settings role");
+            UserRoles updateSysSettings = new UserRoles();
+            updateSysSettings.setRolename("Modify System Settings");
+            updateSysSettings.setUsername("admin");
+            EntityTransaction et = em.getTransaction();
+            et.begin();
+            em.persist(updateSysSettings);
+            et.commit();
+        }
     }
 
     @Override
