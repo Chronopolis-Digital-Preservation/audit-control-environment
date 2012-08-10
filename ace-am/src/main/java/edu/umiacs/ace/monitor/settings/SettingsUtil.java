@@ -1,6 +1,7 @@
 package edu.umiacs.ace.monitor.settings;
 
 import edu.umiacs.ace.util.PersistUtil;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ import javax.persistence.Query;
  */
 public class SettingsUtil {
 
+    // Get an item by its attribute name
     public static SettingsParameter getItemByAttr( String attr ) {
         EntityManager em = PersistUtil.getEntityManager();
         Query q = em.createNamedQuery("SettingsParameter.getAttr");
@@ -31,6 +33,7 @@ public class SettingsUtil {
         return null;
     }
 
+    // Return a list of all custom settings
     public static List<SettingsParameter> getCustomSettings() {
         EntityManager em = PersistUtil.getEntityManager();
         Query q = em.createNamedQuery("SettingsParameter.getCustomSettings");
@@ -38,6 +41,7 @@ public class SettingsUtil {
         return q.getResultList();
     }
 
+    // Return a list of all settings
     public static List<SettingsParameter> getCurrentSettings() {
         EntityManager em = PersistUtil.getEntityManager();
         Query q = em.createNamedQuery("SettingsParameter.getCurrentSettings");
@@ -45,24 +49,28 @@ public class SettingsUtil {
         return q.getResultList();
     }
 
-    public static void updateSettings(Map<String, String> settings, boolean isCustom) {
+    // Update settings based on their name and value, and add new settings
+    public static void updateSettings(List<SettingsParameter> settings) {
         EntityManager em = PersistUtil.getEntityManager();
         EntityTransaction trans = em.getTransaction();
         trans.begin();
 
-        for ( String name : settings.keySet() ) {
-            // Skip any empty strings
-            if (name.trim().isEmpty() || settings.get(name).trim().isEmpty() ) {
+        for ( SettingsParameter setting : settings ) {
+            // Skip any empty settings
+            if ( setting.getName().trim().isEmpty() ||
+                 setting.getValue().trim().isEmpty() ) {
                 continue;
             }
 
+            SettingsParameter old = getItemByAttr(setting.getName());
 
-            SettingsParameter item = getItemByAttr(name);
-            if ( item == null ) {
-                em.persist(new SettingsParameter(name, settings.get(name), isCustom));
+            // If there is no item, persist the new setting
+            if ( old == null ) {
+                em.persist(setting);
             } else {
-                item.setValue(settings.get(name));
-                em.merge(item);
+                // Else update and merge the old item
+                old.setValue(setting.getValue());
+                em.merge(old);
             }
         }
 
@@ -70,73 +78,61 @@ public class SettingsUtil {
         em.clear();
     }
 
-    public static Set<String> getParamSet() {
+    // Get the names of all curent settings
+    public static Set<String> getParamNames() {
+        List<SettingsParameter> settings = getCurrentSettings();
+
         Set<String> paramSet = new HashSet<String>();
-        paramSet.add(SettingsConstants.PARAM_4J_APPENDER);
-        paramSet.add(SettingsConstants.PARAM_4J_BACKUP_INDEX);
-        paramSet.add(SettingsConstants.PARAM_4J_CLASS);
-        paramSet.add(SettingsConstants.PARAM_4J_CONV_PAT);
-        paramSet.add(SettingsConstants.PARAM_4J_FILE);
-        paramSet.add(SettingsConstants.PARAM_4J_FILE_SIZE);
-        paramSet.add(SettingsConstants.PARAM_4J_IRODS);
-        paramSet.add(SettingsConstants.PARAM_4J_LAYOUT);
-        paramSet.add(SettingsConstants.PARAM_4J_ROOT_LOGGER);
-        paramSet.add(SettingsConstants.PARAM_BPS);
-        paramSet.add(SettingsConstants.PARAM_DISABLE_AUDIT);
-        paramSet.add(SettingsConstants.PARAM_FROM);
-        paramSet.add(SettingsConstants.PARAM_IMS);
-        paramSet.add(SettingsConstants.PARAM_IMS_PORT);
-        paramSet.add(SettingsConstants.PARAM_IMS_TOKEN_CLASS);
-        paramSet.add(SettingsConstants.PARAM_SMTP_SERVER);
-        paramSet.add(SettingsConstants.PARAM_THROTTLE_MAXAUDIT);
-        paramSet.add(SettingsConstants.PARAM_TIME);
-        paramSet.add(SettingsConstants.PARAM_USER_AUTH);
+        for ( SettingsParameter s : settings ) {
+            paramSet.add(s.getName());
+        }
         return paramSet;
     }
 
-    public static Map<String, String> getDefaultMap() {
-        Map<String, String> paramMap = new HashMap<String, String>();
 
-        paramMap.put(SettingsConstants.PARAM_IMS,
-                SettingsConstants.ims);
-        paramMap.put(SettingsConstants.PARAM_IMS_PORT,
-                SettingsConstants.imsPort);
-        paramMap.put(SettingsConstants.PARAM_IMS_TOKEN_CLASS,
-                SettingsConstants.imsTokenClass);
-        paramMap.put(SettingsConstants.PARAM_DISABLE_AUDIT,
-                SettingsConstants.autoAudit);
-        paramMap.put(SettingsConstants.PARAM_THROTTLE_MAXAUDIT,
-                SettingsConstants.maxAudit);
-        paramMap.put(SettingsConstants.PARAM_TIME,
-                SettingsConstants.throttleWait);
-        paramMap.put(SettingsConstants.PARAM_BPS,
-                SettingsConstants.throttleBPS);
-        paramMap.put(SettingsConstants.PARAM_SMTP_SERVER,
-                SettingsConstants.mailServer);
-        paramMap.put(SettingsConstants.PARAM_FROM,
-                SettingsConstants.mailFrom);
-        paramMap.put(SettingsConstants.PARAM_USER_AUTH,
-                SettingsConstants.authManagement);
-        paramMap.put(SettingsConstants.PARAM_4J_APPENDER,
-                SettingsConstants.log4JA1);
-        paramMap.put(SettingsConstants.PARAM_4J_BACKUP_INDEX,
-                SettingsConstants.log4JA1MaxBackupIndex);
-        paramMap.put(SettingsConstants.PARAM_4J_CLASS,
-                SettingsConstants.log4JLoggerUMIACS);
-        paramMap.put(SettingsConstants.PARAM_4J_CONV_PAT,
-                SettingsConstants.log4JA1layoutConversationPattern);
-        paramMap.put(SettingsConstants.PARAM_4J_FILE,
-                SettingsConstants.log4JA1File);
-        paramMap.put(SettingsConstants.PARAM_4J_FILE_SIZE,
-                SettingsConstants.log4JA1MaxFileSize);
-        paramMap.put(SettingsConstants.PARAM_4J_IRODS,
-                SettingsConstants.log4JLoggerIrods);
-        paramMap.put(SettingsConstants.PARAM_4J_LAYOUT,
-                SettingsConstants.log4JA1Layout);
-        paramMap.put(SettingsConstants.PARAM_4J_ROOT_LOGGER,
-                SettingsConstants.log4JRootLogger);
+   public static List<SettingsParameter> getDefaultSettings() {
+        List<SettingsParameter> defaults = new ArrayList<SettingsParameter>();
 
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS,
+                SettingsConstants.ims,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS_PORT,
+                SettingsConstants.imsPort,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS_TOKEN_CLASS,
+                SettingsConstants.imsTokenClass,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_DISABLE_AUDIT,
+                SettingsConstants.autoAudit,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_THROTTLE_MAXAUDIT,
+                SettingsConstants.maxAudit,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_TIME,
+                SettingsConstants.throttleWait,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_BPS,
+                SettingsConstants.throttleBPS,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_SMTP_SERVER,
+                SettingsConstants.mailServer,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_FROM,
+                SettingsConstants.mailFrom,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_USER_AUTH,
+                SettingsConstants.authManagement,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_APPENDER,
+                SettingsConstants.log4JA1,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_BACKUP_INDEX,
+                SettingsConstants.log4JA1MaxBackupIndex,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_CLASS,
+                SettingsConstants.log4JLoggerUMIACS,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_CONV_PAT,
+                SettingsConstants.log4JA1layoutConversationPattern,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_FILE,
+                SettingsConstants.log4JA1File,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_FILE_SIZE,
+                SettingsConstants.log4JA1MaxFileSize,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_IRODS,
+                SettingsConstants.log4JLoggerIrods,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_LAYOUT,
+                SettingsConstants.log4JA1Layout,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_ROOT_LOGGER,
+                SettingsConstants.log4JRootLogger,false));
 
-        return paramMap;
+        return defaults;
     }
+
 }

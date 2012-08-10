@@ -45,6 +45,12 @@ public class SettingsParameter implements Serializable {
         this.custom = custom;
     }
 
+    // Custom will default to false when added to DB unless otherwise specified
+    public SettingsParameter(String attr, String value) {
+       this.attr = attr;
+       this.value = value;
+    }
+
     public Long getId() {
         return id;
     }

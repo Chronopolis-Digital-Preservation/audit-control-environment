@@ -8,7 +8,9 @@ package edu.umiacs.ace.monitor.settings;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -27,25 +29,30 @@ import org.apache.commons.fileupload.util.Streams;
 public class AddSettingServlet extends EntityManagerServlet{
 
     @Override
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response, EntityManager em) throws ServletException, IOException {
-        HashMap <String, String> customSettings = new HashMap<String, String>();
+    protected void processRequest(HttpServletRequest request, HttpServletResponse
+            response, EntityManager em) throws ServletException, IOException {
+        List<SettingsParameter> customSettings = new ArrayList<SettingsParameter>();
 
         ServletFileUpload su = new ServletFileUpload();
         try {
             FileItemIterator iter = su.getItemIterator(request);
+
             while ( iter.hasNext() ) {
                 FileItemStream name = iter.next();
-
                 InputStream nameStream = name.openStream();
                 String paramName = Streams.asString(nameStream);
                 FileItemStream value = null;
+
+                // Our form has pairs of 2 (attribute name & value),
+                // so grab the next item as well
                 if ( iter.hasNext() ) {
                     value = iter.next();
-
                     InputStream valueStream = value.openStream();
+
                     if ( name.isFormField() && value.isFormField()) {
                         String paramValue = Streams.asString(valueStream);
-                        customSettings.put(paramName, paramValue);
+                        customSettings.add(new SettingsParameter(paramName,
+                                paramValue, true));
                     }
                 }
 
@@ -54,7 +61,7 @@ public class AddSettingServlet extends EntityManagerServlet{
             //            Logger.getLogger(SettingsServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        SettingsUtil.updateSettings(customSettings, true);
+        SettingsUtil.updateSettings(customSettings);
 
         RequestDispatcher dispatcher = request.getRequestDispatcher("UpdateSettings");
         dispatcher.forward(request, response);

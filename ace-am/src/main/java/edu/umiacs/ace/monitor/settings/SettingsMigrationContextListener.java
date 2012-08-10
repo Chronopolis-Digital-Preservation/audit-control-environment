@@ -25,16 +25,13 @@ public class SettingsMigrationContextListener implements ServletContextListener{
         boolean migrated;
 
         NDC.push("[MIGRATION]");
-        //System.out.println("[MIGRATION] Started");
 
         DataSource ds = PersistUtil.getDataSource();
         try {
             conn = ds.getConnection();
             migrated = hasMigrated(conn);
-            //System.out.println("[MIGRATION] " + migrated);
             if ( !migrated ) {
-                //System.out.println("[MIGRATION] Inserting tables");
-                SettingsUtil.updateSettings(SettingsUtil.getDefaultMap(), false);
+                SettingsUtil.updateSettings(SettingsUtil.getDefaultSettings());
             }
         } catch (SQLException ex) {
             Logger.getLogger(SettingsMigrationContextListener.class.getName())
@@ -56,6 +53,7 @@ public class SettingsMigrationContextListener implements ServletContextListener{
         boolean newTable = false;
         ResultSet rs = dmd.getTables(null, null, null, types);
 
+        // Search for the new table
         while( rs.next() ) {
             String table = rs.getString("TABLE_NAME");
             if ( "system_settings".equals(table) ) {
@@ -68,6 +66,7 @@ public class SettingsMigrationContextListener implements ServletContextListener{
             throw new IllegalStateException("SQL patch to 1.7+ has not been installed, table 'settings' does no exist");
         }
 
+        // Find out if there are any elements in the table
         String search = "SELECT attr, value FROM system_settings";
 
         PreparedStatement pStmt = conn.prepareStatement(search);

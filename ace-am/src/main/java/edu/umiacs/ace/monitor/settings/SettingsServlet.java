@@ -4,6 +4,7 @@ import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.util.Strings;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +33,8 @@ public class SettingsServlet extends EntityManagerServlet {
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response,
             EntityManager em) throws ServletException, IOException {
-        Set<String> paramSet = SettingsUtil.getParamSet();
-        HashMap<String, String> settings = new HashMap<String, String>();
+        Set<String> paramSet = SettingsUtil.getParamNames();
+        List<SettingsParameter> settings = new ArrayList<SettingsParameter>();
         boolean update = false;
 
         // See if we have a multipart/form and take care of it
@@ -49,7 +50,7 @@ public class SettingsServlet extends EntityManagerServlet {
                         String name = item.getFieldName();
                         String value = Streams.asString(stream);
                         if ( paramSet.contains(name) && !value.isEmpty() ) {
-                            settings.put(name, value);
+                            settings.add(new SettingsParameter(name, value));
                         }
 
                         if ( name.equals("update") ) {
@@ -62,9 +63,9 @@ public class SettingsServlet extends EntityManagerServlet {
             }
 
             if ( update ) {
-                SettingsUtil.updateSettings(settings, false);
+                SettingsUtil.updateSettings(settings);
             } else {
-                SettingsUtil.updateSettings(SettingsUtil.getDefaultMap(), false);
+                SettingsUtil.updateSettings(SettingsUtil.getDefaultSettings());
             }
         }
 
