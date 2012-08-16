@@ -56,7 +56,7 @@ DROP TABLE IF EXISTS `logevent`;
 CREATE TABLE `logevent` (
   `ID` bigint(20) NOT NULL auto_increment,
   `SESSION` bigint(20) default NULL,
-  `PATH` text character set utf8 collate latin1_bin,
+  `PATH` text character set utf8 collate utf8_general_ci,
   `DESCRIPTION` text,
   `DATE` datetime default NULL,
   `LOGTYPE` int(11) default NULL,
