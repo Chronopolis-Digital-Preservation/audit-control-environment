@@ -105,7 +105,8 @@ public class ListContentsServlet extends EntityManagerServlet {
                     header.append(":");
                     header.append(mi.getPath());
                 }
-                os.println(header.toString());
+                os.write(header.toString().getBytes("UTF-8"));
+                os.println();
             } else if ( TYPE_CHECKM.equals(output) ) {
 
                 os.println("#%checkm_0.7");

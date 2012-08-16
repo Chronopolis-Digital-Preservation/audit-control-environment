@@ -131,6 +131,8 @@ public class SettingsUtil {
                 SettingsConstants.log4JA1Layout,false));
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_ROOT_LOGGER,
                 SettingsConstants.log4JRootLogger,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_INGEST,
+                SettingsConstants.maxIngestThreads, false));
 
         return defaults;
     }

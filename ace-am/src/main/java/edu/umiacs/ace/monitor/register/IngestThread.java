@@ -183,6 +183,7 @@ public class IngestThread extends Thread {
             em.close();
             trans = null;
             em = null;
+            IngestThreadFactory.release();
             finished();
         }
     }

@@ -28,6 +28,7 @@ public class SettingsConstants {
 	    "log4j.appender.A1.layout.ConversionPattern"; 
     public static final String PARAM_4J_IRODS = "log4j.logger.edu.umiacs.irods";
     public static final String PARAM_4J_CLASS ="log4j.logger.edu.umiacs";
+    public static final String PARAM_INGEST = "ingest.maxthreads";
 
     // Default Values
     public static final String mailServer = "localhost.localdomain";

@@ -63,6 +63,11 @@
                     <div class="settingsHelp"><img src="images/help.png" title="Set this to true to disable internal user management. This should only be used in conjunction with changes to the Authentication realm listed above."></div>
                 </div>
                 <div class="settingsRow">
+                    <div class="settingsName">Max Ingest Threads:</div>
+                    <div class="settingsVal"><input type=text name="ingest.maxthreads" value="${currSettings['ingest.maxthreads']}"/></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="The maximum number of threads allowed for ingesting token stores."></div>
+                </div>
+                <div class="settingsRow">
                     <div class="settingsName">Log Location:</div>
                     <div class="settingsVal"><input type=text name="log4j.appender.A1.File" value="${currSettings['log4j.appender.A1.File']}"/></div>
                     <div class="settingsHelp"><img src="images/help.png" title="The location of your logfile"></div>

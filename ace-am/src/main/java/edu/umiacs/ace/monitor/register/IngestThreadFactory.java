@@ -39,12 +39,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 /**
+ * TODO - Possibly make a LinkedBlockingQueue that threads can poll from
+ *        to get items to ingest
+ *      - What happens when maxThreads is changed in the middle of ingestion?
+ *          - May need to lock it
  *
  * @author shake
  */
@@ -53,6 +58,8 @@ public class IngestThreadFactory extends Thread{
     private List<IngestThread> threads;
     private IngestDirectory idThread;
     private Collection coll;
+    private static int maxThreads = 4;
+    private static AtomicInteger semaphore = new AtomicInteger();
     // private EntityTransaction trans;
     // private EntityManager em = PersistUtil.getEntityManager();
 
@@ -62,31 +69,38 @@ public class IngestThreadFactory extends Thread{
         this.coll = coll;
         //this.trans = em.getTransaction();
         threads = new ArrayList<IngestThread>();
-
-        // Separate single thread for registering directories to avoid any race
-        // conditions
-        idThread = new IngestDirectory(tokens.keySet(), coll);
-
-        // Ingesting can be _really_ slow with large stores, so split the
-        // process up between 1-4 threads
-        double numThreads = (tokens.size()/4.0 > 4) ? 4.0 : Math.ceil(tokens.size()/4.0);
-
-
-        int begin = 0;
-        List<String> keyList = new ArrayList<String>(tokens.keySet());
-        for( int i = 0;i<numThreads;i++ ) {
-            int end = (int) (tokens.size() * ((i + 1) / numThreads));
-            IngestThread thread = new IngestThread(tokens, coll,
-                    keyList.subList(begin, end));
-            threads.add(thread);
-            begin = end;
-        }
-
     }
 
 
     @Override
     public void run() {
+        // Separate single thread for registering directories to avoid any race
+        // conditions
+        idThread = new IngestDirectory(tokens.keySet(), coll);
+
+        // Ingesting can be _really_ slow with large stores, so split the
+        // process up between 1-max threads
+        double numThreads = (tokens.size()/maxThreads > maxThreads) ? maxThreads
+                : Math.ceil(tokens.size()/maxThreads);
+
+
+        int begin = 0;
+        List<String> keyList = new ArrayList<String>(tokens.keySet());
+        for( int i = 0;i<numThreads;i++ ) {
+            // Create a new thread if we are under the threshold, else
+            // wait for i's thread to become available by decrementing it
+            if( semaphore.get() <= maxThreads ) {
+                semaphore.getAndIncrement();
+                int end = (int) (tokens.size() * ((i + 1) / numThreads));
+                IngestThread thread = new IngestThread(tokens, coll,
+                        keyList.subList(begin, end));
+                threads.add(thread);
+                begin = end;
+            }else{
+                i--;
+            }
+        }
+
         executeThreads();
     }
 
@@ -167,6 +181,11 @@ public class IngestThreadFactory extends Thread{
         if ( tokens.isEmpty() ) {
             return "There are no tokens to process";
         }
+
+        if ( semaphore.get() > maxThreads ) {
+            return "Waiting for other ingestion threads to finish before starting";
+        }
+
         int totalFinished = 0;
         for (IngestThread it: threads) {
             // This is only an estimate, no need to lock {new,updated}Tokens
@@ -177,6 +196,14 @@ public class IngestThreadFactory extends Thread{
         DecimalFormat format = new DecimalFormat("#.##");
         double percent = 100*(totalFinished/(double)tokens.size());
         return "Ingested " + format.format(percent) + "% of tokens";
+    }
+
+    public static void setMaxIngestThreads(int ingestThreads){
+       maxThreads = ingestThreads;
+    }
+
+    protected static void release(){
+        semaphore.getAndDecrement();
     }
 
 }
