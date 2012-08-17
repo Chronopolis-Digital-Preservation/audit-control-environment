@@ -58,6 +58,16 @@
                     <div class="settingsHelp"><img src="images/help.png" title="IMS hostname to use. Unless you deployed your own IMS, this should probably not be changed"></div>
                 </div>
                 <div class="settingsRow">
+                    <div class="settingsName">IMS Port:</div>
+                    <div class="settingsVal"><input type=text name="ims.port" value="${currSettings['ims.port']}"/></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Port the IMS Host runs on."></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">IMS Token Class:</div>
+                    <div class="settingsVal"><input type=text name="ims.tokenclass" value="${currSettings['ims.tokenclass']}"/></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Token class for the IMS host to use."></div>
+                </div>
+                <div class="settingsRow">
                     <div class="settingsName">User Management:</div>
                     <div class="settingsVal"><input type=text name="auth.management" value="${currSettings['auth.management']}"/></div>
                     <div class="settingsHelp"><img src="images/help.png" title="Set this to true to disable internal user management. This should only be used in conjunction with changes to the Authentication realm listed above."></div>

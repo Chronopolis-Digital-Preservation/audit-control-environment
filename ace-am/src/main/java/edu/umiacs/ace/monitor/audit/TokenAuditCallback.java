@@ -57,14 +57,14 @@ public final class TokenAuditCallback implements ValidationCallback {
     private long totalErrors = 0;
     private long validTokens = 0;
     private CancelCallback cancel;
-//    private Collection collection;
+    //    private Collection collection;
     LogEventManager logManager;
 
     public TokenAuditCallback( Map<AceToken, MonitoredItem> itemMap,
             CancelCallback callback, Collection collection, long session ) {
         this.itemMap = itemMap;
         this.cancel = callback;
-//        this.collection = collection;
+        //        this.collection = collection;
         logManager = new LogEventManager(session, collection);
     }
 
@@ -85,7 +85,7 @@ public final class TokenAuditCallback implements ValidationCallback {
         // trans.begin();
         String msg = "Exception in batch thread" + Strings.exceptionAsString(throwable);
         logManager.persistCollectionEvent(LogEnum.SYSTEM_ERROR, msg, em);
-//        lem.abortSite(collection, "Exception in batch thread", throwable);
+        //        lem.abortSite(collection, "Exception in batch thread", throwable);
         // trans.commit();
         em.close();
         cancel.cancel();
@@ -107,14 +107,15 @@ public final class TokenAuditCallback implements ValidationCallback {
 
         if ( !token.getValid() ) {
             token.setValid(true);
-//            LogEventManager lem = new LogEventManager(session, collection);
-//            String path = response.getName();
+            //            LogEventManager lem = new LogEventManager(session, collection);
+            //            String path = response.getName();
             em.persist(logManager.createItemEvent(LogEnum.TOKEN_VALID, item.getPath()));
-//            em.persist(lem.validToken(path, collection));
-            if ( item.getState() == 'I' ) {
-                item.setState('A');
-                item.setStateChange(new Date());
-            }
+            //            em.persist(lem.validToken(path, collection));
+        }
+
+        if ( item.getState() == 'I' ) {
+            item.setState('A');
+            item.setStateChange(new Date());
         }
 
         validTokens++;
@@ -140,19 +141,19 @@ public final class TokenAuditCallback implements ValidationCallback {
 
         EntityManager em = PersistUtil.getEntityManager();
 
-//            token.setLastValidated(new Date());
+        //            token.setLastValidated(new Date());
         if ( token.getValid() ) {
             token.setValid(false);
 
-//            String path = response.getName();
+            //            String path = response.getName();
             String message = "Generated CSI: " + calculatedCSI + " IMS (correct) CSI: " + correctCSI;
             em.persist(logManager.createItemEvent(LogEnum.TOKEN_INVALID, item.getPath(), message));
-            if ( item.getState() == 'A' ) {
-                item.setState('I');
-                item.setStateChange(new Date());
-            }
         }
 
+        if ( item.getState() == 'A' ) {
+            item.setState('I');
+            item.setStateChange(new Date());
+        }
         validTokens++;
         EntityTransaction trans = em.getTransaction();
         trans.begin();

@@ -216,7 +216,7 @@ public class IngestThread extends Thread {
                     identifier, coll.getDirectory() + identifier);
             em.persist(token);
             item.setToken(token);
-            item.setState('A');
+            item.setState('I');
             em.merge(item);
             em.persist(event);
             numTransactions += 3;
