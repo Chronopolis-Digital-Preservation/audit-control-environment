@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE glassfish-ejb-jar PUBLIC "-//GlassFish.org//DTD GlassFish Application Server 3.1 EJB 3.1//EN" "http://glassfish.org/dtds/glassfish-ejb-jar_3_1-1.dtd">
+<glassfish-ejb-jar>
+  <enterprise-beans>
+    <ejb>
+      <ejb-name>WitnessBean</ejb-name>
+      <resource-ref>
+        <res-ref-name>db</res-ref-name>
+        <jndi-name>jdbc/ace-ims</jndi-name>
+      </resource-ref>
+    </ejb>
+  </enterprise-beans>
+  <cmp-resource>
+      <jndi-name>jdbc/ace-ims</jndi-name>
+      <create-tables-at-deploy>true</create-tables-at-deploy>
+      <drop-tables-at-undeploy>false</drop-tables-at-undeploy>
+   </cmp-resource>
+</glassfish-ejb-jar>

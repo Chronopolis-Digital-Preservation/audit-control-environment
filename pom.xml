@@ -86,6 +86,10 @@
         <module>ace-am</module>
         <module>ace-dist</module>
         <module>audit-core</module>
+        <module>ace-ims-server</module>
+        <module>ace-ims-ejb</module>
+        <module>ace-ims-war</module>
+        <module>ace-ims-ear</module> 
     </modules>
 
     <!--<reporting>

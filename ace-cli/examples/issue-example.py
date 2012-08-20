@@ -2,7 +2,7 @@ import hashlib
 import binascii
 from suds.client import Client
 
-filename='test2.py'
+filename='issue-example.py'
 
 digFile = open(filename,'rb')
 hashAlg = hashlib.sha256()
