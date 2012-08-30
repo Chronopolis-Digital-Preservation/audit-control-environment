@@ -1,7 +1,7 @@
 --
--- schema for ACE 1.6
+-- schema for ACE 1.7
 --
-DROP TABLE IF EXISTS `collection`;
+
 CREATE TABLE `collection` (
   `ID` bigint(20) NOT NULL auto_increment,
   `STORAGE` varchar(255) default NULL,
@@ -10,11 +10,11 @@ CREATE TABLE `collection` (
   `COLGROUP` varchar(255) default NULL,
   `LASTSYNC` datetime default NULL,
   `STATE` char(1) default NULL,
-  `DIGESTALGORITHM` varchar(20) default 'SHA-256',
+  `DIGESTALGORITHM` varchar(20) NOT NULL default 'SHA-256',
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `monitored_item`;
+
 CREATE TABLE `monitored_item` (
   `ID` bigint(20) NOT NULL auto_increment,
   `LASTSEEN` datetime default NULL,
@@ -37,7 +37,7 @@ CREATE TABLE `monitored_item` (
   KEY `idx_monitored_item_digest` (`FILEDIGEST`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 MAX_ROWS=2431504384;
 
-DROP TABLE IF EXISTS `acetoken`;
+
 CREATE TABLE `acetoken` (
   `ID` bigint(20) NOT NULL auto_increment,
   `CREATEDATE` datetime default NULL,
@@ -52,7 +52,7 @@ CREATE TABLE `acetoken` (
   KEY `FK_acetoken_PARENTCOLLECTION_ID` (`PARENTCOLLECTION_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 MAX_ROWS=2431504384;
 
-DROP TABLE IF EXISTS `logevent`;
+
 CREATE TABLE `logevent` (
   `ID` bigint(20) NOT NULL auto_increment,
   `SESSION` bigint(20) default NULL,
@@ -68,7 +68,7 @@ CREATE TABLE `logevent` (
   KEY `FK_logevent_COLLECTION_ID` (`COLLECTION_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 MAX_ROWS=2431504384;
 
-DROP TABLE IF EXISTS `benchmarksettings`;
+
 CREATE TABLE `benchmarksettings` (
   `ID` bigint(20) NOT NULL auto_increment,
   `DIRS` int(11) NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE `benchmarksettings` (
   KEY `FK_benchmarksettings_COLLECTION_ID` (`COLLECTION_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `srbsettings`;
+
 CREATE TABLE `srbsettings` (
   `ID` bigint(20) NOT NULL auto_increment,
   `ZONE` varchar(255) NOT NULL,
@@ -96,7 +96,7 @@ CREATE TABLE `srbsettings` (
   KEY `FK_srbsettings_COLLECTION_ID` (`COLLECTION_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `swapsettings`;
+
 CREATE TABLE `swapsettings` (
   `ID` bigint(20) NOT NULL auto_increment,
   `USERNAME` varchar(255) NOT NULL,
@@ -109,7 +109,7 @@ CREATE TABLE `swapsettings` (
   KEY `FK_srbsettings_COLLECTION_ID` (`COLLECTION_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `irodssettings`;
+
 CREATE TABLE `irodssettings` (
   `ID` bigint(20) NOT NULL auto_increment,
   `ZONE` varchar(255) NOT NULL,
@@ -122,7 +122,7 @@ CREATE TABLE `irodssettings` (
   KEY `FK_irodssettings_COLLECTION_ID` (`COLLECTION_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `userroles`;
+
 CREATE TABLE `userroles` (
   `ID` bigint(20) NOT NULL auto_increment,
   `USERNAME` varchar(255) default NULL,
@@ -130,7 +130,7 @@ CREATE TABLE `userroles` (
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `settings`;
+
 CREATE TABLE `settings` (
   `ID` bigint(20) NOT NULL auto_increment,
   `ATTR` varchar(255) default NULL,
@@ -140,7 +140,7 @@ CREATE TABLE `settings` (
   UNIQUE idx_coll_setting (`COLLECTION_ID`,`ATTR`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `users`;
+
 CREATE TABLE `users` (
   `ID` bigint(20) NOT NULL auto_increment,
   `USERNAME` varchar(255) default NULL,
@@ -148,7 +148,7 @@ CREATE TABLE `users` (
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `filter_entry`;
+
 CREATE TABLE `filter_entry` (
   `ID` bigint(20) NOT NULL auto_increment,
   `REGEX` varchar(255) default NULL,
@@ -158,7 +158,7 @@ CREATE TABLE `filter_entry` (
   KEY `FK_filter_entry_COLLECTION_ID` (`COLLECTION_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `partner_site`;
+
 CREATE TABLE `partner_site` (
   `ID` bigint(20) NOT NULL auto_increment,
   `REMOTEURL` varchar(255) default NULL,
@@ -167,7 +167,7 @@ CREATE TABLE `partner_site` (
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `report_item`;
+
 CREATE TABLE `report_item` (
   `ID` bigint(20) NOT NULL auto_increment,
   `VALUE` bigint(20) default NULL,
@@ -178,7 +178,7 @@ CREATE TABLE `report_item` (
   KEY `idx_report_id` (`REPORT_ID`)
 ) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `report_summary`;
+
 CREATE TABLE `report_summary` (
   `ID` bigint(20) NOT NULL auto_increment,
   `FIRSTLOGENTRY` bigint(20) default NULL,
@@ -201,7 +201,7 @@ CREATE TABLE `report_policy` (
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `peer_collection`;
+
 CREATE TABLE `peer_collection` (
   `ID` bigint(20) NOT NULL auto_increment,
   `PARENT_ID` bigint(20) NOT NULL,
