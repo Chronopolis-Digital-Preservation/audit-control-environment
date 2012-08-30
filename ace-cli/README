@@ -1,0 +1,24 @@
+Installing Python examples on Ubuntu 12.04
+
+1. Install Pip and Virtualenv (can be skipped if you already have this)
+
+sudo apt-get install python-setuptools
+sudo easy_install pip
+sudo pip install virtualenv
+sudo pip install virtualenvwrapper
+
+2. Configure local ACE virtualenv
+mkdir ~/.virtualenvs
+echo "export WORKON_HOME=~/.virtualenvs" >> ~/.bashrc
+echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc
+echo "export PIP_VIRTUALENV_BASE=~/.virtualenvs" >> ~/.bashrc
+echo "alias mkvirtualenv='mkvirtualenv --no-site-packages --distribute'" >> ~/.bashrc
+source ~/.bashrc
+mkvirtualenv ace
+pip install suds
+
+3. Run examples
+python createstore.py -r .
+
+
+
