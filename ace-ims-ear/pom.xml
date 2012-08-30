@@ -4,7 +4,7 @@
     <parent>
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
-        <version>1.7-SNAPSHOT</version>
+        <version>1.7</version>
     </parent>
     <packaging>ear</packaging>
     <groupId>edu.umiacs.ace</groupId>
@@ -64,7 +64,7 @@
             <plugin>
                 <groupId>org.codehaus.cargo</groupId>
                 <artifactId>cargo-maven2-plugin</artifactId>
-                <version>0.3-SNAPSHOT</version>
+                <version>0.3</version>
                 <configuration>
                     <container>
                         <containerId>jboss4x</containerId>
