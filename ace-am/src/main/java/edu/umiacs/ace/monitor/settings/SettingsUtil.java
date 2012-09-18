@@ -78,6 +78,26 @@ public class SettingsUtil {
         em.clear();
     }
 
+    public static void deleteSettings(List<String> settings) {
+        EntityManager em = PersistUtil.getEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        trans.begin();
+
+        for ( String name : settings ) {
+            // TODO: Find a better way to do this
+            SettingsParameter setting = getItemByAttr(name);
+            SettingsParameter managedSetting =
+                    em.find(SettingsParameter.class, setting.getId());
+
+            if ( setting != null ) {
+                em.remove(managedSetting);
+            }
+        }
+
+        trans.commit();
+        em.close();
+    }
+
     // Get the names of all curent settings
     public static Set<String> getParamNames() {
         List<SettingsParameter> settings = getCurrentSettings();

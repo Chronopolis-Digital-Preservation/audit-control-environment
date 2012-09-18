@@ -191,6 +191,10 @@
         <servlet-name>AddSettingServlet</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.settings.AddSettingServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>DeleteSettingsServlet</servlet-name>
+        <servlet-class>edu.umiacs.ace.monitor.settings.DeleteSettingsServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ServletAdaptor</servlet-name>
         <url-pattern>/rest/*</url-pattern>
@@ -307,6 +311,10 @@
     <servlet-mapping>
         <servlet-name>AddSettingServlet</servlet-name>
         <url-pattern>/AddSettings</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DeleteSettingsServlet</servlet-name>
+        <url-pattern>/DeleteSettings</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

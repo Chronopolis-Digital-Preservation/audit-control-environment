@@ -149,6 +149,7 @@
                 </c:forEach>
                 <div class="settingsRow">
                     <div class="settingsName"><a href="addsetting.jsp">Add setting</a></div>
+                    <div class="settingsName"><a href="DeleteSettings">Delete settings</a></div>
                 </div>
             </fieldset>
             <br>
