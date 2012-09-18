@@ -35,6 +35,7 @@ import edu.umiacs.ace.monitor.peers.PeerCollection;
 import edu.umiacs.util.Argument;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.CascadeType;
@@ -53,6 +54,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Collection states
@@ -69,8 +71,11 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "Collection.getCollectionByName", query =
     "SELECT c FROM Collection c WHERE c.name = :name"),
     @NamedQuery(name = "Collection.listGroups", query =
-    "SELECT DISTINCT c.group FROM Collection c")
+    "SELECT DISTINCT c.group FROM Collection c"),
+    @NamedQuery(name = "Collection.getCollectionById", query =
+    "SELECT c FROM Collection c WHERE c.id = :id")
 })
+@XmlRootElement
 public class Collection implements Serializable {
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)

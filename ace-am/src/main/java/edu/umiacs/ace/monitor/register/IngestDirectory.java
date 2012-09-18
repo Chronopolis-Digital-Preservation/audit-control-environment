@@ -80,6 +80,9 @@ public class IngestDirectory extends Thread{
         // We don't have a FileBean, so build the pathList ourselves
         StringBuilder fullPath = new StringBuilder(path);
         List <String> pathList = new LinkedList<String>();
+        if ( fullPath.charAt(0) != '/') {
+            fullPath.insert(0, "/");
+        }
         int index = 0;
         while( (index = fullPath.lastIndexOf("/")) != 0 ) {
             pathList.add(fullPath.toString());

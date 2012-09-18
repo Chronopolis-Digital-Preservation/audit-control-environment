@@ -235,6 +235,9 @@ public class IngestThread extends Thread {
         StringBuilder fullPath = new StringBuilder(path);
         List <String> pathList = new LinkedList<String>();
         int index = 0;
+        if ( fullPath.charAt(0) != '/') {
+            fullPath.insert(0, "/");
+        }
         while( (index = fullPath.lastIndexOf("/")) != 0 ) {
             //System.out.println(fullPath);
             pathList.add(fullPath.toString());
