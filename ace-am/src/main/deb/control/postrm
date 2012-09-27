@@ -1,0 +1,16 @@
+#!/bin/sh -e
+
+. /usr/share/debconf/confmodule
+
+# Not sure if we really need this, but it can't hurt
+if [ "$1" = "purge" -a -e /usr/share/debconf/confmodule ]; then
+    . /usr/share/debconf/confmodule
+    db_purge
+fi
+
+if [ -x "/etc/init.d/tomcat6" ]; then
+  invoke-rc.d tomcat6 start || true
+fi
+
+echo "Note: The ace-am database and jdbc connector symlink have not been "
+echo "      removed. If you do not want them, please remove them manually" 

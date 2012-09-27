@@ -1,0 +1,37 @@
+#!/bin/sh -e
+
+. /usr/share/debconf/confmodule
+
+echo "Postinst called with $1"
+db_version 2.0
+ACE_USER="aceam"
+ACE_PASS="ace"
+db_get ace-am/mysql_root_pass && MYSQL_PASS="$RET" || MYSQL_PASS=""
+
+# Probably don't want to drop if exists, so this will probably be changed later
+case "$1" in
+  configure)
+    MYSQL_USER="root"
+
+    echo "Setting up ace-am database with user $ACE_USER and password $ACE_PASS"
+    COMMAND="mysql -u $MYSQL_USER"
+    [ -n "$MYSQL_PASS" ] && COMMAND="$COMMAND -p$MYSQL_PASS"
+    echo "$COMMAND"
+    eval $COMMAND << eof
+
+    DROP DATABASE IF EXISTS aceam;
+    create database aceam;
+    grant all on aceam.* to '$ACE_USER'@'localhost' identified by '$ACE_PASS';
+    use aceam;
+    source /tmp/ace-am.sql;
+eof
+
+  ;;
+esac
+
+if [ -x "/etc/init.d/tomcat6" ]; then
+  invoke-rc.d tomcat6 start || true
+fi
+
+# Remove the mysql pass from debconf
+echo PURGE | debconf-communicate ace-am

@@ -1,0 +1,13 @@
+Template: ace-am/mysql_root_pass
+Type: password 
+Description: Enter your MySQL Admin Password:
+
+Template: ace-am/username
+Type: string
+Default: aceam
+Description: MySQL name to connect with to create the database.
+
+Template: ace-am/pass
+Type: password
+Default: ace 
+Description: Password to connect with.

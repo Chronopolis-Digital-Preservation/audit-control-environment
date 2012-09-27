@@ -1,0 +1,20 @@
+#!/bin/sh -e
+
+. /usr/share/debconf/confmodule
+
+# Create a symlink for the jdbc lib in tomcat
+if [ ! -e "/usr/share/tomcat6/lib/mysql-connector-java.jar" ]; then
+  echo "Creating symlink for jdbc connector in /usr/share/tomcat6/lib"
+  ln -s /usr/share/java/mysql-connector-java.jar /usr/share/tomcat6/lib/mysql-connector-java.jar
+fi
+
+# Check tomcat/mysql services so that our install doesn't break
+if [ -x "/etc/init.d/tomcat6" ]; then
+  invoke-rc.d tomcat6 stop || true
+fi
+
+MYSQL_CHECK=`service mysql status | grep start | wc -l`
+
+if [ $MYSQL_CHECK -eq 0 ]; then
+    invoke-rc.d mysql start || true
+fi

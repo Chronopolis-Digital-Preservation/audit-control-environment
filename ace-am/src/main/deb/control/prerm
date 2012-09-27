@@ -1,0 +1,7 @@
+#!/bin/sh -e
+
+. /usr/share/debconf/confmodule
+
+if [ -x "/etc/init.d/tomcat6" ]; then
+  invoke-rc.d tomcat6 stop || true
+fi

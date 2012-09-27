@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+. /usr/share/debconf/confmodule
+
+echo "Config script initializing" 
+
+db_input high ace-am/mysql_root_pass || true
+db_go
+
+db_stop
