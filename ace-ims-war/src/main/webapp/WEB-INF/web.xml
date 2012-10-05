@@ -84,34 +84,36 @@
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
+    <!--
     <ejb-local-ref>
         <ejb-ref-name>RoundBean</ejb-ref-name>
         <ejb-ref-type>Session</ejb-ref-type>
         <local>edu.umiacs.ace.ims.round.RoundLocal</local>
-        <ejb-link>ace-ims-ejb.jar#RoundBean</ejb-link>
+        <ejb-link>edu.umiacs.ace_ace-ims-ejb_ejb_1.7.1-SNAPSHOT/RoundBean</ejb-link>
     </ejb-local-ref>
     <ejb-local-ref>
         <ejb-ref-name>TokenStoreBean</ejb-ref-name>
         <ejb-ref-type>Session</ejb-ref-type>
         <local>edu.umiacs.ace.ims.store.TokenStoreLocal</local>
-        <ejb-link>ace-ims-ejb.jar#TokenStoreBean</ejb-link>
+        <ejb-link>edu.umiacs.ace_ace-ims-ejb_ejb_1.7.1-SNAPSHOT/TokenStoreBean</ejb-link>
     </ejb-local-ref>
     <ejb-local-ref>
         <ejb-ref-name>TokenClassBean</ejb-ref-name>
         <ejb-ref-type>Session</ejb-ref-type>
         <local>edu.umiacs.ace.ims.tokenclass.TokenClassLocal</local>
-        <ejb-link>ace-ims-ejb.jar#TokenClassBean</ejb-link>
+        <ejb-link>edu.umiacs.ace_ace-ims-ejb_ejb_1.7.1-SNAPSHOT/TokenClassBean</ejb-link>
     </ejb-local-ref>
     <ejb-local-ref>
         <ejb-ref-name>WitnessBean</ejb-ref-name>
         <ejb-ref-type>Session</ejb-ref-type>
         <local>edu.umiacs.ace.ims.witness.WitnessLocal</local>
-        <ejb-link>ace-ims-ejb.jar#WitnessBean</ejb-link>
+        <ejb-link>edu.umiacs.ace_ace-ims-ejb_ejb_1.7.1-SNAPSHOT/WitnessBean</ejb-link>
     </ejb-local-ref>
     <ejb-local-ref>
         <ejb-ref-name>MailPublisherBean</ejb-ref-name>
         <ejb-ref-type>Session</ejb-ref-type>
         <local>edu.umiacs.ace.ims.system.MailPublisherLocal</local>
-        <ejb-link>ace-ims-ejb.jar#MailPublisherBean</ejb-link>
+        <ejb-link>edu.umiacs.ace_ace-ims-ejb_ejb_1.7.1-SNAPSHOT/MailPublisherBean</ejb-link>
     </ejb-local-ref>
+    -->
 </web-app>

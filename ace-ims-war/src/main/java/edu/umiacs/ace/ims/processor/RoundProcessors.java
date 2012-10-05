@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import javax.ejb.EJB;
 import org.apache.log4j.Logger;
 
 /**
@@ -34,6 +35,8 @@ public final class RoundProcessors
     private Map<TokenClass, RoundProcessor> processors =
             new HashMap<TokenClass, RoundProcessor>();
     private ReadWriteLock processorsLock = new ReentrantReadWriteLock();
+
+    @EJB(name="TokenStoreBean")
     private TokenStoreLocal tokenStoreBean = 
             ServiceLocator.getInstance().getLocal(TokenStoreLocal.class);
     private TokenPersistenceThread persistenceThread;

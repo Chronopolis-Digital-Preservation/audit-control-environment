@@ -22,7 +22,7 @@ public class InitializeBean implements InitializeLocal
     
     public void development()
     {
-        if ( tokenClassBean.list() == null || tokenClassBean.list().size() == 0 )
+        if ( tokenClassBean.list() == null || tokenClassBean.list().isEmpty() )
         {
             TokenClass tc = new TokenClass();
             tc.setName("SHA-256");

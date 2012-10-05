@@ -1,21 +1,30 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
         <version>1.7.1-SNAPSHOT</version>
     </parent>
+
     <packaging>ear</packaging>
     <groupId>edu.umiacs.ace</groupId>
     <artifactId>ace-ims-ear</artifactId>
     <name>ace-ims-ear</name>
     <url>http://maven.apache.org</url>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <netbeans.hint.deploy.server>gfv3ee6</netbeans.hint.deploy.server>
     </properties>
+
     <dependencies>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>1.45</version>
+        </dependency>
         <dependency>
             <groupId>edu.umiacs.ace</groupId>
             <artifactId>ace-ims-ejb</artifactId>
@@ -28,32 +37,32 @@
             <type>war</type>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>edu.umiacs.ace</groupId>
+            <artifactId>ace-ims-server</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
+
     <build>
         <finalName>ace-ims</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-ear-plugin</artifactId>
                 <configuration>
+                    <defaultLibBundleDir>lib</defaultLibBundleDir>
                     <modules>
-                        <jarModule>
-                            <groupId>edu.umiacs.ace</groupId>
-                            <artifactId>ace-ims-server</artifactId>
-                            <includeInApplicationXml>true</includeInApplicationXml>
-                        </jarModule>
-                        <jarModule>
-                            <groupId>edu.umiacs.ace</groupId>
-                            <artifactId>ace-common</artifactId>
-                            <includeInApplicationXml>true</includeInApplicationXml>
-                        </jarModule>
-                        <!-- <ejbModule>
-                            <groupId>edu.umiacs.ace</groupId>
-                            <artifactId>ace-ims-ejb</artifactId>
-                        </ejbModule>
                         <webModule>
                             <groupId>edu.umiacs.ace</groupId>
                             <artifactId>ace-ims-war</artifactId>
-                        </webModule>-->
+                            <contextRoot>/ace-ims</contextRoot>
+                            <unpack>true</unpack>
+                        </webModule>
+                        <ejbModule>
+                            <groupId>edu.umiacs.ace</groupId>
+                            <artifactId>ace-ims-ejb</artifactId>
+                        </ejbModule>
                     </modules>
                     <jboss>
                         <version>4</version>

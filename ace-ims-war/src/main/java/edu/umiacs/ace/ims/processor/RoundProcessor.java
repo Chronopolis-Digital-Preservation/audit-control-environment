@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.ejb.EJB;
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
@@ -45,6 +46,8 @@ import org.apache.log4j.NDC;
 class RoundProcessor extends Thread 
 {
     private static final HashFormatter hashFormatter = new HashFormatter();
+
+    @EJB(name="RoundBean")
     private RoundLocal roundBean = 
             ServiceLocator.getInstance().getLocal(RoundLocal.class);
     
