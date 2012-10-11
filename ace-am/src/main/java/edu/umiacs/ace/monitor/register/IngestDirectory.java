@@ -49,7 +49,7 @@ import javax.persistence.Query;
  *
  * @author shake
  */
-public class IngestDirectory extends Thread{
+public class IngestDirectory implements Runnable {
     private Collection coll;
     private Set<String> identifiers;
     private Set<String> existingParents = new HashSet<String>();

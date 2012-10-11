@@ -137,12 +137,12 @@ public class IngestStore extends EntityManagerServlet {
             throw new ServletException("Bad upload parameters");
         }
 
-        IngestThreadFactory threads = new IngestThreadFactory(batchTokens, coll);
+        IngestThreadPool tPool = IngestThreadPool.getInstance();
+        tPool.submitTokens(batchTokens, coll);
         HttpSession session = request.getSession();
-        session.setAttribute(PAGE_RESULTS, threads);
-        threads.start();
+        session.setAttribute(PAGE_RESULTS, tPool);
 
-        dispatcher = request.getRequestDispatcher("ingestfinish.jsp");
+        dispatcher = request.getRequestDispatcher("ingeststatus.jsp");
         dispatcher.forward(request, response);
     }
 

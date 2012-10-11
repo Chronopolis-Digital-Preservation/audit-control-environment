@@ -34,7 +34,6 @@ import edu.umiacs.ace.monitor.settings.SettingsParameter;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Properties;
 import javax.mail.Message;
 import javax.mail.MessagingException;

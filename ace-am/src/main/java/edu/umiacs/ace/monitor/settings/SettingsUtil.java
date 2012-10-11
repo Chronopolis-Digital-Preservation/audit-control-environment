@@ -85,6 +85,7 @@ public class SettingsUtil {
 
         for ( String name : settings ) {
             // TODO: Find a better way to do this
+            //       Could possibly wrap the ID into the settings list
             SettingsParameter setting = getItemByAttr(name);
             SettingsParameter managedSetting =
                     em.find(SettingsParameter.class, setting.getId());

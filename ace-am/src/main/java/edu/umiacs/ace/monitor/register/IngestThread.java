@@ -57,7 +57,7 @@ import javax.persistence.EntityTransaction;
  *
  * @author shake
  */
-public class IngestThread extends Thread {
+public class IngestThread implements Runnable {
     // These only gets read from, never written to
     private Map<String, Token> tokens;
     private Collection coll;
@@ -75,7 +75,8 @@ public class IngestThread extends Thread {
     // May cause problems
     private EntityManager em = PersistUtil.getEntityManager();
 
-    IngestThread(Map<String, Token> tokens, Collection coll, List<String> subList) {
+    public IngestThread(Map<String, Token> tokens, Collection coll,
+            List<String> subList) {
         this.tokens = tokens;
         this.coll = coll;
         this.identifiers = subList;
@@ -145,8 +146,8 @@ public class IngestThread extends Thread {
                     // LOG.trace does not exist
                     event[0] = logManager.createItemEvent(LogEnum.FILE_REGISTER,
                             identifier, coll.getDirectory() + identifier);
-                    event[1] = logManager.createItemEvent(LogEnum.ADD_TOKEN, identifier,
-                            coll.getDirectory() + identifier);
+                    event[1] = logManager.createItemEvent(LogEnum.ADD_TOKEN, 
+                            identifier, coll.getDirectory() + identifier);
 
                     String parent = null;
                     parent = extractParent(mim, identifier, coll);
@@ -183,7 +184,6 @@ public class IngestThread extends Thread {
             em.close();
             trans = null;
             em = null;
-            IngestThreadFactory.release();
             finished();
         }
     }
@@ -209,7 +209,6 @@ public class IngestThread extends Thread {
         }else{
             update = true;
         }
-
 
         if ( update ) {
             LogEvent event = logManager.createItemEvent(LogEnum.TOKEN_INGEST_UPDATE,
