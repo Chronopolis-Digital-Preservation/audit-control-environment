@@ -23,8 +23,8 @@
         <script type="text/javascript">
             jQuery(document).ready(function() {
                 jQuery(".content").hide();
-                //toggle the componenet with class msg_body
-                jQuery(".heading").click(function()
+
+                jQuery(".collname").click(function()
                 {
                     jQuery(this).next(".content").slideToggle(100);
                 });
@@ -39,24 +39,16 @@
             <h3>${results.status}</h3>
 
 
-            <div class="headingContainer">
+            <div class="dropDownContainer">
             <c:forEach items="${results.ingestedItems}" var="entry">
-                <p class="heading">Collection: ${entry.key.name}</p>
-                <div class="content">
+                <p class="collName">Collection: ${entry.key.name}</p>
+                <div class="ingestContent">
                     <c:forEach items="${entry.value}" var="what">
                         <li>${what}</li>
                     </c:forEach>
                 </div>
             </c:forEach>
             </div>
-            <!--
-            <div class="headingContainer">
-                <p class="heading">Header-1 </p>
-                <div class="content">Lorem ipsum dolor sit amet, consectetuer adipiscing elit orem ipsum dolor sit amet, consectetuer adipiscing elit</div>
-                <p class="heading">Header-2</p>
-                <div class="content">Lorem ipsum dolor sit amet, consectetuer adipiscing elit orem ipsum dolor sit amet, consectetuer adipiscing elitdddd
-            </div>
-            -->
         <jsp:include page="footer.jsp"/>
     </body>
 </html>
