@@ -48,6 +48,7 @@ public class AuditThreadFactory {
     private static String imsHost = null;
     private static int imsPort = 8080;
     private static String tokenClass = "SHA-256";
+    private static boolean auditOnly = false;
 
     public static void setIMS( String ims ) {
         imsHost = ims;
@@ -73,6 +74,10 @@ public class AuditThreadFactory {
         AuditThreadFactory.imsPort = imsPort;
     }
 
+    static void setAuditOnly(boolean auditOnlyMode) {
+        AuditThreadFactory.auditOnly = auditOnlyMode;
+    }
+
     /**
      * Return a new or existing thread if any room is available New threads will start replication
      * 
@@ -89,7 +94,8 @@ public class AuditThreadFactory {
 //                {
 //                    pathList = new String[startItem.size()];
 //                }
-                AuditThread newThread = new AuditThread(c, tri, startItem);
+                AuditThread newThread = new AuditThread(c, tri, auditOnly,
+                        startItem);
                 newThread.setImsHost(imsHost);
                 newThread.setImsport(imsPort);
                 newThread.setTokenClassName(tokenClass);

@@ -98,6 +98,7 @@ public enum LogEnum {
     TOKEN_AUDIT_FINISH(23, "Token Audit Finish", "Auditing of this collection's tokens finished"),
     TOKEN_INGEST_UPDATE(24, "Token Ingest Update", "Token was out of date and has been updated"),
     FILE_REGISTER(25, "File Registered", "New file registered but is not ready for auditing"),
+    FILE_AUDIT_FALLBACK(26, "File Audit Fallback", "File Audit could not connect to the IMS, falling back to audit-only mode"),
     SYSTEM_ERROR(99, "System Error", "Unknown system error occurred, check server logs");
     private int type;
     private String shortName;
@@ -173,6 +174,8 @@ public enum LogEnum {
                 return TOKEN_INGEST_UPDATE;
             case 25:
                 return FILE_REGISTER;
+            case 26:
+                return FILE_AUDIT_FALLBACK;
 
             case 99:
                 return SYSTEM_ERROR;

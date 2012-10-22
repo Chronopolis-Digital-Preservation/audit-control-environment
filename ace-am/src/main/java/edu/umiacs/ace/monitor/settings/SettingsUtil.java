@@ -1,11 +1,10 @@
 package edu.umiacs.ace.monitor.settings;
 
+import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.util.PersistUtil;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -154,8 +153,49 @@ public class SettingsUtil {
                 SettingsConstants.log4JRootLogger,false));
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_INGEST,
                 SettingsConstants.maxIngestThreads, false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_AUDIT_ONLY,
+                SettingsConstants.auditOnly, false));
 
         return defaults;
+    }
+
+       /**
+     *
+     * @param c
+     * @param attr
+     * @return true if collection, settings are not null and parameter is "true"
+     */
+    public static boolean getBoolean(Collection c, String attr) {
+        if (!containsKey(c, attr)) {
+            return false;
+        }
+
+        return "true".equalsIgnoreCase(c.getSettings().get(attr));
+    }
+
+    public static String getString(Collection c, String attr) {
+        if (!containsKey(c, attr)) {
+            return null;
+        }
+        return c.getSettings().get(attr);
+
+    }
+
+    public static int getInt(Collection c, String attr, int def) {
+        if (!containsKey(c, attr)) {
+            return def;
+        }
+        try {
+            return Integer.parseInt(c.getSettings().get(attr));
+        } catch (NumberFormatException e) {
+            return def;
+        }
+    }
+
+    public static boolean containsKey(Collection c, String attr) {
+        return (c != null && c.getSettings() != null
+                && c.getSettings().containsKey(attr));
+
     }
 
 }

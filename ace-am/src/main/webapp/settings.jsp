@@ -53,6 +53,11 @@
                     <div class="settingsHelp"><img src="images/help.png" title="Start automated auditing"></div>
                 </div>
                 <div class="settingsRow">
+                    <div class="settingsName">Audit Only Mode:</div>
+                    <div class="settingsVal"><input type=text name="audit.only" value="${currSettings['audit.only']}"/></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="If true, do not attempt to register new items or contact the IMS during auditing"></div>
+                </div>
+                <div class="settingsRow">
                     <div class="settingsName">IMS Host:</div>
                     <div class="settingsVal"><input type=text name="ims" value="${currSettings['ims']}"/></div>
                     <div class="settingsHelp"><img src="images/help.png" title="IMS hostname to use. Unless you deployed your own IMS, this should probably not be changed"></div>

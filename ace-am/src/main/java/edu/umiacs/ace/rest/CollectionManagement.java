@@ -8,6 +8,7 @@ package edu.umiacs.ace.rest;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.util.PersistUtil;
 import java.util.logging.Level;
+import javax.annotation.security.RolesAllowed;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.ws.rs.Consumes;
@@ -52,6 +53,7 @@ public class CollectionManagement {
     @POST
     @Path("xml")
     @Consumes(MediaType.APPLICATION_XML)
+    @RolesAllowed("CollectionModify")
     public void addCollectionXML(Collection coll) {
         checkCollection(coll);
         EntityManager em = PersistUtil.getEntityManager();
@@ -64,6 +66,7 @@ public class CollectionManagement {
     @POST
     @Path("json")
     @Consumes(MediaType.APPLICATION_JSON)
+    @RolesAllowed("CollectionModify")
     // Instead of unmarshalling, this may be able to just take a Collection
     public void addCollectionJSON(JSONObject jsonObj){
         JAXBContext jc = null;
@@ -103,6 +106,7 @@ public class CollectionManagement {
     @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("xml/{id}")
+    @RolesAllowed("Browse")
     public Collection getCollectionXML(@PathParam("id") long collId){
         EntityManager em = PersistUtil.getEntityManager();
         return em.find(Collection.class, collId);
@@ -111,6 +115,7 @@ public class CollectionManagement {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("json/{id}")
+    @RolesAllowed({"Browse"})
     public Collection getCollectionJSON(@PathParam("id") long collId){
         EntityManager em = PersistUtil.getEntityManager();
         return em.find(Collection.class, collId);

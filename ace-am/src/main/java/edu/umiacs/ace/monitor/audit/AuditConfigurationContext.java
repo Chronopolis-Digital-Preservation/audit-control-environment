@@ -30,19 +30,22 @@
 // $Id$
 package edu.umiacs.ace.monitor.audit;
 
-import edu.umiacs.ace.monitor.core.SettingsUtil;
+import edu.umiacs.ace.monitor.settings.SettingsUtil;
 import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.driver.StorageDriverFactory;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.ConfigConstants;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
+import edu.umiacs.ace.monitor.settings.SettingsConstants;
 import edu.umiacs.ace.monitor.settings.SettingsParameter;
 import edu.umiacs.util.Strings;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -65,6 +68,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
     private static final String PARAM_IMS_TOKEN_CLASS = "ims.tokenclass";
     private static final String PARAM_DISABLE_AUDIT = "auto.audit.disable";
     private static final String PARAM_THROTTLE_MAXAUDIT = "throttle.maxaudit";
+    private static final String PARAM_AUDIT_ONLY = "audit.only";
     public static final String ATTRIBUTE_PAUSE = "pause";
     private static final long HOUR = 1000 * 60 * 60;
     private Timer checkTimer;
@@ -102,6 +106,18 @@ public final class AuditConfigurationContext implements ServletContextListener {
             } else {
                 throw new RuntimeException("ims.port must be between 1 and 32768");
             }
+        }
+
+        q.setParameter("attr", PARAM_AUDIT_ONLY);
+        try {
+            s = (SettingsParameter) q.getSingleResult();
+            AuditThreadFactory.setAuditOnly(Boolean.valueOf(s.getValue()));
+        }catch ( NoResultException ex ) {
+            EntityTransaction trans = em.getTransaction();
+            em.persist(new SettingsParameter(SettingsConstants.PARAM_AUDIT_ONLY,
+                    SettingsConstants.auditOnly, false));
+            trans.commit();
+            AuditThreadFactory.setAuditOnly(false);
         }
 
         PauseBean pb = new PauseBean();

@@ -54,7 +54,7 @@ import edu.umiacs.ace.monitor.reporting.SchedulerContextListener;
 import edu.umiacs.ace.monitor.reporting.SummaryGenerator;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.ConfigConstants;
-import edu.umiacs.ace.monitor.core.SettingsUtil;
+import edu.umiacs.ace.monitor.settings.SettingsUtil;
 import edu.umiacs.ace.monitor.log.LogEnum;
 import edu.umiacs.ace.monitor.log.LogEvent;
 import edu.umiacs.ace.monitor.peers.PeerCollection;
@@ -82,6 +82,7 @@ import org.apache.log4j.NDC;
 public final class AuditThread extends Thread implements CancelCallback {
 
     private static final Logger LOG = Logger.getLogger(AuditThread.class);
+    private boolean fallback = false;
     private Map<AceToken, MonitoredItem> itemMap =
             new ConcurrentHashMap<AceToken, MonitoredItem>();
     private String imsHost;
@@ -104,11 +105,13 @@ public final class AuditThread extends Thread implements CancelCallback {
     private String tokenClassName;
     private LogEventManager logManager;
     private AuditIterable<FileBean> iterableItems;
+    private boolean auditOnly;
 
-    AuditThread(Collection c, StorageDriver driver,
+    AuditThread(Collection c, StorageDriver driver, boolean auditOnly,
             MonitoredItem... startItem) {
         this.driver = driver;
         this.coll = c;
+        this.auditOnly = auditOnly;
         if (startItem != null && startItem[0] != null) {
             baseItemPathList = Arrays.copyOf(startItem, startItem.length);
         }
@@ -190,10 +193,23 @@ public final class AuditThread extends Thread implements CancelCallback {
 
                 callback = new FileAuditCallback(coll, session, this);
                 boolean auditTokens = SettingsUtil.getBoolean(coll, ConfigConstants.ATTR_AUDIT_TOKENS);
+                /*
                 if (!openIms() || (auditTokens
                         && !openTokenValidator(MessageDigest.getInstance(
                         "SHA-256")))) {
                     return;
+                }
+                 *
+                 */
+                System.out.println(!auditOnly);
+                if( !auditOnly ) {
+                    fallback = !openIms();
+                    if ( !fallback ) {
+                        if ( auditTokens &&
+                             !openTokenValidator(MessageDigest.getInstance("SHA-256"))) {
+                            return;
+                        }
+                    }
                 }
 
                 performAudit();
@@ -247,7 +263,9 @@ public final class AuditThread extends Thread implements CancelCallback {
             trans.begin();
             em.persist(logManager.createCollectionEvent(
                     LogEnum.UNKNOWN_IMS_COMMUNICATION_ERROR, e));
-//            em.persist(logManager.imsCommError("", coll, e));
+
+            em.persist(logManager.createCollectionEvent(
+                    LogEnum.FILE_AUDIT_FALLBACK, imsHost));
             trans.commit();
             em.close();
             return false;
@@ -456,7 +474,7 @@ public final class AuditThread extends Thread implements CancelCallback {
             String parentName = extractAndRegisterParent(mim, currentFile);
             MonitoredItem item = null;
             if ((item = mim.getItemByPath(fileName, coll)) != null) {
-                LogEvent event;
+                LogEvent event = null;
                 LOG.trace("Updating existing item" + fileName);
                 item.setLastVisited(new Date());
                 // if item is in error, log a message and update its state to M
@@ -466,7 +484,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                 } else {
                     if (item.getToken() != null) {
                         event = validateIntegrity(currentFile, item);
-                    } else {
+                    } else if (!auditOnly && !fallback) {
                         // we have no token, so set state to T and enqueue
                         event = requestNewToken(currentFile, item);
                     }
@@ -479,7 +497,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                 }
                 em.merge(item);
                 trans.commit();
-            } else {
+            } else if (!auditOnly && !fallback) {
                 // OK, no registered item, do the registration
                 LogEvent[] event = addNewFile(currentFile, fileName,
                         parentName, mim);
@@ -494,7 +512,6 @@ public final class AuditThread extends Thread implements CancelCallback {
                         trans.commit();
                     }
                 }
-
             }
         } finally {
             em.close();

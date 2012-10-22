@@ -31,7 +31,7 @@
 package edu.umiacs.ace.driver;
 
 import edu.umiacs.ace.monitor.core.ConfigConstants;
-import edu.umiacs.ace.monitor.core.SettingsUtil;
+import edu.umiacs.ace.monitor.settings.SettingsUtil;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
