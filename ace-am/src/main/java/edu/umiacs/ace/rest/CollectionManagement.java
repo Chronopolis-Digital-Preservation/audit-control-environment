@@ -51,56 +51,15 @@ public class CollectionManagement {
     }
 
     @POST
-    @Path("xml")
-    @Consumes(MediaType.APPLICATION_XML)
-    @RolesAllowed("CollectionModify")
-    public void addCollectionXML(Collection coll) {
+    @Path("/")
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public void addCollection(Collection coll){
         checkCollection(coll);
         EntityManager em = PersistUtil.getEntityManager();
         EntityTransaction trans = em.getTransaction();
         trans.begin();
         em.persist(coll);
         trans.commit();
-    }
-
-    @POST
-    @Path("json")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @RolesAllowed("CollectionModify")
-    // Instead of unmarshalling, this may be able to just take a Collection
-    public void addCollectionJSON(JSONObject jsonObj){
-        JAXBContext jc = null;
-        try {
-            jc = JAXBContext.newInstance(Collection.class);
-        } catch (JAXBException ex) {
-            java.util.logging.Logger.getLogger(CollectionManagement.
-                    class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        if ( jc == null ) {
-            return;
-        }
-
-        Configuration config = new Configuration();
-        MappedNamespaceConvention con = new MappedNamespaceConvention(config);
-        try {
-            XMLStreamReader xmlSR = new MappedXMLStreamReader(jsonObj, con);
-            Unmarshaller unmarshall = jc.createUnmarshaller();
-            Collection coll = (Collection) unmarshall.unmarshal(xmlSR);
-            checkCollection(coll);
-            EntityManager em = PersistUtil.getEntityManager();
-            EntityTransaction trans = em.getTransaction();
-            trans.begin();
-            em.persist(coll);
-            trans.commit();
-        } catch (JAXBException ex) {
-            LOG.fatal(ex);
-        } catch (JSONException ex) {
-            LOG.fatal(ex);
-        } catch (XMLStreamException ex) {
-            LOG.fatal(ex);
-        }
-
     }
 
     @GET
