@@ -114,6 +114,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
             AuditThreadFactory.setAuditOnly(Boolean.valueOf(s.getValue()));
         }catch ( NoResultException ex ) {
             EntityTransaction trans = em.getTransaction();
+            trans.begin();
             em.persist(new SettingsParameter(SettingsConstants.PARAM_AUDIT_ONLY,
                     SettingsConstants.auditOnly, false));
             trans.commit();

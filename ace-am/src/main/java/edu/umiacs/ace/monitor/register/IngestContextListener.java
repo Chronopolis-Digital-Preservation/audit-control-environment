@@ -22,7 +22,6 @@ public class IngestContextListener implements ServletContextListener {
 
     public void contextInitialized(ServletContextEvent sce) {
         NDC.push("[Ingest startup]");
-        System.out.println("INGEST STARTOOP");
         EntityManager em = PersistUtil.getEntityManager();
         Query threadQuery = em.createNamedQuery("SettingsParameter.getAttr");
         threadQuery.setParameter("attr", PARAM_INGEST);
@@ -31,14 +30,10 @@ public class IngestContextListener implements ServletContextListener {
         IngestThreadPool pool = IngestThreadPool.getInstance();
         //pool.start();
 
-        //IngestThreadPool factory = new IngestThreadPool();
-        //factory.start();
     }
 
     public void contextDestroyed(ServletContextEvent sce) {
         IngestThreadPool.shutdownPools();
-        IngestThreadPool pool = IngestThreadPool.getInstance();
-        //pool.interrupt();
     }
 
 }

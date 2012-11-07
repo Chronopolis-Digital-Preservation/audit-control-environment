@@ -74,7 +74,7 @@ public class AuditThreadFactory {
         AuditThreadFactory.imsPort = imsPort;
     }
 
-    static void setAuditOnly(boolean auditOnlyMode) {
+    public static void setAuditOnly(boolean auditOnlyMode) {
         AuditThreadFactory.auditOnly = auditOnlyMode;
     }
 

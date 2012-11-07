@@ -3,7 +3,7 @@ Version: 1.7.1
 Section: misc
 Priority: extra 
 Architecture: all
-Depends: mysql-server, tomcat6, debconf (>= 0.5)
+Depends: mysql-server, libmysql-java, tomcat6, debconf (>= 0.5)
 Maintainer: shake <shake@umiacs.umd.edu> 
 Description: Audit Control Environment
 Distribution: development
