@@ -7,6 +7,7 @@ package edu.umiacs.ace.rest;
 
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.util.PersistUtil;
+import javax.annotation.security.RolesAllowed;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.ws.rs.Consumes;
@@ -40,6 +41,7 @@ public class CollectionManagement {
 
     @POST
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @RolesAllowed("Collection Modify")
     public void addCollection(Collection coll){
         checkCollection(coll);
         EntityManager em = PersistUtil.getEntityManager();
@@ -52,6 +54,7 @@ public class CollectionManagement {
     @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("xml/{id}")
+    @RolesAllowed("Browse")
     public Collection getCollectionXML(@PathParam("id") long collId){
         EntityManager em = PersistUtil.getEntityManager();
         return em.find(Collection.class, collId);
@@ -60,6 +63,7 @@ public class CollectionManagement {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("json/{id}")
+    @RolesAllowed("Browse")
     public Collection getCollectionJSON(@PathParam("id") long collId){
         EntityManager em = PersistUtil.getEntityManager();
         return em.find(Collection.class, collId);

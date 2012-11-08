@@ -720,6 +720,22 @@
             <role-name>Modify System Settings</role-name>
         </auth-constraint>
     </security-constraint>
+    <security-constraint>
+        <display-name>Rest</display-name>
+        <web-resource-collection>
+            <web-resource-name>CollectionManagement</web-resource-name>
+            <description/>
+            <url-pattern>/rest/collection/*</url-pattern>
+            <http-method>GET</http-method>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <description/>
+            <role-name>Collection Modify</role-name>
+            <role-name>Browse</role-name>
+        </auth-constraint>
+        M
+    </security-constraint>
     <login-config>
         <auth-method>BASIC</auth-method>
         <realm-name>Audit Manager</realm-name>
