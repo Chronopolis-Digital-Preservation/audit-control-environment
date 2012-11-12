@@ -4,7 +4,7 @@
     <parent>
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
-        <version>1.7.1-SNAPSHOT</version>
+        <version>1.7.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>edu.umiacs.ace</groupId>
@@ -246,7 +246,7 @@
         <dependency>
             <groupId>edu.umiacs.ace</groupId>
             <artifactId>ace-ims-ws</artifactId>
-            <version>1.7.1-SNAPSHOT</version>
+            <version>1.7.1</version>
             <type>jar</type>
         </dependency>
     </dependencies>
