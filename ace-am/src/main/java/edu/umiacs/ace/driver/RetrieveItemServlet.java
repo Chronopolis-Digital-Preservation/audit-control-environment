@@ -66,7 +66,7 @@ public final class RetrieveItemServlet extends EntityManagerServlet {
         Collection coll;
         MonitoredItem item = null;
         String urlPath;
-        String collection;
+        Long collection;
         String collectionPath = null;
 
 
@@ -77,21 +77,22 @@ public final class RetrieveItemServlet extends EntityManagerServlet {
         urlPath = request.getPathInfo().substring(1);
 
         if ( urlPath.contains("/") ) {
-            collection = urlPath.substring(0, urlPath.indexOf("/"));
-            collectionPath = urlPath.substring(collection.length());
+            collection =
+                    Long.parseLong(urlPath.substring(0, urlPath.indexOf("/")));
+            collectionPath = urlPath.substring(collection.toString().length());
         } else {
-            collection = urlPath;
+            collection = Long.parseLong(urlPath);
         }
 
         LOG.trace("Looking up item, collection: " + collection + " path: " + collectionPath);
 
-        if ( (coll = resolveCollection(collection, em)) == null ) {
+        if ( (coll = em.find(Collection.class, collection)) == null ) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
-        if (SettingsUtil.getBoolean(coll, ConfigConstants.ATTR_PROXY_DATA)) {
-//        if ( !coll.isProxyData() ) {
+        if (!SettingsUtil.getBoolean(coll, ConfigConstants.ATTR_PROXY_DATA)) {
+        //if ( !coll.isProxyData() ) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -117,19 +118,6 @@ public final class RetrieveItemServlet extends EntityManagerServlet {
         }
         LOG.debug("Retrieved item, Collection: " + collection + " item: " + item.getPath());
 
-    }
-
-    private Collection resolveCollection( String collection, EntityManager em ) {
-
-        Query q = em.createNamedQuery("Collection.getCollectionByName");
-        q.setParameter("name", collection);
-
-        try {
-            return (Collection) q.getSingleResult();
-        } catch ( NoResultException nre ) {
-            LOG.info("Attempt to access non-existent collection: " + collection);
-            return null;
-        }
     }
 
     private void writeItemToResponse( HttpServletResponse response,

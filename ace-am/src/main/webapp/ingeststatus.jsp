@@ -43,8 +43,8 @@
             <c:forEach items="${results.ingestedItems}" var="entry">
                 <p class="collName">Collection: ${entry.key.name}</p>
                 <div class="ingestContent">
-                    <c:forEach items="${entry.value}" var="what">
-                        <li>${what}</li>
+                    <c:forEach items="${entry.value}" var="token">
+                        <li>${token}</li>
                     </c:forEach>
                 </div>
             </c:forEach>

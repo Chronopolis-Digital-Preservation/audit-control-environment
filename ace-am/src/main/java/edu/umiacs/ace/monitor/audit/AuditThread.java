@@ -201,7 +201,6 @@ public final class AuditThread extends Thread implements CancelCallback {
                 }
                  *
                  */
-                System.out.println(!auditOnly);
                 if( !auditOnly ) {
                     fallback = !openIms();
                     if ( !fallback ) {
