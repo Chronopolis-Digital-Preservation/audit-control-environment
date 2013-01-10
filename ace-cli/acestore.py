@@ -1,4 +1,4 @@
-#!/usr/local/stow/python-2.7.1/bin/python
+#!/usr/local/stow/python-2.7.3/bin/python
 #
 # ACE Token store tool
 #
@@ -59,6 +59,30 @@ class TokenStoreEntry:
         self.algorithm,self.server,self.service,self.round,self.date,self.length = headerparts
         self.round = int(self.round)
 
+# Should merge this and create tokens, or at least some parts since they're pretty close
+def getProof(digestlist, wsdl='http://ims.umiacs.umd.edu:8080/ace-ims/IMSWebService?wsdl'):
+    urlparts = urlparse(wsdl)
+    client = Client(wsdl)
+    requestlist = []
+    for digestpair in digestlist:
+        request = client.factory.create('tokenRequest')
+        request.hashValue = digestpair[1]
+        request.name = digestpair[0]
+        requestlist.append(request)
+    response = client.service.requestTokensImmediate('SHA-256-0', requestlist)
+    prooflist = {}
+    clientInfo = {}
+    for item in response:
+        lines = []
+        for proofelement in item.proofElements:
+            proofelement.hashes.insert(proofelement.index,'X')
+            lines.append(":".join(proofelement.hashes))
+        prooflist[item.name] = lines
+        clientInfo['roundId'] = str(item.roundId)
+        clientInfo['tokenClass'] = item.tokenClassName
+        clientInfo['digestService'] = item.digestService
+    return (prooflist, clientInfo)
+
    
 def createTokens(digestlist,outfile,wsdl='http://ims.umiacs.umd.edu:8080/ace-ims/IMSWebService?wsdl'):
     print 'start_create ' + str(time.time())
@@ -100,6 +124,13 @@ def getAlgorithm(algName):
     elif (algName == "SHA1"):
        return hashlib.sha1()
     return None
+
+def calculateCSI(file, proof, algName):
+    """Calculate the CSI for a file"""
+    prevhash = digestFile(file)
+    for proofLine in proof:
+        prevhash = calculateLevel(prevhash,proofLine,algName)
+    return binascii.b2a_hex(prevhash)
 
 def calculateLevel(lowerHash,rowString, algName):
     """Calculate a level given a token store string, and the hash and index
