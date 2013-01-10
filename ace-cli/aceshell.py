@@ -131,9 +131,9 @@ def processDir(args, directory, files):
       req = requests.post(url, auth=(shell.user, shell.passwd), 
                           headers=headers)
     elif method == 'put':
-      files = {'files': open(os.path.join(directory, f), 'rb')}
+      f = open(os.path.join(directory, f), 'rb')
       req = requests.put(url, auth=(shell.user, shell.passwd), 
-                         files=files, headers=headers)
+                         data=f, headers=headers)
     print req.url, req.status_code,'\n', req.text
 
 def doPut(shell, arg, filename, contentID=None):
@@ -148,12 +148,11 @@ def doPut(shell, arg, filename, contentID=None):
     return
 
   headers = createHeaders(filename)
-  files = {'files':open(filename, 'rb')}
   if contentID == None:
     _, contentID = os.path.split(filename)
   url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID+'/'+contentID
   req = requests.put(url, auth=(shell.user, shell.passwd), 
-                     headers=headers, files=files)
+                     headers=headers, data=open(filename, 'rb'))
   print req.status_code
 
 
