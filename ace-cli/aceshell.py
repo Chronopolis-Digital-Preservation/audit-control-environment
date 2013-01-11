@@ -131,9 +131,9 @@ def processDir(args, directory, files):
       req = requests.post(url, auth=(shell.user, shell.passwd), 
                           headers=headers)
     elif method == 'put':
-      f = open(os.path.join(directory, f), 'rb')
+      fobj = open(os.path.join(directory, f), 'rb')
       req = requests.put(url, auth=(shell.user, shell.passwd), 
-                         data=f, headers=headers)
+                         data=fobj, headers=headers)
     print req.url, req.status_code,'\n', req.text
 
 def doPut(shell, arg, filename, contentID=None):
