@@ -1,4 +1,4 @@
-#!/usr/local/stow/python-2.7.3/bin/python
+#!/usr/bin/python2
 #
 # ACE Token store tool
 #
@@ -127,7 +127,7 @@ def getAlgorithm(algName):
 
 def calculateCSI(file, proof, algName):
     """Calculate the CSI for a file"""
-    prevhash = digestFile(file)
+    prevhash = digestFile(file, algName)
     for proofLine in proof:
         prevhash = calculateLevel(prevhash,proofLine,algName)
     return binascii.b2a_hex(prevhash)
