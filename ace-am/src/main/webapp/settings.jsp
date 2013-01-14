@@ -48,9 +48,9 @@
                     <div class="settingsHelp"><img src="images/help.png" title="Maximum bytes per second per running audit, default = 0 = unlimited"></div>
                 </div>
                 <div class="settingsRow">
-                    <div class="settingsName">Auto Audit:</div>
+                    <div class="settingsName">Disable Auto Audit:</div>
                     <div class="settingsVal"><input type=text name="auto.audit.disable" value="${currSettings['auto.audit.disable']}"/></div>
-                    <div class="settingsHelp"><img src="images/help.png" title="Start automated auditing"></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Disable automated auditing"></div>
                 </div>
                 <div class="settingsRow">
                     <div class="settingsName">Audit Only Mode:</div>
