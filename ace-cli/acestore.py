@@ -59,7 +59,6 @@ class TokenStoreEntry:
         self.algorithm,self.server,self.service,self.round,self.date,self.length = headerparts
         self.round = int(self.round)
 
-# Should merge this and create tokens, or at least some parts since they're pretty close
 def getProof(digestlist, wsdl='http://ims.umiacs.umd.edu:8080/ace-ims/IMSWebService?wsdl'):
     urlparts = urlparse(wsdl)
     client = Client(wsdl)
@@ -125,11 +124,11 @@ def getAlgorithm(algName):
        return hashlib.sha1()
     return None
 
-def calculateCSI(file, proof, algName):
+def calculateCSI(file, proof, algName, prevhash=None):
     """Calculate the CSI for a file"""
-    prevhash = digestFile(file, algName)
+    if prevhash == None: prevhash = digestFile(file, algName)
     for proofLine in proof:
-        prevhash = calculateLevel(prevhash,proofLine,algName)
+        prevhash = calculateLevel(prevhash,proofLine, 'SHA-256') 
     return binascii.b2a_hex(prevhash)
 
 def calculateLevel(lowerHash,rowString, algName):
