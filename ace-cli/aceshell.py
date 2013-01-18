@@ -1,178 +1,99 @@
 #!/usr/bin/python2
-
+#
+# Shell to communication acetokens with duraspace and do some neato
+# validation
+#
 import requests
 import getopt, getpass, sys, os
-import acestore, binascii
+import acestore, acelib, binascii
 import readline
 import re
+import xml.dom.minidom
 from suds.client import Client
 
-## TODO:
-##   Batch token creation on folders
-##   Help for individual commands
-##   Status Code to Human Readable
+## Global for success codes
+SUCCESS = (200, 201)
 
-class AceShell:
-  """Ace Shell Information"""
-  def __init__(self, user=None, passwd=None, dhost=None, space=None, 
-               wsdl='http://ims.umiacs.umd.edu:8080/ace-ims/IMSWebService?wsdl',  
-               verbose=False):
-    self.user = user
-    self.passwd = passwd
-    self.wsdl = wsdl 
-    self.dhost = dhost
-    self.spaceID = space
-    self.verbose = verbose
-    self.run = True
-    self.validate = True
-
-  def printInfo(self):
-    print 'WSDL: ', self.wsdl, '\n', 
-    print 'Duracloud Host: ', self.dhost, '\n',
-    print 'Duracloud SpaceID: ', self.spaceID, '\n',
-    print 'Duracloud Username: ', self.user, '\n',
-    print 'Validate on pull: ', self.validate, '\n',
-    print 'Verbose mode: ', self.verbose
-
-  def ready(self):
-    return (self.dhost!= None and self.spaceID != None and 
-            self.user != None and self.passwd != None)
-
-def shellHelp(shell):
-  print """Shell Commands: 
-    help                Show available commands
-    exit                Quit the shell
-    info                Show the shells parameters
-
-    set                 Set a parameter
-      wsdl    [host]    Set the wsdl host
-      dhost   [host]    Set the duracloud host
-      spaceID [id]      Set the duracloud space
-      user    [user]    Set the duracloud user and password to
-                        connect with
-      validate [file]   Set validation of files when pulling from 
-                        duracloud
-      verbose           Turn on/off verbose output
-
-    get
-      content [contentID] Get the content of the space, or 
-                          content if specified
-      props [contentID]   Get the parameters of the space, or
-                          content if specified
-    put 
-      file [contentID]  Upload a file to the duracloud host
-      directory         Upload the contents of a directory to
-                        the duracloud host
-    update
-      file [contendID]  The file to update, and the contentID (optional)
-
-    validate
-      local  [filename]   Validate a local file 
-      remote [contentID]  Validate the remote file with the specified
-                          contentID
-  """
-
-## Tab complete class
-
-class Completer(object):
-  def complete_update(self, args):
-    cmds = ['file']
-    return [c + ' ' for c in cmds if not args or c.startswith(args[0])]
-  
-  def complete_put(self, args):
-    cmds = ['file', 'directory']
-    return [c + ' ' for c in cmds if not args or c.startswith(args[0])]
-
-  def complete_set(self, args):
-    cmds = ['wsdl', 'dhost', 'spaceID', 'user', 'verbose']
-    return [c + ' ' for c in cmds if not args or c.startswith(args[0])]
-
-  def complete_get(self, args):
-    cmds = ['content', 'props']
-    return [c + ' ' for c in cmds if not args or c.startswith(args[0])]
-
-  def complete_validate(self, args):
-    cmds = ['remote', 'local']
-    return [c + ' ' for c in cmds if not args or c.startswith(args[0])]
-
-  def complete_pull(self, args):
-    cmds = ['file', 'directory']
-    return [c + ' ' for c in cmds if not args or c.startswith(args[0])]
-
-  def complete(self, text, state):
-    buf = readline.get_line_buffer()
-    line = readline.get_line_buffer().split()
-
-    COMMANDS = ['help', 'exit', 'set', 'put', 'update', 'get', 'validate',
-                'pull']
-    if not line:
-      return [c + ' ' for c in COMMANDS][state]
-
-    regex = re.compile('.*\s+$', re.M)
-    if regex.match(buf):
-      line.append('')
-
-    cmd = line[0].strip()
-    if cmd in COMMANDS:
-      impl = getattr(self, 'complete_%s' % cmd)
-      args = line[1:]
-      # Currently no commands have more than 1 argument, so chop it here
-      # Also, don't feel like completing path names hah
-      if len(args) > 1:
-        return 
-      return (impl(args)+[None])[state]
-    results = [c + ' ' for c in COMMANDS if c.startswith(cmd)] + [None]
-    return results[state]
 
 ##
 ## Main functions for the shell commands
 ##   On all - contentID should default to filename unless specified
-##   Will probably want to clean up how work on dir/files are done
+##   TODO: Unify style so it's not all over the place
 ##
 
+## Open question -- should we use the base directory as the filename?
+## ie: filename = /fs/narahomes/shake/scripts/ base = /scripts/
+## on durastore as scripts/etcetc
+
 def doPut(shell, arg, filename, contentID=None):
-  if os.path.isdir(filename):
-    if filename.endswith('/'):
-      filename = filename.rstrip('/')
-    os.path.walk(filename, processDir, (filename, 'put', shell))
-    return
+  """Put files or directories into duraspace"""
+  
+  if not os.path.exists(filename):
+    print 'File/Directory %s does not exist' % filename
+    return 
 
-  headers = createHeaders(filename)
-  if contentID == None:
-    contentID = filename
-  url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID+'/'+contentID
-  req = requests.put(url, auth=(shell.user, shell.passwd), 
-                     headers=headers, data=open(filename, 'rb'))
-  print req.status_code
+  pre_l = 'x-dura-meta-local-'
+  pre_r = 'x-dura-meta-remote-'
+  ## Request lists, proof dicts, and client info
+  rl_l = createRequestList(filename, 'SHA-256')
+  rl_r = createRequestList(filename, 'MD5')
+  proof_l, client_l = acestore.getProof(rl_l)
+  proof_r, client_r = acestore.getProof(rl_r)
 
+  for file in prooflocal: 
+    headers = createHeaders(pre_l, proof_l.get(file), client_l)
+    headers.update(createHeaders(pre_r, proof_r.get(file), client_r))
+
+    contentID = file 
+
+    url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID+'/'+contentID
+    req = requests.put(url, auth=(shell.user, shell.passwd), 
+                       headers=headers, data=open(file, 'rb'))
+
+    if req.status_code in SUCCESS:
+      print 'Successfully put %s' % file 
+    else:
+      print 'Could not put %s into your durastore space' % file 
+
+## TODO: This and put share many things... combine 
 
 def doUpdate(shell, arg, filename, contentID=None):
-  if not os.path.isfile(filename) and not os.path.isdir(filename):
-    print "File/Directory",filename,"does not exist"
+  """Update files or directories already in duraspace"""
+
+  if not os.path.exists(filename):
+    print 'File/Directory %s does not exist' % filename
     return
 
-  if os.path.isdir(filename):
-    if filename.endswith('/'):
-      filename = filename.rstrip('/')
-    os.path.walk(filename, processDir, (filename, 'post', shell))
-    return
+  pre_l = 'x-dura-meta-local-'
+  pre_r = 'x-dura-meta-remote-'
+  ## Request lists, proof dicts, and client info
+  rl_l = createRequestList(filename, 'SHA-256')
+  rl_r = createRequestList(filename, 'MD5')
+  proof_l, client_l = acestore.getProof(rl_l)
+  proof_r, client_r = acestore.getProof(rl_r)
 
-  headers = createHeaders(filename) 
-  if contentID == None:
-    contentID = filename
-  url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID+'/'+contentID
-  print url
-  req = requests.post(url, auth=(shell.user, shell.passwd), 
-                      headers=headers)
-  print req.status_code
+  for file in prooflocal:
+    headers = createHeaders(pre_l, proof_l.get(file), client_l)
+    headers.update(createHeaders(pre_r, proof_r.get(file), client_r))
+
+    contentID = file
+    url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID+'/'+contentID
+    req = requests.post(url, auth=(shell.user, shell.passwd), headers=headers)
+
+    if req.status_code in SUCCESS:
+      print 'Successfully updated %s' % filename
+    else:
+      print 'Could not update %s' % filename
 
 # Similar to pull, but we're not saving the file... not sure what the
-# point of that is...
+# point of that is, especially if the file is not text 
 # TODO: Pretty print for headers
 
 def doGet(shell, type, contentID=None):
+  """Print contents or properties of files in duraspace"""
+
   req = None
-  url = "https://"+shell.dhost+"/durastore/"+shell.spaceID
+  url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID
   if contentID != None:
     url += "/"+contentID
 
@@ -181,13 +102,36 @@ def doGet(shell, type, contentID=None):
   elif type == 'props':
     req = requests.head(url, auth=(shell.user, shell.passwd))
 
-  print "Status: \n", req.status_code
+  status = 'success' if req.status_code in SUCCESS else 'failure'
+  print "Status: \n", status 
   if shell.verbose or type =='props': 
     print "Headers: \n", req.headers
   print "Data: \n", req.text
 
+def doImport(shell, filename):
+  if not os.path.exists(filename):
+    print 'Cannot open file %s' % filename
+    return
+
+  pre = 'x-dura-meta-local-'
+  base = raw_input('Enter the base contentID of the duraspace collection (leave blank for none): ') 
+
+  ts = acestore.TokenStore(open(filename, 'r'))
+  for file in ts.entries:
+    entry = ts.entries.get(file)
+    contentID = os.path.join(base, file.lstrip('/'))
+    headers = createHeaders(pre, entry.proof, entry.get_client_info())
+    url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID+'/'+contentID
+    req = requests.post(url, auth=(shell.user, shell.passwd), headers=headers)
+    if req.status_code in SUCCESS:
+      print 'Successfully added ace proof to %s' % file
+    else:
+      print 'Could not add ace proof for %s' % file
+      print 'Tried to use contentID: %s' % contentID
 
 def doSet(shell, arg, param=None):
+  """Set shell properties"""
+
   if arg == 'wsdl':
     shell.wsdl = (raw_input('WSDL Host: ') 
                   if param == None else param)
@@ -228,60 +172,84 @@ def doSet(shell, arg, param=None):
 
 
 def doPull(shell, arg, file, contentID=None):
+  """Pull files and directories from duraspace"""
+
+  debug = True
   stage = raw_input('Where would you like to stage the data? ')
 
   if arg == 'directory':
-    print 'I really shouldn\'t add these in until I\'ve coded them'
-    return
+    ## Let's grab content from the space
+    ## Then match against everything in the dir and pull them
+    url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID
+    req = requests.get(url, auth=(shell.user, shell.passwd))
+    dom = xml.dom.minidom.parseString(req.text)
+    items = dom.getElementsByTagName('item')
+    contentIDs = [item.firstChild.nodeValue for item in items if
+                  item.firstChild.nodeValue.startswith(file)]
+  else:
+    contentIDs = [contentID]
 
-  # Get the file name and make a request
-  # Not sure how this would fare for large files ( >8G or so )
-  if contentID == None: 
-    contentID = file 
-  file = os.path.join(stage, contentID)
-  print file
-  url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID+'/'+contentID
-  req = requests.get(url, auth=(shell.user, shell.passwd))
-  if req.status_code == 404:
-    print "File Not Found in your duraspace."
-    return
+  for contentID in contentIDs:
+    ## Get the file name and make a request
+    ## Not sure how this would fare for large files ( >8G or so )
+    if contentID == None: 
+      contentID = file 
+    file = os.path.join(stage, contentID)
+    print file
+    url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID+'/'+contentID
+    req = requests.get(url, auth=(shell.user, shell.passwd))
+    if req.status_code == 404:
+      print 'File Not Found in your duraspace.'
+      return
 
-  # Make the directory if it does not exist
-  dirs, _ = os.path.split(file)
-  if not os.path.exists(dirs):
-    os.makedirs(dirs)
+    ## Make the directory if it does not exist
+    dirs, _ = os.path.split(file)
+    if not os.path.exists(dirs):
+      os.makedirs(dirs)
 
-  fnew = open(file, 'w+b')
-  fnew.write(req.content)
-  fnew.close()
+    ## Open the file to write in binary, and create if needed
+    fnew = open(file, 'w+b')
+    fnew.write(req.content)
+    fnew.close()
 
-  # validate and leave
-  valid = doValidate(shell, 'local', file, contentID)
-  print 'Finished pulling data; Status: ', req.status_code
-  print 'File is valid: ', valid
+    ## validate
+    status = 'success' if req.status_code in SUCCESS else 'failure'
+    valid = doValidate(shell, 'local', file, contentID)
+    print 'Finished pulling data; Status: ', status 
+    print 'File is valid: ', valid
 
 
 def doValidate(shell, arg, file, contentID=None):
+  """Validate local or remote files"""
+
+  ## set properties on duracloud contain 'x-dura-meta', so we include it
   pre = 'x-dura-meta-'
   prevhash = None
+  validateList = []
 
-  if arg not in ['remote', 'local']:
-    print 'Unknown argument for validate'
+  if not checkArgs('validate', ['local', 'remote'], arg):
     return
 
   if os.path.isdir(file): 
     print 'Validating directories is not yet supported'
+    for r, _, files in os.walk(file):
+      for f in files:
+        validateList.append(os.path.join(r,f))
+    print validateList
     return
+  else:
+    validateList.append(file)
  
   if contentID == None:
     contentID = file
-  url = "https://"+shell.dhost+"/durastore/"+shell.spaceID+"/"+contentID
+  url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID+'/'+contentID
 
   req = requests.head(url, auth=(shell.user, shell.passwd))
   headers = req.headers
   keys = headers.keys()
   keys.sort()
 
+  ## Pull the MD5 hash from duracloud if it is remote
   if arg == 'remote':
     pre += 'remote-'
     prevhash = binascii.a2b_hex(headers.get('etag'))
@@ -289,9 +257,9 @@ def doValidate(shell, arg, file, contentID=None):
     pre += 'local-'
 
   proof = [headers.get(x) for x in keys 
-                          if x.startswith(pre+'proof')]
+           if x.startswith(pre+'proof')]
   digest = headers.get(pre+'digestservice')
-  rhash = getRoundHash(headers.get(pre+'roundid'))
+  rhash = getRoundHash(shell, headers.get(pre+'roundid'))
   csi = acestore.calculateCSI(file, proof, digest, prevhash) 
 
   if shell.verbose: 
@@ -301,62 +269,45 @@ def doValidate(shell, arg, file, contentID=None):
     print 'Calculated csi:', csi
 
   valid = rhash == csi
-  print valid 
+  print 'File is valid: ', valid 
   return valid
 
 ##
 ## Helper methods for the most part
 ## 
 
-def getRoundHash(round, url=None):
+def createRequestList(filename, digest):
+  """ Return a list of tuples as (filename, hash) for the ims """
+  if os.path.isdir(filename):
+    rl = [(os.path.join(r,f), 
+          binascii.b2a_hex(acestore.digestFile(os.path.join(r, f), 
+          digest))) for r, _, files in os.walk(filename)
+                    for f in files]
+  else:
+    rl = [(filename, binascii.b2a_hex(acestore.digestFile(filename, digest)))]
+  return rl
+
+def checkArgs(cmd, children, arg):
+  """ Czech an argument for a given command """
+  valid = True
+  if arg not in children:
+    print 'Unknown argument for %s' % cmd
+    valid = False
+  return valid
+
+def getRoundHash(shell, round, url=None):
   client = Client(shell.wsdl)
   response = client.service.getRoundSummaries(round)
   return response.__getitem__(0).hashValue
 
-# Need to check working on a directory when given a full path
-def processDir(args, directory, files):
-  origin, method, shell = args
-  req = None
-  for f in files:
-    _, base = os.path.split(origin)
-    _, _, dirs = directory.partition(base)
-
-    # This has worked so far, may opt for os.join later 
-    contentID = base+dirs+'/'+f 
-
-    # Ignore directories...  
-    if (os.path.isdir(os.path.join(directory, f))):
-      continue
-    headers = createHeaders(os.path.join(directory,f))
-    url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID+'/'+contentID
-
-    if method == 'post':
-      req = requests.post(url, auth=(shell.user, shell.passwd), 
-                          headers=headers)
-    elif method == 'put':
-      fobj = open(os.path.join(directory, f), 'rb')
-      req = requests.put(url, auth=(shell.user, shell.passwd), 
-                         data=fobj, headers=headers)
-    print req.url, req.status_code,'\n', req.text
-
-# Needs a better name
-def headerHelp(filename, pre, digest):
+def createHeaders(pre, proof, clientinfo):
   headers = {}
-  reqList = [(filename, binascii.b2a_hex(acestore.digestFile(filename, digest)))]
-  prooflist, clientinfo = acestore.getProof(reqList)
+  for line in proof:
+    headers[pre+'proof-'+str(proof.index(line))] = line
   headers[pre+'roundId'] = clientinfo['roundId']
   headers[pre+'tokenClass'] = clientinfo['tokenClass']
   headers[pre+'digestService'] = clientinfo['digestService']
-  proof = prooflist[filename]
-  for line in proof:
-    headers[pre+"proof-"+str(proof.index(line))] = line
   return headers
-
-def createHeaders(filename):
-  headers = {}
-  headers.update(headerHelp(filename, 'x-dura-meta-local-', 'SHA-256'))
-  headers.update(headerHelp(filename, 'x-dura-meta-remote-', 'MD5'))
-  return headers 
 
 def printInfo(shell):
   shell.printInfo()
@@ -369,7 +320,9 @@ def help():
     -h, --help          Print this help
     -v, --verbose       Verbose mode
   """
-  shellHelp(None)
+
+def sHelp(shell, *args):
+  shell.help(args)
 
 def stopShell(shell):
   shell.run = False
@@ -378,29 +331,31 @@ def stopShell(shell):
 def process(cmd, shell):
   if cmd == None or len(cmd) == 0: return
 
-  fns = {'help': shellHelp, 'exit': stopShell,
+  fns = {'help': sHelp, 'exit': stopShell,
          'info': printInfo, 'update': doUpdate,
          'get':  doGet, 'set':  doSet,
          'put': doPut, 'pull': doPull, 
-         'validate': doValidate}
+         'validate': doValidate, 'import': doImport}
 
   args = cmd.split()
   if args[0] not in fns:
     print args[0], "is not a valid command"
     return
-  if args[0] in ['get', 'update', 'put', 'validate', 'pull'] and not shell.ready():
-    print "Please set duraspace information before using",args[0]
+
+  ## Check if it's a command that requires duracloud info
+  if args[0] in ['get', 'update', 'put', 'validate', 'pull', 'import'] and not shell.ready():
+    print 'Please set duraspace information before using',args[0]
     return
 
   func = fns[args[0]]
   func(shell, *args[1:])
 
 ##
-## For running while coding... sort of 
+## For running while coding (but not really cause that's another file) 
 ##  
-#  def repl():
-#    global acestore
-#    acestore = reload(acestore)
+# def repl():
+#   global acestore
+#   acestore = reload(acestore)
 
 def main():
   try:
@@ -411,22 +366,18 @@ def main():
     sys.exit(1)
 
   colors = {'white':'\033[1;37m',
-            'esc': '\033[1;37m'} 
+            'esc': '\033[0m'} 
 
-  shell = AceShell()
-  prompt = '>>\033[1;37m '
+  shell = acelib.AceShell()
+  shell.createCommands()
+  prompt = colors.get('esc')+'>> '+colors.get('white')
 
-  # Set up our tab complete object
-  comp = Completer()
-  readline.set_completer_delims(' \t\n;')
-  readline.parse_and_bind('tab: complete')
-  readline.set_completer(comp.complete)
   print "Ace Shell"
-  print "To get a list of commands type help, to leave type exit"
+  print "To get more information type help, to leave type exit"
 
   # This gets a little buggy, should fix when the input gets fubar'd 
   while shell.run:
-    sys.stdout.write(prompt),
+    # sys.stdout.write(prompt),
     cmd = raw_input(prompt) # sys.stdin.readline().strip('\n') # raw_input()
     sys.stdout.write('\033[0m')
     process(cmd, shell)

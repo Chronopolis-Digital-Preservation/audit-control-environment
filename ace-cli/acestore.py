@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/user/bin/python2
 #
 # ACE Token store tool
 #
@@ -22,13 +22,13 @@ class TokenStore:
             header = readHeader(infile)
             if not header:
                 break
-            albName = header[0]
+            algName = header[0]
             identifiers = readIdentifiers(infile)
             proof = readProof(infile)
             entry = TokenStoreEntry(proof,header)
             for id in identifiers:
                 self.entries[id[trimid:]] = entry
-
+    
     def get_round(self,round):
         if round not in self.roundlist:
             url='http://ims.umiacs.umd.edu:8080/ace-ims/IMSWebService?wsdl'
@@ -59,8 +59,16 @@ class TokenStoreEntry:
         self.algorithm,self.server,self.service,self.round,self.date,self.length = headerparts
         self.round = int(self.round)
 
+    def get_client_info(self):
+      clientInfo = {}
+      clientInfo['roundId'] = str(self.round)
+      clientInfo['tokenClass'] = self.algorithm
+      clientInfo['digestService'] = self.service
+      return clientInfo 
+
+## This and create tokens share code, should trim it a good bit
+
 def getProof(digestlist, wsdl='http://ims.umiacs.umd.edu:8080/ace-ims/IMSWebService?wsdl'):
-    urlparts = urlparse(wsdl)
     client = Client(wsdl)
     requestlist = []
     for digestpair in digestlist:
@@ -93,10 +101,8 @@ def createTokens(digestlist,outfile,wsdl='http://ims.umiacs.umd.edu:8080/ace-ims
         request.hashValue = digestpair[1]
         request.name = digestpair[0]
         requestlist.append(request)
-    #request._tokenClassName = "SHA-256-0"
     print 'before call' + str(time.time())
     response = client.service.requestTokensImmediate('SHA-256-0',requestlist)
-    #response = portType.requestTokensImmediate(request)
     print 'after call ' + str(time.time())
     for item in response:
         lines = [item.name,'']
