@@ -1,8 +1,5 @@
 #!/usr/bin/python2
-#
-# Shell to communication acetokens with duraspace and do some neato
-# validation
-#
+
 import requests
 import getopt, getpass, sys, os
 import acestore, acelib, binascii
@@ -18,33 +15,37 @@ SUCCESS = (200, 201)
 ##
 ## Main functions for the shell commands
 ##   On all - contentID should default to filename unless specified
-##   TODO: Unify style so it's not all over the place
 ##
 
 ## Open question -- should we use the base directory as the filename?
 ## ie: filename = /fs/narahomes/shake/scripts/ base = /scripts/
 ## on durastore as scripts/etcetc
 
-def doPut(shell, arg, filename, contentID=None):
+def doPut(shell, arg, filename, base=''):
   """Put files or directories into duraspace"""
   
   if not os.path.exists(filename):
     print 'File/Directory %s does not exist' % filename
     return 
 
+  base_dir = ''
+  if filename.startswith('/'):
+    base_dir = os.path.basename(filename.rstrip('/')) + '/'
+  else:
+    base_die = filename.split('/')[0] +'/'
+
   pre_l = 'x-dura-meta-local-'
   pre_r = 'x-dura-meta-remote-'
-  ## Request lists, proof dicts, and client info
-  rl_l = createRequestList(filename, 'SHA-256')
-  rl_r = createRequestList(filename, 'MD5')
-  proof_l, client_l = acestore.getProof(rl_l)
-  proof_r, client_r = acestore.getProof(rl_r)
+  rllocal = createRequestList(filename, 'SHA-256', base_dir)
+  rlremote = createRequestList(filename, 'MD5', base_dir)
+  prooflocal, client_l = acestore.getProof(rllocal)
+  proofremote, client_r = acestore.getProof(rlremote)
 
   for file in prooflocal: 
-    headers = createHeaders(pre_l, proof_l.get(file), client_l)
-    headers.update(createHeaders(pre_r, proof_r.get(file), client_r))
+    headers = createHeaders(pre_l, prooflocal.get(file), client_l)
+    headers.update(createHeaders(pre_r, proofremote.get(file), client_r))
 
-    contentID = file 
+    contentID = base+file
 
     url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID+'/'+contentID
     req = requests.put(url, auth=(shell.user, shell.passwd), 
@@ -55,28 +56,33 @@ def doPut(shell, arg, filename, contentID=None):
     else:
       print 'Could not put %s into your durastore space' % file 
 
-## TODO: This and put share many things... combine 
+## TODO: This and put share many things... combine into one?
 
-def doUpdate(shell, arg, filename, contentID=None):
+def doUpdate(shell, arg, filename, base=''):
   """Update files or directories already in duraspace"""
 
   if not os.path.exists(filename):
     print 'File/Directory %s does not exist' % filename
     return
 
+  base_dir = ''
+  if filename.startswith('/'):
+    base_dir = os.path.basename(filename.rstrip('/')) + '/'
+  else:
+    base_dir = filename.split('/')[0] +'/'
+
   pre_l = 'x-dura-meta-local-'
   pre_r = 'x-dura-meta-remote-'
-  ## Request lists, proof dicts, and client info
-  rl_l = createRequestList(filename, 'SHA-256')
-  rl_r = createRequestList(filename, 'MD5')
-  proof_l, client_l = acestore.getProof(rl_l)
-  proof_r, client_r = acestore.getProof(rl_r)
+  rllocal = createRequestList(filename, 'SHA-256', base_dir)
+  rlremote = createRequestList(filename, 'MD5', base_dir)
+  prooflocal, client_l = acestore.getProof(rllocal)
+  proofremote, client_r = acestore.getProof(rlremote)
 
   for file in prooflocal:
-    headers = createHeaders(pre_l, proof_l.get(file), client_l)
-    headers.update(createHeaders(pre_r, proof_r.get(file), client_r))
+    headers = createHeaders(pre_l, prooflocal.get(file), client_l)
+    headers.update(createHeaders(pre_r, proofremote.get(file), client_r))
 
-    contentID = file
+    contentID = base+file
     url = 'https://'+shell.dhost+'/durastore/'+shell.spaceID+'/'+contentID
     req = requests.post(url, auth=(shell.user, shell.passwd), headers=headers)
 
@@ -89,7 +95,7 @@ def doUpdate(shell, arg, filename, contentID=None):
 # point of that is, especially if the file is not text 
 # TODO: Pretty print for headers
 
-def doGet(shell, type, contentID=None):
+def doGet(shell, type, contentID=''):
   """Print contents or properties of files in duraspace"""
 
   req = None
@@ -276,10 +282,10 @@ def doValidate(shell, arg, file, contentID=None):
 ## Helper methods for the most part
 ## 
 
-def createRequestList(filename, digest):
+def createRequestList(filename, digest, base=''):
   """ Return a list of tuples as (filename, hash) for the ims """
   if os.path.isdir(filename):
-    rl = [(os.path.join(r,f), 
+    rl = [(os.path.join(base, r.split(base)[1], f),  
           binascii.b2a_hex(acestore.digestFile(os.path.join(r, f), 
           digest))) for r, _, files in os.walk(filename)
                     for f in files]
@@ -343,9 +349,9 @@ def process(cmd, shell):
     return
 
   ## Check if it's a command that requires duracloud info
-  if args[0] in ['get', 'update', 'put', 'validate', 'pull', 'import'] and not shell.ready():
-    print 'Please set duraspace information before using',args[0]
-    return
+  # if args[0] in ['get', 'update', 'put', 'validate', 'pull', 'import'] and not shell.ready():
+  #   print 'Please set duraspace information before using',args[0]
+  #   return
 
   func = fns[args[0]]
   func(shell, *args[1:])
@@ -377,8 +383,7 @@ def main():
 
   # This gets a little buggy, should fix when the input gets fubar'd 
   while shell.run:
-    # sys.stdout.write(prompt),
-    cmd = raw_input(prompt) # sys.stdin.readline().strip('\n') # raw_input()
+    cmd = raw_input(prompt) 
     sys.stdout.write('\033[0m')
     process(cmd, shell)
 
