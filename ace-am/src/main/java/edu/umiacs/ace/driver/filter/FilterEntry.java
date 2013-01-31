@@ -48,7 +48,7 @@ import javax.persistence.Table;
  * 
  * @author toaster
  */
-@Entity()
+@Entity
 @Table(name = "filter_entry")
 @NamedQueries({
     @NamedQuery(name = "FilterEntry.dropByCollection", query =

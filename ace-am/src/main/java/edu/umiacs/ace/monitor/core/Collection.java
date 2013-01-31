@@ -66,6 +66,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Entity
 @Table(name = "collection")
 @NamedQueries({
+    @NamedQuery(name = "Collection.listIds", query =
+    "SELECT c.id FROM Collection c"),
     @NamedQuery(name = "Collection.listAllCollections", query =
     "SELECT c FROM Collection c ORDER BY c.group"),
     @NamedQuery(name = "Collection.getCollectionByName", query =

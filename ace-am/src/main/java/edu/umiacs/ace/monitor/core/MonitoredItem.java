@@ -66,6 +66,8 @@ import javax.persistence.TemporalType;
 @Entity
 @Table(name = "monitored_item")
 @NamedQueries({
+    @NamedQuery(name = "MonitoredItem.listIds", query =
+    "SELECT m.id FROM MonitoredItem m WHERE m.parentCollection = :coll AND m.directory = false"),
     @NamedQuery(name = "MonitoredItem.getItemByPath", query =
     "SELECT m FROM MonitoredItem m WHERE m.path = :path AND m.parentCollection = :coll"),
     //@NamedQuery(name = "MonitoredItem.setItemState", query = "UPDATE MonitoredItem m set m.state = :state, m.lastSeen = :date WHERE m.path = :path AND m.parentCollection = :coll"),
@@ -264,5 +266,9 @@ public class MonitoredItem implements Serializable, Comparable {
 
     public String getFileDigest() {
         return fileDigest;
+    }
+
+    public boolean isError() {
+        return (this.state == 'I' || this.state == 'C');
     }
 }

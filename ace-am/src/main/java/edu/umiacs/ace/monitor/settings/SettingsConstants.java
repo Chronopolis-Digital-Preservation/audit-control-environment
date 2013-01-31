@@ -10,6 +10,7 @@ public class SettingsConstants {
     public static final String PARAM_IMS = "ims";
     public static final String PARAM_IMS_PORT = "ims.port";
     public static final String PARAM_IMS_TOKEN_CLASS = "ims.tokenclass";
+    public static final String PARAM_IMS_SSL = "ims.ssl";
     public static final String PARAM_DISABLE_AUDIT = "auto.audit.disable";
     public static final String PARAM_THROTTLE_MAXAUDIT = "throttle.maxaudit";
     public static final String PARAM_TIME = "throttle.wait";
@@ -40,6 +41,7 @@ public class SettingsConstants {
     public static final String ims = "ims.umiacs.umd.edu";
     public static final String imsPort = "8080";
     public static final String imsTokenClass = "SHA-256";
+    public static final String imsSSL = "false";
     public static final String authManagement = "true";
     public static final String maxIngestThreads = "4";
     public static final String throttleWait = "0";

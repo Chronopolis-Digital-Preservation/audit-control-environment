@@ -83,10 +83,10 @@ public class SimpleFilter implements PathFilter {
                 }
             }
 
-            if ( fileRegex.size() == 0 ) {
+            if ( fileRegex.isEmpty() ) {
                 fileRegex = null;
             }
-            if ( dirRegex.size() == 0 ) {
+            if ( dirRegex.isEmpty() ) {
                 dirRegex = null;
             }
         } finally {

@@ -1,5 +1,6 @@
 package edu.umiacs.ace.monitor.settings;
 
+import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.util.PersistUtil;
 import java.util.ArrayList;
@@ -75,6 +76,8 @@ public class SettingsUtil {
 
         trans.commit();
         em.clear();
+
+        reloadSettings();
     }
 
     public static void deleteSettings(List<String> settings) {
@@ -195,6 +198,31 @@ public class SettingsUtil {
     public static boolean containsKey(Collection c, String attr) {
         return (c != null && c.getSettings() != null
                 && c.getSettings().containsKey(attr));
+
+    }
+
+    // Update the settings our context listeners would normally do
+    private static void reloadSettings() {
+        EntityManager em = PersistUtil.getEntityManager();
+        Query q = em.createNamedQuery("SettingsParameter.getAttr");
+        SettingsParameter s = null;
+
+        // Host
+        q.setParameter("attr", SettingsConstants.PARAM_IMS);
+        s = (SettingsParameter) q.getSingleResult();
+        AuditThreadFactory.setIMS(s.getValue());
+        // Port
+        q.setParameter("attr", SettingsConstants.PARAM_IMS_PORT);
+        s = (SettingsParameter) q.getSingleResult();
+        AuditThreadFactory.setImsPort(Integer.parseInt(s.getValue()));
+        // SSL
+        q.setParameter("attr", SettingsConstants.PARAM_IMS_SSL);
+        s = (SettingsParameter) q.getSingleResult();
+        AuditThreadFactory.setSSL(Boolean.valueOf(s.getValue()));
+        // Token Class
+        q.setParameter("attr", SettingsConstants.PARAM_IMS_TOKEN_CLASS);
+        s = (SettingsParameter) q.getSingleResult();
+        AuditThreadFactory.setTokenClass(s.getValue());
 
     }
 

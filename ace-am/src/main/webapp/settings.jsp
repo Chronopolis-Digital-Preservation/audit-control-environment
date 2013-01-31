@@ -68,6 +68,11 @@
                     <div class="settingsHelp"><img src="images/help.png" title="Port the IMS Host runs on."></div>
                 </div>
                 <div class="settingsRow">
+                    <div class="settingsName">IMS SSL:</div>
+                    <div class="settingsVal"><input type=text name="ims.ssl" value="${currSettings['ims.ssl']}"/></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Use SSL when connecting to the IMS."></div>
+                </div>
+                <div class="settingsRow">
                     <div class="settingsName">IMS Token Class:</div>
                     <div class="settingsVal"><input type=text name="ims.tokenclass" value="${currSettings['ims.tokenclass']}"/></div>
                     <div class="settingsHelp"><img src="images/help.png" title="Token class for the IMS host to use."></div>
