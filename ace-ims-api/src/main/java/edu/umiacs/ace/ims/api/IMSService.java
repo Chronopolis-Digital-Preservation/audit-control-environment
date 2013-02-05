@@ -60,21 +60,18 @@ public final class IMSService
 {
     private static final int DEFAULT_PORT = 8080;
     private static final String DEFAULT_PATH = "/ace-ims/IMSWebService?wsdl";
+    private static final boolean DEFAULT_SSL = false;
 
     private IMSWebService port;
     
-    private IMSService(URL url)
-    {
-        try
-        {
+    private IMSService(URL url) {
+        try {
             IMSWebService_Service service = new IMSWebService_Service(url,
                   new QName("http://ws.ims.ace.umiacs.edu/", "IMSWebService"));
             port = service.getIMSWebServicePort();
             ((BindingProvider)port).getRequestContext()
                     .put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
-        }
-        catch ( Exception e )
-        {
+        } catch ( Exception e ) {
             throw handleException(e);
         }
     }
@@ -88,24 +85,26 @@ public final class IMSService
      * @return ims connection
      */
     public static IMSService connect(String hostName, int portNumber, 
-            String path)
-    {
+            String path, boolean ssl) {
         Check.notEmpty("hostName", hostName);
         Check.isPositive("portNumber", portNumber);
         Check.notEmpty("path", path);
         
-        if ( !path.startsWith("/") )
-        {
+        if ( !path.startsWith("/") ) {
             path = "/" + path;
         }
-        String url = "http://" + hostName + ":" + portNumber + path;
-        
-        try
-        {
-            return new IMSService(new URL(url));
+        StringBuilder url = new StringBuilder();
+        if ( ssl ) {
+            url.append("https://").append(hostName).append(":")
+               .append(portNumber).append(path);
+
+        }else {
+            url.append("http://").append(hostName).append(":")
+               .append(portNumber).append(path);
         }
-        catch ( MalformedURLException mue )
-        {
+        try {
+            return new IMSService(new URL(url.toString()));
+        } catch ( MalformedURLException mue ) {
             throw new IllegalArgumentException("Invalid URL: " + url);
         }
     }
@@ -119,12 +118,16 @@ public final class IMSService
      */
     public static IMSService connect(String hostName)
     {
-        return IMSService.connect(hostName, DEFAULT_PORT, DEFAULT_PATH);
+        return IMSService.connect(hostName, DEFAULT_PORT, DEFAULT_PATH, DEFAULT_SSL);
     }
     
     public static IMSService connect(String hostName, int port)
     {
-        return IMSService.connect(hostName, port, DEFAULT_PATH);
+        return IMSService.connect(hostName, port, DEFAULT_PATH, DEFAULT_SSL);
+    }
+
+    public static IMSService connect(String hostName, int port, boolean ssl) {
+        return IMSService.connect(hostName, port, DEFAULT_PATH, ssl);
     }
     
 //    public TokenClass createTokenClass(TokenClass tokenClass)
