@@ -72,4 +72,12 @@ public class CollectionManagement {
         return em.find(Collection.class, collId);
     }
 
+    @GET
+    @Path("remove/{id}")
+    public void removeCollection(@PathParam("id") long collId) {
+        EntityManager em = PersistUtil.getEntityManager();
+        em.remove(em.find(Collection.class, collId));
+        em.close();
+    }
+
 }

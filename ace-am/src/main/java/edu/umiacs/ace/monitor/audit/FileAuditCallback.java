@@ -96,7 +96,7 @@ public class FileAuditCallback implements RequestBatchCallback {
             tokensAdded++;
             if ( tr.getStatusCode() == StatusCode.SUCCESS ) {
                 MonitoredItem item = null;
-                item = mim.getItemByPath(tr.getName(), coll);
+                item = mim.getItemById(tr.getName(), coll);
 
                 Token token = new Token();
 //                token.setCreateDate(new Date());
@@ -122,7 +122,7 @@ public class FileAuditCallback implements RequestBatchCallback {
                 item.setToken(token);
                 item.setState('A');
                 em.merge(item);
-                em.persist(logManager.createItemEvent(LogEnum.ADD_TOKEN, tr.getName(),
+                em.persist(logManager.createItemEvent(LogEnum.ADD_TOKEN, item.getPath(),
                         "Round: " + tr.getRoundId()));
             } else {
                 em.persist(logManager.createItemEvent(LogEnum.CREATE_TOKEN_ERROR,  tr.getName(),

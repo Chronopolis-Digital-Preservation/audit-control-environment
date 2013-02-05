@@ -83,7 +83,6 @@ public class FilterServlet extends EntityManagerServlet {
             q.setParameter("coll", c);
             q.executeUpdate();
             for (FilterEntry fe : regexResults ) {
-                System.out.println(fe.getRegex() + " :: "  + fe.getAffectedItem() + " :: " + fe.getCollection());
                 fe.setCollection(c);
                 em.persist(fe);
             }

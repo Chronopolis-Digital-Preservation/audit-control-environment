@@ -75,8 +75,8 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
 /**
- * 
- * 
+ *
+ *
  * @author toaster
  */
 public final class AuditThread extends Thread implements CancelCallback {
@@ -92,6 +92,8 @@ public final class AuditThread extends Thread implements CancelCallback {
     private boolean cancel = false;
     private StorageDriver driver;
     private long session;
+    private boolean auditOnly;
+    private boolean verbose = false;
     // exposed for jsp display
     private long totalErrors = 0;
     private long newFilesFound = 0;
@@ -105,19 +107,22 @@ public final class AuditThread extends Thread implements CancelCallback {
     private String tokenClassName;
     private LogEventManager logManager;
     private AuditIterable<FileBean> iterableItems;
-    private boolean auditOnly;
 
-    AuditThread(Collection c, StorageDriver driver, boolean auditOnly,
+    public AuditThread(Collection c, StorageDriver driver, boolean auditOnly,
             MonitoredItem... startItem) {
-        this.driver = driver;
-        this.coll = c;
+        this(c, driver, auditOnly, true, startItem);
+    }
+
+    public AuditThread(Collection c, StorageDriver driver, boolean auditOnly,
+            boolean verbose, MonitoredItem... startItem) {
         this.auditOnly = auditOnly;
+        this.verbose = verbose;
+        this.coll = c;
+        this.driver = driver;
         if (startItem != null && startItem[0] != null) {
             baseItemPathList = Arrays.copyOf(startItem, startItem.length);
         }
         this.setName("audit: " + c.getName());
-
-        this.start();
     }
 
     public DriverStateBean[] getDriverStatus() {
@@ -192,7 +197,8 @@ public final class AuditThread extends Thread implements CancelCallback {
                 logAuditStart();
 
                 callback = new FileAuditCallback(coll, session, this);
-                boolean auditTokens = SettingsUtil.getBoolean(coll, ConfigConstants.ATTR_AUDIT_TOKENS);
+                boolean auditTokens = SettingsUtil.getBoolean(coll,
+                        ConfigConstants.ATTR_AUDIT_TOKENS);
                 /*
                 if (!openIms() || (auditTokens
                         && !openTokenValidator(MessageDigest.getInstance(
@@ -202,6 +208,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                  *
                  */
                 if( !auditOnly ) {
+                    // If we can't open the IMS, we want to fallback
                     fallback = !openIms();
                     if ( !fallback ) {
                         if ( auditTokens &&
@@ -237,8 +244,11 @@ public final class AuditThread extends Thread implements CancelCallback {
             }
             lastFileSeen = "Setting collection state";
             setCollectionState();
-            logAuditFinish();
-            generateAuditReport();
+
+            if ( verbose ) {
+                logAuditFinish();
+                generateAuditReport();
+            }
             NDC.pop();
 
         }
@@ -248,7 +258,7 @@ public final class AuditThread extends Thread implements CancelCallback {
     private boolean openIms() {
         try {
             IMSService ims;
-            ims = IMSService.connect(imsHost, imsport);
+            ims = IMSService.connect(imsHost, imsport, AuditThreadFactory.useSSL());
 
             batch = ims.createImmediateTokenRequestBatch(
                     tokenClassName, callback, 1000, 5000);
@@ -273,36 +283,31 @@ public final class AuditThread extends Thread implements CancelCallback {
     }
 
     private boolean openTokenValidator(MessageDigest digest) {
-//        TokenValidator validator = null;
-
         try {
             IMSService ims;
-            ims = IMSService.connect(imsHost, imsport);
-            TokenAuditCallback callback = new TokenAuditCallback(itemMap, this,
+            ims = IMSService.connect(imsHost, imsport, AuditThreadFactory.useSSL());
+            TokenAuditCallback tokenCallback = new TokenAuditCallback(itemMap,
+                    this,
                     coll,
                     session);
-            validator = ims.createTokenValidator(callback, 1000,
+            validator = ims.createTokenValidator(tokenCallback, 1000,
                     5000, digest);
-//                    "SHA-256-0", new BatchCallback(), 1000, 5000);
+            //                    "SHA-256-0", new BatchCallback(), 1000, 5000);
             return true;
         } catch (IMSException e) {
             EntityManager em;
             LOG.error("Cannot connect to IMS ", e);
-//            LogEventManager lem;
             em = PersistUtil.getEntityManager();
 
 
             EntityTransaction trans = em.getTransaction();
             trans.begin();
-//            em.persist(lem.imsCommError("", coll, e));
             em.persist(logManager.createCollectionEvent(
                     LogEnum.UNKNOWN_IMS_COMMUNICATION_ERROR, e));
-
             trans.commit();
             em.close();
             return false;
         }
-//        return validator;
     }
 
     private void performAudit() {
@@ -330,7 +335,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                 }
 
                 if (cancel || abortException != null) {
-//                    iterableItems.cancel();
+                    //                    iterableItems.cancel();
                     return;
                 }
 
@@ -356,7 +361,7 @@ public final class AuditThread extends Thread implements CancelCallback {
 
         // let token batch finish before processing or items waiting tokens
         // will appear as errors.
-//        Thread.sleep(2000);
+        //        Thread.sleep(2000);
         if (batch != null) {
             batch.close();
             batch = null;
@@ -389,7 +394,7 @@ public final class AuditThread extends Thread implements CancelCallback {
      * 1. we got an exception somewhere, abortException will be set
      * 2. user requested cancel
      * 3. we finished as expected
-     * 
+     *
      */
     private void logAuditFinish() {
         EntityManager em = PersistUtil.getEntityManager();
@@ -430,7 +435,6 @@ public final class AuditThread extends Thread implements CancelCallback {
 
     private void logAuditStart() {
         LOG.info("Starting audit on: " + coll.getName());
-
         EntityManager em = PersistUtil.getEntityManager();
         String message = null;
         if (baseItemPathList != null) {
@@ -536,10 +540,11 @@ public final class AuditThread extends Thread implements CancelCallback {
         }
 
         TokenRequest request = new TokenRequest();
-        request.setName(item.getPath());
+        //request.setName(item.getPath());
+        request.setName(item.getId().toString());
         request.setHashValue(currentFile.getHash());
-        if (!Strings.isEmpty(item.getPath()) && !Strings.isEmpty(
-                currentFile.getHash()) && batch != null) {
+        if (!Strings.isEmpty(item.getPath()) && 
+            !Strings.isEmpty(currentFile.getHash()) && batch != null) {
             try {
                 batch.add(request);
             } catch (InterruptedException e) {
@@ -554,8 +559,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                 "Generated checksum: " + currentFile.getHash()
                 + " expected checksum: " + item.getFileDigest());
         LogEvent event;
-        if (currentFile.getHash().equals(
-                item.getFileDigest())) {
+        if (currentFile.getHash().equals(item.getFileDigest())) {
             // File is active and intact
             // log the transition if it already isn't A
             // only toggle to A if state is not a remote error.
@@ -566,8 +570,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                         item.getPath());
                 item.setState('A');
                 item.setStateChange(new Date());
-                LOG.trace(
-                        "Toggling state to Active for " + item.getPath());
+                LOG.trace("Toggling state to Active for " + item.getPath());
             } else {
                 event = null;
             }
@@ -617,14 +620,14 @@ public final class AuditThread extends Thread implements CancelCallback {
             totalErrors++;
         } else {
             // create new item with state of missing token
-            mim.addItem(fileName, parentName, false, coll, 'T',
+            MonitoredItem mi = mim.addItem(fileName, parentName, false, coll, 'T',
                     currentFile.getFileSize());
             event[1] = null;
             TokenRequest request = new TokenRequest();
-            request.setName(fileName);
+            request.setName(mi.getId().toString());
             request.setHashValue(currentFile.getHash());
-            if (!Strings.isEmpty(fileName) && !Strings.isEmpty(
-                    currentFile.getHash()) && batch != null) {
+            if (!Strings.isEmpty(fileName) && 
+                !Strings.isEmpty(currentFile.getHash()) && batch != null) {
                 try {
                     batch.add(request);
                 } catch (InterruptedException e) {
@@ -648,8 +651,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                 String parent = (currentFile.getPathList().length > i + 1
                         ? currentFile.getPathList()[i + 1] : null);
                 parent = Strings.cleanStringForXml(parent, '_');
-                mim.createDirectory(currentFile.getPathList()[i], parent,
-                        coll);
+                mim.createDirectory(currentFile.getPathList()[i], parent, coll);
             }
         }
 
@@ -745,10 +747,10 @@ public final class AuditThread extends Thread implements CancelCallback {
             try {
                 CompareResults cr = new CompareResults(cc);
                 cc.compareTo(cr, coll, null);
-//                cc.loadCollectionTable(coll, null);
-//                cc.doCompare();
+                //                cc.loadCollectionTable(coll, null);
+                //                cc.doCompare();
                 // For now, we don't care about files that only exist remotely
-//                cc.getUnseenTargetFiles();
+                //                cc.getUnseenTargetFiles();
                 // State: P, only set if file is currently active as local errors
                 // take precedence
                 em = PersistUtil.getEntityManager();

@@ -199,7 +199,6 @@ public class DefaultAccountContextListener implements ServletContextListener {
         }
 
         if ( !settingsMigration ) {
-            System.out.println("Adding modify system settings role");
             UserRoles updateSysSettings = new UserRoles();
             updateSysSettings.setRolename("Modify System Settings");
             updateSysSettings.setUsername("admin");

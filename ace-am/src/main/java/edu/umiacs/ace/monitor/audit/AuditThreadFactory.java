@@ -49,6 +49,7 @@ public class AuditThreadFactory {
     private static int imsPort = 8080;
     private static String tokenClass = "SHA-256";
     private static boolean auditOnly = false;
+    private static boolean ssl = false;
 
     public static void setIMS( String ims ) {
         imsHost = ims;
@@ -78,6 +79,10 @@ public class AuditThreadFactory {
         AuditThreadFactory.auditOnly = auditOnlyMode;
     }
 
+    public static boolean isAuditing() {
+        return !runningThreads.isEmpty();
+    }
+
     /**
      * Return a new or existing thread if any room is available New threads will start replication
      * 
@@ -85,7 +90,7 @@ public class AuditThreadFactory {
      * @param tri
      * @return
      */
-    public static AuditThread createThread( Collection c, StorageDriver tri,
+    public static AuditThread createThread( Collection c, StorageDriver tri, boolean verbose,
             MonitoredItem... startItem ) {
         synchronized ( runningThreads ) {
             if ( !runningThreads.containsKey(c) && runningThreads.size() < max_audits ) {
@@ -94,11 +99,12 @@ public class AuditThreadFactory {
 //                {
 //                    pathList = new String[startItem.size()];
 //                }
-                AuditThread newThread = new AuditThread(c, tri, auditOnly,
-                        startItem);
+                AuditThread newThread = new AuditThread(c, tri, auditOnly, 
+                        verbose, startItem);
                 newThread.setImsHost(imsHost);
                 newThread.setImsport(imsPort);
                 newThread.setTokenClassName(tokenClass);
+                newThread.start();
                 runningThreads.put(c, newThread);
             }
             return runningThreads.get(c);
@@ -142,6 +148,10 @@ public class AuditThreadFactory {
         AuditThreadFactory.max_audits = max_audits;
     }
 
+    public static void setSSL(Boolean ssl) {
+        AuditThreadFactory.ssl = ssl;
+    }
+
     /**
      * Return the current thread for a collection.
      * @param c collection to fetch
@@ -167,4 +177,9 @@ public class AuditThreadFactory {
             runningThreads.remove(c);
         }
     }
+
+    public static boolean useSSL() {
+        return AuditThreadFactory.ssl;
+    }
+
 }

@@ -66,6 +66,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
     private static final String PARAM_IMS = "ims";
     private static final String PARAM_IMS_PORT = "ims.port";
     private static final String PARAM_IMS_TOKEN_CLASS = "ims.tokenclass";
+    private static final String PARAM_IMS_SSL = "ims.ssl";
     private static final String PARAM_DISABLE_AUDIT = "auto.audit.disable";
     private static final String PARAM_THROTTLE_MAXAUDIT = "throttle.maxaudit";
     private static final String PARAM_AUDIT_ONLY = "audit.only";
@@ -121,6 +122,19 @@ public final class AuditConfigurationContext implements ServletContextListener {
             AuditThreadFactory.setAuditOnly(false);
         }
 
+        q.setParameter("attr", PARAM_IMS_SSL);
+        try {
+            s = (SettingsParameter) q.getSingleResult();
+            AuditThreadFactory.setSSL(Boolean.valueOf(s.getValue()));
+        } catch ( NoResultException ex ) {
+            EntityTransaction trans = em.getTransaction();
+            trans.begin();
+            em.persist(new SettingsParameter(SettingsConstants.PARAM_IMS_SSL,
+                    SettingsConstants.imsSSL, false));
+            trans.commit();
+            AuditThreadFactory.setSSL(false);
+        }
+
         PauseBean pb = new PauseBean();
         ctx.setAttribute(ATTRIBUTE_PAUSE, pb);
 
@@ -139,6 +153,12 @@ public final class AuditConfigurationContext implements ServletContextListener {
             }
         }
 
+        // q.setParam(attr, continuous audit)
+        // s = q.getSingleResult
+        // seed = s.getValue
+        //bgAudit = new BackgroundAuditorFactory();
+        //BackgroundAuditorFactory.start();
+
         checkTimer = new Timer("Audit Check Timer");
         checkTimer.schedule(new MyTimerTask(pb), 0, HOUR);
 
@@ -151,6 +171,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
         }
         AuditThreadFactory.cancellAll();
         AuditTokens.cancellAll();
+        //BackgroundAuditorFactory.cancel();
     }
 
     public static class PauseBean {
@@ -212,7 +233,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
                         LOG.debug("No last sync for " + c.getName() + " running");
                         sa = StorageDriverFactory.createStorageAccess(c,
                                 em);
-                        AuditThreadFactory.createThread(c, sa, (MonitoredItem[])null);
+                        AuditThreadFactory.createThread(c, sa, true, (MonitoredItem[])null);
                     } else {
                         long syncTime = c.getLastSync().getTime();
                         long currTime = System.currentTimeMillis();
@@ -222,7 +243,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
                                     + " greater than " + (checkperiod * HOUR * 24));
                             sa = StorageDriverFactory.createStorageAccess(c,
                                     em);
-                            AuditThreadFactory.createThread(c, sa, (MonitoredItem[]) null);
+                            AuditThreadFactory.createThread(c, sa, true, (MonitoredItem[]) null);
                         } else {
                             LOG.trace("No Sync on " + c.getName());
                         }

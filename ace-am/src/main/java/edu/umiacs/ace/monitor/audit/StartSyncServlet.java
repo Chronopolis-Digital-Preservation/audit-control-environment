@@ -92,7 +92,8 @@ public final class StartSyncServlet extends EntityManagerServlet {
             if ( isTokenAudit ) {
                 AuditTokens.createThread(collection);
             } else {
-                AuditThreadFactory.createThread(collection, driver, item);
+                // Move 'true' to separate variable for clarity
+                AuditThreadFactory.createThread(collection, driver, true, item);
             }
             response.sendRedirect("Status?collectionid=" + collection.getId());
 

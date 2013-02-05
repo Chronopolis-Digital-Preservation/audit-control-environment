@@ -33,6 +33,7 @@ package edu.umiacs.ace.monitor.core;
 
 import edu.umiacs.ace.monitor.log.LogEnum;
 import edu.umiacs.ace.monitor.log.LogEventManager;
+import edu.umiacs.ace.util.PersistUtil;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -116,6 +117,16 @@ public class MonitoredItemManager {
         } finally {
             lock.unlock();
         }
+    }
+
+    /*
+     *
+     * @param id to get
+     * @return the monitored item
+     */
+    public MonitoredItem getItemById( String id, Collection c ) {
+        EntityManager pem = PersistUtil.getEntityManager();
+        return pem.find(MonitoredItem.class, Long.parseLong(id));
     }
 
     /**

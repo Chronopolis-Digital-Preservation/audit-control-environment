@@ -222,7 +222,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
         return false;
     }
 
-    public void populateCollection(HttpServletRequest req, Collection col) {
+    public static void populateCollection(HttpServletRequest req, Collection col) {
         if (!Strings.isEmpty(req.getParameter(PARAM_NAME))) {
             col.setName(req.getParameter(PARAM_NAME));
         }
