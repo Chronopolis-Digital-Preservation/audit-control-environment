@@ -34,6 +34,8 @@ package edu.umiacs.ace.monitor.core;
 import edu.umiacs.ace.monitor.log.LogEnum;
 import edu.umiacs.ace.monitor.log.LogEventManager;
 import edu.umiacs.ace.util.PersistUtil;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -42,7 +44,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
 
@@ -101,19 +102,23 @@ public class MonitoredItemManager {
      * 
      * 
      * @param path path to look for
-     * @return true if item exists, false otherwise
+     * @return MonitoredItem if exist, null otherwise
      */
     public MonitoredItem getItemByPath( String path, Collection c ) {
         lock.lock();
         try {
+            MonitoredItem tmp = new MonitoredItem();
+            tmp.setPath(path);
+
             Query q = em.createNamedQuery("MonitoredItem.getItemByPath");
             q.setParameter("path", path);
             q.setParameter("coll", c);
-            try {
-                return (MonitoredItem) q.getSingleResult();
-            } catch ( NoResultException ex ) {
-                return null;
-            }
+
+            // Make sure we have the correct item
+            List<MonitoredItem> li = q.getResultList();
+            Collections.sort(li, new PathComparator());
+            int idx = Collections.binarySearch(li, tmp, new PathComparator());
+            return (idx >= 0 ? li.get(idx): null);
         } finally {
             lock.unlock();
         }
@@ -235,5 +240,12 @@ public class MonitoredItemManager {
         q.setParameter("coll", c);
 
         return (Long) q.getSingleResult();
+    }
+
+    // To compare MonitoredItems based on paths
+    private class PathComparator implements Comparator<MonitoredItem> {
+        public int compare(MonitoredItem m1, MonitoredItem m2) {
+            return m1.getPath().compareTo(m2.getPath());
+        }
     }
 }
