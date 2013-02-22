@@ -193,7 +193,7 @@ def doPull(shell, arg, file, contentID=None):
     contentIDs = [item.firstChild.nodeValue for item in items if
                   item.firstChild.nodeValue.startswith(file)]
   else:
-    contentIDs = [contentID]
+    contentIDs = [file]
 
   for contentID in contentIDs:
     ## Get the file name and make a request
@@ -294,7 +294,7 @@ def createRequestList(filename, digest, base=''):
   return rl
 
 def checkArgs(cmd, children, arg):
-  """ Czech an argument for a given command """
+  """ Check an argument for a given command """
   valid = True
   if arg not in children:
     print 'Unknown argument for %s' % cmd
@@ -328,7 +328,7 @@ def help():
   """
 
 def sHelp(shell, *args):
-  shell.help(args)
+  shell.help(list(args))
 
 def stopShell(shell):
   shell.run = False
@@ -349,15 +349,15 @@ def process(cmd, shell):
     return
 
   ## Check if it's a command that requires duracloud info
-  # if args[0] in ['get', 'update', 'put', 'validate', 'pull', 'import'] and not shell.ready():
-  #   print 'Please set duraspace information before using',args[0]
-  #   return
+  if args[0] in ['get', 'update', 'put', 'validate', 'pull', 'import'] and not shell.ready():
+    print 'Please set duraspace information before using',args[0]
+    return
 
   func = fns[args[0]]
   func(shell, *args[1:])
 
 ##
-## For running while coding (but not really cause that's another file) 
+## For running while coding (but not really cause that's another file now) 
 ##  
 # def repl():
 #   global acestore

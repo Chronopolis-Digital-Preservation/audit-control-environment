@@ -6,6 +6,8 @@ import readline
 import re
 import os
 
+_help = '_help_'
+
 class AceShell(object):
   """Ace Shell Information"""
   
@@ -21,7 +23,6 @@ class AceShell(object):
     self.run = True
     self.validate = True
     self.commands = None
-    self.helper = None
     self.completer = None
 
   def printInfo(self):
@@ -37,249 +38,133 @@ class AceShell(object):
             self.user != None and self.passwd != None)
 
   def createCommands(self):
-    ## May add on help in children later on
-    self.commands = { 
-      'get': ['content', 'props'],
-      'info': [],
-      'pull': ['file', 'directory'],
-      'put': ['file'],
-      'set': ['dhost', 'spaceID', 'user', 'validate', 'verbose', 'wsdl'],
-      'update': ['file'],
-      'validate': ['local', 'remote'],
-      'import': [],
-      'help': ['get', 'import', 'info', 'pull', 
-               'put', 'set', 'update', 'validate']
+    self.commands = {
+      'get':{
+        'content':{_help: 'get content <file> [contentID] \n' \
+            '\tPrint the content of the file, optionally specified by the ContentID'},
+        'props':  {_help: 'get props <file> [contentID] \n' \
+            '\tPrint the properties of the file, optionally specified bt the ContentID'},
+        _help : 'Possible arguments for get: \n\thelp get content \n\thelp get props',
+      },'info':{
+        _help: 'info [param] \n\tPrint the shell information matching optional parameter'
+      },'import':{
+        _help: 'import [tokenstore] \n\tImport the token store to duraspace'
+      },'pull' :{
+        'file':{_help: 'pull file <file> \n' \
+            '\tPull a file from durastore to local disk'},
+        'directory': {_help: 'pull directory <file> \n' \
+            '\tPull a directory from durastore to local disk'},
+        _help : 'Possible arguments for pull: \n\thelp pull file \n\thelp pull directory',
+      },'put' :{
+        'file':{_help: 'put file <file> \n' \
+            '\tUpload a file or directory to durastore'},
+        _help: 'Possible arguements for put: \n\thelp put file',
+      },'set' :{
+        'dhost':{_help: 'set dhost [hostname] \n' \
+            '\tSet the durastore host'},
+        'spaceID':{_help: 'set spaceID [id] \n' \
+            '\tSet the durastore spaceID'},
+        'user':{_help: 'set user [username]\n' \
+            '\tSet the durastore user'},
+        'validate':{_help: 'set valdate\n' \
+            '\tSet validation of files when pulling on or off'},
+        'verbose':{_help: 'set verbose\n' \
+            '\tSet verbose mode on or off'},
+        'wsdl':{_help: 'set wsdl [hostname]\n' \
+            '\tSet the wsdl hostname'},
+        _help: 'Possible arguments for set: \n\thelp set dhost \n\thelp set spaceID'\
+            '\n\thelp set user \n\thelp set validate \n\thelp set verose'\
+            '\n\thelp set wsdl',
+      },'update':{
+        'file':{_help: 'update file \n' \
+            '\tUpdate the proofs for the file or directory'},
+        _help: 'Possible arguments for update: \n\thelp update file',
+      },'validate':{
+        'local':{_help: 'validate local <file> [contentID] \n' \
+            '\tValidate a local file against its proof in durastore, optional ContentID'},
+        'remote':{_help: 'validate remote <contentID> \n' \
+            '\tValidate the remote copy held in durastore specified by the contentID'},
+        _help: 'Possible arguments for validate: \n\thelp validate local' \
+            '\n\thelp validate remote',
+      },'help':{
+        'get':None,
+        'import': None,
+        'info': None,
+        'pull': None,
+        'put': None,
+        'set': None,
+        'update': None,
+        'validate': None,
+        _help: 'Possible help commands:' \
+            '\n\thelp get \n\thelp import \n\thelp info \n\thelp pull \n\thelp put' \
+            '\n\thelp set \n\thelp update \n\thelp validate'
+      },
     }
 
     ## While we're here...
-    ## Helper and Tab Complete objects
-    self.helper = Helper(self.commands)
+    ## Tab Complete object
     self.completer = Completer(self.commands)
     readline.set_completer_delims(' \t\n;')
     readline.parse_and_bind('tab: complete')
     readline.set_completer(self.completer.complete)
 
   def help(self, line):
-    self.helper.help(line)
+    ## The initial help is stripped off so we want to add it back
+    ## if nothing is there
+    if len(line) == 0:
+      line.append('help')
+
+    help = get_help(line, self.commands)
+    print help 
 
   def getCommands(self):
     return self.commands
 
+def get_help(tokens, cmds):
+  if tokens is None: 
+    return ''
 
-class Helper(object):
-  """For all the help options that need to be printed"""
+  if _help in cmds and len(tokens) == 0:
+    return cmds[_help]
+  else:
+    if tokens[0] in cmds.keys():
+      help = get_help(tokens[1:], cmds[tokens[0]])
+    else:
+      print 'Unknown argument %s' % tokens[0] 
+      help = ''
 
-  def __init__(self, commands):
-    self.commands = commands 
+  if help == '' and _help in cmds.keys():
+   help = cmds[_help] 
 
-  def print_unknown(self, cmd, children, bad):
-    print 'Unknown option %s for %s' % (bad, cmd) 
-    print 'Possible help command:'
-    for c in children:
-      print '\thelp %s %s' % (cmd, c)
+  return help 
 
-  def help_get(self, args):
-    children = self.commands.get('get')
-    if args[0] not in children:
-      self.print_unknown('get', children, args)
-      return
-
-    print 'get %s <file> [contentID]' % args[0]
-    if args[0] == 'content':
-      print '\tPrint the content of the file,', 
-      print 'optionally specified by the contentID'
-    elif args[0] == 'props':
-      print '\tPrint the properties of the file,',
-      print 'optionally specified by the contentID'
-
-  def help_import(self, args):
-    if args:
-      self.print_unknown('import', [''], args)
-      return
-
-    print """import [tokenstore]
-    Import the token store to matching duraspace content
-    """
-
-  def help_info(self, args):
-    if args:
-      self.print_unknown('info', [''], args)
-      return
-
-    print """info [param]
-      Print the shell information matching optional parameter""" 
-
-  def help_pull(self, args):
-    children = self.commands.get('pull')
-    if not args or args[0] not in children:
-      self.print_unknown('pull', children, args)
-      return
-
-    print 'pull %s <file> [contentID]' % args[0]
-    if args[0] == 'file':
-      print '\tPull a file from durastore, optionally specified by contentID'
-    elif args[0] == 'directory':
-      print '\tPull a directory from durastore, optionally specified by contentID'
-
-  def help_put(self, args):
-    children = self.commands.get('put')
-    if not args or args[0] not in children:
-      self.print_unknown('put', children, args)
-      return
-
-    print 'put %s <file>' % args[0] 
-    print '\tUpload a file or directory to durastore'
-
-  def help_set(self, args):
-    children = self.commands.get('set')
-    if not args or args[0] not in children:
-      self.print_unknown('set', children, args)
-      return
-
-    ## There's probably a better way to do this... for now this works
-    if args[0] == 'wsdl':
-      print 'set %s [hostname]' % args[0]
-      print '\tSet the wsdl host, with optional hostname'
-    elif args[0] == 'dhost':
-      print 'set %s [hostname]' % args[0]
-      print '\tSet the durastore host, with optional hostname'
-    elif args[0] == 'spaceID':
-      print 'set %s [id]' % args[0]
-      print '\tSet the durastore space ID, with optional ID'
-    elif args[0] == 'user':
-      print 'set %s [user]' % args[0]
-      print '\tSet the durastore user, with optional username'
-    elif args[0] == 'validate':
-      print 'set %s' % args[0]
-      print '\tSet validation of files when pulling on or off'
-    elif args[0] == 'verbose':
-      print 'set %s' % args[0]
-      print '\tSet verbose mode on or off'
-
-  def help_update(self, args):
-    children = self.commands.get('update')
-    if not args or args[0] not in children:
-      self.print_unknown('update', children, args)
-      return
-
-    print 'update %s'  % args[0]
-    print '\tUpdate the proofs for the file or directory file', 
-
-  def help_validate(self, args):
-    children = self.commands.get('validate')
-    if not args or args[0] not in children:
-      self.print_unknown('validate', children, args)
-      return
-
-    if args[0] == 'local':
-      print 'validate %s <file> [contentID]' % args[0]
-      print '\tValidate a local file against it\'s proof in durastore, optional',
-      print 'contentID'
-    elif args[0] == 'remote':
-      print 'validate %s <contentID>' % args[0]
-      print '\tValidate the remote copy held in durastore specified by the', 
-      print 'contentID'
-
-  def help_all(self, cmd):
-    print """Unknown command: """,cmd,""" 
-    Possible help commands: 
-      exit
-      help info
-      help set                 
-      help get
-      help put 
-      help update
-      help validate
-    """
-
-  def help(self, text):
-    line = list(text)
-    if not line:
-      self.help_all('')
-      return
-    
-    cmd = line[0].strip()
-    if cmd in self.commands:
-      impl = getattr(self, 'help_%s' % cmd)
-      children = line[1:]
-      impl(children)
-      return
-
-    self.help_all(cmd)
-
-## TODO: Bug when there is a space after a sub command, will match and add to
-##       the end of the line
-
+## Slighly modified version of: 
+## https://sites.google.com/site/xiangyangsite/home/software-development/python-readline-completions
 class Completer(object):
   def __init__(self, commands):
     self.commands = commands
 
-  def complete_update(self, args):
-    cmds = self.commands.get('update')
-    ## If a whole command is matched, return nozing
-    return [c + ' ' for c in cmds if not args or 
-           (c.startswith(args[0]) and not args[0] in cmds)]
-  
-  def complete_put(self, args):
-    cmds = self.commands.get('put')
-    return [c + ' ' for c in cmds if not args or 
-           (c.startswith(args[0]) and not args[0] in cmds)]
-
-  def complete_set(self, args):
-    cmds = self.commands.get('set')
-    return [c + ' ' for c in cmds if not args or
-           (c.startswith(args[0]) and not args[0] in cmds)]
-
-  def complete_get(self, args):
-    cmds = self.commands.get('get')
-    return [c + ' ' for c in cmds if not args or
-           (c.startswith(args[0]) and not args[0] in cmds)]
-
-  def complete_validate(self, args):
-    cmds = self.commands.get('validate')
-    return [c + ' ' for c in cmds if not args or
-           (c.startswith(args[0]) and not args[0] in cmds)]
-
-  def complete_pull(self, args):
-    cmds = self.commands.get('pull')
-    return [c + ' ' for c in cmds if not args or 
-           (c.startswith(args[0]) and not args[0] in cmds)]
-
-  def complete_help(self, args):
-    cmds = self.commands.get('help')
-    if not args:
-      return [c + ' ' for c in cmds]
-
-    subcmd = args[0].strip()
+  def traverse(self, tokens, cmds):
+    if cmds is None or len(tokens) == 0:
+      return []
     
-    if subcmd not in cmds:
-      return [c + ' ' for c in cmds if c.startswith(subcmd)]
+    ## Base case -- when we're at the final command
+    if len(tokens) == 1:
+      return [x + ' ' for x in cmds if x.startswith(tokens[0]) and x is not _help]
+    else:
+      ## Follow along the dictionary with subsequent tokens 
+      ## And child commands
+      if tokens[0] in cmds.keys():
+        return self.traverse(tokens[1:], cmds[tokens[0]])
 
-    sargs = args[1:]
-    impl = getattr(self, 'complete_%s' % subcmd)
-    return impl(sargs)+[None]
+    return []
 
   def complete(self, text, state):
-    buf = readline.get_line_buffer()
-    line = readline.get_line_buffer().split()
-
-    ## Really need to centralize these
-    # COMMANDS = ['help', 'exit', 'set', 'put', 'update', 'get', 'validate',
-    #              'pull']
-    COMMANDS = self.commands.keys()
-
-    if not line:
-      return [c + ' ' for c in COMMANDS][state]
-
-    regex = re.compile('.*\s+$', re.M)
-    if regex.match(buf):
-      line.append('')
-
-    cmd = line[0].strip()
-    if cmd in COMMANDS:
-      impl = getattr(self, 'complete_%s' % cmd)
-      args = filter(lambda x: x != '',line[1:])
-      return (impl(args)+[None])[state]
-    results = [c + ' ' for c in COMMANDS if c.startswith(cmd)] + [None]
-    return results[state]
-
+    try:
+      tokens = readline.get_line_buffer().split()
+      if not tokens or readline.get_line_buffer()[-1] == ' ':
+        tokens.append('')
+      results = self.traverse(tokens, self.commands) + [None]
+      return results[state]
+    except Exception, e:
+      print e
