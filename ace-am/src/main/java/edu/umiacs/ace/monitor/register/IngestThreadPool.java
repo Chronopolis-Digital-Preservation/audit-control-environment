@@ -74,10 +74,10 @@ public class IngestThreadPool {
         // 2 - Java will throw an exception otherwise 
         if ( threads == null ) {
             threads = new ThreadPoolExecutor(maxThreads,
-                    maxThreads, 1, TimeUnit.MINUTES, ingestQueue);
+                    maxThreads, 5, TimeUnit.MINUTES, ingestQueue);
         }
         if ( dirThread == null ) {
-            dirThread = new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, dirQueue);
+            dirThread = new ThreadPoolExecutor(1, 1, 5, TimeUnit.MINUTES, dirQueue);
         }
         if ( hasSeen == null ) {
             hasSeen = new HashMap<Collection, Set<String>>();
@@ -134,6 +134,13 @@ public class IngestThreadPool {
     protected static void shutdownPools() {
         LOG.debug("[Ingest]: Shutting down thread pools.");
         threads.shutdown();
+        if (!threads.isTerminated() ) {
+            threads.shutdownNow();
+        }
+
         dirThread.shutdown();
+        if ( !dirThread.isShutdown()) {
+            dirThread.shutdownNow();
+        }
     }
 }

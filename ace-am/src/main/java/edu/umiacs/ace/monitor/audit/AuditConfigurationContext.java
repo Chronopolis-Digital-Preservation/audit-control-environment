@@ -63,13 +63,13 @@ import org.apache.log4j.NDC;
  */
 public final class AuditConfigurationContext implements ServletContextListener {
 
-    private static final String PARAM_IMS = "ims";
-    private static final String PARAM_IMS_PORT = "ims.port";
-    private static final String PARAM_IMS_TOKEN_CLASS = "ims.tokenclass";
-    private static final String PARAM_IMS_SSL = "ims.ssl";
-    private static final String PARAM_DISABLE_AUDIT = "auto.audit.disable";
-    private static final String PARAM_THROTTLE_MAXAUDIT = "throttle.maxaudit";
-    private static final String PARAM_AUDIT_ONLY = "audit.only";
+    //private static final String PARAM_IMS = "ims";
+    //private static final String PARAM_IMS_PORT = "ims.port";
+    //private static final String PARAM_IMS_TOKEN_CLASS = "ims.tokenclass";
+    //private static final String PARAM_IMS_SSL = "ims.ssl";
+    //private static final String PARAM_DISABLE_AUDIT = "auto.audit.disable";
+    //private static final String PARAM_THROTTLE_MAXAUDIT = "throttle.maxaudit";
+    //private static final String PARAM_AUDIT_ONLY = "audit.only";
     public static final String ATTRIBUTE_PAUSE = "pause";
     private static final long HOUR = 1000 * 60 * 60;
     private Timer checkTimer;
@@ -83,14 +83,14 @@ public final class AuditConfigurationContext implements ServletContextListener {
 
         ServletContext ctx = arg0.getServletContext();
         // set IMS for audit Thread from server parameter
-        q.setParameter("attr", PARAM_IMS);
+        q.setParameter("attr", SettingsConstants.PARAM_IMS);
         s = (SettingsParameter) q.getSingleResult();
         AuditThreadFactory.setIMS(s.getValue());
         if ( Strings.isEmpty(AuditThreadFactory.getIMS()) ) {
             throw new RuntimeException("IMS is empty");
         }
 
-        q.setParameter("attr", PARAM_IMS_TOKEN_CLASS);
+        q.setParameter("attr", SettingsConstants.PARAM_IMS_TOKEN_CLASS);
         s = (SettingsParameter) q.getSingleResult();
         if ( !Strings.isEmpty(s.getValue()) ) {
             String tokenClass = s.getValue();
@@ -98,7 +98,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
         }
 
 
-        q.setParameter("attr", PARAM_IMS_PORT);
+        q.setParameter("attr", SettingsConstants.PARAM_IMS_PORT);
         s = (SettingsParameter) q.getSingleResult();
         if ( Strings.isValidInt(s.getValue()) ) {
             int port = Integer.parseInt(s.getValue());
@@ -109,7 +109,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
             }
         }
 
-        q.setParameter("attr", PARAM_AUDIT_ONLY);
+        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_ONLY);
         try {
             s = (SettingsParameter) q.getSingleResult();
             AuditThreadFactory.setAuditOnly(Boolean.valueOf(s.getValue()));
@@ -122,7 +122,15 @@ public final class AuditConfigurationContext implements ServletContextListener {
             AuditThreadFactory.setAuditOnly(false);
         }
 
-        q.setParameter("attr", PARAM_IMS_SSL);
+        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_SAMPLE);
+        try {
+            s = (SettingsParameter) q.getSingleResult();
+            AuditThreadFactory.setAuditSampling(Boolean.valueOf(s.getValue()));
+        } catch (NoResultException ex) {
+            LOG.error(ex.getStackTrace());
+        }
+
+        q.setParameter("attr", SettingsConstants.PARAM_IMS_SSL);
         try {
             s = (SettingsParameter) q.getSingleResult();
             AuditThreadFactory.setSSL(Boolean.valueOf(s.getValue()));
@@ -138,12 +146,12 @@ public final class AuditConfigurationContext implements ServletContextListener {
         PauseBean pb = new PauseBean();
         ctx.setAttribute(ATTRIBUTE_PAUSE, pb);
 
-        q.setParameter("attr", PARAM_DISABLE_AUDIT);
+        q.setParameter("attr", SettingsConstants.PARAM_DISABLE_AUDIT);
         s = (SettingsParameter) q.getSingleResult();
         String startPaused = s.getValue();
         pb.setPaused(Boolean.valueOf(startPaused));
 
-        q.setParameter("attr", PARAM_THROTTLE_MAXAUDIT);
+        q.setParameter("attr", SettingsConstants.PARAM_THROTTLE_MAXAUDIT);
         s = (SettingsParameter) q.getSingleResult();
         String maxRun = s.getValue();
         if ( Strings.isValidInt(maxRun) ) {

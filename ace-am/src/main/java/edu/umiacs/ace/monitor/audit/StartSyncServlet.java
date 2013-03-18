@@ -57,6 +57,7 @@ public final class StartSyncServlet extends EntityManagerServlet {
             throws ServletException, IOException {
 
         boolean isTokenAudit = false;
+        boolean verbose = true;
         Collection collection;
         StorageDriver driver;
         MonitoredItem[] item = null;
@@ -71,8 +72,6 @@ public final class StartSyncServlet extends EntityManagerServlet {
         if ( (collection = getCollection(request, em)) != null ) {
             driver = StorageDriverFactory.createStorageAccess(collection, em);
             if ( "corrupt".equals(request.getParameter(PARAM_TYPE)) ) {
-                List<MonitoredItem> itemlist;
-
                 Query query = em.createNamedQuery("MonitoredItem.listLocalErrors");
                 query.setParameter("coll", collection);
                 List<MonitoredItem> resList = query.getResultList();
@@ -92,8 +91,7 @@ public final class StartSyncServlet extends EntityManagerServlet {
             if ( isTokenAudit ) {
                 AuditTokens.createThread(collection);
             } else {
-                // Move 'true' to separate variable for clarity
-                AuditThreadFactory.createThread(collection, driver, true, item);
+                AuditThreadFactory.createThread(collection, driver, verbose, item);
             }
             response.sendRedirect("Status?collectionid=" + collection.getId());
 

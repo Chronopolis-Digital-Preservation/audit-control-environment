@@ -104,7 +104,6 @@ public class SettingsUtil {
     // Get the names of all curent settings
     public static Set<String> getParamNames() {
         List<SettingsParameter> settings = getCurrentSettings();
-
         Set<String> paramSet = new HashSet<String>();
         for ( SettingsParameter s : settings ) {
             paramSet.add(s.getName());
@@ -158,6 +157,8 @@ public class SettingsUtil {
                 SettingsConstants.maxIngestThreads, false));
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_AUDIT_ONLY,
                 SettingsConstants.auditOnly, false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_AUDIT_SAMPLE,
+                SettingsConstants.auditSample, false));
 
         return defaults;
     }

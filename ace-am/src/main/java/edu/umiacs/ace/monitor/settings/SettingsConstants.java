@@ -7,6 +7,7 @@ package edu.umiacs.ace.monitor.settings;
 public class SettingsConstants {
     // Attributes
     public static final String PARAM_AUDIT_ONLY="audit.only";
+    public static final String PARAM_AUDIT_SAMPLE = "audit.sample";
     public static final String PARAM_IMS = "ims";
     public static final String PARAM_IMS_PORT = "ims.port";
     public static final String PARAM_IMS_TOKEN_CLASS = "ims.tokenclass";
@@ -34,6 +35,7 @@ public class SettingsConstants {
 
     // Default Values
     public static final String auditOnly = "false";
+    public static final String auditSample = "false";
     public static final String mailServer = "localhost.localdomain";
     public static final String mailFrom = "acemail@localhost";
     public static final String maxAudit = "3";

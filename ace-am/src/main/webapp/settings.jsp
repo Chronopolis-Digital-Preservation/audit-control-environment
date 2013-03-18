@@ -38,6 +38,11 @@
                     <div class="settingsHelp"><img src="images/help.png" title="Max number of running audits"></div>
                 </div>
                 <div class="settingsRow">
+                    <div class="settingsName">Audit Sampling:</div>
+                    <div class="settingsVal"><input type=text name="audit.sample" value="${currSettings['audit.sample']}"/></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Enable or disable statistical sampling while auditing (samples sqrt n files)"></div>
+                </div>
+                <div class="settingsRow">
                     <div class="settingsName">Audit Wait Time:</div>
                     <div class="settingsVal"><input type=text name="throttle.wait" value="${currSettings['throttle.wait']}"/></div>
                     <div class="settingsHelp"><img src="images/help.png" title="Minimum time between srb file reads in milliseconds"></div>

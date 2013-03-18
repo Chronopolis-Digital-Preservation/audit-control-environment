@@ -33,7 +33,8 @@ public class SettingsServlet extends EntityManagerServlet {
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response,
             EntityManager em) throws ServletException, IOException {
-        Set<String> paramSet = SettingsUtil.getParamNames();
+        // Set<String> paramSet = SettingsUtil.getParamNames();
+
         List<SettingsParameter> settings = new ArrayList<SettingsParameter>();
         boolean update = false;
 
@@ -49,12 +50,10 @@ public class SettingsServlet extends EntityManagerServlet {
                     if ( item.isFormField() ) {
                         String name = item.getFieldName();
                         String value = Streams.asString(stream);
-                        if ( paramSet.contains(name) && !value.isEmpty() ) {
-                            settings.add(new SettingsParameter(name, value));
-                        }
-
                         if ( name.equals("update") ) {
                             update = true;
+                        }else if (!value.isEmpty()) {
+                            settings.add(new SettingsParameter(name, value));
                         }
                     }
                 }

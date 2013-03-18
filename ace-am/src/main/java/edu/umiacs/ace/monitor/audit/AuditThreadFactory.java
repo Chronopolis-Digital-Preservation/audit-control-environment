@@ -33,8 +33,14 @@ package edu.umiacs.ace.monitor.audit;
 import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.util.PersistUtil;
+import java.security.SecureRandom;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 /**
  *
@@ -49,6 +55,7 @@ public class AuditThreadFactory {
     private static int imsPort = 8080;
     private static String tokenClass = "SHA-256";
     private static boolean auditOnly = false;
+    private static boolean auditSample = false;
     private static boolean ssl = false;
 
     public static void setIMS( String ims ) {
@@ -79,6 +86,10 @@ public class AuditThreadFactory {
         AuditThreadFactory.auditOnly = auditOnlyMode;
     }
 
+    public static void setAuditSampling(boolean auditSampling ) {
+        AuditThreadFactory.auditSample = auditSampling;
+    }
+
     public static boolean isAuditing() {
         return !runningThreads.isEmpty();
     }
@@ -94,13 +105,12 @@ public class AuditThreadFactory {
             MonitoredItem... startItem ) {
         synchronized ( runningThreads ) {
             if ( !runningThreads.containsKey(c) && runningThreads.size() < max_audits ) {
-//                String[] pathList = null;
-//                if (startItem != null)
-//                {
-//                    pathList = new String[startItem.size()];
-//                }
-                AuditThread newThread = new AuditThread(c, tri, auditOnly, 
-                        verbose, startItem);
+                AuditThread newThread = null;
+                if ( auditSample ) {
+                    startItem = getSampledList(c);
+                }
+                newThread = new AuditThread(c, tri, auditOnly,
+                    verbose, startItem);
                 newThread.setImsHost(imsHost);
                 newThread.setImsport(imsPort);
                 newThread.setTokenClassName(tokenClass);
@@ -111,23 +121,6 @@ public class AuditThreadFactory {
         }
     }
 
-//    public static AuditThread createThread(Collection c, StorageAccess tri,
-//            MonitoredItem startItem)
-//    {
-//        synchronized ( runningThreads )
-//        {
-//            if ( !runningThreads.containsKey(c) && runningThreads.size() < max_audits)
-//            {
-//                String path = null;
-//                if (startItem != null)
-//                {
-//                    path = startItem.getPath();
-//                }
-//                runningThreads.put(c, new AuditThread(c, tri, path));
-//            }
-//            return runningThreads.get(c);
-//        }
-//    }
     public static final boolean isRunning( Collection c ) {
         synchronized ( runningThreads ) {
             return runningThreads.containsKey(c);
@@ -180,6 +173,24 @@ public class AuditThreadFactory {
 
     public static boolean useSSL() {
         return AuditThreadFactory.ssl;
+    }
+
+    private static MonitoredItem[] getSampledList(Collection c) {
+        EntityManager em = PersistUtil.getEntityManager();
+        Query q = em.createNamedQuery("MonitoredItem.listIds");
+        q.setParameter("coll", c);
+        List<Long> itemIds = q.getResultList();
+        int size = (int) Math.ceil(Math.sqrt(itemIds.size()));
+
+        SecureRandom rand = new SecureRandom();
+        List<MonitoredItem> items = new LinkedList<MonitoredItem>();
+        for ( int i=0;i < size; i++) {
+            int idxToGet = rand.nextInt(itemIds.size());
+            MonitoredItem item = em.find(MonitoredItem.class, itemIds.remove(idxToGet));
+            items.add(item);
+        }
+
+        return items.toArray(new MonitoredItem[items.size()]);
     }
 
 }
