@@ -112,25 +112,25 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                     </td>
                     <td>
                         <c:choose>
-                            <c:when test="${item.state eq 'C'}">
+                            <c:when test="${item.stateAsString eq 'C'}">
                                 Corrupt
                             </c:when>
-                            <c:when test="${item.state eq 'T'}">
+                            <c:when test="${item.stateAsString eq 'T'}">
                                 Token Missing
                             </c:when>
-                            <c:when test="${item.state eq 'M'}">
+                            <c:when test="${item.stateAsString eq 'M'}">
                                 File Missing
                             </c:when>
-                            <c:when test="${item.state eq 'I'}">
+                            <c:when test="${item.stateAsString eq 'I'}">
                                 Token Corrupt
                             </c:when>
-                            <c:when test="${item.state eq 'P'}">
+                            <c:when test="${item.stateAsString eq 'P'}">
                                 Remote Missing
                             </c:when>
-                            <c:when test="${item.state eq 'D'}">
+                            <c:when test="${item.stateAsString eq 'D'}">
                                 Remote Corrupt
                             </c:when>
-                            <c:when test="${item.state eq 'R'}">
+                            <c:when test="${item.stateAsString eq 'R'}">
                                 File Registered
                             </c:when>
                             <c:otherwise>

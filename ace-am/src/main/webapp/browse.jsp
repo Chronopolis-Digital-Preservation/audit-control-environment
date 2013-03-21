@@ -123,25 +123,25 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                     <c:if test="${!selectedFile.root.directory}"><tr><td>Size</td><td><m:FileSize value="${selectedFile.root.size}" /></td></tr></c:if>
                     <tr><td>State</td><td>
                             <c:choose>
-                                <c:when test="${selectedFile.root.state eq 'A'}">
+                                <c:when test="${selectedFile.root.stateAsString eq 'A'}">
                                     <img src="images/file-ok.jpg"/>
                                     </c:when>
-                                    <c:when test="${selectedFile.root.state eq 'C'}">
+                                    <c:when test="${selectedFile.root.stateAsString eq 'C'}">
                                         Corrupt
                                     </c:when>
-                                    <c:when test="${selectedFile.root.state eq 'T'}">
+                                    <c:when test="${selectedFile.root.stateAsString eq 'T'}">
                                         Token Missing
                                     </c:when>
-                                    <c:when test="${selectedFile.root.state eq 'M'}">
+                                    <c:when test="${selectedFile.root.stateAsString eq 'M'}">
                                         File Missing
                                     </c:when>
-                                    <c:when test="${selectedFile.root.state eq 'R'}">
+                                    <c:when test="${selectedFile.root.stateAsString eq 'R'}">
                                         File Registered
                                     </c:when>
-                                    <c:when test="${selectedFile.root.state eq 'P'}">
+                                    <c:when test="${selectedFile.root.stateAsString eq 'P'}">
                                         Remote File Missing
                                     </c:when>
-                                    <c:when test="${selectedFile.root.state eq 'D'}">
+                                    <c:when test="${selectedFile.root.stateAsString eq 'D'}">
                                         Remote File Corrupt
                                     </c:when>
                                 </c:choose>

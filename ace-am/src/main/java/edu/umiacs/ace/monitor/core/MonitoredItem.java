@@ -224,6 +224,10 @@ public class MonitoredItem implements Serializable, Comparable {
         return state;
     }
 
+    public String getStateAsString() {
+        return String.valueOf(state);
+    }
+
     public void setState( char state ) {
         this.state = state;
     }
