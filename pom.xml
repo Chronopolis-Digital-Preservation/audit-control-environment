@@ -7,7 +7,7 @@
     <version>1.8</version>
     <packaging>pom</packaging>
     <scm>
-        <connection>scm:svn:https://subversion.umiacs.umd.edu/ace/trunk</connection>
+        <connection>scm:svn:https://subversion.umiacs.umd.edu/ace/tags/ace-1.8</connection>
     </scm>
 
     <name>ace</name>
