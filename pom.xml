@@ -4,10 +4,10 @@
 
     <groupId>edu.umiacs.ace</groupId>
     <artifactId>ace</artifactId>
-    <version>1.8</version>
+    <version>1.9-SNAPSHOT</version>
     <packaging>pom</packaging>
     <scm>
-        <connection>scm:svn:https://subversion.umiacs.umd.edu/ace/tags/ace-1.8</connection>
+        <connection>scm:svn:https://subversion.umiacs.umd.edu/ace/trunk</connection>
     </scm>
 
     <name>ace</name>
