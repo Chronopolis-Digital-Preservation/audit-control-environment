@@ -803,7 +803,7 @@
     <security-role>
         <description>Add/edit/remove stuff in /PartnerSite</description>
         <role-name>Modify Partner Sites</role-name>
-    </security-role> --&gt;
+    </security-role> 
     <security-role>
         <description>Role used to modify system settings</description>
         <role-name>Modify System Settings</role-name>
