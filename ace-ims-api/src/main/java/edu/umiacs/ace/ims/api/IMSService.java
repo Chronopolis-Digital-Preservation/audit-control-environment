@@ -203,7 +203,7 @@ public final class IMSService
 
     public List<TokenResponse> retrieveAsyncTokens(List<TokenReceipt> receiptList)
     {
-        if (receiptList == null || receiptList.size() == 0)
+        if (receiptList == null || receiptList.isEmpty())
         {
             return Collections.emptyList();
         }
