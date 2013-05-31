@@ -14,7 +14,7 @@
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
+        <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
     </properties>
 
     <build>
@@ -33,12 +33,12 @@
                             </includes>
                         </resource>
                         <!--<resource>
-              <directory>src/main/webapp</directory>
-              <filtering>false</filtering>
-              <excludes>
-                <exclude>**/footer.jsp</exclude>
-              </excludes>
-            </resource>-->
+                          <directory>src/main/webapp</directory>
+                          <filtering>false</filtering>
+                          <excludes>
+                            <exclude>**/footer.jsp</exclude>
+                          </excludes>
+                        </resource>-->
                     </webResources>
                 </configuration>
             </plugin>
@@ -215,6 +215,11 @@
             <groupId>edu.umiacs.irods</groupId>
             <artifactId>irods-api</artifactId>
             <version>1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.25</version>
         </dependency>
         <!--<dependency>
             <groupId>org.apache.jackrabbit</groupId>
