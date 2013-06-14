@@ -42,12 +42,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * 
  * @author toaster
  */
 @Entity
+@XmlRootElement
 @Table(name = "irodssettings")
 @NamedQuery(name = "IrodsSettings.getByCollection", query =
 "SELECT i FROM IrodsSetting i WHERE i.collection = :coll")
@@ -140,6 +143,7 @@ public class IrodsSetting implements Serializable {
         this.collection = collection;
     }
 
+    @XmlTransient
     public Collection getCollection() {
         return collection;
     }

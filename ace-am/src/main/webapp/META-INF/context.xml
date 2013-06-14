@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Context path="/ace-am-1.7.1-SNAPSHOT">
+<Context path="/ace-am-1.8">
   <Logger className="org.apache.catalina.logger.FileLogger" prefix="aceam." suffix=".log" timestamp="true"/>
   <!-- Configuration for authentication. This information should not need to be
   changed at all unless you have your own authentication provider-->
