@@ -7,9 +7,11 @@ package edu.umiacs.ace.rest;
 
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.util.PersistUtil;
+import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -41,12 +43,35 @@ public class CollectionManagement {
         }
     }
 
+    // Note: There should be a requirement that all the collections in the list
+    // share the same name. I'll add it in the conditional just in case 
+    private boolean checkGroupCollision(List<Collection> colls, Collection coll) {
+        for ( Collection c : colls ) {
+            if ( coll.getGroup().equals(c.getGroup()) &&
+                 coll.getName().equals(c.getName())) {
+                return true;
+            }
+        } 
+        return false;
+    }
+
     @POST
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @RolesAllowed("Collection Modify")
     public Response addCollection(Collection coll){
         checkCollection(coll);
         EntityManager em = PersistUtil.getEntityManager();
+
+        // Check against the name collection name in the group. This could 
+        // make things very confusing in the interface
+        Query q = em.createNamedQuery("Collection.getCollectionByName");
+        q.setParameter("name", coll.getName());
+        List<Collection> colls = q.getResultList();
+        if ( checkGroupCollision(colls, coll)) {
+            em.close();
+            return Response.status(Status.CONFLICT).build();
+        }
+    
         EntityTransaction trans = em.getTransaction();
         trans.begin();
         em.persist(coll);
