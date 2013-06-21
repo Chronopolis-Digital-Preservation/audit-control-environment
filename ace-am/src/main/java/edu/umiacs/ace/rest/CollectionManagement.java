@@ -56,6 +56,44 @@ public class CollectionManagement {
     }
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @RolesAllowed("Collection Modify")
+    @Path("modify/{id}")
+    public Response modifyCollection(Collection coll, @PathParam("id") long id) {
+        // For my sanity (and yours), we're only going to allow certain settings
+        // to be modified. 
+        // These are:
+        //   - storage
+        //   - directory
+        //   - group 
+        EntityManager em = PersistUtil.getEntityManager();
+        Collection orig = em.find(Collection.class, id);
+        if ( !orig.getName().equals(coll.getName()) ) {
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+
+        if (null != coll.getStorage()) {
+            orig.setStorage(coll.getStorage());
+        }
+
+        if ( null != coll.getDirectory()) {
+            orig.setDirectory(coll.getDirectory());
+        }
+
+        if ( null != coll.getGroup()) {
+            orig.setGroup(coll.getGroup());
+        }
+
+        EntityTransaction trans = em.getTransaction();
+        trans.begin();
+        em.merge(orig);
+        trans.commit();
+        em.close();
+        
+        return Response.status(Status.OK).build();
+    }
+
+    @POST
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @RolesAllowed("Collection Modify")
     public Response addCollection(Collection coll){
@@ -69,13 +107,14 @@ public class CollectionManagement {
         List<Collection> colls = q.getResultList();
         if ( checkGroupCollision(colls, coll)) {
             em.close();
-            return Response.status(Status.CONFLICT).build();
+            return Response.status(Status.BAD_REQUEST).build();
         }
     
         EntityTransaction trans = em.getTransaction();
         trans.begin();
         em.persist(coll);
         trans.commit();
+        em.close();
         return Response.status(Status.OK).build();
     }
 
@@ -95,6 +134,31 @@ public class CollectionManagement {
     public Collection getCollectionJSON(@PathParam("id") long collId){
         EntityManager em = PersistUtil.getEntityManager();
         return em.find(Collection.class, collId);
+    }
+
+    /**
+     *
+     * @param name - Name of the collection
+     * @param group - Group the collection is in
+     * @return
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("json/{name}/{group}")
+    @RolesAllowed("Browse")
+    public Collection getCollection(@PathParam("name") String name, 
+                                    @PathParam("group") String group) {
+        EntityManager em = PersistUtil.getEntityManager();
+        Query q = em.createNamedQuery("Collection.getCollectionByName");
+        q.setParameter("name", name);
+        List<Collection> cols = q.getResultList();
+        em.close();
+        for (Collection c : cols) { 
+            if ( c.getGroup().equals(group)) {
+                return c;
+            }
+        }
+        return null;
     }
 
 
