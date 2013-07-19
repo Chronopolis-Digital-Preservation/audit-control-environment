@@ -64,6 +64,7 @@ public class ListContentsServlet extends EntityManagerServlet {
     public static final String TYPE_DIGEST = "digest";
     public static final String TYPE_CHECKM = "checkm";
     public static final String TYPE_STORE = "store";
+    public static final String CHARSET = "UTF-8";
 
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -105,7 +106,7 @@ public class ListContentsServlet extends EntityManagerServlet {
                     header.append(":");
                     header.append(mi.getPath());
                 }
-                os.write(header.toString().getBytes("UTF-8"));
+                os.write(header.toString().getBytes(CHARSET));
                 os.println();
             } else if ( TYPE_CHECKM.equals(output) ) {
 
@@ -147,21 +148,21 @@ public class ListContentsServlet extends EntityManagerServlet {
                 while ( rs.next() ) {
                     String line = null;
                     if ( TYPE_WGET.equals(output) ) {
-                        String ctxPath = HttpUtils.getRequestURL(request).toString();
+                        String ctxPath = request.getRequestURL().toString();
                         String prefix = ctxPath.substring(
                                 0, ctxPath.lastIndexOf("/Sum"));
                         line = prefix + "/Path/" + c.getName() + formatPath(rs.getString(1));
-                        os.write(line.getBytes("UTF-8"));
+                        os.write(line.getBytes(CHARSET));
                         os.println();
                     } else if ( TYPE_CHECKM.equals(output) ) {
                         String digestAlg = checkmDigestAlgFormat(c.getDigestAlgorithm());
                         line = formatPath(rs.getString(1)) + " | " + digestAlg + " | "
                                 + rs.getString(2);
-                        os.write(line.getBytes("UTF-8"));
+                        os.write(line.getBytes(CHARSET));
                         os.println();
                     } else if ( TYPE_DIGEST.equals(output) ) {
                         line = rs.getString(2) + "\t" + formatPath(rs.getString(1));
-                        os.write(line.getBytes("UTF-8"));
+                        os.write(line.getBytes(CHARSET));
                         os.println();
                     } else if ( TYPE_STORE.equals(output) ) {
                         Token tok = em.getReference(Token.class, rs.getLong(3));
@@ -185,7 +186,6 @@ public class ListContentsServlet extends EntityManagerServlet {
             }
         } catch ( Throwable t ) {
             t.printStackTrace();
-
         }
 
     }
