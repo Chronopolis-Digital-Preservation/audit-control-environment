@@ -42,7 +42,23 @@
             <layout>default</layout>
             <name>Repository for library Library[eclipselink]</name>
         </repository>
+        <repository>
+            <id>central</id>
+            <name>Maven Repository Switchboard</name>
+            <url>http://repo1.maven.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
     </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>deployment</id>
+            <name>Internal Releases</name>
+            <url>https://scm.umiacs.umd.edu/maven/adapt/content/repositories/releases/</url>
+        </repository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
