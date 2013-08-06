@@ -96,6 +96,7 @@ public class Collection implements Serializable {
     private char state;
     @Column(name = "COLGROUP")
     private String group;
+    @Column(nullable = false)
     private String digestAlgorithm;
     @ElementCollection
     @CollectionTable(name="settings", joinColumns=@JoinColumn(name="COLLECTION_ID"))

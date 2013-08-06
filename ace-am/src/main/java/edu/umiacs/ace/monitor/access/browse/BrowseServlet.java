@@ -156,7 +156,7 @@ public class BrowseServlet extends EntityManagerServlet {
         } catch ( EntityNotFoundException e ) {
             return null;
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Cannot create ald",e);
+            LOG.error("Cannot create alg",e);
             return null;
         }
 

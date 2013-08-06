@@ -33,6 +33,9 @@ package edu.umiacs.ace.monitor.register;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.Token;
 import edu.umiacs.ace.monitor.settings.SettingsConstants;
+import edu.umiacs.ace.token.TokenStoreEntry;
+import edu.umiacs.ace.token.TokenStoreReader;
+import edu.umiacs.ace.util.TokenUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,6 +45,7 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.servlet.ServletException;
 import org.apache.log4j.Logger;
 
 /**
@@ -53,10 +57,10 @@ import org.apache.log4j.Logger;
  * @author shake
  */
 public class IngestThreadPool {
-
+    
     private static final IngestThreadPool instance = new IngestThreadPool();
     private static final Logger LOG = Logger.getLogger(IngestThreadPool.class);
-
+    
     private static Map<Collection, Set<String>> hasSeen;
     private static ThreadPoolExecutor threads;
     private static ThreadPoolExecutor dirThread;
@@ -64,14 +68,14 @@ public class IngestThreadPool {
             Integer.parseInt(SettingsConstants.maxIngestThreads);
     private static LinkedBlockingQueue ingestQueue = new LinkedBlockingQueue();
     private static LinkedBlockingQueue dirQueue = new LinkedBlockingQueue();
-
+    
     private IngestThreadPool() {
     }
-
+    
     public static IngestThreadPool getInstance() {
         // We instantiate here to ensure 2 things:
         // 1 - We use the correct number for max threads from the DB
-        // 2 - Java will throw an exception otherwise 
+        // 2 - Java will throw an exception otherwise
         if ( threads == null ) {
             threads = new ThreadPoolExecutor(maxThreads,
                     maxThreads, 5, TimeUnit.MINUTES, ingestQueue);
@@ -82,15 +86,35 @@ public class IngestThreadPool {
         if ( hasSeen == null ) {
             hasSeen = new HashMap<Collection, Set<String>>();
         }
-       return instance;
+        return instance;
     }
-
+    
+    public static void submitTokenStore(TokenStoreReader tokenReader, Collection coll) {
+        if ( tokenReader == null ) {
+            throw new RuntimeException("Token file is corrupt");
+        }
+        IngestThreadPool thePool = IngestThreadPool.getInstance();
+        HashMap<String, Token> batchTokens = new HashMap<String, Token>();
+        
+        while ( tokenReader.hasNext() ) {
+            TokenStoreEntry tokenEntry = tokenReader.next();
+            Token token = TokenUtil.convertFromAceToken(tokenEntry.getToken());
+            
+            if ( !token.getProofAlgorithm().equals(coll.getDigestAlgorithm()) ) {
+                throw new RuntimeException("Token digest differs from"
+                        + " collection digest.");
+            }
+            batchTokens.put(tokenEntry.getIdentifiers().get(0), token);
+        }
+        thePool.submitTokens(batchTokens, coll);
+    }
+    
     public void submitTokens(Map<String, Token> tokens, Collection coll) {
         dirThread.execute(new IngestDirectory(tokens.keySet(), coll));
-
+        
         double numThreads = (tokens.size()/maxThreads > maxThreads) ? maxThreads
                 : Math.ceil(tokens.size()/maxThreads);
-
+        
         // Remove any tokens we've already seen and can possibly be in progress
         // Possibly release tokens after the thread has finished merging them
         Set<String> tokensSeen = hasSeen.get(coll);
@@ -102,7 +126,7 @@ public class IngestThreadPool {
             tokensSeen.addAll(tokens.keySet());
         }
         hasSeen.put(coll, tokensSeen);
-
+        
         // Split the token store we're givin up equally among our threads
         // and submit jobs to the thread pool
         int begin = 0;
@@ -113,31 +137,31 @@ public class IngestThreadPool {
             begin = end;
         }
     }
-
+    
     public String getStatus() {
-           return String.format("[Thread Pool] Active: %d, Completed: %d, Total: %d",
-                        threads.getActiveCount(),
-                        threads.getCompletedTaskCount(),
-                        threads.getTaskCount());
+        return String.format("[Thread Pool] Active: %d, Completed: %d, Total: %d",
+                threads.getActiveCount(),
+                threads.getCompletedTaskCount(),
+                threads.getTaskCount());
     }
-
+    
     // Not entirely accurate for the jsp, but it'll show what collections are
     // ingesting what
     public Map<Collection, Set<String>> getIngestedItems() {
         return hasSeen;
     }
-
+    
     public static void setMaxThreads(int maxThreads) {
         IngestThreadPool.maxThreads = maxThreads;
     }
-
+    
     protected static void shutdownPools() {
         LOG.debug("[Ingest]: Shutting down thread pools.");
         threads.shutdown();
         if (!threads.isTerminated() ) {
             threads.shutdownNow();
         }
-
+        
         dirThread.shutdown();
         if ( !dirThread.isShutdown()) {
             dirThread.shutdownNow();
