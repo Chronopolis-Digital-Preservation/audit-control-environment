@@ -170,7 +170,7 @@ public class AuditThreadFactory {
     static void cancellAll() {
         LOG.info("Shuttding down thread factory");
         executor.shutdown();
-        if ( executor.isTerminated() ) {
+        if ( !executor.isTerminated() ) {
             executor.shutdownNow();
         }
         runningAudits.clear();
@@ -216,6 +216,7 @@ public class AuditThreadFactory {
      * @param c
      */
     static void finished( Collection c ) {
+        // Clean up everything which may contain a reference to the thread
         AuditThread thread = runningAudits.remove(c);
         if ( thread != null ) {
             executor.remove(thread);

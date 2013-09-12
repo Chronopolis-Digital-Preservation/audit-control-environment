@@ -264,10 +264,12 @@ public final class IrodsThreadedDirectoryIterator implements Iterator<FileBean> 
 //                        pool.poolShutdown();
                     }
                 }
+
+                // Destroy the reader as well or else the digset thread has a 
+                // chance of hanging
                 reader.shutdown();
                 reader = null;
             }
-            LOG.debug("Final irods exit");
         }
 
         @SuppressWarnings("empty-statement")
