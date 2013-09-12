@@ -55,41 +55,43 @@ import org.apache.log4j.Logger;
  * @author toaster
  */
 public class FileAuditCallback implements RequestBatchCallback {
-
+    
     private long tokensAdded = 0;
-//    private long session = 0;
+    //    private long session = 0;
     private Collection coll;
     private static final Logger LOG = Logger.getLogger(FileAuditCallback.class);
     private long callbackErrors = 0;
     private CancelCallback callback;
     private LogEventManager logManager;
-
-    public FileAuditCallback( Collection coll, long session, CancelCallback callback ) {
+    
+    public FileAuditCallback(Collection coll,
+            long session,
+            CancelCallback callback) {
         this.coll = coll;
-//        this.session = session;
+        //        this.session = session;
         this.callback = callback;
         logManager = new LogEventManager(session, coll);
     }
-
+    
     public long getTokensAdded() {
         return tokensAdded;
     }
-
+    
     public long getCallbackErrors() {
         return callbackErrors;
     }
-
+    
     @Override
     public void tokensReceived( List<TokenRequest> requests,
-            List<TokenResponse> responses ) {
+    List<TokenResponse> responses ) {
         EntityManager em = PersistUtil.getEntityManager();
         MonitoredItemManager mim = new MonitoredItemManager(em);
-//        LogEventManager lem = new LogEventManager( session, coll);
+        //        LogEventManager lem = new LogEventManager( session, coll);
         Map<String, String> map = new HashMap<String, String>();
         for ( TokenRequest tr : requests ) {
             map.put(tr.getName(), tr.getHashValue());
         }
-
+        
         EntityTransaction trans = em.getTransaction();
         trans.begin();
         for ( TokenResponse tr : responses ) {
@@ -97,14 +99,14 @@ public class FileAuditCallback implements RequestBatchCallback {
             if ( tr.getStatusCode() == StatusCode.SUCCESS ) {
                 MonitoredItem item = null;
                 item = mim.getItemById(tr.getName(), coll);
-
+                
                 Token token = new Token();
-//                token.setCreateDate(new Date());
+                //                token.setCreateDate(new Date());
                 token.setValid(true);
-
-//                AceToken at = IMSUtil.convertResponse(tr, AuditThreadFactory.getIMS());
-//                token.setLastValidated();
-//                token.setToken((Serializable) tr);
+                
+                //                AceToken at = IMSUtil.convertResponse(tr, AuditThreadFactory.getIMS());
+                //                token.setLastValidated();
+                //                token.setToken((Serializable) tr);
                 token.setImsService(tr.getTokenClassName());
                 token.setProofText(IMSUtil.formatProof(tr));
                 token.setRound(tr.getRoundId());
@@ -116,7 +118,7 @@ public class FileAuditCallback implements RequestBatchCallback {
                     LOG.error("No request for response: " + tr.getName() + " or item null, item: "
                             + item);
                 }
-
+                
                 em.persist(token);
                 item.setFileDigest(map.get(tr.getName()));
                 item.setToken(token);
@@ -133,10 +135,10 @@ public class FileAuditCallback implements RequestBatchCallback {
         trans.commit();
         em.close();
     }
-
+    
     @Override
     public void exceptionThrown( List<TokenRequest> requests,
-            Throwable throwable ) {
+    Throwable throwable ) {
         LOG.error("Exception throw registering", throwable);
         EntityManager em = PersistUtil.getEntityManager();
         MonitoredItemManager mim = new MonitoredItemManager(em);
@@ -144,26 +146,26 @@ public class FileAuditCallback implements RequestBatchCallback {
         trans.begin();
         callbackErrors++;
         for ( TokenRequest tr : requests ) {
-
+            
             LOG.debug(" Error item: " + tr.getName());
-
+            
             em.persist(logManager.createItemEvent(LogEnum.UNKNOWN_IMS_COMMUNICATION_ERROR, tr.getName(), throwable));
-
+            
             MonitoredItem item = null;
             item = mim.getItemByPath(tr.getName(), coll);
             if ( item == null ) {
                 continue;
             }
             item.setState('M');
-
-
+            
+            
             em.merge(item);
-
+            
         }
         trans.commit();
         em.close();
     }
-
+    
     @Override
     public void unexpectedException( Throwable throwable ) {
         callbackErrors++;

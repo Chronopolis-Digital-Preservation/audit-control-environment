@@ -71,7 +71,8 @@ public final class StopSyncServlet extends EntityManagerServlet {
                     AuditTokens.getThread(collection).cancel();
                 }
             } else {
-                if ( AuditThreadFactory.isRunning(collection) ) {
+                if ( AuditThreadFactory.isRunning(collection) || 
+                        AuditThreadFactory.isQueued(collection) ) {
                     AuditThreadFactory.getThread(collection).cancel();
                 }
             }

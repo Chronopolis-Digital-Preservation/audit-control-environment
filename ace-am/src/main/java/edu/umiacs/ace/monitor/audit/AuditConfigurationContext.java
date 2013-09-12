@@ -179,7 +179,6 @@ public final class AuditConfigurationContext implements ServletContextListener {
         }
         AuditThreadFactory.cancellAll();
         AuditTokens.cancellAll();
-        //BackgroundAuditorFactory.cancel();
     }
 
     public static class PauseBean {

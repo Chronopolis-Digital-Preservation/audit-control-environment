@@ -36,7 +36,7 @@
                     </c:choose>
                 </td>
             </tr>
-
+            
             <tr>
                 <td>Last&nbsp;Complete&nbsp;Update</td>
                 <td>${workingCollection.collection.lastSync}</td>
@@ -68,10 +68,10 @@
             <tr>
                 <td>Audit Period</td>
                 <td>${workingCollection.collection.settings['audit.period']} <c:if test="${pause.paused && workingCollection.collection.settings['audit.period'] > 0}">Automated auditing is paused</c:if></td>
-            </tr>
-            <tr>
-                <td>Total Monitored Files</td>
-                <td><h:DefaultValue test="${workingCollection.totalFiles > -1}" success="${workingCollection.totalFiles}" failure="Unknown" /></td>
+                </tr>
+                <tr>
+                    <td>Total Monitored Files</td>
+                    <td><h:DefaultValue test="${workingCollection.totalFiles > -1}" success="${workingCollection.totalFiles}" failure="Unknown" /></td>
             </tr>
             <c:if test="${!workingCollection.fileAuditRunning}">
                 <tr>
@@ -84,17 +84,17 @@
                     <td>Total Files Scanned</td>
                     <td>${workingCollection.fileAuditThread.filesSeen}</td>
                 </tr>
-
+                
                 <tr onmouseout='javascript:this.style.background="#ffffff"; return false;' onmouseover='javascript:this.style.background="#e8e8e8"; return false;'>
                     <td>New Files Found: </td>
                     <td>${workingCollection.fileAuditThread.newFilesFound}</td>
                 </tr>
-
+                
                 <tr>
                     <td>Tokens Added</td>
                     <td>${workingCollection.fileAuditThread.tokensAdded}</td>
                 </tr>
-
+                
                 <tr>
                     <td>Errors</td>
                     <td>${workingCollection.fileAuditThread.totalErrors}</td>
@@ -103,46 +103,53 @@
                     <td>Last File Processed</td>
                     <td>${fn:replace(workingCollection.fileAuditThread.lastFileSeen, "/", "&#x200B;/")}</td>
                 </tr>
-
+                
             </c:if>
-
+            
             <c:if test="${workingCollection.tokenAuditRunning}">
                 <tr>
                     <td>Total Tokens Scanned</td>
                     <td>${workingCollection.tokenAuditThread.tokensSeen}</td>
                 </tr>
-
+                
                 <tr>
                     <td>Tokens Validated</td>
                     <td>${workingCollection.tokenAuditThread.validTokens}</td>
                 </tr>
-
-
+                
+                
                 <tr>
                     <td>Errors</td>
                     <td>${workingCollection.fileAuditThread.totalErrors}</td>
                 </tr>
-
-
+                
+                
             </c:if>
-
+            
         </table>
         <table id="dettable">        
             <tr>
                 <um:Auth role="Audit">
                     <c:if test="${!workingCollection.tokenAuditRunning && workingCollection.collection.storage != null}">
                         <c:choose>
-                            <c:when test="${workingCollection.fileAuditRunning}">
-                                <td><a href="StopSync?type=file&amp;collectionid=${workingCollection.collection.id}" title="Stop File Audit" ><img src="images/stop.jpg" alt="Stop File Audit" ></a></td>
-                                    </c:when>
-                                    <c:otherwise>
-                                <td><a href="StartSync?type=file&amp;collectionid=${workingCollection.collection.id}" title="Start File Audit"><img src="images/file-audit-start.jpg" alt="Start File Audit" ></a></td>
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:if>
-
-
-                    <c:if test="${!workingCollection.fileAuditRunning}">
+                            <c:when test="${workingCollection.fileAuditRunning || workingCollection.queued}">
+                                <td>
+                                    <a href="StopSync?type=file&amp;collectionid=${workingCollection.collection.id}" title="Stop File Audit" >
+                                        <img src="images/stop.jpg" alt="Stop File Audit" >
+                                    </a>
+                                </td>
+                            </c:when>
+                            <c:otherwise>
+                                <td>
+                                    <a href="StartSync?type=file&amp;collectionid=${workingCollection.collection.id}" title="Start File Audit">
+                                        <img src="images/file-audit-start.jpg" alt="Start File Audit" >
+                                    </a>
+                                </td>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:if>
+                    
+                    <c:if test="${!workingCollection.fileAuditRunning || workingCollection.queued}">
                         <c:choose>
                             <c:when test="${workingCollection.tokenAuditRunning}">
                                 <td><a href="StopSync?type=token&amp;collectionid=${workingCollection.collection.id}" title="Stop Token Audit" ><img src="images/stop.jpg" alt="Stop Token Audit" /></a></td>
@@ -153,15 +160,15 @@
                                 </c:choose>
                             </c:if>
                         </um:Auth>
-
-<!--<td><a href="#" onclick="javascript:showBrowse(${workingCollection.collection.id}); return false;">Browse</a>-->
+                
+                <!--<td><a href="#" onclick="javascript:showBrowse(${workingCollection.collection.id}); return false;">Browse</a>-->
                 <um:Auth role="Browse"><td><a href="Browse?collection=${workingCollection.collection.id}" title="Browse"><img src="images/browse.jpg" alt="Browse"></a></td></um:Auth>
                 <um:Auth role="Log"><td><a href="EventLog?collection=${workingCollection.collection.id}&amp;clear=1&amp;toggletype=sync"><img title="Event Log" src="images/log.jpg" alt="View Log"></a></td></um:Auth>
                 <um:Auth role="Report"><td><a href="Report?collectionid=${workingCollection.collection.id}" title="Report"><img src="images/report.jpg" alt="Report"></a></td></um:Auth>
-                <td>
-                    <fieldset id="dropmenu2" style="display: none; z-index: 2; position: absolute; background-color: #FFFFFF; width: 150px;">
-                        <legend><span onclick="toggleVisibility('dropmenu1','block'); toggleVisibility('dropmenu2','block');">close</span></legend>
-                        <c:if test="${!(workingCollection.fileAuditRunning || workingCollection.tokenAuditRunning)}">
+                    <td>
+                        <fieldset id="dropmenu2" style="display: none; z-index: 2; position: absolute; background-color: #FFFFFF; width: 150px;">
+                            <legend><span onclick="toggleVisibility('dropmenu1','block'); toggleVisibility('dropmenu2','block');">close</span></legend>
+                        <c:if test="${!(workingCollection.fileAuditRunning || workingCollection.tokenAuditRunning || workingCollection.queued)}">
                             <um:Auth role="Collection Modify">
                                 <a href="ManageCollection?collectionid=${workingCollection.collection.id}" title="Configure connection settings for this collection" >Collection Settings</a><br>
                                 <a href="collectionremove.jsp" title="Delete Collection">Remove Collection</a><br>
@@ -190,9 +197,9 @@
                             <a href="ViewSummary?collectionid=${workingCollection.collection.id}&amp;limit=50" title="View all activity reports">Activity Reports</a>
                         </um:Auth>
                     </fieldset>
-
+                    
                     <div id="dropmenu1" style="display: block;" onclick="toggleVisibility('dropmenu1','block'); toggleVisibility('dropmenu2','block'); ">more...</div>
-
+                    
                 </td>
             </tr>
         </table>

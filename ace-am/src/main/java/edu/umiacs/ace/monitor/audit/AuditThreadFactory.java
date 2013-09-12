@@ -35,22 +35,32 @@ import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.util.PersistUtil;
 import java.security.SecureRandom;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import org.apache.log4j.Logger;
 
-/**
+/**w
  *
  * @author toaster
  */
 public class AuditThreadFactory {
+    private static final Logger LOG = Logger.getLogger(AuditThreadFactory.class);
 
     private static int max_audits = 3;
-    private static final Map<Collection, AuditThread> runningThreads =
-            new HashMap<Collection, AuditThread>();
+    //private static final Map<Collection, AuditThread> runningThreads =
+    //        new HashMap<Collection, AuditThread>();
+    private static final ConcurrentHashMap<Collection, AuditThread> runningAudits = 
+            new ConcurrentHashMap<Collection, AuditThread>();
+    private static final LinkedBlockingQueue<Runnable> blockingQueue = 
+            new LinkedBlockingQueue<Runnable>();
+    private static final ThreadPoolExecutor executor = 
+            new ThreadPoolExecutor(3, 3, 2, TimeUnit.MINUTES, blockingQueue);
     private static String imsHost = null;
     private static int imsPort = 8080;
     private static String tokenClass = "SHA-256";
@@ -91,7 +101,8 @@ public class AuditThreadFactory {
     }
 
     public static boolean isAuditing() {
-        return !runningThreads.isEmpty();
+        return executor.getActiveCount() != 0;
+        //return !runningThreads.isEmpty();
     }
 
     /**
@@ -103,9 +114,23 @@ public class AuditThreadFactory {
      */
     public static AuditThread createThread( Collection c, StorageDriver tri, boolean verbose,
             MonitoredItem... startItem ) {
+        synchronized ( blockingQueue ) {
+            AuditThread newThread = new AuditThread(c, tri, auditOnly, verbose, startItem);
+            newThread.setImsHost(imsHost);
+            newThread.setImsport(imsPort);
+            newThread.setTokenClassName(tokenClass);
+            boolean contains = runningAudits.contains(c);
+            if (!contains) {
+                runningAudits.put(c, newThread);
+                executor.execute(newThread);
+            }
+            return newThread;
+        }
+        /*
         synchronized ( runningThreads ) {
+            AuditThread newThread = null;
+            //if ( blockingQueue.contains(runningQueue))
             if ( !runningThreads.containsKey(c) && runningThreads.size() < max_audits ) {
-                AuditThread newThread = null;
                 if ( auditSample ) {
                     startItem = getSampledList(c);
                 }
@@ -117,20 +142,44 @@ public class AuditThreadFactory {
                 newThread.start();
                 runningThreads.put(c, newThread);
             }
-            return runningThreads.get(c);
+            return newThread;
         }
+        */
+    }
+
+    public static AuditThread getThread(Collection c) {
+        AuditThread thread;
+        thread = runningAudits.get(c);
+        return thread;
+    }
+
+    public static final boolean isQueued( Collection c ) {
+        return blockingQueue.contains(getThread(c));
     }
 
     public static final boolean isRunning( Collection c ) {
+        AuditThread thread = getThread(c);
+        return thread != null && !blockingQueue.contains(thread);
+        /*
         synchronized ( runningThreads ) {
             return runningThreads.containsKey(c);
         }
+        */
     }
 
     static void cancellAll() {
+        LOG.info("Shuttding down thread factory");
+        executor.shutdown();
+        if ( executor.isTerminated() ) {
+            executor.shutdownNow();
+        }
+        runningAudits.clear();
+        blockingQueue.clear();
+        /*
         for ( AuditThread at : runningThreads.values() ) {
             at.cancel();
         }
+        */
     }
 
     public static int getMaxAudits() {
@@ -139,6 +188,7 @@ public class AuditThreadFactory {
 
     public static void setMaxAudits( int max_audits ) {
         AuditThreadFactory.max_audits = max_audits;
+        executor.setMaximumPoolSize(max_audits);
     }
 
     public static void setSSL(Boolean ssl) {
@@ -151,7 +201,6 @@ public class AuditThreadFactory {
      * 
      * @return current running thread or null if nothing is running
      * 
-     */
     public static AuditThread getThread( Collection c ) {
         synchronized ( runningThreads ) {
             if ( isRunning(c) ) {
@@ -160,15 +209,32 @@ public class AuditThreadFactory {
         }
         return null;
     }
+    */
 
     /**
      * Method for AuditThread to notify its finished
      * @param c
      */
     static void finished( Collection c ) {
-        synchronized ( runningThreads ) {
-            runningThreads.remove(c);
+        AuditThread thread = runningAudits.remove(c);
+        if ( thread != null ) {
+            executor.remove(thread);
+            blockingQueue.remove(thread);
+            thread = null;
         }
+            /*
+        synchronized ( runningThreads ) {
+            AuditThread thread = runningThreads.remove(c);
+            if (thread.isAlive()) {
+                System.out.println("Here's yer problem");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                }
+                thread.cancel();
+            }
+        }
+            */
     }
 
     public static boolean useSSL() {

@@ -122,6 +122,19 @@ public class CollectionCountContext implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent arg0) {
         abort = true;
+
+        // Null these out so that the references to the collections are dropped
+        // after tomcat stops the webapp
+        fileCountMap = null;
+        fileActiveMap = null;
+        fileCorruptMap = null;
+        fileMissingMap = null;
+        fileMissingTokenMap = null;
+        fileTokenMismatchMap = null;
+        totalErrorMap = null;
+        totalSizeMap = null;
+        fileRemoteMissing = null;
+        fileRemoteCorrupt = null;
     }
 
     public static long getTokenMismatchCount(Collection c) {

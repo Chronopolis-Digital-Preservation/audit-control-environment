@@ -86,7 +86,7 @@ public final class AuditThread extends Thread implements CancelCallback {
     private Map<AceToken, MonitoredItem> itemMap =
             new ConcurrentHashMap<AceToken, MonitoredItem>();
     private String imsHost;
-    private int imsport;
+    private int imsPort;
     private Collection coll;
     private boolean hasRun = false;
     private boolean cancel = false;
@@ -108,13 +108,18 @@ public final class AuditThread extends Thread implements CancelCallback {
     private LogEventManager logManager;
     private AuditIterable<FileBean> iterableItems;
 
-    public AuditThread(Collection c, StorageDriver driver, boolean auditOnly,
-            MonitoredItem... startItem) {
+    public AuditThread(Collection c, 
+                       StorageDriver driver, 
+                       boolean auditOnly,
+                       MonitoredItem... startItem) {
         this(c, driver, auditOnly, true, startItem);
     }
 
-    public AuditThread(Collection c, StorageDriver driver, boolean auditOnly,
-            boolean verbose, MonitoredItem... startItem) {
+    public AuditThread(Collection c, 
+                       StorageDriver driver, 
+                       boolean auditOnly,
+                       boolean verbose, 
+                       MonitoredItem... startItem) {
         this.auditOnly = auditOnly;
         this.verbose = verbose;
         this.coll = c;
@@ -142,7 +147,7 @@ public final class AuditThread extends Thread implements CancelCallback {
     }
 
     void setImsport(int imsport) {
-        this.imsport = imsport;
+        this.imsPort = imsport;
     }
 
     public long getTotalErrors() {
@@ -171,14 +176,20 @@ public final class AuditThread extends Thread implements CancelCallback {
         return 0;
     }
 
+    public Collection getCollection() {
+        return coll;
+    }
+
     @Override
     public void cancel() {
         cancel = true;
         if (iterableItems != null) {
             iterableItems.cancel();
         }
+        if ( AuditThreadFactory.isQueued(coll) ) {
+            AuditThreadFactory.finished(coll);
+        }
         this.interrupt();
-
     }
 
     @Override
@@ -198,7 +209,7 @@ public final class AuditThread extends Thread implements CancelCallback {
 
                 callback = new FileAuditCallback(coll, session, this);
                 boolean auditTokens = SettingsUtil.getBoolean(coll,
-                        ConfigConstants.ATTR_AUDIT_TOKENS);
+                                          ConfigConstants.ATTR_AUDIT_TOKENS);
                 /*
                 if (!openIms() || (auditTokens
                         && !openTokenValidator(MessageDigest.getInstance(
@@ -207,15 +218,38 @@ public final class AuditThread extends Thread implements CancelCallback {
                 }
                  *
                  */
+
+
+                // Audit only does not attempt to connect to the IMS, so we
+                // only need these checks if we are not in it
                 if( !auditOnly ) {
+                    // If we can open a connection to the IMS, check what mode
+                    // we're in, else fallback so we go to audit only mode
+                    if ( openIms() ) {
+                        boolean openValidator = openTokenValidator(MessageDigest.getInstance("SHA-256"));
+                        //short circuit
+                        if ( auditTokens && !openValidator ) { 
+                            return;
+                        }
+                    } else {
+                        fallback = true;
+                    }
+
                     // If we can't open the IMS, we want to fallback
+                    // openIms = false => fallback = true
+                    // openIms = true => fallback = false
+                    
+                    /*
                     fallback = !openIms();
                     if ( !fallback ) {
+                        // If we aren't falling back, check if we are auditing 
+                        // tokens and if we can open the validator, short circuit
                         if ( auditTokens &&
                              !openTokenValidator(MessageDigest.getInstance("SHA-256"))) {
                             return;
                         }
                     }
+                    */
                 }
 
                 performAudit();
@@ -231,7 +265,6 @@ public final class AuditThread extends Thread implements CancelCallback {
             LOG.info("Audit ending. exception: "
                     + (abortException != null) + " null requester: " + (batch
                     == null) + " cancel: " + cancel);
-            AuditThreadFactory.finished(coll);
 
             // make sure we don't leave these two open
             if (batch != null) {
@@ -242,6 +275,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                 validator.close();
                 validator = null;
             }
+            
             lastFileSeen = "Setting collection state";
             setCollectionState();
 
@@ -249,19 +283,25 @@ public final class AuditThread extends Thread implements CancelCallback {
                 logAuditFinish();
                 generateAuditReport();
             }
+
+            AuditThreadFactory.finished(coll);
             NDC.pop();
 
         }
-
+        LOG.info("Exiting audit thread");
     }
 
     private boolean openIms() {
         try {
             IMSService ims;
-            ims = IMSService.connect(imsHost, imsport, AuditThreadFactory.useSSL());
+            ims = IMSService.connect(imsHost, 
+                                     imsPort, 
+                                     AuditThreadFactory.useSSL());
 
-            batch = ims.createImmediateTokenRequestBatch(
-                    tokenClassName, callback, 1000, 5000);
+            batch = ims.createImmediateTokenRequestBatch(tokenClassName,
+                                                         callback, 
+                                                         1000, 
+                                                         5000);
             return true;
         } catch (IMSException e) {
             EntityManager em;
@@ -285,7 +325,7 @@ public final class AuditThread extends Thread implements CancelCallback {
     private boolean openTokenValidator(MessageDigest digest) {
         try {
             IMSService ims;
-            ims = IMSService.connect(imsHost, imsport, AuditThreadFactory.useSSL());
+            ims = IMSService.connect(imsHost, imsPort, AuditThreadFactory.useSSL());
             TokenAuditCallback tokenCallback = new TokenAuditCallback(itemMap,
                     this,
                     coll,
@@ -321,7 +361,8 @@ public final class AuditThread extends Thread implements CancelCallback {
         // 2. Get file list
         try {
             iterableItems = driver.getWorkList(coll.getDigestAlgorithm(),
-                    filter, baseItemPathList);
+                                               filter, 
+                                               baseItemPathList);
         } catch (Exception e) {
             abortException = e;
             return;

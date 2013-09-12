@@ -97,7 +97,8 @@ public class BrowseServlet extends EntityManagerServlet {
             request.setAttribute(PAGE_COLLECTION, collectionId);
 
             Collection c = em.getReference(Collection.class, collectionId);
-            if ( AuditThreadFactory.isRunning(c) || AuditTokens.isRunning(c) ) {
+            if ( AuditThreadFactory.isRunning(c) || AuditTokens.isRunning(c) ||
+                    AuditThreadFactory.isQueued(c)) {
                 isRunning = true;
             }
             dt = new DirectoryTree(c);
@@ -109,7 +110,8 @@ public class BrowseServlet extends EntityManagerServlet {
                 throw new ServletException("No directory tree in context, servlet must be called with collection first");
             }
             Collection c = dt.getCollection();
-            if ( AuditThreadFactory.isRunning(c) || AuditTokens.isRunning(c) ) {
+            if ( AuditThreadFactory.isRunning(c) || AuditTokens.isRunning(c) ||
+                    AuditThreadFactory.isQueued(c)) {
                 isRunning = true;
             }
             session.setAttribute(SESSION_FILE,

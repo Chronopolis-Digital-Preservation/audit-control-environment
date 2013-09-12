@@ -35,7 +35,6 @@ import edu.umiacs.ace.monitor.peers.PeerCollection;
 import edu.umiacs.util.Argument;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.CascadeType;

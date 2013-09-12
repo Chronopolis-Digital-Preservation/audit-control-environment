@@ -45,7 +45,6 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import javax.servlet.ServletException;
 import org.apache.log4j.Logger;
 
 /**

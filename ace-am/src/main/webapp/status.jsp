@@ -181,6 +181,9 @@
                             <c:when test="${item.fileAuditRunning || item.tokenAuditRunning}">
                                 <img src="images/running.jpg" title="Audit in progress" alt="running" />
                             </c:when>
+                            <c:when test="${item.queued}">
+                                <img src="images/queued.jpg" title="Audit is queued" alt="queued" />
+                            </c:when>
                             <c:otherwise>
                                 <img src="images/stopped.jpg" title="No audit in progress" alt="idle" />
                             </c:otherwise>
@@ -209,6 +212,9 @@
                         <c:choose>
                             <c:when test="${item.fileAuditRunning || item.tokenAuditRunning}">
                                 In Progress
+                            </c:when>
+                            <c:when test="${item.queued}">
+                                Queued
                             </c:when>
                             <c:when test="${item.collection.lastSync == null || item.collection.settings['audit.period'] < 1 || pause.paused}">
                                 Unknown

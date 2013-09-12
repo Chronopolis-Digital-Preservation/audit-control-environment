@@ -74,6 +74,10 @@ public class CollectionSummaryBean {
         return AuditTokens.getThread(collection);
     }
 
+    public boolean isQueued() {
+        return AuditThreadFactory.isQueued(collection);
+    }
+
     public boolean isFileAuditRunning() {
         return AuditThreadFactory.isRunning(collection);
     }

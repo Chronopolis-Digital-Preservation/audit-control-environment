@@ -264,7 +264,10 @@ public final class IrodsThreadedDirectoryIterator implements Iterator<FileBean> 
 //                        pool.poolShutdown();
                     }
                 }
+                reader.shutdown();
+                reader = null;
             }
+            LOG.debug("Final irods exit");
         }
 
         @SuppressWarnings("empty-statement")

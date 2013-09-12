@@ -95,6 +95,7 @@ public class CollectionManagement {
 
     @POST
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed("Collection Modify")
     public Response addCollection(Collection coll){
         checkCollection(coll);
