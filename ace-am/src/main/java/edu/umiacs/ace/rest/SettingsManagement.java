@@ -61,6 +61,7 @@ public class SettingsManagement {
             is.setCollection(coll);
             em.merge(is);
             trans.commit();
+            em.close();
         }
         return Response.ok().build();
     }
@@ -73,6 +74,10 @@ public class SettingsManagement {
         Collection coll = em.find(Collection.class, collId);
         Query q = em.createNamedQuery("IrodsSettings.getByCollection");
         q.setParameter("coll", coll);
-        return (IrodsSetting) q.getSingleResult();
+        try {
+            return (IrodsSetting) q.getSingleResult();
+        } finally {
+            em.close();
+        }
     }
 }

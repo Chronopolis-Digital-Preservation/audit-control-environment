@@ -5,7 +5,11 @@
 
 package edu.umiacs.ace.rest;
 
+import edu.umiacs.ace.driver.StorageDriver;
+import edu.umiacs.ace.driver.StorageDriverFactory;
+import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.PersistUtil;
 import java.util.List;
 import javax.annotation.security.RolesAllowed;
@@ -22,6 +26,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 /**
  * REST Service for adding and viewing collections
@@ -53,6 +59,23 @@ public class CollectionManagement {
             }
         } 
         return false;
+    }
+
+    @POST
+    @Path("audit/{id}")
+    public Response startAudit(@PathParam("id")long id) {
+        EntityManager em = PersistUtil.getEntityManager();
+        Collection c = em.find(Collection.class, id);
+        if ( c == null ) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+
+        StorageDriver driver = StorageDriverFactory.createStorageAccess(c, em);
+
+        // We use a null item so that the entire collection gets audited
+        MonitoredItem[] item = null;
+        AuditThreadFactory.createThread(c, driver, true, item);
+        return Response.ok().build();
     }
 
     @POST
@@ -116,7 +139,14 @@ public class CollectionManagement {
         em.persist(coll);
         trans.commit();
         em.close();
-        return Response.status(Status.OK).build();
+
+        JSONObject id = new JSONObject();
+        try {
+            id.put("id", coll.getId());
+        } catch (JSONException ex) {
+            return Response.serverError().build();
+        }
+        return Response.ok(id.toString(), MediaType.APPLICATION_JSON).build();
     }
 
     @GET

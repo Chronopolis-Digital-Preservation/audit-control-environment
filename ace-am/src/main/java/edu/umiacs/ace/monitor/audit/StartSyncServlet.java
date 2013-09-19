@@ -82,8 +82,8 @@ public final class StartSyncServlet extends EntityManagerServlet {
                 item = new MonitoredItem[]{
                             getItem(request, em)
                         };
-                if ( item[0] != null && (!item[0].isDirectory() || item[0].getParentCollection()
-                        != collection) ) {
+                if ( item[0] != null && (!item[0].isDirectory() 
+                       || item[0].getParentCollection() != collection) ) {
                     item = null;
                 }
             }
