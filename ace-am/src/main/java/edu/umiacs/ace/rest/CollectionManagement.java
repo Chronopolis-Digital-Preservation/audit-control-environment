@@ -12,6 +12,7 @@ import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.PersistUtil;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.security.RolesAllowed;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -89,6 +90,7 @@ public class CollectionManagement {
         //   - storage
         //   - directory
         //   - group 
+        //   - general settings (audit period, etc_
         EntityManager em = PersistUtil.getEntityManager();
         Collection orig = em.find(Collection.class, id);
         if ( !orig.getName().equals(coll.getName()) ) {
@@ -103,9 +105,12 @@ public class CollectionManagement {
             orig.setDirectory(coll.getDirectory());
         }
 
+        // TODO: Make sure no collection is contained in the group first
         if ( null != coll.getGroup()) {
             orig.setGroup(coll.getGroup());
         }
+
+        orig.getSettings().putAll(coll.getSettings());
 
         EntityTransaction trans = em.getTransaction();
         trans.begin();
