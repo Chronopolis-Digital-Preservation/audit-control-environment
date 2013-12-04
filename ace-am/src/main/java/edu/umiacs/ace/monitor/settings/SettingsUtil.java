@@ -2,7 +2,9 @@ package edu.umiacs.ace.monitor.settings;
 
 import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.reporting.SchedulerContextListener;
 import edu.umiacs.ace.util.PersistUtil;
+import edu.umiacs.util.Strings;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -163,12 +165,12 @@ public class SettingsUtil {
         return defaults;
     }
 
-       /**
-     *
-     * @param c
-     * @param attr
-     * @return true if collection, settings are not null and parameter is "true"
-     */
+    /**
+    *
+    * @param c
+    * @param attr
+    * @return true if collection, settings are not null and parameter is "true"
+    */
     public static boolean getBoolean(Collection c, String attr) {
         if (!containsKey(c, attr)) {
             return false;
@@ -212,18 +214,39 @@ public class SettingsUtil {
         q.setParameter("attr", SettingsConstants.PARAM_IMS);
         s = (SettingsParameter) q.getSingleResult();
         AuditThreadFactory.setIMS(s.getValue());
+
         // Port
         q.setParameter("attr", SettingsConstants.PARAM_IMS_PORT);
         s = (SettingsParameter) q.getSingleResult();
         AuditThreadFactory.setImsPort(Integer.parseInt(s.getValue()));
+
         // SSL
         q.setParameter("attr", SettingsConstants.PARAM_IMS_SSL);
         s = (SettingsParameter) q.getSingleResult();
         AuditThreadFactory.setSSL(Boolean.valueOf(s.getValue()));
+
         // Token Class
         q.setParameter("attr", SettingsConstants.PARAM_IMS_TOKEN_CLASS);
         s = (SettingsParameter) q.getSingleResult();
         AuditThreadFactory.setTokenClass(s.getValue());
+
+        // Max Audits
+        q.setParameter("attr", SettingsConstants.PARAM_THROTTLE_MAXAUDIT);
+        s = (SettingsParameter) q.getSingleResult();
+        if (Strings.isValidInt(s.getValue())) {
+            AuditThreadFactory.setMaxAudits(Integer.parseInt(s.getValue()));
+        }
+        
+        // Mail Server
+        q.setParameter("attr", SettingsConstants.PARAM_SMTP_SERVER);
+        s = (SettingsParameter) q.getSingleResult();
+        SchedulerContextListener.setMailServer(s.getValue());
+
+        // Mail From
+        q.setParameter("attr", SettingsConstants.PARAM_FROM);
+        s = (SettingsParameter) q.getSingleResult();
+        SchedulerContextListener.setMailFrom(s.getValue());
+
 
     }
 

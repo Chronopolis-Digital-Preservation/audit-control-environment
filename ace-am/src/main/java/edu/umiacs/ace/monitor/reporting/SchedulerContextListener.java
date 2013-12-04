@@ -182,6 +182,13 @@ public class SchedulerContextListener implements ServletContextListener {
         msg.setContent(report.createReport(), "text/plain");
         Transport.send(msg);
         LOG.trace("Successfully mailed report to: " + Strings.join(',', mailList));
+    }
 
+    public static void setMailServer(String mailServer) {
+        SchedulerContextListener.mailserver = mailServer;
+    }
+
+    public static void setMailFrom(String mailFrom) {
+        SchedulerContextListener.mailfrom = mailFrom;
     }
 }
