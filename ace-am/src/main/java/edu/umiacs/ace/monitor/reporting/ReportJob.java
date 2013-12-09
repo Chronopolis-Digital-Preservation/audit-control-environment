@@ -31,10 +31,15 @@
 
 package edu.umiacs.ace.monitor.reporting;
 
+import com.sun.jersey.api.MessageException;
+import edu.umiacs.ace.monitor.log.LogEnum;
+import edu.umiacs.ace.monitor.log.LogEventManager;
+import edu.umiacs.ace.util.PersistUtil;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 import org.quartz.CronExpression;
@@ -51,6 +56,7 @@ public class ReportJob implements Job {
 
     public static final String ATTR_POLICY = "policy";
     private static final Logger LOG = Logger.getLogger(ReportJob.class);
+    private LogEventManager logManager;
 
     public ReportJob() {
     }
@@ -61,6 +67,8 @@ public class ReportJob implements Job {
         ReportPolicy reportPolicy = null;
         reportPolicy = (ReportPolicy) arg0.getJobDetail().getJobDataMap().get(
                 ATTR_POLICY);
+        long session = System.currentTimeMillis();
+        logManager = new LogEventManager(session, reportPolicy.getCollection()); 
 
         LOG.debug("Starting job " + reportPolicy.getName());
         try {
@@ -81,6 +89,13 @@ public class ReportJob implements Job {
 
         } catch ( ParseException ex ) {
             LOG.error("Unknown parse exception", ex);
+            throw new JobExecutionException(ex);
+        } catch ( MessageException ex) {
+            EntityManager em = PersistUtil.getEntityManager();
+            logManager.persistCollectionEvent(LogEnum.SMTP_ERROR, 
+                                              ex.getMessage(), em);
+            em.close();
+            LOG.error("Could not send report summary", ex);
             throw new JobExecutionException(ex);
         } catch ( Exception e ) {
             LOG.error("Unknown exception", e);

@@ -99,6 +99,7 @@ public enum LogEnum {
     TOKEN_INGEST_UPDATE(24, "Token Ingest Update", "Token was out of date and has been updated"),
     FILE_REGISTER(25, "File Registered", "New file registered but is not ready for auditing"),
     FILE_AUDIT_FALLBACK(26, "File Audit Fallback", "File Audit could not connect to the IMS, falling back to audit-only mode"),
+    SMTP_ERROR(27, "SMTP Communication Error", "Could not connect to designated SMTP host"),
     SYSTEM_ERROR(99, "System Error", "Unknown system error occurred, check server logs");
     private int type;
     private String shortName;

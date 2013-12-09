@@ -426,6 +426,10 @@ public final class AuditThread extends Thread implements CancelCallback {
         try {
             SchedulerContextListener.mailReport(rs, createMailList());
         } catch (MessagingException e) {
+            EntityManager em = PersistUtil.getEntityManager();
+            logManager.persistCollectionEvent(LogEnum.SMTP_ERROR, 
+                                              e.getMessage(), em);
+            em.close();
             LOG.error("Could not send report summary", e);
         }
     }
