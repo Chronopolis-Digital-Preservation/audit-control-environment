@@ -214,9 +214,9 @@ def doPull(shell, arg, file, contentID=None):
       os.makedirs(dirs)
 
     ## Open the file to write in binary, and create if needed
-    fnew = open(file, 'w+b')
-    fnew.write(req.content)
-    fnew.close()
+    with open(file, 'w+b') as fnew:
+        for chunk in req.iter_content(8142)
+            fnew.write(chunk)
 
     ## validate
     status = 'success' if req.status_code in SUCCESS else 'failure'
