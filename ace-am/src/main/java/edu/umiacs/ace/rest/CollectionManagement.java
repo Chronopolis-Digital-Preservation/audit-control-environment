@@ -172,6 +172,14 @@ public class CollectionManagement {
         return em.find(Collection.class, collId);
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("json/{name}")
+    @RolesAllowed("Browse")
+    public Collection getCollection(@PathParam("name") String name) {
+        return findCollection(name, null);
+    }
+
     /**
      *
      * @param name - Name of the collection
@@ -184,6 +192,10 @@ public class CollectionManagement {
     @RolesAllowed("Browse")
     public Collection getCollection(@PathParam("name") String name, 
                                     @PathParam("group") String group) {
+        return findCollection(name, group);
+    }
+
+    private Collection findCollection(String name, String group) {
         EntityManager em = PersistUtil.getEntityManager();
         Query q = em.createNamedQuery("Collection.getCollectionByName");
         q.setParameter("name", name);
@@ -197,7 +209,7 @@ public class CollectionManagement {
                 if ( group == null || group.isEmpty()) {
                     return c;
                 }
-            } else if ( collGroup.equals(group)) {
+            } else if (collGroup.equals(group)) {
                 return c;
             }
         }
