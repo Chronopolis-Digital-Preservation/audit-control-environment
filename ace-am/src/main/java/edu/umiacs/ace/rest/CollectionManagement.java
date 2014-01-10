@@ -190,7 +190,14 @@ public class CollectionManagement {
         List<Collection> cols = q.getResultList();
         em.close();
         for (Collection c : cols) { 
-            if ( c.getGroup().equals(group)) {
+            String collGroup = c.getGroup();
+            if ( collGroup == null ) {
+                // Check if what we want is also null
+                // Note: Nested if to avoid NPE in the following statement
+                if ( group == null || group.isEmpty()) {
+                    return c;
+                }
+            } else if ( collGroup.equals(group)) {
                 return c;
             }
         }
