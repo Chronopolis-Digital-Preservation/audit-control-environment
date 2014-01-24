@@ -210,6 +210,10 @@ public final class AuditConfigurationContext implements ServletContextListener {
             this.pb = pb;
         }
 
+        private boolean auditing(Collection c) {
+            return AuditThreadFactory.isQueued(c) || AuditThreadFactory.isRunning(c);
+        }
+
         @Override
         public void run() {
             NDC.push("[Audit Timer]");
@@ -244,12 +248,15 @@ public final class AuditConfigurationContext implements ServletContextListener {
                     } else {
                         long syncTime = c.getLastSync().getTime();
                         long currTime = System.currentTimeMillis();
-                        if ( ((long) (currTime - syncTime)) > ((long) (checkperiod * HOUR
-                                * 24)) ) {
+                        // if the next audit is due and we haven't already started the audit
+                        long lastSyncTime = currTime - syncTime;
+                        if ( lastSyncTime > ((long) (checkperiod * HOUR * 24)) && 
+                             !auditing(c) ) {
+                                
                             LOG.debug("last sync difference: " + (currTime - syncTime)
                                     + " greater than " + (checkperiod * HOUR * 24));
-                            sa = StorageDriverFactory.createStorageAccess(c,
-                                    em);
+                            sa = StorageDriverFactory.createStorageAccess(c, em);
+                                    
                             AuditThreadFactory.createThread(c, sa, true, (MonitoredItem[]) null);
                         } else {
                             LOG.trace("No Sync on " + c.getName());

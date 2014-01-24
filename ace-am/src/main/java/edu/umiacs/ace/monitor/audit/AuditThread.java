@@ -146,8 +146,8 @@ public final class AuditThread extends Thread implements CancelCallback {
         this.imsHost = imsHost;
     }
 
-    void setImsport(int imsport) {
-        this.imsPort = imsport;
+    void setImsPort(int imsPort) {
+        this.imsPort = imsPort;
     }
 
     public long getTotalErrors() {
@@ -186,7 +186,7 @@ public final class AuditThread extends Thread implements CancelCallback {
         if (iterableItems != null) {
             iterableItems.cancel();
         }
-        if ( AuditThreadFactory.isQueued(coll) ) {
+        if ( AuditThreadFactory.isRunning(coll) || AuditThreadFactory.isQueued(coll)) {
             AuditThreadFactory.finished(coll);
         }
         this.interrupt();
@@ -376,7 +376,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                 }
 
                 if (cancel || abortException != null) {
-                    //                    iterableItems.cancel();
+                    // iterableItems.cancel();
                     return;
                 }
 
@@ -593,7 +593,7 @@ public final class AuditThread extends Thread implements CancelCallback {
             try {
                 batch.add(request);
             } catch (InterruptedException e) {
-                abortException = e;
+                 abortException = e;
             }
         }
         return event;

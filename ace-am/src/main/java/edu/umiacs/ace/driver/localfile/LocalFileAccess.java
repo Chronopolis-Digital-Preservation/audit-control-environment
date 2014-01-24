@@ -223,12 +223,12 @@ public class LocalFileAccess extends StorageDriver {
                 } else {
                     for (File f : directory.listFiles()) {
                         LOG.trace("Found item " + f);
-                        if (f.isDirectory() && filter.process(
-                                extractPathList(f), true)) {
+                        if ( f.isDirectory() && 
+                             filter.process(extractPathList(f), true)) {
                             LOG.trace("Adding matching directory: " + f);
                             dirsToProcess.add(f);
-                        } else if (f.isFile() && filter.process(
-                                extractPathList(f), false)) {
+                        } else if ( f.isFile() && 
+                                    filter.process(extractPathList(f), false)) {
                             LOG.trace("Adding matching file: " + f);
                             filesToProcess.add(f);
                         }

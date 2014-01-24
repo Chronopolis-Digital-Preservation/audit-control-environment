@@ -44,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
+import org.apache.log4j.NDC;
 
 /**w
  *
@@ -117,7 +118,7 @@ public class AuditThreadFactory {
         synchronized ( blockingQueue ) {
             AuditThread newThread = new AuditThread(c, tri, auditOnly, verbose, startItem);
             newThread.setImsHost(imsHost);
-            newThread.setImsport(imsPort);
+            newThread.setImsPort(imsPort);
             newThread.setTokenClassName(tokenClass);
             boolean contains = runningAudits.contains(c);
             if (!contains) {
@@ -137,7 +138,7 @@ public class AuditThreadFactory {
                 newThread = new AuditThread(c, tri, auditOnly,
                     verbose, startItem);
                 newThread.setImsHost(imsHost);
-                newThread.setImsport(imsPort);
+                newThread.setImsPort(imsPort);
                 newThread.setTokenClassName(tokenClass);
                 newThread.start();
                 runningThreads.put(c, newThread);
@@ -160,15 +161,10 @@ public class AuditThreadFactory {
     public static final boolean isRunning( Collection c ) {
         AuditThread thread = getThread(c);
         return thread != null && !blockingQueue.contains(thread);
-        /*
-        synchronized ( runningThreads ) {
-            return runningThreads.containsKey(c);
-        }
-        */
     }
 
     static void cancellAll() {
-        LOG.info("Shuttding down thread factory");
+        LOG.info("Shutting down thread factory");
         executor.shutdown();
         if ( !executor.isTerminated() ) {
             executor.shutdownNow();
@@ -221,21 +217,9 @@ public class AuditThreadFactory {
         if ( thread != null ) {
             executor.remove(thread);
             blockingQueue.remove(thread);
+            runningAudits.remove(c);
             thread = null;
         }
-            /*
-        synchronized ( runningThreads ) {
-            AuditThread thread = runningThreads.remove(c);
-            if (thread.isAlive()) {
-                System.out.println("Here's yer problem");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                }
-                thread.cancel();
-            }
-        }
-            */
     }
 
     public static boolean useSSL() {
