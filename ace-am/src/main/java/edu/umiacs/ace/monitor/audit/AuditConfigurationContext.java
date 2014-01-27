@@ -40,6 +40,9 @@ import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.settings.SettingsConstants;
 import edu.umiacs.ace.monitor.settings.SettingsParameter;
 import edu.umiacs.util.Strings;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -127,20 +130,63 @@ public final class AuditConfigurationContext implements ServletContextListener {
             s = (SettingsParameter) q.getSingleResult();
             AuditThreadFactory.setAuditSampling(Boolean.valueOf(s.getValue()));
         } catch (NoResultException ex) {
-            LOG.error(ex.getStackTrace());
+            EntityTransaction trans = em.getTransaction();
+            trans.begin();
+            em.persist(new SettingsParameter(SettingsConstants.PARAM_AUDIT_SAMPLE,
+                    SettingsConstants.auditSample, false));
+            trans.commit();
+            AuditThreadFactory.setAuditSampling(false);
         }
 
         q.setParameter("attr", SettingsConstants.PARAM_IMS_SSL);
         try {
             s = (SettingsParameter) q.getSingleResult();
             AuditThreadFactory.setSSL(Boolean.valueOf(s.getValue()));
-        } catch ( NoResultException ex ) {
+        } catch (NoResultException ex) {
             EntityTransaction trans = em.getTransaction();
             trans.begin();
             em.persist(new SettingsParameter(SettingsConstants.PARAM_IMS_SSL,
                     SettingsConstants.imsSSL, false));
             trans.commit();
             AuditThreadFactory.setSSL(false);
+        }
+
+        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_BLOCKING);
+        try {
+            s = (SettingsParameter) q.getSingleResult();
+            AuditThreadFactory.setBlocking(Boolean.valueOf(s.getValue()));
+        } catch (NoResultException ex) {
+            EntityTransaction trans = em.getTransaction();
+            trans.begin();
+            em.persist(new SettingsParameter(SettingsConstants.PARAM_AUDIT_BLOCKING,
+                                             SettingsConstants.auditBlocking,
+                                             false));
+            trans.commit();
+            AuditThreadFactory.setBlocking(false);
+        }
+
+        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_MAX_BLOCK_TIME);
+        try {
+            s = (SettingsParameter) q.getSingleResult();
+            int blockTime = 0;
+            String val = s.getValue();
+            if (Strings.isValidInt(val)) {
+                blockTime = Integer.parseInt(val);
+            }
+
+            // Just in case...
+            if ( blockTime < 0 ) {
+                blockTime = 0;
+            }
+            AuditThreadFactory.setMaxBlockTime(blockTime);
+        } catch (NoResultException ex) {
+            EntityTransaction trans = em.getTransaction();
+            trans.begin();
+            em.persist(new SettingsParameter(SettingsConstants.PARAM_AUDIT_MAX_BLOCK_TIME,
+                    SettingsConstants.auditMaxBlockTime,
+                    false));
+            trans.commit();
+            AuditThreadFactory.setBlocking(false);
         }
 
         PauseBean pb = new PauseBean();
@@ -167,10 +213,35 @@ public final class AuditConfigurationContext implements ServletContextListener {
         //bgAudit = new BackgroundAuditorFactory();
         //BackgroundAuditorFactory.start();
 
+        em.close();
         checkTimer = new Timer("Audit Check Timer");
         checkTimer.schedule(new MyTimerTask(pb), 0, HOUR);
 
     }
+
+    /**
+     * TODO: Use this to eliminate a lot of the boilerplate above with this
+     *
+    private void doDbStuff(EntityManager em, String param, String defaultVal, Method method) throws InvocationTargetException, IllegalAccessException {
+        SettingsParameter s = null;
+        Query q = em.createNamedQuery("SettingsParameter.getAttr");
+
+        q.setParameter("attr", param);
+        try {
+            s = (SettingsParameter) q.getSingleResult();
+            method.invoke(null, s.getValue());
+        } catch (NoResultException ex) {
+            EntityTransaction trans = em.getTransaction();
+            trans.begin();
+            em.persist(new SettingsParameter(param,
+                    defaultVal,
+                    false));
+            trans.commit();
+            method.invoke(null, defaultVal);
+        }
+
+    }
+    */
 
     @Override
     public void contextDestroyed( ServletContextEvent arg0 ) {

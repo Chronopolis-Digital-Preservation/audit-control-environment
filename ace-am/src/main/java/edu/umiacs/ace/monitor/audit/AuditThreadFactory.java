@@ -68,6 +68,8 @@ public class AuditThreadFactory {
     private static boolean auditOnly = false;
     private static boolean auditSample = false;
     private static boolean ssl = false;
+    public static boolean blocking = false;
+    public static int maxBlockTime = 0;
 
     public static void setIMS( String ims ) {
         imsHost = ims;
@@ -99,6 +101,22 @@ public class AuditThreadFactory {
 
     public static void setAuditSampling(boolean auditSampling ) {
         AuditThreadFactory.auditSample = auditSampling;
+    }
+
+    public static void setBlocking(boolean blocking) {
+        AuditThreadFactory.blocking = blocking;
+    }
+
+    public static boolean isBlocking() {
+        return AuditThreadFactory.isBlocking();
+    }
+
+    public static void setMaxBlockTime(int maxBlockTime) {
+        AuditThreadFactory.maxBlockTime = maxBlockTime;
+    }
+
+    public static int getMaxBlockTime() {
+       return maxBlockTime;
     }
 
     public static boolean isAuditing() {
@@ -182,8 +200,10 @@ public class AuditThreadFactory {
         return max_audits;
     }
 
+    // Why does max_audits have an underscore? Oh well...
     public static void setMaxAudits( int max_audits ) {
         AuditThreadFactory.max_audits = max_audits;
+        executor.setCorePoolSize(max_audits);
         executor.setMaximumPoolSize(max_audits);
     }
 

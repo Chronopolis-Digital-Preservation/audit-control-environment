@@ -271,8 +271,8 @@ public class TokenValidator extends Thread
                     print.info("Shutdown acknowledged");
                     break;
                 }
-                Date deadline = new Date(System.currentTimeMillis() +
-                        maxWaitTime);
+                Date deadline = new Date(System.currentTimeMillis()
+                                         + maxWaitTime);
                 try
                 {
                     print.info("Waiting until: " + deadline);

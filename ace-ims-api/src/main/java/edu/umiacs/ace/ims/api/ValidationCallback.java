@@ -52,6 +52,7 @@ public interface ValidationCallback
      * @param correctCSI IMS stored CSI
      * @param calculatedCSI CSI generated from local hash and token
      */
-    public void invalidToken(AceToken response, String correctCSI,
-            String calculatedCSI);
+    public void invalidToken(AceToken response,
+                             String correctCSI,
+                             String calculatedCSI);
 }

@@ -296,7 +296,9 @@ public final class AuditThread extends Thread implements CancelCallback {
             IMSService ims;
             ims = IMSService.connect(imsHost, 
                                      imsPort, 
-                                     AuditThreadFactory.useSSL());
+                                     AuditThreadFactory.useSSL(),
+                                     AuditThreadFactory.isBlocking(),
+                                     AuditThreadFactory.getMaxBlockTime());
 
             batch = ims.createImmediateTokenRequestBatch(tokenClassName,
                                                          callback, 
@@ -325,7 +327,11 @@ public final class AuditThread extends Thread implements CancelCallback {
     private boolean openTokenValidator(MessageDigest digest) {
         try {
             IMSService ims;
-            ims = IMSService.connect(imsHost, imsPort, AuditThreadFactory.useSSL());
+            ims = IMSService.connect(imsHost,
+                                     imsPort,
+                                     AuditThreadFactory.useSSL(),
+                                     AuditThreadFactory.isBlocking(),
+                                     AuditThreadFactory.getMaxBlockTime());
             TokenAuditCallback tokenCallback = new TokenAuditCallback(itemMap,
                     this,
                     coll,

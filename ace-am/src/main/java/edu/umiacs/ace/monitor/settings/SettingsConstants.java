@@ -6,6 +6,8 @@ package edu.umiacs.ace.monitor.settings;
  */
 public class SettingsConstants {
     // Attributes
+    public static final String PARAM_AUDIT_BLOCKING = "audit.blocking";
+    public static final String PARAM_AUDIT_MAX_BLOCK_TIME = "audit.max.block.time";
     public static final String PARAM_AUDIT_ONLY="audit.only";
     public static final String PARAM_AUDIT_SAMPLE = "audit.sample";
     public static final String PARAM_IMS = "ims";
@@ -34,6 +36,8 @@ public class SettingsConstants {
     public static final String PARAM_INGEST = "ingest.maxthreads";
 
     // Default Values
+    public static final String auditBlocking = "false";
+    public static final String auditMaxBlockTime = "0";
     public static final String auditOnly = "false";
     public static final String auditSample = "false";
     public static final String mailServer = "localhost.localdomain";
@@ -59,5 +63,6 @@ public class SettingsConstants {
 	    = "%d{[dd/MMM/yyyy:HH:mm:ss]} %x%m%n";
     public static final String log4JLoggerIrods = "ERROR";
     public static final String log4JLoggerUMIACS = "TRACE";
+
 
 }

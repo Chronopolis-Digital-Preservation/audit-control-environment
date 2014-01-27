@@ -103,7 +103,7 @@ public class SettingsUtil {
         em.close();
     }
 
-    // Get the names of all curent settings
+    // Get the names of all current settings
     public static Set<String> getParamNames() {
         List<SettingsParameter> settings = getCurrentSettings();
         Set<String> paramSet = new HashSet<String>();
@@ -161,6 +161,11 @@ public class SettingsUtil {
                 SettingsConstants.auditOnly, false));
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_AUDIT_SAMPLE,
                 SettingsConstants.auditSample, false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_AUDIT_BLOCKING,
+                SettingsConstants.auditBlocking, false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_AUDIT_MAX_BLOCK_TIME,
+                SettingsConstants.auditMaxBlockTime, false));
+
 
         return defaults;
     }
@@ -236,7 +241,7 @@ public class SettingsUtil {
         if (Strings.isValidInt(s.getValue())) {
             AuditThreadFactory.setMaxAudits(Integer.parseInt(s.getValue()));
         }
-        
+
         // Mail Server
         q.setParameter("attr", SettingsConstants.PARAM_SMTP_SERVER);
         s = (SettingsParameter) q.getSingleResult();
@@ -246,6 +251,16 @@ public class SettingsUtil {
         q.setParameter("attr", SettingsConstants.PARAM_FROM);
         s = (SettingsParameter) q.getSingleResult();
         SchedulerContextListener.setMailFrom(s.getValue());
+
+        // Audit Blocking
+        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_BLOCKING);
+        s = (SettingsParameter) q.getSingleResult();
+        AuditThreadFactory.setBlocking(Boolean.valueOf(s.getValue()));
+
+        // Max block time
+        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_MAX_BLOCK_TIME);
+        s = (SettingsParameter) q.getSingleResult();
+        AuditThreadFactory.setMaxBlockTime(Integer.parseInt(s.getValue()));
 
 
     }

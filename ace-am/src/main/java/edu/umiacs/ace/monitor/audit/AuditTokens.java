@@ -188,7 +188,11 @@ public final class AuditTokens extends Thread implements CancelCallback {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             IMSService ims;
-            ims = IMSService.connect(imsHost, imsPort);
+            ims = IMSService.connect(imsHost,
+                                     imsPort,
+                                     AuditThreadFactory.useSSL(),
+                                     AuditThreadFactory.isBlocking(),
+                                     AuditThreadFactory.getMaxBlockTime());
             callback = new TokenAuditCallback(itemMap, this, collection, session);
             validator = ims.createTokenValidator(callback, 1000, 5000,
                     digest);

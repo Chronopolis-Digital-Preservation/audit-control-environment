@@ -37,10 +37,22 @@
                     <div class="settingsVal"><input type=text name="throttle.maxaudit" value="${currSettings['throttle.maxaudit']}"/></div>
                     <div class="settingsHelp"><img src="images/help.png" title="Max number of running audits"></div>
                 </div>
+                <!-- TODO: Get proper sampling in the future
                 <div class="settingsRow">
                     <div class="settingsName">Audit Sampling:</div>
                     <div class="settingsVal"><input type=text name="audit.sample" value="${currSettings['audit.sample']}"/></div>
                     <div class="settingsHelp"><img src="images/help.png" title="Enable or disable statistical sampling while auditing (samples sqrt n files)"></div>
+                </div>
+                -->
+                <div class="settingsRow">
+                    <div class="settingsName">Audit IMS Blocking:</div>
+                    <div class="settingsVal"><input type=text name="audit.blocking" value="${currSettings['audit.blocking']}"/></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Block audits when connectivity to the IMS is lost"></div>
+                </div>
+                <div class="settingsRow">
+                    <div class="settingsName">Audit Max Block Time:</div>
+                    <div class="settingsVal"><input type=text name="audit.max.block.time" value="${currSettings['audit.max.block.time']}"/></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Maximum time (in minutes) to block an audit when connectivity to the IMS is lost"></div>
                 </div>
                 <div class="settingsRow">
                     <div class="settingsName">Audit Wait Time:</div>
