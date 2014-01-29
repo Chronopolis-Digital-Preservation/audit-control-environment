@@ -155,17 +155,8 @@ public class CollectionManagement {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_XML)
-    @Path("xml/{id}")
-    @RolesAllowed("Browse")
-    public Collection getCollectionXML(@PathParam("id") long collId){
-        EntityManager em = PersistUtil.getEntityManager();
-        return em.find(Collection.class, collId);
-    }
-
-    @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("json/{id}")
+    @Path("settings/by-id/{id}")
     @RolesAllowed("Browse")
     public Collection getCollectionJSON(@PathParam("id") long collId){
         EntityManager em = PersistUtil.getEntityManager();
@@ -174,7 +165,7 @@ public class CollectionManagement {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("json/{name}")
+    @Path("settings/by-name/{name}")
     @RolesAllowed("Browse")
     public Collection getCollection(@PathParam("name") String name) {
         return findCollection(name, null);
@@ -188,7 +179,7 @@ public class CollectionManagement {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("json/{name}/{group}")
+    @Path("settings/by-name/{name}/{group}")
     @RolesAllowed("Browse")
     public Collection getCollection(@PathParam("name") String name, 
                                     @PathParam("group") String group) {
