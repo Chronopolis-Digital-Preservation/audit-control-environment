@@ -236,11 +236,14 @@ public class SettingsUtil {
         AuditThreadFactory.setTokenClass(s.getValue());
 
         // Max Audits
+        /* This idles all threads, and can get messy if we actually want to do it properly
+           (drain the thread pool, etc). Basically, let's keep the count on start up only.
         q.setParameter("attr", SettingsConstants.PARAM_THROTTLE_MAXAUDIT);
         s = (SettingsParameter) q.getSingleResult();
         if (Strings.isValidInt(s.getValue())) {
             AuditThreadFactory.setMaxAudits(Integer.parseInt(s.getValue()));
         }
+        */
 
         // Mail Server
         q.setParameter("attr", SettingsConstants.PARAM_SMTP_SERVER);
