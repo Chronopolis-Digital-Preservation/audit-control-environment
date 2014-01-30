@@ -43,6 +43,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+
+import edu.umiacs.util.Strings;
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
@@ -70,6 +72,10 @@ public class AuditThreadFactory {
     public static int maxBlockTime = 0;
 
     public static void setIMS( String ims ) {
+        if (Strings.isEmpty(ims)) {
+            LOG.error("Empty ims string, ignoring");
+            return;
+        }
         imsHost = ims;
     }
 
@@ -90,6 +96,10 @@ public class AuditThreadFactory {
     }
 
     public static void setImsPort( int imsPort ) {
+        if ( imsPort > 1 && imsPort < 32768 ) {
+            LOG.error("ims port must be between 1 and 32768");
+            return;
+        }
         AuditThreadFactory.imsPort = imsPort;
     }
 
@@ -110,6 +120,9 @@ public class AuditThreadFactory {
     }
 
     public static void setMaxBlockTime(int maxBlockTime) {
+        if ( maxBlockTime < 0 ) {
+            maxBlockTime = 0;
+        }
         AuditThreadFactory.maxBlockTime = maxBlockTime;
     }
 
@@ -191,6 +204,9 @@ public class AuditThreadFactory {
 
     // Why does max_audits have an underscore? Oh well...
     public static void setMaxAudits( int max_audits ) {
+        if ( max_audits <= 0 ) {
+            return;
+        }
         AuditThreadFactory.max_audits = max_audits;
         executor.setCorePoolSize(max_audits);
         executor.setMaximumPoolSize(max_audits*2);

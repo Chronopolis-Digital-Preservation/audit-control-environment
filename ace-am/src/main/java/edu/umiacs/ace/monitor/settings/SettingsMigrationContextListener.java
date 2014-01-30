@@ -41,6 +41,7 @@ public class SettingsMigrationContextListener implements ServletContextListener{
         if (conn != null) {
             SQL.release(conn);
         }
+        NDC.pop();
     }
 
     public void contextDestroyed(ServletContextEvent sce) {
