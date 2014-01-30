@@ -104,7 +104,7 @@ public final class IMSService
                                      int maxBlockTimeMinutes) {
         Check.notEmpty("hostName", hostName);
         Check.isPositive("portNumber", portNumber);
-        Check.isPositive("maxBlockTime", maxBlockTimeMinutes);
+        Check.notNegative("maxBlockTime", maxBlockTimeMinutes);
         Check.notEmpty("path", path);
         
         if ( !path.startsWith("/") ) {
@@ -233,7 +233,7 @@ public final class IMSService
         }
     }
 
-    private <E> E blockUntil(Method m, Object... args) {
+    private <E> E blockUntil(Method m, Object... args) throws Exception {
         boolean done = false;
         E fin = null;
 
@@ -243,7 +243,7 @@ public final class IMSService
             try {
                 // avoid sleeping on the first pass
                 if ( elapsed != 0 ) {
-                    TimeUnit.HOURS.sleep(1);
+                    TimeUnit.MINUTES.sleep(15);
                 }
 
                 fin = (E) m.invoke(port, args);
@@ -261,13 +261,18 @@ public final class IMSService
                     if ( cause instanceof java.net.ConnectException ) {
                         continue;
                     }
-                } else if ( e instanceof  InvocationTargetException ) {
+                } else if ( e instanceof  InvocationTargetException) {
+                    // TODO: Properly catch java.net.ConnectException
+                    // it's kind of tricky as the invocation exception makes
+                    // the stack trace murky
                     continue;
                 }
-                handleException(e);
+                throw handleException(e);
             }
 
         }
+
+        // TODO: Throw timeout exception
 
         return fin;
     }

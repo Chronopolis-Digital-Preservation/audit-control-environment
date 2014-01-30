@@ -54,9 +54,7 @@ public class AuditThreadFactory {
     private static final Logger LOG = Logger.getLogger(AuditThreadFactory.class);
 
     private static int max_audits = 3;
-    //private static final Map<Collection, AuditThread> runningThreads =
-    //        new HashMap<Collection, AuditThread>();
-    private static final ConcurrentHashMap<Collection, AuditThread> runningAudits = 
+    private static final ConcurrentHashMap<Collection, AuditThread> runningAudits =
             new ConcurrentHashMap<Collection, AuditThread>();
     private static final LinkedBlockingQueue<Runnable> blockingQueue = 
             new LinkedBlockingQueue<Runnable>();
@@ -108,7 +106,7 @@ public class AuditThreadFactory {
     }
 
     public static boolean isBlocking() {
-        return AuditThreadFactory.isBlocking();
+        return AuditThreadFactory.blocking;
     }
 
     public static void setMaxBlockTime(int maxBlockTime) {
@@ -133,37 +131,22 @@ public class AuditThreadFactory {
      */
     public static AuditThread createThread( Collection c, StorageDriver tri, boolean verbose,
             MonitoredItem... startItem ) {
-        synchronized ( blockingQueue ) {
-            AuditThread newThread = new AuditThread(c, tri, auditOnly, verbose, startItem);
-            newThread.setImsHost(imsHost);
-            newThread.setImsPort(imsPort);
-            newThread.setTokenClassName(tokenClass);
+        // I doubt there's ever going to be much contention, plus we're not exactly shooting for
+        // efficiency
+        // Note: Because we don't put the collection/thread in the map atomically, we need to lock
+        AuditThread newThread = null;
+        synchronized ( runningAudits ) {
             boolean contains = runningAudits.contains(c);
             if (!contains) {
+                newThread = new AuditThread(c, tri, auditOnly, verbose, startItem);
+                newThread.setImsHost(imsHost);
+                newThread.setImsPort(imsPort);
+                newThread.setTokenClassName(tokenClass);
                 runningAudits.put(c, newThread);
                 executor.execute(newThread);
             }
             return newThread;
         }
-        /*
-        synchronized ( runningThreads ) {
-            AuditThread newThread = null;
-            //if ( blockingQueue.contains(runningQueue))
-            if ( !runningThreads.containsKey(c) && runningThreads.size() < max_audits ) {
-                if ( auditSample ) {
-                    startItem = getSampledList(c);
-                }
-                newThread = new AuditThread(c, tri, auditOnly,
-                    verbose, startItem);
-                newThread.setImsHost(imsHost);
-                newThread.setImsPort(imsPort);
-                newThread.setTokenClassName(tokenClass);
-                newThread.start();
-                runningThreads.put(c, newThread);
-            }
-            return newThread;
-        }
-        */
     }
 
     public static AuditThread getThread(Collection c) {
@@ -182,18 +165,24 @@ public class AuditThreadFactory {
     }
 
     static void cancellAll() {
-        LOG.info("Shutting down thread factory");
+        LOG.info("Shutting down audits");
+        /*
+        for ( AuditThread thread : runningAudits.values() ) {
+            LOG.info("Canceling threads");
+            thread.cancel();
+        }
+        */
         executor.shutdown();
         if ( !executor.isTerminated() ) {
+            LOG.info("Shutting down Executor");
             executor.shutdownNow();
+        }
+        // Hm... this seems to work... still need more testing
+        for ( Runnable r : blockingQueue ) {
+            r = null;
         }
         runningAudits.clear();
         blockingQueue.clear();
-        /*
-        for ( AuditThread at : runningThreads.values() ) {
-            at.cancel();
-        }
-        */
     }
 
     public static int getMaxAudits() {
@@ -204,7 +193,7 @@ public class AuditThreadFactory {
     public static void setMaxAudits( int max_audits ) {
         AuditThreadFactory.max_audits = max_audits;
         executor.setCorePoolSize(max_audits);
-        executor.setMaximumPoolSize(max_audits);
+        executor.setMaximumPoolSize(max_audits*2);
     }
 
     public static void setSSL(Boolean ssl) {
@@ -229,12 +218,16 @@ public class AuditThreadFactory {
 
     /**
      * Method for AuditThread to notify its finished
+     *
      * @param c
      */
     static void finished( Collection c ) {
         // Clean up everything which may contain a reference to the thread
+        // Thread will only ever be removed once, so no need to worry about
+        // race conditions
         AuditThread thread = runningAudits.remove(c);
         if ( thread != null ) {
+            LOG.debug("Removing old audit thread from thread pool executor");
             executor.remove(thread);
             blockingQueue.remove(thread);
             runningAudits.remove(c);

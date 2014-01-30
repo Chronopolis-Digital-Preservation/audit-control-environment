@@ -121,7 +121,10 @@ public class LocalFileAccess extends StorageDriver {
             @Override
             public void cancel() {
                 LOG.debug("Cancel called on localfile iterator");
-                it.cancel();
+                // believe it or not this npe has happened...
+                if ( it != null ) {
+                    it.cancel();
+                }
             }
 
             @Override
