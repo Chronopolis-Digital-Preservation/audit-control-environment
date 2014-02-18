@@ -29,6 +29,7 @@ public class IngestContextListener implements ServletContextListener {
         IngestThreadPool.setMaxThreads(Integer.parseInt(s.getValue()));
         IngestThreadPool pool = IngestThreadPool.getInstance();
         //pool.start();
+        NDC.pop();
 
     }
 

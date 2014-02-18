@@ -41,6 +41,8 @@ import edu.umiacs.ace.token.AceToken;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.util.TokenUtil;
 import edu.umiacs.util.Strings;
+import org.apache.log4j.Logger;
+
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -58,6 +60,8 @@ import javax.persistence.EntityTransaction;
  * @author shake
  */
 public class IngestThread implements Runnable {
+    private static final Logger LOG = Logger.getLogger(IngestThread.class);
+
     // These only gets read from, never written to
     private Map<String, Token> tokens;
     private Collection coll;
@@ -142,6 +146,7 @@ public class IngestThread implements Runnable {
                 Token token = tokens.get(identifier);
                 item = mim.getItemByPath(identifier, coll);
                 if ( item == null ) {
+                    LOG.debug("Adding new item " + identifier);
                     LogEvent[] event = new LogEvent[2];
                     // LOG.trace does not exist
                     event[0] = logManager.createItemEvent(LogEnum.FILE_REGISTER,
@@ -168,6 +173,7 @@ public class IngestThread implements Runnable {
 
                     newTokens.add(identifier);
                 }else{
+                    LOG.debug("Updating existing item " + identifier);
                     updateToken(em, token, item, coll, identifier);
                 }
 
@@ -234,7 +240,7 @@ public class IngestThread implements Runnable {
         StringBuilder fullPath = new StringBuilder(path);
         List <String> pathList = new LinkedList<String>();
         int index = 0;
-        if ( fullPath.charAt(0) != '/') {
+        if (fullPath.charAt(0) != '/') {
             fullPath.insert(0, "/");
         }
         while( (index = fullPath.lastIndexOf("/")) != 0 ) {

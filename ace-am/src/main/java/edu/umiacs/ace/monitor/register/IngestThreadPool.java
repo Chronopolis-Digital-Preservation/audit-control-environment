@@ -110,10 +110,14 @@ public class IngestThreadPool {
     
     public void submitTokens(Map<String, Token> tokens, Collection coll) {
         dirThread.execute(new IngestDirectory(tokens.keySet(), coll));
-        
-        double numThreads = (tokens.size()/maxThreads > maxThreads) ? maxThreads
-                : Math.ceil(tokens.size()/maxThreads);
-        
+
+        // Just to avoid an ugly cast
+        double max = maxThreads;
+
+        double numThreads = (tokens.size()/max> maxThreads) ? maxThreads
+                : Math.ceil(tokens.size()/max);
+        LOG.debug("Number of threads for ingestion: " + numThreads);
+
         // Remove any tokens we've already seen and can possibly be in progress
         // Possibly release tokens after the thread has finished merging them
         Set<String> tokensSeen = hasSeen.get(coll);
