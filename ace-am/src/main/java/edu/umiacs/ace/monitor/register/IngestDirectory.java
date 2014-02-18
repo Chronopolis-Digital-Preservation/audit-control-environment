@@ -96,7 +96,7 @@ public class IngestDirectory implements Runnable {
 
         // 1. make sure directory path is registered
         if (parentName != null) {
-            parentName = Strings.cleanStringForXml(parentName, '_');
+            //parentName = Strings.cleanStringForXml(parentName, '_');
             for ( int i = 1; i < pathList.size(); i++) {
                 String parent = (pathList.size() > i + 1 ? pathList.get(i+1) : null);
                 parent = Strings.cleanStringForXml(parent, '_');
@@ -141,8 +141,11 @@ public class IngestDirectory implements Runnable {
 
     }
 
-    public MonitoredItem addItem( String path, String parentDir,boolean directory,
-            char initialState, long size ) {
+    public MonitoredItem addItem(String path,
+                                 String parentDir,
+                                 boolean directory,
+                                 char initialState,
+                                 long size) {
 
         MonitoredItem mi = new MonitoredItem();
         mi.setDirectory(directory);
