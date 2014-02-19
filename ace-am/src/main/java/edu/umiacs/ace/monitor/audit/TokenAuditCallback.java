@@ -113,7 +113,7 @@ public final class TokenAuditCallback implements ValidationCallback {
             //            em.persist(lem.validToken(path, collection));
         }
 
-        if ( item.getState() == 'I' ) {
+        if ( item.getState() == 'I' || item.getState() == 'R' ) {
             item.setState('A');
             item.setStateChange(new Date());
         }
@@ -141,11 +141,9 @@ public final class TokenAuditCallback implements ValidationCallback {
 
         EntityManager em = PersistUtil.getEntityManager();
 
-        //            token.setLastValidated(new Date());
         if ( token.getValid() ) {
             token.setValid(false);
 
-            //            String path = response.getName();
             String message = "Generated CSI: " + calculatedCSI + " IMS (correct) CSI: " + correctCSI;
             em.persist(logManager.createItemEvent(LogEnum.TOKEN_INVALID, item.getPath(), message));
         }
@@ -153,7 +151,12 @@ public final class TokenAuditCallback implements ValidationCallback {
         if ( item.getState() == 'A' ) {
             item.setState('I');
             item.setStateChange(new Date());
+        } else if (item.getState() == 'R') {
+            //invalid digest
+            item.setState('C');
+            item.setStateChange(new Date());
         }
+
         validTokens++;
         EntityTransaction trans = em.getTransaction();
         trans.begin();

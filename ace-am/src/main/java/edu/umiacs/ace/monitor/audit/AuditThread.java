@@ -610,13 +610,21 @@ public final class AuditThread extends Thread implements CancelCallback {
                 "Generated checksum: " + currentFile.getHash()
                 + " expected checksum: " + item.getFileDigest());
         LogEvent event;
+
+        // If we have a registered file, set the digested value
+        LOG.trace(null == item.getFileDigest());
+        if (null == item.getFileDigest() && item.getState() == 'R') {
+            LOG.trace("Setting digest for registered file " + item.getPath());
+            item.setFileDigest(currentFile.getHash());
+        }
+
         if (currentFile.getHash().equals(item.getFileDigest())) {
             // File is active and intact
             // log the transition if it already isn't A
-            // only toggle to A if state is not a remote error.
+            // only toggle to A if state is not a remote error or registered
             // we handle those later
             if (item.getState() != 'A' && item.getState() != 'P'
-                    && item.getState() != 'D') {
+                    && item.getState() != 'D' && item.getState() != 'R') {
                 event = logManager.createItemEvent(LogEnum.FILE_ONLINE,
                         item.getPath());
                 item.setState('A');
