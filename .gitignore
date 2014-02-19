@@ -1,0 +1,16 @@
+## Maven builds
+/ace-am/target/
+/ace-cli/target/
+/ace-common/target/
+/ace-dist/target/
+/ace-ims-api/target/
+/ace-ims-ear/target/
+/ace-ims-ejb/target/
+/ace-ims-server/target/
+/ace-ims-war/target/
+/ace-ims-ws/target/
+/audit-core/target/
+
+## Intellij
+/.idea/
+*.iml
