@@ -41,8 +41,6 @@ import edu.umiacs.ace.monitor.settings.SettingsConstants;
 import edu.umiacs.ace.monitor.settings.SettingsParameter;
 import edu.umiacs.util.Strings;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -70,7 +68,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
     //private static final String PARAM_IMS_PORT = "ims.port";
     //private static final String PARAM_IMS_TOKEN_CLASS = "ims.tokenclass";
     //private static final String PARAM_IMS_SSL = "ims.ssl";
-    //private static final String PARAM_DISABLE_AUDIT = "auto.audit.disable";
+    //private static final String PARAM_DISABLE_AUTO_AUDIT = "auto.audit.disable";
     //private static final String PARAM_THROTTLE_MAXAUDIT = "throttle.maxaudit";
     //private static final String PARAM_AUDIT_ONLY = "audit.only";
     public static final String ATTRIBUTE_PAUSE = "pause";
@@ -192,7 +190,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
         PauseBean pb = new PauseBean();
         ctx.setAttribute(ATTRIBUTE_PAUSE, pb);
 
-        q.setParameter("attr", SettingsConstants.PARAM_DISABLE_AUDIT);
+        q.setParameter("attr", SettingsConstants.PARAM_DISABLE_AUTO_AUDIT);
         s = (SettingsParameter) q.getSingleResult();
         String startPaused = s.getValue();
         pb.setPaused(Boolean.valueOf(startPaused));

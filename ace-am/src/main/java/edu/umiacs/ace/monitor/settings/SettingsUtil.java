@@ -4,7 +4,7 @@ import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.reporting.SchedulerContextListener;
 import edu.umiacs.ace.util.PersistUtil;
-import edu.umiacs.util.Strings;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -123,7 +123,7 @@ public class SettingsUtil {
                 SettingsConstants.imsPort,false));
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS_TOKEN_CLASS,
                 SettingsConstants.imsTokenClass,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_DISABLE_AUDIT,
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_DISABLE_AUTO_AUDIT,
                 SettingsConstants.autoAudit,false));
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_THROTTLE_MAXAUDIT,
                 SettingsConstants.maxAudit,false));
@@ -234,6 +234,11 @@ public class SettingsUtil {
         q.setParameter("attr", SettingsConstants.PARAM_IMS_TOKEN_CLASS);
         s = (SettingsParameter) q.getSingleResult();
         AuditThreadFactory.setTokenClass(s.getValue());
+
+        // Audit Only
+        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_ONLY);
+        s = (SettingsParameter) q.getSingleResult();
+        AuditThreadFactory.setAuditOnly(Boolean.valueOf(s.getValue()));
 
         // Max Audits
         /* This idles all threads, and can get messy if we actually want to do it properly
