@@ -114,7 +114,8 @@ public class IngestThreadPool {
         // Just to avoid an ugly cast
         double max = maxThreads;
 
-        double numThreads = (tokens.size()/max> maxThreads) ? maxThreads
+        double numThreads = (tokens.size()/max> maxThreads)
+                ? maxThreads
                 : Math.ceil(tokens.size()/max);
         LOG.debug("Number of threads for ingestion: " + numThreads);
 
@@ -130,7 +131,7 @@ public class IngestThreadPool {
         }
         hasSeen.put(coll, tokensSeen);
         
-        // Split the token store we're givin up equally among our threads
+        // Split the token store we're given up equally among our threads
         // and submit jobs to the thread pool
         int begin = 0;
         List<String> keyList = new ArrayList<String>(tokens.keySet());

@@ -239,7 +239,6 @@ public final class AuditTokens extends Thread implements CancelCallback {
                 MonitoredItem item = (MonitoredItem) o;
                 AceToken t = TokenUtil.convertToAceToken(item.getToken());
                 if ( t != null ) {
-//                    TokenResponse response = IMSUtil.c;
                     itemMap.put(t, item);
                     tokensSeen++;
                     validator.add(item.getFileDigest(), t);
@@ -259,8 +258,6 @@ public final class AuditTokens extends Thread implements CancelCallback {
             em = PersistUtil.getEntityManager();
             // finished
             logManager.persistCollectionEvent(LogEnum.TOKEN_AUDIT_FINISH, "successful audit", em);
-//            new LogEventManager(em, session).finishTokenAudit(collection,
-//                    "successful audit");
             em.close();
             em = null;
 
@@ -270,7 +267,6 @@ public final class AuditTokens extends Thread implements CancelCallback {
         } catch ( Throwable t ) {
             LOG.error("Unexpected error auditing tokens", t);
             logManager.persistCollectionEvent(LogEnum.SYSTEM_ERROR, Strings.exceptionAsString(t),em);
-//            new LogEventManager(em, session).systemError(collection, t);
 
         } finally {
             validator.close();

@@ -82,21 +82,30 @@ public class Collection implements Serializable {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<PeerCollection> peerCollections;
     private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id = (long) 0;
+
     @Column(nullable = false)
     private String name;
+
     @Column(nullable = false)
     private String directory;
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastSync;
+
     private String storage;
+
     private char state;
+
     @Column(name = "COLGROUP")
     private String group;
+
     @Column(nullable = false)
     private String digestAlgorithm;
+
     @ElementCollection
     @CollectionTable(name="settings", joinColumns=@JoinColumn(name="COLLECTION_ID"))
     @MapKeyColumn(name="ATTR")

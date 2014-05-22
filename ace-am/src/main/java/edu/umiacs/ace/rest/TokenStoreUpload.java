@@ -35,6 +35,7 @@ import org.apache.log4j.Logger;
 public class TokenStoreUpload {
     
     private static final Logger LOG = Logger.getLogger(TokenStoreUpload.class);
+
     @POST
     @Path("{collectionid}")
     public Response loadTokenStore(@PathParam("collectionid") long collectionId,
@@ -50,7 +51,7 @@ public class TokenStoreUpload {
                 items = upload.parseRequest(request);
                 LOG.info("item size: " + items.size());
                 for (FileItem item : items) {
-                    LOG.info("item " + item.getSize() + " " + item.getName() + " " + item.getContentType() ) ;
+                    LOG.info("item " + item.getSize() + " " + item.getName() + " " + item.getContentType());
                     Collection coll = em.find(Collection.class, collectionId);
                     TokenStoreReader reader = new TokenStoreReader(item.getInputStream());
                     IngestThreadPool.submitTokenStore(reader, coll);
