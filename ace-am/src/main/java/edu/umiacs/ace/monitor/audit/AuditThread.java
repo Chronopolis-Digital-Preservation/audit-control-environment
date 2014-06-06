@@ -761,8 +761,9 @@ public final class AuditThread extends Thread implements CancelCallback {
 
         for (MonitoredItem mi : mim.listItemsBefore(coll, d)) {
             LOG.trace("Updating missing item: " + mi.getPath());
-            if (mi.getState() != 'M' && (mi.getStateChange() == null || d.after(
-                    mi.getStateChange()))) {
+            if (mi.getState() != 'M'
+                && (mi.getStateChange() == null
+                    || d.after(mi.getStateChange()))) {
                 mi.setState('M');
                 mi.setStateChange(new Date());
                 em.persist(logManager.createItemEvent(LogEnum.FILE_MISSING,

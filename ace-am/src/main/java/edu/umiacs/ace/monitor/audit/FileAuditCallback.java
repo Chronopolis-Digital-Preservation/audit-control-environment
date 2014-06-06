@@ -82,8 +82,8 @@ public class FileAuditCallback implements RequestBatchCallback {
     }
     
     @Override
-    public void tokensReceived( List<TokenRequest> requests,
-    List<TokenResponse> responses ) {
+    public void tokensReceived(List<TokenRequest> requests,
+                               List<TokenResponse> responses) {
         EntityManager em = PersistUtil.getEntityManager();
         MonitoredItemManager mim = new MonitoredItemManager(em);
         //        LogEventManager lem = new LogEventManager( session, coll);
