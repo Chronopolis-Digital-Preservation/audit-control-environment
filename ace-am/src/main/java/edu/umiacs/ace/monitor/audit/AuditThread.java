@@ -529,12 +529,11 @@ public final class AuditThread extends Thread implements CancelCallback {
             MonitoredItem item = null;
             if ((item = mim.getItemByPath(fileName, coll)) != null) {
                 LogEvent event = null;
-                LOG.trace("Updating existing item" + fileName);
+                LOG.trace("Updating existing item " + fileName);
                 item.setLastVisited(new Date());
                 // if item is in error, log a message and update its state to M
                 if (currentFile.isError()) {
                     event = setItemError(item, currentFile.getErrorMessage());
-
                 } else {
                     if (item.getToken() != null) {
                         event = validateIntegrity(currentFile, item);
@@ -575,10 +574,8 @@ public final class AuditThread extends Thread implements CancelCallback {
     }
 
     private LogEvent requestNewToken(FileBean currentFile, MonitoredItem item) {
-
         LogEvent event;
         if (item.getState() != 'T') {
-
             event = logManager.createItemEvent(LogEnum.MISSING_TOKEN,
                     item.getPath());
             item.setStateChange(new Date());
@@ -616,9 +613,11 @@ public final class AuditThread extends Thread implements CancelCallback {
         if (null == item.getFileDigest() && item.getState() == 'R') {
             LOG.trace("Setting digest for registered file " + item.getPath());
             item.setFileDigest(currentFile.getHash());
+            item.setLastSeen(new Date());
         }
 
         if (currentFile.getHash().equals(item.getFileDigest())) {
+            LOG.trace("Digests match for " + item.getPath());
             // File is active and intact
             // log the transition if it already isn't A
             // only toggle to A if state is not a remote error or registered
@@ -761,6 +760,10 @@ public final class AuditThread extends Thread implements CancelCallback {
 
         for (MonitoredItem mi : mim.listItemsBefore(coll, d)) {
             LOG.trace("Updating missing item: " + mi.getPath());
+            LOG.trace("Item information: LS= " + mi.getLastSeen()
+                    + ", LV = " + mi.getLastVisited()
+                    + ", SC = " + mi.getStateChange()
+                    + "Audit started on: " + d);
             if (mi.getState() != 'M'
                 && (mi.getStateChange() == null
                     || d.after(mi.getStateChange()))) {
