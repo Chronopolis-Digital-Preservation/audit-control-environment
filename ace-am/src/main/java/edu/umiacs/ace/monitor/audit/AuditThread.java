@@ -363,6 +363,15 @@ public final class AuditThread extends Thread implements CancelCallback {
         PathFilter filter = new SimpleFilter(coll);
         Date startDate = new Date();
 
+        // Sleep to ensure that we update a monitored item at a time strictly
+        // greater than our start date
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            abortException = e;
+            return;
+        }
+
 
         // 2. Get file list
         try {
