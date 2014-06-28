@@ -50,16 +50,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.RecursiveAction;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 /**
- * Worker thread spawned from IngestStore. Probably not thread safe.
- * But who needs locks anyways?
+ * A recursive action for fork join pools. Splits its work up to worker threads
+ * until less than 7000 transactions are made.
  *
  * @author shake
  */
-public class IngestThread implements Runnable {
+public class IngestThread extends RecursiveAction {
     private static final Logger LOG = Logger.getLogger(IngestThread.class);
 
     // These only gets read from, never written to
@@ -79,14 +80,13 @@ public class IngestThread implements Runnable {
     // May cause problems
     private EntityManager em = PersistUtil.getEntityManager();
 
-    public IngestThread(Map<String, Token> tokens, Collection coll,
-            List<String> subList) {
+    public IngestThread(Map<String,
+                        Token> tokens,
+                        Collection coll,
+                        List<String> subList) {
         this.tokens = tokens;
         this.coll = coll;
         this.identifiers = subList;
-        updatedTokens = new HashSet<String>();
-        newTokens = new HashSet<String>();
-        unchangedTokens = new HashSet<String>();
     }
 
     private void finished() {
@@ -131,7 +131,29 @@ public class IngestThread implements Runnable {
     }
 
     @Override
+    protected void compute() {
+        if ( identifiers == null || coll == null ) {
+            return;
+        }
+
+        if (identifiers.size() < 7000) {
+            // TODO: I still want to play around with rollbacks in case of failure
+            EntityTransaction trans = em.getTransaction();
+            trans.begin();
+            run();
+            trans.commit();
+        } else {
+            int mid = identifiers.size() >>> 1;
+            invokeAll(new IngestThread(tokens, coll, identifiers.subList(0, mid)),
+                      new IngestThread(tokens, coll, identifiers.subList(mid, identifiers.size())));
+        }
+
+    }
+
     public void run() {
+        updatedTokens = new HashSet<String>();
+        newTokens = new HashSet<String>();
+        unchangedTokens = new HashSet<String>();
         MonitoredItemManager mim = new MonitoredItemManager(em);
         MonitoredItem item = null;
         session = System.currentTimeMillis();

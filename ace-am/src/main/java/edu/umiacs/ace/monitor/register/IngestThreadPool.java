@@ -35,6 +35,7 @@ import edu.umiacs.ace.monitor.core.Token;
 import edu.umiacs.ace.monitor.settings.SettingsConstants;
 import edu.umiacs.ace.token.TokenStoreEntry;
 import edu.umiacs.ace.token.TokenStoreReader;
+import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.util.TokenUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,10 +43,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
+
+import javax.persistence.EntityManager;
 
 /**
  * TODO - Possibly make a LinkedBlockingQueue that threads can poll from
@@ -61,6 +65,7 @@ public class IngestThreadPool {
     private static final Logger LOG = Logger.getLogger(IngestThreadPool.class);
     
     private static Map<Collection, Set<String>> hasSeen;
+    private static ForkJoinPool forkJoinPool;
     private static ThreadPoolExecutor threads;
     private static ThreadPoolExecutor dirThread;
     private static int maxThreads =
@@ -85,6 +90,10 @@ public class IngestThreadPool {
         if ( hasSeen == null ) {
             hasSeen = new HashMap<Collection, Set<String>>();
         }
+        if (forkJoinPool == null ) {
+            forkJoinPool = new ForkJoinPool();
+        }
+
         return instance;
     }
     
@@ -94,7 +103,7 @@ public class IngestThreadPool {
         }
         IngestThreadPool thePool = IngestThreadPool.getInstance();
         HashMap<String, Token> batchTokens = new HashMap<String, Token>();
-        
+
         while ( tokenReader.hasNext() ) {
             TokenStoreEntry tokenEntry = tokenReader.next();
             Token token = TokenUtil.convertFromAceToken(tokenEntry.getToken());
@@ -133,13 +142,16 @@ public class IngestThreadPool {
         
         // Split the token store we're given up equally among our threads
         // and submit jobs to the thread pool
-        int begin = 0;
         List<String> keyList = new ArrayList<String>(tokens.keySet());
+
+        forkJoinPool.execute(new IngestThread(tokens, coll, keyList));
+        /*
+        int begin = 0;
         for ( int idx=0; idx < numThreads; idx++) {
             int end = (int) (tokens.size() * ((idx + 1) / numThreads));
-            threads.execute( new IngestThread(tokens, coll, keyList.subList(begin, end)));
+            threads.execute(new IngestThread(tokens, coll, keyList.subList(begin, end)));
             begin = end;
-        }
+        }*/
     }
     
     public String getStatus() {
