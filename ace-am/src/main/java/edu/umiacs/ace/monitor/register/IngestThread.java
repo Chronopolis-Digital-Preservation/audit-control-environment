@@ -78,7 +78,7 @@ public class IngestThread extends RecursiveAction {
     private int numTransactions = 0;
 
     // May cause problems
-    private EntityManager em = PersistUtil.getEntityManager();
+    private EntityManager em;
 
     public IngestThread(Map<String,
                         Token> tokens,
@@ -95,19 +95,6 @@ public class IngestThread extends RecursiveAction {
 
     public boolean isRunning() {
         return running;
-    }
-
-    // This was for the jsp page, but has since been moved to ITF
-    // Saving in case things with that get fubar'd
-    public String getStatus() {
-        if ( tokens.isEmpty() ) {
-            return "Set of tokens to add is empty";
-        }
-        DecimalFormat format = new DecimalFormat("#.##");
-        double percent =
-                100*((updatedTokens.size() + newTokens.size() +
-                unchangedTokens.size())/(double)tokens.size());
-        return "Ingested " + format.format(percent) + "% of tokens";
     }
 
     public Set<String> getUpdatedTokens() {
@@ -138,10 +125,15 @@ public class IngestThread extends RecursiveAction {
 
         if (identifiers.size() < 7000) {
             // TODO: I still want to play around with rollbacks in case of failure
+            em = PersistUtil.getEntityManager();
             EntityTransaction trans = em.getTransaction();
             trans.begin();
-            run();
-            trans.commit();
+            try {
+                run();
+            } finally {
+                trans.commit();
+                em.close();
+            }
         } else {
             int mid = identifiers.size() >>> 1;
             invokeAll(new IngestThread(tokens, coll, identifiers.subList(0, mid)),
@@ -161,14 +153,13 @@ public class IngestThread extends RecursiveAction {
 
         // Cycle through all items read in and add/update tokens
         // Commit only if there are no errors in all transactions
-        EntityTransaction trans = em.getTransaction();
-        trans.begin();
         try{
             for(String identifier: identifiers) {
                 Token token = tokens.get(identifier);
                 item = mim.getItemByPath(identifier, coll);
                 if ( item == null ) {
-                    LOG.debug("Adding new item " + identifier);
+                    LOG.debug("[Ingest Thread " + Thread.currentThread().getId()
+                            + "] Adding new item " + identifier);
                     LogEvent[] event = new LogEvent[2];
                     // LOG.trace does not exist
                     event[0] = logManager.createItemEvent(LogEnum.FILE_REGISTER,
@@ -195,12 +186,14 @@ public class IngestThread extends RecursiveAction {
 
                     newTokens.add(identifier);
                 }else{
-                    LOG.debug("Updating existing item " + identifier);
+                    LOG.debug("[Ingest Thread " + Thread.currentThread().getId()
+                            + "] Updating existing item " + identifier);
                     updateToken(em, token, item, coll, identifier);
                 }
 
                 // With large Token Stores, we get a large number of transactions
-                // Flusing and Clearing the EM helps to clear some memory
+                // Flushing and Clearing the EM helps to clear some memory
+                // TODO: W/ fork join this isn't needed anymore, unless we want to flush at a lower number
                 if ( numTransactions > 7000 ) {
                     em.flush();
                     em.clear();
@@ -208,10 +201,6 @@ public class IngestThread extends RecursiveAction {
                 }
             }
         }finally{
-            trans.commit();
-            em.close();
-            trans = null;
-            em = null;
             finished();
         }
     }

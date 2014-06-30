@@ -34,6 +34,8 @@ import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
+import org.apache.log4j.Logger;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -50,7 +52,8 @@ import javax.persistence.Query;
  *
  * @author shake
  */
-public class IngestDirectory implements Runnable {
+public class IngestDirectory extends RecursiveAction {
+    private static final Logger LOG = Logger.getLogger(IngestDirectory.class);
     private Collection coll;
     private Set<String> identifiers;
     private Set<String> existingParents = new HashSet<String>();
@@ -63,7 +66,8 @@ public class IngestDirectory implements Runnable {
     }
 
     @Override
-    public void run() {
+    protected void compute() {
+        // We want this to remain single threaded, so we just leave it be
         if ( identifiers == null || coll == null ) {
             return;
         }
@@ -74,14 +78,13 @@ public class IngestDirectory implements Runnable {
             extractAndRegisterParentDirs(identifier);
         }
         trans.commit();
-
     }
 
     private void extractAndRegisterParentDirs(String path) {
         // We don't have a FileBean, so build the pathList ourselves
         StringBuilder fullPath = new StringBuilder(path);
         List <String> pathList = new LinkedList<String>();
-        if ( fullPath.charAt(0) != '/') {
+        if ( fullPath.charAt(0) != '/' ) {
             fullPath.insert(0, "/");
         }
         int index = 0;

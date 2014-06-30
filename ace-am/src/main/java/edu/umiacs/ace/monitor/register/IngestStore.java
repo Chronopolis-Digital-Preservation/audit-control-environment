@@ -67,8 +67,9 @@ public class IngestStore extends EntityManagerServlet {
     public static final String PAGE_RESULTS = "results";
 
     @Override
-    protected void processRequest( HttpServletRequest request, HttpServletResponse response,
-            EntityManager em ) throws ServletException, IOException {
+    protected void processRequest(HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  EntityManager em) throws ServletException, IOException {
         Collection coll = null; //getCollection(request, em);
         MonitoredItem item = getItem(request, em);
         TokenStoreReader tokenReader = null;
