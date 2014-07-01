@@ -57,6 +57,7 @@ public class TokenStoreReader implements Iterable<TokenStoreEntry>, Iterator<Tok
     private BufferedReader input;
     private TokenStoreEntry next;
     private AceTokenBuilder builder = new AceTokenBuilder();
+    private int lineNum;
 
     public TokenStoreReader( InputStream input ) throws IOException {
         init(input, "UTF-8");
@@ -67,6 +68,7 @@ public class TokenStoreReader implements Iterable<TokenStoreEntry>, Iterator<Tok
     }
 
     private void init( InputStream input, String charset ) throws IOException {
+        lineNum = 0;
         this.input = new BufferedReader(new InputStreamReader(input, charset));
         next = loadNext();
     }
@@ -95,8 +97,8 @@ public class TokenStoreReader implements Iterable<TokenStoreEntry>, Iterator<Tok
 
         String header;
         try {
-
             header = input.readLine();
+            lineNum++;
         } catch ( IOException e ) {
             throw new TokenLoadException(e);
         }
@@ -106,12 +108,12 @@ public class TokenStoreReader implements Iterable<TokenStoreEntry>, Iterator<Tok
         }
 
         if ( Strings.isEmpty(header) ) {
-            throw new TokenLoadException(ErrorType.IOEXCEPTION, "Header line empty");
+            throw new TokenLoadException(ErrorType.IOEXCEPTION, "Header line empty (Line #" + lineNum + ")");
         }
 
         Matcher m = headerPattern.matcher(header);
         if ( !m.matches() ) {
-            throw new TokenLoadException(ErrorType.HEADERFORMATERROR, header);
+            throw new TokenLoadException(ErrorType.HEADERFORMATERROR, header + " (Line #" + lineNum + ")");
         }
 
         String digest = m.group(1);
@@ -133,8 +135,10 @@ public class TokenStoreReader implements Iterable<TokenStoreEntry>, Iterator<Tok
         String identifier;
         try {
             while ( !Strings.isEmpty(identifier = input.readLine()) ) {
+                lineNum++;
                 idList.add(identifier);
             }
+            lineNum++;
         } catch ( IOException e ) {
 
             //TODO: should we forward to next extry
@@ -145,6 +149,7 @@ public class TokenStoreReader implements Iterable<TokenStoreEntry>, Iterator<Tok
         TokenLoadException delayedError = null;
         try {
             while ( !Strings.isEmpty(proofLine = input.readLine()) ) {
+                lineNum++;
                 String[] proofList = proofLine.split(":");
                 if ( delayedError == null && (proofList.length <= 1 || proofList.length > 3) ) {
                     delayedError = new TokenLoadException(ErrorType.PROOFFORMATERROR, proofLine);
@@ -157,7 +162,7 @@ public class TokenStoreReader implements Iterable<TokenStoreEntry>, Iterator<Tok
 
                     
                     if ( Strings.isEmpty(proofList[i]) ) {
-                        //TOOD: error:
+                        //TODO: error:
                     }
 
                     if ( proofList[i].equals("X") ) {
@@ -171,6 +176,7 @@ public class TokenStoreReader implements Iterable<TokenStoreEntry>, Iterator<Tok
                 }
 
             }
+            lineNum++;
         } catch ( IOException e ) {
             //TODO: should we forward to next extry
             throw new TokenLoadException(e);
