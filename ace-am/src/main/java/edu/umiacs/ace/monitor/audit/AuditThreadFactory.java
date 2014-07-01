@@ -83,7 +83,7 @@ public class AuditThreadFactory {
         return tokenClass;
     }
 
-    public static void setTokenClass( String tokenClass ) {
+    public static void setTokenClass(String tokenClass) {
         AuditThreadFactory.tokenClass = tokenClass;
     }
 
@@ -142,10 +142,10 @@ public class AuditThreadFactory {
      * @param tri
      * @return
      */
-    public static AuditThread createThread( Collection c, StorageDriver tri, boolean verbose,
-            MonitoredItem... startItem ) {
-        // I doubt there's ever going to be much contention, plus we're not exactly shooting for
-        // efficiency
+    public static AuditThread createThread(Collection c,
+                                           StorageDriver tri,
+                                           boolean verbose,
+                                           MonitoredItem... startItem) {
         // Note: Because we don't put the collection/thread in the map atomically, we need to lock
         AuditThread newThread = null;
         synchronized ( runningAudits ) {
@@ -168,11 +168,11 @@ public class AuditThreadFactory {
         return thread;
     }
 
-    public static final boolean isQueued( Collection c ) {
+    public static final boolean isQueued(Collection c) {
         return blockingQueue.contains(getThread(c));
     }
 
-    public static final boolean isRunning( Collection c ) {
+    public static final boolean isRunning(Collection c) {
         AuditThread thread = getThread(c);
         return thread != null && !blockingQueue.contains(thread);
     }
@@ -203,7 +203,7 @@ public class AuditThreadFactory {
     }
 
     // Why does max_audits have an underscore? Oh well...
-    public static void setMaxAudits( int max_audits ) {
+    public static void setMaxAudits(int max_audits) {
         if ( max_audits <= 0 ) {
             return;
         }
@@ -237,7 +237,7 @@ public class AuditThreadFactory {
      *
      * @param c
      */
-    static void finished( Collection c ) {
+    static void finished(Collection c) {
         // Clean up everything which may contain a reference to the thread
         // Thread will only ever be removed once, so no need to worry about
         // race conditions

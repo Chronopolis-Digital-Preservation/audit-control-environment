@@ -30,76 +30,91 @@
 
 package edu.umiacs.ace.monitor.register;
 
+import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.Token;
 import edu.umiacs.ace.monitor.settings.SettingsConstants;
 import edu.umiacs.ace.token.TokenStoreEntry;
 import edu.umiacs.ace.token.TokenStoreReader;
 import edu.umiacs.ace.util.TokenUtil;
+import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import org.apache.log4j.Logger;
 
 /**
  * TODO - Possibly make a LinkedBlockingQueue that threads can poll from
- *        to get items to ingest
- *      - What happens when maxThreads is changed in the middle of ingestion?
- *          - May need to lock it
+ * to get items to ingest
+ * - What happens when maxThreads is changed in the middle of ingestion?
+ * - May need to lock it
  *
  * @author shake
  */
 public class IngestThreadPool {
-    
+
     private static final IngestThreadPool instance = new IngestThreadPool();
     private static final Logger LOG = Logger.getLogger(IngestThreadPool.class);
-    
+
+    private static CopyOnWriteArraySet<Collection> collections;
     private static Map<Collection, Set<String>> hasSeen;
-    private static ThreadPoolExecutor threads;
-    private static ThreadPoolExecutor dirThread;
+    private static ForkJoinPool forkJoinPool;
     private static int maxThreads =
             Integer.parseInt(SettingsConstants.maxIngestThreads);
-    private static LinkedBlockingQueue ingestQueue = new LinkedBlockingQueue();
-    private static LinkedBlockingQueue dirQueue = new LinkedBlockingQueue();
-    
+    private static ThreadPoolExecutor executor;
+    private static LinkedBlockingQueue supervisorQueue =
+            new LinkedBlockingQueue();
+
     private IngestThreadPool() {
     }
-    
+
     public static IngestThreadPool getInstance() {
         // We instantiate here to ensure 2 things:
         // 1 - We use the correct number for max threads from the DB
         // 2 - Java will throw an exception otherwise
-        if ( threads == null ) {
-            threads = new ThreadPoolExecutor(maxThreads,
-                    maxThreads, 5, TimeUnit.MINUTES, ingestQueue);
+        if (executor == null) {
+            executor = new ThreadPoolExecutor(maxThreads, maxThreads, 5, TimeUnit.MINUTES, supervisorQueue);
         }
-        if ( dirThread == null ) {
-            dirThread = new ThreadPoolExecutor(1, 1, 5, TimeUnit.MINUTES, dirQueue);
-        }
-        if ( hasSeen == null ) {
+        if (hasSeen == null) {
             hasSeen = new HashMap<Collection, Set<String>>();
         }
+        if (forkJoinPool == null) {
+            forkJoinPool = new ForkJoinPool();
+        }
+        if (collections == null) {
+            collections = new CopyOnWriteArraySet<Collection>();
+        }
+
         return instance;
     }
-    
+
+    /**
+     * Submit a token store to ingest
+     *
+     * @param tokenReader The token store
+     * @param coll The collection to ingest to
+     */
     public static void submitTokenStore(TokenStoreReader tokenReader, Collection coll) {
-        if ( tokenReader == null ) {
+        if (tokenReader == null) {
             throw new RuntimeException("Token file is corrupt");
         }
         IngestThreadPool thePool = IngestThreadPool.getInstance();
         HashMap<String, Token> batchTokens = new HashMap<String, Token>();
-        
-        while ( tokenReader.hasNext() ) {
+
+        while (tokenReader.hasNext()) {
             TokenStoreEntry tokenEntry = tokenReader.next();
             Token token = TokenUtil.convertFromAceToken(tokenEntry.getToken());
-            
-            if ( !token.getProofAlgorithm().equals(coll.getDigestAlgorithm()) ) {
+
+            if (!token.getProofAlgorithm().equals(coll.getDigestAlgorithm())) {
                 throw new RuntimeException("Token digest differs from"
                         + " collection digest.");
             }
@@ -107,68 +122,109 @@ public class IngestThreadPool {
         }
         thePool.submitTokens(batchTokens, coll);
     }
-    
-    public void submitTokens(Map<String, Token> tokens, Collection coll) {
-        dirThread.execute(new IngestDirectory(tokens.keySet(), coll));
 
-        // Just to avoid an ugly cast
-        double max = maxThreads;
+    public static boolean isIngesting(Collection collection) {
+        return collections.contains(collection);
+    }
 
-        double numThreads = (tokens.size()/max> maxThreads)
-                ? maxThreads
-                : Math.ceil(tokens.size()/max);
-        LOG.debug("Number of threads for ingestion: " + numThreads);
-
-        // Remove any tokens we've already seen and can possibly be in progress
-        // Possibly release tokens after the thread has finished merging them
-        Set<String> tokensSeen = hasSeen.get(coll);
-        if ( tokensSeen == null ) {
-            tokensSeen = new HashSet<String>();
-            tokensSeen.addAll(tokens.keySet());
-        }else {
-            tokens.keySet().removeAll(hasSeen.get(coll));
-            tokensSeen.addAll(tokens.keySet());
+    /**
+     * Something like this to wait until all ingestion has completed before doing anything
+     *
+     * @param collection
+     */
+    public static void awaitIngestionComplete(Collection collection) {
+        while (collections.contains(collection)) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(200);
+            } catch (InterruptedException e) {
+                LOG.error("Sleep Interrupted, returning");
+                return;
+            }
         }
-        hasSeen.put(coll, tokensSeen);
-        
-        // Split the token store we're given up equally among our threads
-        // and submit jobs to the thread pool
-        int begin = 0;
-        List<String> keyList = new ArrayList<String>(tokens.keySet());
-        for ( int idx=0; idx < numThreads; idx++) {
-            int end = (int) (tokens.size() * ((idx + 1) / numThreads));
-            threads.execute( new IngestThread(tokens, coll, keyList.subList(begin, end)));
-            begin = end;
+
+    }
+
+    /**
+     * Submit a batch of tokens to be ingested
+     *
+     * @param tokens The tokens to ingest (mapping path to the token)
+     * @param coll The collection to ingest to
+     */
+    public void submitTokens(Map<String, Token> tokens, Collection coll) {
+        if (AuditThreadFactory.isQueued(coll) || AuditThreadFactory.isRunning(coll)) {
+            LOG.error("Cannot ingest tokens for a collection which is auditing");
+        } else {
+            executor.execute(new IngestSupervisor(tokens, coll));
         }
     }
-    
+
     public String getStatus() {
         return String.format("[Thread Pool] Active: %d, Completed: %d, Total: %d",
-                threads.getActiveCount(),
-                threads.getCompletedTaskCount(),
-                threads.getTaskCount());
+                executor.getActiveCount(),
+                executor.getCompletedTaskCount(),
+                executor.getTaskCount());
     }
-    
+
     // Not entirely accurate for the jsp, but it'll show what collections are
     // ingesting what
     public Map<Collection, Set<String>> getIngestedItems() {
         return hasSeen;
     }
-    
+
     public static void setMaxThreads(int maxThreads) {
         IngestThreadPool.maxThreads = maxThreads;
     }
-    
+
     protected static void shutdownPools() {
-        LOG.debug("[Ingest]: Shutting down thread pools.");
-        threads.shutdown();
-        if (!threads.isTerminated() ) {
-            threads.shutdownNow();
+        LOG.debug("[Ingest] Shutting down thread pools.");
+        executor.shutdown();
+        if (!executor.isTerminated()) {
+            executor.shutdownNow();
         }
-        
-        dirThread.shutdown();
-        if ( !dirThread.isShutdown()) {
-            dirThread.shutdownNow();
+    }
+
+    /**
+     * A private class to supervise token ingestion. We use it to keep track of
+     * what collections we have seen
+     *
+     */
+    private class IngestSupervisor implements Runnable {
+        private Map<String, Token> tokens;
+        private Collection coll;
+
+        public IngestSupervisor(final Map<String, Token> tokens, final Collection coll) {
+            this.tokens = tokens;
+            this.coll = coll;
+        }
+
+        public void run() {
+            collections.add(coll);
+            try {
+                ForkJoinTask dirTask = forkJoinPool.submit(new IngestDirectory(tokens.keySet(), coll));
+
+                // Remove any tokens we've already seen and can possibly be in progress
+                // Possibly release tokens after the thread has finished merging them
+                Set<String> tokensSeen = hasSeen.get(coll);
+                if (tokensSeen == null) {
+                    tokensSeen = new HashSet<String>();
+                    tokensSeen.addAll(tokens.keySet());
+                } else {
+                    tokens.keySet().removeAll(hasSeen.get(coll));
+                    tokensSeen.addAll(tokens.keySet());
+                }
+                hasSeen.put(coll, tokensSeen);
+
+                // Split the token store we're given up equally among our threads
+                // and submit jobs to the thread pool
+                List<String> keyList = new ArrayList<String>(tokens.keySet());
+
+                ForkJoinTask fileTask = forkJoinPool.submit(new IngestThread(tokens, coll, keyList));
+
+                dirTask.quietlyJoin();
+                fileTask.quietlyJoin();
+            } finally {
+                collections.remove(coll);
+            }
         }
     }
 }

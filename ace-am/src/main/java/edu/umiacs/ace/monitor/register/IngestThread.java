@@ -50,16 +50,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.RecursiveAction;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 /**
- * Worker thread spawned from IngestStore. Probably not thread safe.
- * But who needs locks anyways?
+ * A recursive action for fork join pools. Splits its work up to worker threads
+ * until less than 7000 transactions are made.
  *
  * @author shake
  */
-public class IngestThread implements Runnable {
+public class IngestThread extends RecursiveAction {
     private static final Logger LOG = Logger.getLogger(IngestThread.class);
 
     // These only gets read from, never written to
@@ -77,16 +78,15 @@ public class IngestThread implements Runnable {
     private int numTransactions = 0;
 
     // May cause problems
-    private EntityManager em = PersistUtil.getEntityManager();
+    private EntityManager em;
 
-    public IngestThread(Map<String, Token> tokens, Collection coll,
-            List<String> subList) {
+    public IngestThread(Map<String,
+                        Token> tokens,
+                        Collection coll,
+                        List<String> subList) {
         this.tokens = tokens;
         this.coll = coll;
         this.identifiers = subList;
-        updatedTokens = new HashSet<String>();
-        newTokens = new HashSet<String>();
-        unchangedTokens = new HashSet<String>();
     }
 
     private void finished() {
@@ -95,19 +95,6 @@ public class IngestThread implements Runnable {
 
     public boolean isRunning() {
         return running;
-    }
-
-    // This was for the jsp page, but has since been moved to ITF
-    // Saving in case things with that get fubar'd
-    public String getStatus() {
-        if ( tokens.isEmpty() ) {
-            return "Set of tokens to add is empty";
-        }
-        DecimalFormat format = new DecimalFormat("#.##");
-        double percent =
-                100*((updatedTokens.size() + newTokens.size() +
-                unchangedTokens.size())/(double)tokens.size());
-        return "Ingested " + format.format(percent) + "% of tokens";
     }
 
     public Set<String> getUpdatedTokens() {
@@ -131,7 +118,34 @@ public class IngestThread implements Runnable {
     }
 
     @Override
+    protected void compute() {
+        if ( identifiers == null || coll == null ) {
+            return;
+        }
+
+        if (identifiers.size() < 7000) {
+            // TODO: I still want to play around with rollbacks in case of failure
+            em = PersistUtil.getEntityManager();
+            EntityTransaction trans = em.getTransaction();
+            trans.begin();
+            try {
+                run();
+            } finally {
+                trans.commit();
+                em.close();
+            }
+        } else {
+            int mid = identifiers.size() >>> 1;
+            invokeAll(new IngestThread(tokens, coll, identifiers.subList(0, mid)),
+                      new IngestThread(tokens, coll, identifiers.subList(mid, identifiers.size())));
+        }
+
+    }
+
     public void run() {
+        updatedTokens = new HashSet<String>();
+        newTokens = new HashSet<String>();
+        unchangedTokens = new HashSet<String>();
         MonitoredItemManager mim = new MonitoredItemManager(em);
         MonitoredItem item = null;
         session = System.currentTimeMillis();
@@ -139,14 +153,13 @@ public class IngestThread implements Runnable {
 
         // Cycle through all items read in and add/update tokens
         // Commit only if there are no errors in all transactions
-        EntityTransaction trans = em.getTransaction();
-        trans.begin();
         try{
             for(String identifier: identifiers) {
                 Token token = tokens.get(identifier);
                 item = mim.getItemByPath(identifier, coll);
                 if ( item == null ) {
-                    LOG.debug("Adding new item " + identifier);
+                    LOG.debug("[Ingest Thread " + Thread.currentThread().getId()
+                            + "] Adding new item " + identifier);
                     LogEvent[] event = new LogEvent[2];
                     // LOG.trace does not exist
                     event[0] = logManager.createItemEvent(LogEnum.FILE_REGISTER,
@@ -173,12 +186,14 @@ public class IngestThread implements Runnable {
 
                     newTokens.add(identifier);
                 }else{
-                    LOG.debug("Updating existing item " + identifier);
+                    LOG.debug("[Ingest Thread " + Thread.currentThread().getId()
+                            + "] Updating existing item " + identifier);
                     updateToken(em, token, item, coll, identifier);
                 }
 
                 // With large Token Stores, we get a large number of transactions
-                // Flusing and Clearing the EM helps to clear some memory
+                // Flushing and Clearing the EM helps to clear some memory
+                // TODO: W/ fork join this isn't needed anymore, unless we want to flush at a lower number
                 if ( numTransactions > 7000 ) {
                     em.flush();
                     em.clear();
@@ -186,10 +201,6 @@ public class IngestThread implements Runnable {
                 }
             }
         }finally{
-            trans.commit();
-            em.close();
-            trans = null;
-            em = null;
             finished();
         }
     }
