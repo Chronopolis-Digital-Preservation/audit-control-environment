@@ -30,6 +30,7 @@
 
 package edu.umiacs.ace.monitor.register;
 
+import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.Token;
 import edu.umiacs.ace.monitor.settings.SettingsConstants;
@@ -150,7 +151,11 @@ public class IngestThreadPool {
      * @param coll The collection to ingest to
      */
     public void submitTokens(Map<String, Token> tokens, Collection coll) {
-        executor.execute(new IngestSupervisor(tokens, coll));
+        if (AuditThreadFactory.isQueued(coll) || AuditThreadFactory.isRunning(coll)) {
+            LOG.error("Cannot ingest tokens for a collection which is auditing");
+        } else {
+            executor.execute(new IngestSupervisor(tokens, coll));
+        }
     }
 
     public String getStatus() {
