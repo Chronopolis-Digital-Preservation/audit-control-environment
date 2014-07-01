@@ -122,6 +122,10 @@ public class IngestThreadPool {
         thePool.submitTokens(batchTokens, coll);
     }
 
+    public static boolean isIngesting(Collection collection) {
+        return collections.contains(collection);
+    }
+
     /**
      * Something like this to wait until all ingestion has completed before doing anything
      *
@@ -147,42 +151,6 @@ public class IngestThreadPool {
      */
     public void submitTokens(Map<String, Token> tokens, Collection coll) {
         executor.execute(new IngestSupervisor(tokens, coll));
-        /*
-        dirThread.execute(new IngestDirectory(tokens.keySet(), coll));
-        forkJoinPool.execute(new IngestDirectory(tokens.keySet(), coll));
-
-        Just to avoid an ugly cast
-        double max = maxThreads;
-
-        double numThreads = (tokens.size() / max > maxThreads)
-                 ? maxThreads
-                 : Math.ceil(tokens.size() / max);
-        LOG.debug("Number of threads for ingestion: " + numThreads);
-
-        Remove any tokens we've already seen and can possibly be in progress
-        Possibly release tokens after the thread has finished merging them
-        Set<String> tokensSeen = hasSeen.get(coll);
-        if (tokensSeen == null) {
-            tokensSeen = new HashSet<String>();
-            tokensSeen.addAll(tokens.keySet());
-        } else {
-            tokens.keySet().removeAll(hasSeen.get(coll));
-            tokensSeen.addAll(tokens.keySet());
-        }
-        hasSeen.put(coll, tokensSeen);
-
-        Split the token store we're given up equally among our threads
-        and submit jobs to the thread pool
-        List<String> keyList = new ArrayList<String>(tokens.keySet());
-
-        forkJoinPool.execute(new IngestThread(tokens, coll, keyList));
-
-        int begin = 0;
-        for ( int idx=0; idx < numThreads; idx++) {
-            int end = (int) (tokens.size() * ((idx + 1) / numThreads));
-            threads.execute(new IngestThread(tokens, coll, keyList.subList(begin, end)));
-            begin = end;
-        }*/
     }
 
     public String getStatus() {
@@ -226,29 +194,32 @@ public class IngestThreadPool {
 
         public void run() {
             collections.add(coll);
-            ForkJoinTask dirTask = forkJoinPool.submit(new IngestDirectory(tokens.keySet(), coll));
+            try {
+                ForkJoinTask dirTask = forkJoinPool.submit(new IngestDirectory(tokens.keySet(), coll));
 
-            // Remove any tokens we've already seen and can possibly be in progress
-            // Possibly release tokens after the thread has finished merging them
-            Set<String> tokensSeen = hasSeen.get(coll);
-            if (tokensSeen == null) {
-                tokensSeen = new HashSet<String>();
-                tokensSeen.addAll(tokens.keySet());
-            } else {
-                tokens.keySet().removeAll(hasSeen.get(coll));
-                tokensSeen.addAll(tokens.keySet());
+                // Remove any tokens we've already seen and can possibly be in progress
+                // Possibly release tokens after the thread has finished merging them
+                Set<String> tokensSeen = hasSeen.get(coll);
+                if (tokensSeen == null) {
+                    tokensSeen = new HashSet<String>();
+                    tokensSeen.addAll(tokens.keySet());
+                } else {
+                    tokens.keySet().removeAll(hasSeen.get(coll));
+                    tokensSeen.addAll(tokens.keySet());
+                }
+                hasSeen.put(coll, tokensSeen);
+
+                // Split the token store we're given up equally among our threads
+                // and submit jobs to the thread pool
+                List<String> keyList = new ArrayList<String>(tokens.keySet());
+
+                ForkJoinTask fileTask = forkJoinPool.submit(new IngestThread(tokens, coll, keyList));
+
+                dirTask.quietlyJoin();
+                fileTask.quietlyJoin();
+            } finally {
+                collections.remove(coll);
             }
-            hasSeen.put(coll, tokensSeen);
-
-            // Split the token store we're given up equally among our threads
-            // and submit jobs to the thread pool
-            List<String> keyList = new ArrayList<String>(tokens.keySet());
-
-            ForkJoinTask fileTask = forkJoinPool.submit(new IngestThread(tokens, coll, keyList));
-
-            dirTask.quietlyJoin();
-            fileTask.quietlyJoin();
-            collections.remove(coll);
         }
     }
 }

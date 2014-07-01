@@ -41,6 +41,7 @@ import edu.umiacs.ace.ims.api.TokenRequestBatch;
 import edu.umiacs.ace.ims.api.TokenValidator;
 import edu.umiacs.ace.ims.ws.TokenRequest;
 import edu.umiacs.ace.monitor.access.CollectionCountContext;
+import edu.umiacs.ace.monitor.register.IngestThreadPool;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.driver.filter.SimpleFilter;
 import edu.umiacs.ace.monitor.compare.CollectionCompare2;
@@ -206,18 +207,14 @@ public final class AuditThread extends Thread implements CancelCallback {
                 session = System.currentTimeMillis();
                 logManager = new LogEventManager(session, coll);
                 logAuditStart();
+                while (IngestThreadPool.isIngesting(coll)) {
+                    LOG.debug("Waiting for ingest to finish");
+                    Thread.sleep(500);
+                }
 
                 callback = new FileAuditCallback(coll, session, this);
                 boolean auditTokens = SettingsUtil.getBoolean(coll,
                                           ConfigConstants.ATTR_AUDIT_TOKENS);
-                /*
-                if (!openIms() || (auditTokens
-                        && !openTokenValidator(MessageDigest.getInstance(
-                        "SHA-256")))) {
-                    return;
-                }
-                 *
-                 */
 
 
                 // Audit only does not attempt to connect to the IMS, so we
@@ -234,22 +231,6 @@ public final class AuditThread extends Thread implements CancelCallback {
                     } else {
                         fallback = true;
                     }
-
-                    // If we can't open the IMS, we want to fallback
-                    // openIms = false => fallback = true
-                    // openIms = true => fallback = false
-                    
-                    /*
-                    fallback = !openIms();
-                    if ( !fallback ) {
-                        // If we aren't falling back, check if we are auditing 
-                        // tokens and if we can open the validator, short circuit
-                        if ( auditTokens &&
-                             !openTokenValidator(MessageDigest.getInstance("SHA-256"))) {
-                            return;
-                        }
-                    }
-                    */
                 }
 
                 performAudit();
