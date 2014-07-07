@@ -153,6 +153,8 @@ public class IngestThreadPool {
     public void submitTokens(Map<String, Token> tokens, Collection coll) {
         if (AuditThreadFactory.isQueued(coll) || AuditThreadFactory.isRunning(coll)) {
             LOG.error("Cannot ingest tokens for a collection which is auditing");
+        } else if (executor.getActiveCount() == executor.getMaximumPoolSize()) {
+            LOG.error("Executor has reached it's maximum limit");
         } else {
             executor.execute(new IngestSupervisor(tokens, coll));
         }
