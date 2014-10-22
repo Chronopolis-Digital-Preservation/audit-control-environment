@@ -109,9 +109,9 @@ public class MonitoredItem implements Serializable, Comparable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, columnDefinition = "VARCHAR(512) COLLATE latin1_bin")
+    @Column(nullable = false, columnDefinition = "VARCHAR(255) COLLATE utf8")
     private String path; // path relative to base directory
-    @Column(columnDefinition = "VARCHAR(512) COLLATE latin1_bin")
+    @Column(columnDefinition = "VARCHAR(255) COLLATE utf8")
     private String parentPath;
     @Column(nullable = false)
     private boolean directory; // true if directory

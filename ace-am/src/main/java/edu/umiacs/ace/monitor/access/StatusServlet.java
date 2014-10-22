@@ -95,7 +95,7 @@ public class StatusServlet extends EntityManagerServlet {
             collections.add(csb);
 
             // if param_collection was supplied as a parameter see if this bean
-            // hsould be set as working/details bean
+            // should be set as working/details bean
             if ( Strings.isValidLong(request.getParameter(PARAM_COLLECTION_ID)) && col.getId() == Long.parseLong(request.getParameter(
                     PARAM_COLLECTION_ID)) ) {
                 request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, csb);

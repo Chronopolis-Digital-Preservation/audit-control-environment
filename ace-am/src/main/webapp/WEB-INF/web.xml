@@ -734,7 +734,6 @@
             <role-name>Collection Modify</role-name>
             <role-name>Browse</role-name>
         </auth-constraint>
-        M
     </security-constraint>
     <login-config>
         <auth-method>BASIC</auth-method>

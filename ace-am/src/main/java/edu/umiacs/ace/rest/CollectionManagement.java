@@ -11,6 +11,9 @@ import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.PersistUtil;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.security.RolesAllowed;
@@ -23,10 +26,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -90,23 +95,23 @@ public class CollectionManagement {
         //   - storage
         //   - directory
         //   - group 
-        //   - general settings (audit period, etc_
+        //   - general settings (audit period, etc)
         EntityManager em = PersistUtil.getEntityManager();
         Collection orig = em.find(Collection.class, id);
         if ( !orig.getName().equals(coll.getName()) ) {
             return Response.status(Status.BAD_REQUEST).build();
         }
 
-        if (null != coll.getStorage()) {
+        if (null != coll.getStorage() ) {
             orig.setStorage(coll.getStorage());
         }
 
-        if ( null != coll.getDirectory()) {
+        if ( null != coll.getDirectory() ) {
             orig.setDirectory(coll.getDirectory());
         }
 
         // TODO: Make sure no collection is contained in the group first
-        if ( null != coll.getGroup()) {
+        if ( null != coll.getGroup() ) {
             orig.setGroup(coll.getGroup());
         }
 
@@ -134,7 +139,7 @@ public class CollectionManagement {
         Query q = em.createNamedQuery("Collection.getCollectionByName");
         q.setParameter("name", coll.getName());
         List<Collection> colls = q.getResultList();
-        if ( checkGroupCollision(colls, coll)) {
+        if ( checkGroupCollision(colls, coll) ) {
             em.close();
             return Response.status(Status.BAD_REQUEST).build();
         }
@@ -197,7 +202,7 @@ public class CollectionManagement {
             if ( collGroup == null ) {
                 // Check if what we want is also null
                 // Note: Nested if to avoid NPE in the following statement
-                if ( group == null || group.isEmpty()) {
+                if ( group == null || group.isEmpty() ) {
                     return c;
                 }
             } else if (collGroup.equals(group)) {
