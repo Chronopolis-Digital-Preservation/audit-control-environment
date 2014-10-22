@@ -33,10 +33,7 @@ package edu.umiacs.ace.monitor.core;
 
 import edu.umiacs.ace.monitor.peers.PeerCollection;
 import edu.umiacs.util.Argument;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -54,6 +51,10 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Collection states
@@ -74,7 +75,9 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Collection.listGroups", query =
     "SELECT DISTINCT c.group FROM Collection c"),
     @NamedQuery(name = "Collection.getCollectionById", query =
-    "SELECT c FROM Collection c WHERE c.id = :id")
+    "SELECT c FROM Collection c WHERE c.id = :id"),
+    @NamedQuery(name = "Collection.getCollectionsInGroup", query =
+    "SELECT c FROM Collection c WHERE c.group = :group")
 })
 @XmlRootElement
 public class Collection implements Serializable {
