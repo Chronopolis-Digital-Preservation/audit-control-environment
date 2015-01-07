@@ -600,7 +600,7 @@ public final class AuditThread extends Thread implements CancelCallback {
 
         // If we have a registered file, set the digested value
         LOG.trace(null == item.getFileDigest());
-        if (null == item.getFileDigest() && item.getState() == 'R') {
+        if (null == item.getFileDigest()) {
             LOG.trace("Setting digest for registered file " + item.getPath());
             item.setFileDigest(currentFile.getHash());
             item.setLastSeen(new Date());
