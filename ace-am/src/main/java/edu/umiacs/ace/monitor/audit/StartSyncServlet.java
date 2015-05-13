@@ -35,6 +35,7 @@ import edu.umiacs.ace.driver.StorageDriverFactory;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.Collection;
+import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -48,6 +49,8 @@ import javax.servlet.http.HttpServletResponse;
  * @author toaster
  */
 public final class StartSyncServlet extends EntityManagerServlet {
+
+    private static final Logger LOG = Logger.getLogger(StartSyncServlet.class);
 
     public static final String PARAM_TYPE = "type";
 
@@ -70,6 +73,8 @@ public final class StartSyncServlet extends EntityManagerServlet {
 
 
         if ( (collection = getCollection(request, em)) != null ) {
+            LOG.trace("Request to start audit on collection " + collection.getName()
+                    + " from " + request.getRemoteHost());
             driver = StorageDriverFactory.createStorageAccess(collection, em);
             if ( "corrupt".equals(request.getParameter(PARAM_TYPE)) ) {
                 Query query = em.createNamedQuery("MonitoredItem.listLocalErrors");

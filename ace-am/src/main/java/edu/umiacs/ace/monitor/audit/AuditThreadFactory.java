@@ -151,6 +151,7 @@ public class AuditThreadFactory {
         synchronized ( runningAudits ) {
             boolean contains = runningAudits.contains(c);
             if (!contains) {
+                LOG.trace("Creating new thread for " + c.getName());
                 newThread = new AuditThread(c, tri, auditOnly, verbose, startItem);
                 newThread.setImsHost(imsHost);
                 newThread.setImsPort(imsPort);
@@ -238,6 +239,7 @@ public class AuditThreadFactory {
      * @param c
      */
     static void finished(Collection c) {
+        LOG.trace("Finishing audit for collection " + c.getName());
         // Clean up everything which may contain a reference to the thread
         // Thread will only ever be removed once, so no need to worry about
         // race conditions

@@ -11,29 +11,26 @@ import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.PersistUtil;
+import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import javax.annotation.security.RolesAllowed;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.GenericEntity;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import java.util.List;
 
 /**
  * REST Service for adding and viewing collections
@@ -44,6 +41,9 @@ import org.codehaus.jettison.json.JSONObject;
 public class CollectionManagement {
     private static final Logger LOG =
             Logger.getLogger(CollectionManagement.class);
+
+    @Context
+    private HttpServletRequest request;
 
     // Make sure we have required attributes set for the collections
     private void checkCollection(Collection coll) {
@@ -75,6 +75,9 @@ public class CollectionManagement {
         if ( c == null ) {
             return Response.status(Status.NOT_FOUND).build();
         }
+
+        LOG.trace("[REST] Request to start audit on collection " + c.getName()
+                + " from " + request.getRemoteHost());
 
         StorageDriver driver = StorageDriverFactory.createStorageAccess(c, em);
 
