@@ -32,6 +32,7 @@
 package edu.umiacs.ace.remote;
 
 import edu.umiacs.ace.monitor.peers.PartnerSite;
+import edu.umiacs.ace.monitor.peers.PartnerSiteServlet;
 import edu.umiacs.util.Strings;
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,7 +86,7 @@ public class JsonGateway {
             URL u = new URL(site.getRemoteURL() + DIGEST_SUFFIX + collection);
             LOG.trace("Attempting to pull: " + u);
 
-            return getURLInputStream(u);
+            return getURLInputStream(u, site.getUser() + ":" + site.getPass());
         } catch ( IOException ioe ) {
             LOG.error("Error reading site " + site.getRemoteURL(), ioe);
             return null;
@@ -271,5 +272,23 @@ public class JsonGateway {
         URLConnection uc = u.openConnection();
         uc.setReadTimeout(5000);
         return uc.getInputStream();
+    }
+
+    /**
+     * Return the input stream using the authorization credentials provided
+     *
+     * Only support basic auth
+     *
+     * @param u - url to get the input stream of
+     * @param auth - auth credentials, ex: user:password
+     * @return
+     * @throws IOException
+     */
+    private InputStream getURLInputStream(URL u, String auth) throws IOException {
+        URLConnection uc = u.openConnection();
+        uc.setRequestProperty("Authorization", "Basic " + PartnerSiteServlet.encode(auth));
+        uc.setReadTimeout(5000);
+        return uc.getInputStream();
+
     }
 }
