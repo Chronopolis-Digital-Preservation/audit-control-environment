@@ -35,6 +35,7 @@ import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.util.Strings;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import javax.persistence.EntityManager;
@@ -44,6 +45,15 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import sun.misc.BASE64Encoder;
 
@@ -144,12 +154,14 @@ public final class PartnerSiteServlet extends EntityManagerServlet {
 
         try {
             URL encodedUrl = new URL(url);
+            CredentialsProvider provider = new BasicCredentialsProvider();
+            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user, pass);
+            provider.setCredentials(AuthScope.ANY, credentials);
 
-
-            URLConnection uc = encodedUrl.openConnection();
-            uc.setRequestProperty("Authorization", "Basic " + encode(
-                    user + ":" + pass));
-            uc.getInputStream().close();
+            HttpClient client = HttpClients.custom().setDefaultCredentialsProvider(provider).build();
+            HttpGet get = new HttpGet(encodedUrl.toURI());
+            HttpResponse execute = client.execute(get);
+            execute.getEntity().getContent().close();
 
             return FailType.SUCCESS;
         } catch ( MalformedURLException e ) {

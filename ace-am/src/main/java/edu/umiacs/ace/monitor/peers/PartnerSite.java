@@ -97,6 +97,10 @@ public class PartnerSite implements Serializable {
         return pass;
     }
 
+    public String getCredentials() {
+        return user + ":" + pass;
+    }
+
     @Override
     public boolean equals( Object object ) {
         // TODO: Warning - this method won't work in the case the id fields are not set

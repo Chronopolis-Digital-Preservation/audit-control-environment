@@ -32,18 +32,26 @@
 package edu.umiacs.ace.remote;
 
 import edu.umiacs.ace.monitor.peers.PartnerSite;
-import edu.umiacs.ace.monitor.peers.PartnerSiteServlet;
 import edu.umiacs.util.Strings;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class to cache various ACE json elements according to some arbitrary policy.
@@ -86,7 +94,7 @@ public class JsonGateway {
             URL u = new URL(site.getRemoteURL() + DIGEST_SUFFIX + collection);
             LOG.trace("Attempting to pull: " + u);
 
-            return getURLInputStream(u, site.getUser() + ":" + site.getPass());
+            return getURLInputStream(u, site.getCredentials());
         } catch ( IOException ioe ) {
             LOG.error("Error reading site " + site.getRemoteURL(), ioe);
             return null;
@@ -188,7 +196,7 @@ public class JsonGateway {
             URL u = new URL(site.getRemoteURL() + ITEMROOT_SUFFIX + collectionid);
             LOG.trace("Attempting to pull: " + u);
 
-            return readJSONValue(u, ParentChildBean.class);
+            return readJSONValue(u, site.getCredentials(), ParentChildBean.class);
         } catch ( IOException ioe ) {
             LOG.error("Error reading site " + site.getRemoteURL(), ioe);
             return null;
@@ -202,7 +210,7 @@ public class JsonGateway {
                     + parentpath);
             LOG.trace("Attempting to pull: " + u);
 
-            return readJSONValue(u, ParentChildBean.class);
+            return readJSONValue(u, site.getCredentials(), ParentChildBean.class);
         } catch ( IOException ioe ) {
             LOG.error("Error reading site " + site.getRemoteURL(), ioe);
             return null;
@@ -215,7 +223,7 @@ public class JsonGateway {
             URL u = new URL(site.getRemoteURL() + REPORT_SUFFIX + collectionid);
             LOG.trace("Attempting to pull: " + u);
 
-            return readJSONValue(u, ReportBean.class);
+            return readJSONValue(u, site.getCredentials(), ReportBean.class);
         } catch ( IOException ioe ) {
             LOG.error("Error reading site " + site.getRemoteURL(), ioe);
             return null;
@@ -228,7 +236,7 @@ public class JsonGateway {
             URL u = new URL(site.getRemoteURL() + STATUS_SUFFIX);
             LOG.trace("Attempting to pull: " + u);
 
-            return readJSONValue(u, StatusBean.class);
+            return readJSONValue(u, site.getCredentials(), StatusBean.class);
         } catch ( IOException ioe ) {
             LOG.error("Error reading site " + site.getRemoteURL(), ioe);
             return null;
@@ -241,7 +249,7 @@ public class JsonGateway {
             URL u = new URL(site.getRemoteURL() + SUMMARY_SUFFIX);
             LOG.trace("Attempting to pull: " + u);
 //mapper.readValue(u, );
-            return readJSONValue(u, SummaryBean.class);
+            return readJSONValue(u, site.getCredentials(), SummaryBean.class);
         } catch ( IOException ioe ) {
             LOG.error("Error reading site " + site.getRemoteURL(), ioe);
             return null;
@@ -264,14 +272,8 @@ public class JsonGateway {
         private Map<Long, Long> itemRootMapUpdate = new HashMap<Long, Long>();
     }
 
-    private <T> T readJSONValue( URL u, Class<T> clazz ) throws IOException {
-        return mapper.readValue(getURLInputStream(u), clazz);
-    }
-
-    private InputStream getURLInputStream( URL u ) throws IOException {
-        URLConnection uc = u.openConnection();
-        uc.setReadTimeout(5000);
-        return uc.getInputStream();
+    private <T> T readJSONValue( URL u, String auth, Class<T> clazz ) throws IOException {
+        return mapper.readValue(getURLInputStream(u, auth), clazz);
     }
 
     /**
@@ -285,10 +287,18 @@ public class JsonGateway {
      * @throws IOException
      */
     private InputStream getURLInputStream(URL u, String auth) throws IOException {
-        URLConnection uc = u.openConnection();
-        uc.setRequestProperty("Authorization", "Basic " + PartnerSiteServlet.encode(auth));
-        uc.setReadTimeout(5000);
-        return uc.getInputStream();
+        CredentialsProvider provider = new BasicCredentialsProvider();
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(auth);
+        provider.setCredentials(AuthScope.ANY, credentials);
 
+        try {
+            HttpClient client = HttpClients.custom().setDefaultCredentialsProvider(provider).build();
+            HttpGet get = new HttpGet(u.toURI());
+            HttpResponse execute = client.execute(get);
+            return execute.getEntity().getContent();
+        } catch (URISyntaxException e) {
+            // should never happen
+            return null;
+        }
     }
 }
