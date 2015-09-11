@@ -146,6 +146,8 @@ public class IngestThreadPool {
 
     /**
      * Submit a batch of tokens to be ingested
+     * TODO: This can me memory intensive for large amounts of tokens,
+     *       maybe find a way to chunk it up?
      *
      * @param tokens The tokens to ingest (mapping path to the token)
      * @param coll The collection to ingest to
@@ -190,7 +192,7 @@ public class IngestThreadPool {
      * what collections we have seen
      *
      */
-    private class IngestSupervisor implements Runnable {
+    public class IngestSupervisor implements Runnable {
         private Map<String, Token> tokens;
         private Collection coll;
 
