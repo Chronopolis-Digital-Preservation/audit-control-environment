@@ -5,13 +5,13 @@ import edu.umiacs.ace.monitor.core.Collection;
 /**
  * Created by shake on 9/11/15.
  */
-public class Submittable implements Comparable<Submittable> {
+public class Submittable<V extends Runnable> implements Comparable<Submittable> {
     final Collection collection;
-    final Runnable runnable;
+    final V runnable;
     final RunType type;
     RunState state;
 
-    Submittable(Collection collection, RunType type, Runnable runnable) {
+    Submittable(Collection collection, RunType type, V runnable) {
         this.collection = collection;
         this.runnable = runnable;
         this.type = type;
@@ -26,8 +26,12 @@ public class Submittable implements Comparable<Submittable> {
         return state;
     }
 
-    public Runnable getThread() {
+    public V getThread() {
         return runnable;
+    }
+
+    public RunType getType() {
+        return type;
     }
 
     @Override
@@ -49,7 +53,8 @@ public class Submittable implements Comparable<Submittable> {
     }
 
     public int compareTo(Submittable submittable) {
-        return (int) (this.collection.getId() - submittable.collection.getId());
+        return (int) (this.collection.getId() - submittable.collection.getId())
+                + (this.getType().ordinal() - submittable.getType().ordinal());
     }
 
     public enum RunType {
