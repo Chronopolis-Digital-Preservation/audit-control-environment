@@ -60,19 +60,21 @@ public class CollectionThreadPoolExecutor extends ThreadPoolExecutor {
 
     // Public interface to interact with the TPE
 
-    public KnownFuture<Submittable> submitFileAudit(Collection c, AuditThread at) {
+    public KSFuture submitFileAudit(Collection c, AuditThread at) {
+        LOG.info("Submitting [FILE_AUDIT]" + " for " + c.getName());
         Submittable submittable = new Submittable(c, Submittable.RunType.FILE_AUDIT, at);
-        return submitThread(at, submittable);
+        return submitThread(at, submittable, c);
     }
 
-    public KnownFuture<Submittable> submitIngestThread(Collection c, IngestThreadPool.IngestSupervisor is) {
+    public KSFuture submitIngestThread(Collection c, IngestThreadPool.IngestSupervisor is) {
         Submittable submittable = new Submittable(c, Submittable.RunType.TOKEN_INGEST, is);
-        return submitThread(is, submittable);
+        return submitThread(is, submittable, c);
     }
 
-    public KnownFuture<Submittable> submitTokenAduit(Collection c, AuditTokens at) {
+    public KSFuture submitTokenAudit(Collection c, AuditTokens at) {
+        LOG.info("Submitting [TOKEN_AUDIT]" + " for " + c.getName());
         Submittable submittable = new Submittable(c, Submittable.RunType.TOKEN_AUDIT, at);
-        return submitThread(at, submittable);
+        return submitThread(at, submittable, c);
     }
 
     public Runnable getRunnableForSubmittable(Collection c, Submittable.RunType t) {
@@ -105,13 +107,16 @@ public class CollectionThreadPoolExecutor extends ThreadPoolExecutor {
      * @param s The submittable to use
      * @return true if a new thread was created, false otherwise
      */
-    private KnownFuture<Submittable> submitThread(Runnable r, Submittable s) {
+    private KSFuture submitThread(Runnable r, Submittable s, Collection c) {
         if (set.add(s)) {
-            KnownFuture<Submittable> f = new KnownFuture<>(r, s);
+            KSFuture f = new KSFuture(r, s);
             execute(f);
             return f;
         }
 
+        Submittable.RunType t = s.getType();
+
+        LOG.info("Already submitted RunType [" + t.name() + "]" + " for " + c.getName());
         return null;
     }
 
