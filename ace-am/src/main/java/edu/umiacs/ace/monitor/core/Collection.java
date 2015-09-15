@@ -148,23 +148,18 @@ public class Collection implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
+        return id != null ? id.hashCode() : 0;
     }
 
     @Override
-    public boolean equals( Object object ) {
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        if ( !(object instanceof Collection) ) {
-            return false;
-        }
-        Collection other = (Collection) object;
-        if ( (this.id == null && other.id != null) || (this.id != null && !this.id.equals(
-                other.id)) ) {
-            return false;
-        }
-        return true;
+        Collection that = (Collection) o;
+
+        // auto gen loves nots apparently
+        return !(id != null ? !id.equals(that.id) : that.id != null);
     }
 
     @Override
