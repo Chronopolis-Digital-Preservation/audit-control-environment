@@ -53,8 +53,26 @@ public class Submittable<V extends Runnable> implements Comparable<Submittable> 
     }
 
     public int compareTo(Submittable submittable) {
-        return (int) (this.collection.getId() - submittable.collection.getId())
-                + (this.getType().ordinal() - submittable.getType().ordinal());
+        long myId = this.collection.getId();
+        long oId = submittable.collection.getId();
+        long mOrd = this.getType().ordinal();
+        long oOrd = submittable.getType().ordinal();
+
+        int eq = 0;
+
+        if (myId < oId) {        // t -> eq = -2
+            eq -= 2;
+        } else if (myId > oId) { // t -> eq_2 = 2
+            eq += 2;
+        }
+
+        if (mOrd < oOrd) {       // t -> eq_2 = 1
+            eq -= 1;
+        } else if (mOrd > oOrd) { // t -> eq = -1
+            eq += 1;
+        }
+
+        return eq;
     }
 
     public enum RunType {
@@ -62,6 +80,6 @@ public class Submittable<V extends Runnable> implements Comparable<Submittable> 
     }
 
     public enum RunState {
-        QUEUED, RUNNING
+        QUEUED, RUNNING, FINISHED
     }
 }
