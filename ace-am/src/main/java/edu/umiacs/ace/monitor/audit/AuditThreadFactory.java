@@ -250,6 +250,7 @@ public class AuditThreadFactory {
             // runningAudits.remove(c);
             // thread = null;
         // }
+        KSFuture<AuditThread> future = audits.remove(c);
     }
 
     public static boolean useSSL() {
