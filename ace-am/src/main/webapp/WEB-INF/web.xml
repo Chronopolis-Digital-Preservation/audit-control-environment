@@ -54,7 +54,10 @@
         <description>ServletContextListener</description>
         <listener-class>edu.umiacs.ace.monitor.core.CollectionSettingsMigrationListener</listener-class>
     </listener>
-    <!-- normal startup listeners, shedulers, etc -->
+    <!-- normal startup listeners, schedulers, etc -->
+    <listener>
+        <listener-class>edu.umiacs.ace.util.CollectionThreadPoolContextListener</listener-class>
+    </listener>
     <listener>
         <listener-class>edu.umiacs.ace.monitor.access.CollectionCountContext</listener-class>
     </listener>

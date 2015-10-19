@@ -183,11 +183,21 @@ public final class AuditThread extends Thread implements CancelCallback {
 
     @Override
     public void cancel() {
+        LOG.info("Received cancel for audit " + coll.getName());
         cancel = true;
         if (iterableItems != null) {
             iterableItems.cancel();
         }
-        if ( AuditThreadFactory.isRunning(coll) || AuditThreadFactory.isQueued(coll)) {
+
+        if (batch != null) {
+            batch.close();
+        }
+
+        if (validator != null) {
+            validator.close();
+        }
+
+        if (AuditThreadFactory.isRunning(coll) || AuditThreadFactory.isQueued(coll)) {
             AuditThreadFactory.finished(coll);
         }
         this.interrupt();
@@ -207,10 +217,12 @@ public final class AuditThread extends Thread implements CancelCallback {
                 session = System.currentTimeMillis();
                 logManager = new LogEventManager(session, coll);
                 logAuditStart();
+                /*
                 while (IngestThreadPool.isIngesting(coll)) {
                     LOG.debug("Waiting for ingest to finish");
                     Thread.sleep(500);
                 }
+                */
 
                 callback = new FileAuditCallback(coll, session, this);
                 boolean auditTokens = SettingsUtil.getBoolean(coll,

@@ -30,14 +30,15 @@
 // $Id$
 package edu.umiacs.ace.monitor.audit;
 
-import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.util.Strings;
-import java.io.IOException;
+
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  *
@@ -71,10 +72,7 @@ public final class StopSyncServlet extends EntityManagerServlet {
                     AuditTokens.getThread(collection).cancel();
                 }
             } else {
-                if ( AuditThreadFactory.isRunning(collection) || 
-                        AuditThreadFactory.isQueued(collection) ) {
-                    AuditThreadFactory.getThread(collection).cancel();
-                }
+                AuditThreadFactory.cancel(collection);
             }
             response.sendRedirect("Status?collectionid=" + collectionId);
 
