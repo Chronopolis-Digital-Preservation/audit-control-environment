@@ -294,8 +294,10 @@ public class TokenValidator extends Thread
         finally
         {
             lock.unlock();
+            print.info("Stopped");
+            NDC.pop();
+            NDC.remove();
         }
-        print.info("Stopped");
     }
 
     /**

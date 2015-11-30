@@ -221,12 +221,15 @@ class ImmediateTokenRequestBatch extends Thread implements TokenRequestBatch
         catch ( Exception e )
         {
             callback.unexpectedException(e);
+        } finally {
+            print.info("Stopped");
+            NDC.pop();
+            NDC.remove();
         }
 //        finally
 //        {
 //            lock.unlock();
 //        }
 
-        print.info("Stopped");
     }
 }
