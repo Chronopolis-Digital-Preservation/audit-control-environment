@@ -125,7 +125,9 @@ public final class AuditThread extends Thread implements CancelCallback {
         this.verbose = verbose;
         this.coll = c;
         this.driver = driver;
-        if (startItem != null && startItem[0] != null) {
+        if (startItem != null
+                && startItem.length > 0
+                && startItem[0] != null) {
             baseItemPathList = Arrays.copyOf(startItem, startItem.length);
         }
         this.setName("audit: " + c.getName());
