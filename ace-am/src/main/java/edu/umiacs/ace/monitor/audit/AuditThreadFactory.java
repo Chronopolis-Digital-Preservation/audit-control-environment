@@ -94,7 +94,7 @@ public class AuditThreadFactory {
     }
 
     public static void setImsPort( int imsPort ) {
-        if ( imsPort > 1 && imsPort < 32768 ) {
+        if ( imsPort < 1 && imsPort > 32768 ) {
             LOG.error("ims port must be between 1 and 32768");
             return;
         }

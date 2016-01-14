@@ -2,6 +2,11 @@ package edu.umiacs.ace.monitor.settings;
 
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.sql.SQL;
+import org.apache.log4j.NDC;
+
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -9,10 +14,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.sql.DataSource;
-import org.apache.log4j.NDC;
 
 /**
  *
@@ -24,7 +25,7 @@ public class SettingsMigrationContextListener implements ServletContextListener{
         Connection conn = null;
         boolean migrated;
 
-        NDC.push("[MIGRATION]");
+        NDC.push("[MIGRATION-SETTINGS]");
 
         DataSource ds = PersistUtil.getDataSource();
         try {
@@ -36,12 +37,13 @@ public class SettingsMigrationContextListener implements ServletContextListener{
         } catch (SQLException ex) {
             Logger.getLogger(SettingsMigrationContextListener.class.getName())
                     .log(Level.SEVERE, null, ex);
+        } finally {
+            NDC.pop();
         }
 
         if (conn != null) {
             SQL.release(conn);
         }
-        NDC.pop();
     }
 
     public void contextDestroyed(ServletContextEvent sce) {

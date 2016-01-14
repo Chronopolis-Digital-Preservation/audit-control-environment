@@ -30,20 +30,19 @@
 // $Id$
 package edu.umiacs.ace.monitor.audit;
 
-import edu.umiacs.ace.monitor.settings.SettingsUtil;
 import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.driver.StorageDriverFactory;
-import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.ConfigConstants;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.settings.SettingsConstants;
 import edu.umiacs.ace.monitor.settings.SettingsParameter;
+import edu.umiacs.ace.monitor.settings.SettingsUtil;
+import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
+import org.apache.log4j.Logger;
+import org.apache.log4j.NDC;
 
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
@@ -51,8 +50,9 @@ import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Set the IMS for the AuditThread to use. Also, startup a background task

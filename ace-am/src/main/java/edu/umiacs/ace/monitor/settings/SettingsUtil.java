@@ -5,14 +5,14 @@ import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.reporting.SchedulerContextListener;
 import edu.umiacs.ace.util.PersistUtil;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -121,6 +121,8 @@ public class SettingsUtil {
                 SettingsConstants.ims,false));
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS_PORT,
                 SettingsConstants.imsPort,false));
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS_SSL,
+                SettingsConstants.imsSSL,false));
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS_TOKEN_CLASS,
                 SettingsConstants.imsTokenClass,false));
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_DISABLE_AUTO_AUDIT,
