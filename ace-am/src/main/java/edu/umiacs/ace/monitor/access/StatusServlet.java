@@ -30,18 +30,22 @@
 // $Id$
 package edu.umiacs.ace.monitor.access;
 
-import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.support.PageBean;
+import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.util.Strings;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.log4j.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  *
@@ -49,9 +53,30 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class StatusServlet extends EntityManagerServlet {
 
+    private static final Logger LOG = Logger.getLogger(StatusServlet.class);
+
     private static final String PAGE_COLLECTIONS = "collections";
+    private static final String PAGE_COUNT = "count";
+    private static final String PAGE_NUMBER = "page";
+
+    private static final long DEFAULT_PAGE = 0;
+    private static final int DEFAULT_COUNT = 20;
+
     private static final String SESSION_WORKINGCOLLECTION = "workingCollection";
     private static final String PARAM_CSV = "csv";
+
+    // Pagination stuff
+    private static final String PARAM_COUNT = "count";
+    private static final String PARAM_PAGE = "page";
+
+    // Search Params
+    private static final String PARAM_GROUP = "group";
+    private static final String PARAM_COLLECTION_LIKE = "collection";
+    private static final String PARAM_AUDIT_DATE = "audit";
+
+    // Filter params?
+    // ...group
+    // ...name (maybe some regex?)
 
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -65,14 +90,90 @@ public class StatusServlet extends EntityManagerServlet {
         RequestDispatcher dispatcher;
         List<CollectionSummaryBean> collections;
         List<Collection> items;
+        LOG.info("Processing /Status request");
+        LOG.info("Processing /Status additional info");
 
+        long page = getParameter(request, PARAM_PAGE, DEFAULT_PAGE);
+        int count = (int) getParameter(request, PARAM_COUNT, DEFAULT_COUNT);
+        String group = getParameter(request, PARAM_GROUP, null);
+        String collection = getParameter(request, PARAM_COLLECTION_LIKE, null);
+        // String date = getParameter(request, PARAM_GROUP, null);
+        PageBean pb = new PageBean((int) page, count, "Status");
+
+        long offset = page * count;
+
+        // our main query
+        StringBuilder queryString = new StringBuilder();
+
+        // for getting a count of items
+        StringBuilder countString = new StringBuilder();
+
+        // our parameters
+        StringBuilder params = new StringBuilder();
+
+        List<String> queries = new ArrayList<>();
+
+        if (!Strings.isEmpty(group)) {
+            queries.add("c.group = :group");
+            pb.addParam(PARAM_GROUP, group);
+        }
+
+        if (!Strings.isEmpty(collection)) {
+            queries.add("c.name LIKE :collection");
+            pb.addParam(PARAM_COLLECTION_LIKE, collection);
+        }
+
+        queryString.append("SELECT c FROM Collection c");
+        countString.append("SELECT COUNT(c.id) FROM Collection c");
+
+        if (queries.size() > 0) {
+            params.append(" WHERE");
+        }
+
+        Iterator<String> it = queries.iterator();
+        while (it.hasNext()) {
+            String query = it.next();
+            params.append(" ")
+                    .append(query);
+            if (it.hasNext()) {
+                params.append(" AND");
+            }
+        }
+
+        queryString.append(params);
+        // allows us to keep a consistent order when displaying collections
+        queryString.append(" ORDER BY c.group ASC, c.name ASC");
+        countString.append(params);
 
         Query query =
-                em.createNamedQuery("Collection.listAllCollections");
+                em.createQuery(queryString.toString());
+                // em.createNamedQuery("Collection.listAllCollections");
+        query.setFirstResult((int) offset);
+        query.setMaxResults(count);
+
+        Query countQuery = em.createQuery(countString.toString());
+
+        if (!Strings.isEmpty(group)) {
+            query.setParameter(PARAM_GROUP, group);
+            countQuery.setParameter(PARAM_GROUP, group);
+        }
+
+        if (!Strings.isEmpty(collection)) {
+            query.setParameter(PARAM_COLLECTION_LIKE, "%" + collection + "%");
+            countQuery.setParameter(PARAM_COLLECTION_LIKE, "%" + collection + "%");
+        }
 
         items = query.getResultList();
 
-        collections = new ArrayList<CollectionSummaryBean>();
+        // We only need to execute this query if we have parameters
+        // and need to update the total count of collections
+        if (queries.size() > 0) {
+            long totalResults = (long) countQuery.getSingleResult();
+            LOG.info("Total results from query: " + totalResults);
+            pb.update(totalResults);
+        }
+
+        collections = new ArrayList<>();
 
         if ( Strings.isValidLong(request.getParameter(PARAM_COLLECTION_ID)) && -1 == Long.parseLong(request.getParameter(
                 PARAM_COLLECTION_ID)) ) {
@@ -109,6 +210,8 @@ public class StatusServlet extends EntityManagerServlet {
         }
 
         request.setAttribute(PAGE_COLLECTIONS, collections);
+        request.setAttribute(PAGE_COUNT, count);
+        request.setAttribute(PAGE_NUMBER, pb);
         if ( hasJson(request) ) {
             dispatcher = request.getRequestDispatcher("status-json.jsp");
         } else if ( hasCsv(request) ) {
