@@ -30,15 +30,14 @@
 // $Id$
 package edu.umiacs.ace.monitor.core;
 
-import edu.umiacs.ace.util.EntityManagerServlet;
-import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.driver.StorageDriverFactory;
+import edu.umiacs.ace.monitor.access.CollectionCountContext;
+import edu.umiacs.ace.util.EntityManagerServlet;
+import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
+import org.apache.log4j.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
@@ -47,7 +46,10 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.log4j.Logger;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 
 /**
  * add,modify,remove the settings of a collection
@@ -154,6 +156,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
                 PersistUtil.persist(collection);
                 storage = StorageDriverFactory.createStorageAccess(collection,
                         em);
+                CollectionCountContext.incrementTotalCollections();
             }
 
             dispatcher = request.getRequestDispatcher("collectionmodify.jsp");
@@ -206,6 +209,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
             storage.remove(em);
         }
         em.remove(collection);
+        CollectionCountContext.decrementTotalCollections();
         trans.commit();
     }
 
