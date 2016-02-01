@@ -79,12 +79,55 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
             .badreplica {
             }
 
+            #collectionHeader {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: -1px;
+                border-bottom: 1px solid black;
+            }
+
+            .container {
+                flex: 1 1 0%;
+            }
+
+            .heading {
+                letter-spacing: 1px;
+                font-size: 11px;
+                margin-bottom: 5px;
+                text-transform: uppercase;
+                color: #868686;
+            }
+
+            .subheading {
+                font-size: 16px;
+                line-height: 1;
+                font-weight: 300;
+                margin-top: 0px;
+            }
+
+            .is-centered {
+                text-align: center;
+            }
+
         </style>
     </head>
     <body>
 
         <jsp:include page="header.jsp" />
 
+        <div id="collectionHeader">
+            <div class="container">
+                <p class="heading is-centered">Group</p>
+                <p class="subheading is-centered">${collection.group}</p>
+                <%--<h2 style="font-size: 1.5em; margin-bottom: 2px">${collection.group}</h2>--%>
+            </div>
+            <div class="container">
+                <p class="heading is-centered">Collection</p>
+                <p class="subheading is-centered">${collection.name}</p>
+                <%--<h3 style="font-size: 1.25em; font-weight: 100; margin-top: 2px">${collection.name}</h3>--%>
+            </div>
+        </div>
         <div id="scrollContainer">
             <div id="scrollDirectory">
                 <c:forEach var="dir" items="${directoryTree.roots}">
