@@ -16,7 +16,7 @@
         <param-name>ace.ims.publisher.email</param-name>
         <param-value>edu.umiacs.ace.ims.processor.EmailPublisher</param-value>
     </context-param>
-    <!--<context-param>
+    <context-param>
         <param-name>ace.ims.publisher.googleGroups.address</param-name>
         <param-value>ace-ims-witness@googlegroups.com</param-value>
     </context-param>
@@ -43,7 +43,7 @@
     <context-param>
         <param-name>ace.ims.publisher.umiacsList.from</param-name>
         <param-value>naraapp@umiacs.umd.edu</param-value>
-    </context-param> -->
+    </context-param>
     <context-param>
         <param-name>org.quartz.scheduler.instanceName</param-name>
         <param-value>WitnessScheduler</param-value>
