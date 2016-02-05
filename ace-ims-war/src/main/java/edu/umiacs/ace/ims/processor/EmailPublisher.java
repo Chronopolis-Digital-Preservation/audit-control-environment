@@ -9,8 +9,10 @@ import edu.umiacs.ace.ims.system.MailPublisherLocal;
 import edu.umiacs.ace.ims.tokenclass.TokenClass;
 import edu.umiacs.ace.ims.witness.Witness;
 import edu.umiacs.ace.server.ServiceLocator;
-import java.util.Date;
+
+import javax.ejb.EJB;
 import javax.mail.MessagingException;
+import java.util.Date;
 
 /**
  *
@@ -18,13 +20,13 @@ import javax.mail.MessagingException;
  */
 public class EmailPublisher extends WitnessPublisher
 {
-    
+
+    @EJB(name = "MailPublisherBean")
+    MailPublisherLocal mailBean =
+            ServiceLocator.getInstance().getLocal(MailPublisherLocal.class);
 
     public void publishWitness(Witness newWitness)
     {
-        MailPublisherLocal mailBean =
-            ServiceLocator.getInstance().getLocal(MailPublisherLocal.class);
-        
         String subject = "IMS Witness for " + newWitness.getTokenClass().getName() + " rounds " + newWitness.getStartRound().getId() + " - " + newWitness.getEndRound().getId();
 
         StringBuilder sb = new StringBuilder();

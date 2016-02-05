@@ -12,6 +12,8 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import javax.ejb.EJB;
+
 /**
  * Publish job for the quartz scheduler
  * @author toaster
@@ -19,6 +21,7 @@ import org.quartz.JobExecutionException;
 public class PublishJob implements Job
 {
 
+    @EJB(name = "TokenClassBean")
     private TokenClassLocal tokenClassBean =
             ServiceLocator.getInstance().getLocal(TokenClassLocal.class);
 
@@ -26,6 +29,7 @@ public class PublishJob implements Job
     {
     }
 
+    @Override
     public void execute(JobExecutionContext arg0) throws JobExecutionException
     {
         Log.system("Running PublishJob");
