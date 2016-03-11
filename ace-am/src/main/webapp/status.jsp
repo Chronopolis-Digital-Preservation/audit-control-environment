@@ -262,7 +262,7 @@
                         </c:choose>
                     </td>
                     <td>
-                        <a href="Status?collectionid=${item.collection.id}">${item.collection.name}</a>
+                        <a href="Status?collectionid=${item.collection.id}&page=${page.page}&count=${page.count}">${item.collection.name}</a>
                     </td>
                     <td>${item.collection.storage}</td>
                     <td><h:DefaultValue test="${item.totalFiles > -1}" success="${item.totalFiles}" failure="Unknown" /></td>
