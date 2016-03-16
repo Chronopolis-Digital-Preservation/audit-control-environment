@@ -48,7 +48,6 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- *
  * @author toaster
  */
 public class StatusServlet extends EntityManagerServlet {
@@ -62,7 +61,9 @@ public class StatusServlet extends EntityManagerServlet {
     private static final long DEFAULT_PAGE = 0;
     private static final int DEFAULT_COUNT = 20;
 
+    // TODO: Add session fields for pagination and search params
     private static final String SESSION_WORKINGCOLLECTION = "workingCollection";
+
     private static final String PARAM_CSV = "csv";
 
     // Pagination stuff
@@ -78,14 +79,15 @@ public class StatusServlet extends EntityManagerServlet {
     // ...group
     // ...name (maybe some regex?)
 
-    /** 
+    /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
+     *
+     * @param request  servlet request
      * @param response servlet response
      */
     @Override
-    protected void processRequest( HttpServletRequest request,
-            HttpServletResponse response, EntityManager em )
+    protected void processRequest(HttpServletRequest request,
+                                  HttpServletResponse response, EntityManager em)
             throws ServletException, IOException {
         RequestDispatcher dispatcher;
         List<CollectionSummaryBean> collections;
@@ -147,7 +149,7 @@ public class StatusServlet extends EntityManagerServlet {
 
         Query query =
                 em.createQuery(queryString.toString());
-                // em.createNamedQuery("Collection.listAllCollections");
+        // em.createNamedQuery("Collection.listAllCollections");
         query.setFirstResult((int) offset);
         query.setMaxResults(count);
 
@@ -175,46 +177,42 @@ public class StatusServlet extends EntityManagerServlet {
 
         collections = new ArrayList<>();
 
-        if ( Strings.isValidLong(request.getParameter(PARAM_COLLECTION_ID)) && -1 == Long.parseLong(request.getParameter(
-                PARAM_COLLECTION_ID)) ) {
+        long collectionId;
+        String idParam = request.getParameter(PARAM_COLLECTION_ID);
+        collectionId = Strings.isValidLong(idParam) ? Long.parseLong(idParam) : -1;
+        CollectionSummaryBean workingCollectionBean = (CollectionSummaryBean) request.getSession().getAttribute(SESSION_WORKINGCOLLECTION);
+
+        if (Strings.isValidLong(idParam) && -1 == collectionId) {
+            // clear the working collection
             request.getSession().removeAttribute(SESSION_WORKINGCOLLECTION);
-        }
-        for ( Collection col : items ) {
-            CollectionSummaryBean csb = new CollectionSummaryBean();
-            csb.setCollection(col);
-            csb.setTotalFiles(CollectionCountContext.getFileCount(col));
-            csb.setActiveFiles(CollectionCountContext.getActiveCount(col));
-            csb.setCorruptFiles(CollectionCountContext.getCorruptCount(col));
-            csb.setInvalidDigests(CollectionCountContext.getTokenMismatchCount(
-                    col));
-            csb.setMissingFiles(CollectionCountContext.getMissingCount(col));
-            csb.setMissingTokens(CollectionCountContext.getMissingTokenCount(col));
-            csb.setTotalSize(CollectionCountContext.getTotelSize(col));
-            csb.setTotalErrors(CollectionCountContext.getTotalErrors(col));
-            csb.setRemoteMissing(CollectionCountContext.getRemoteMissing(col));
-            csb.setRemoteCorrupt(CollectionCountContext.getRemoteCorrupt(col));
-            collections.add(csb);
 
-            // if param_collection was supplied as a parameter see if this bean
-            // should be set as working/details bean
-            if ( Strings.isValidLong(request.getParameter(PARAM_COLLECTION_ID)) && col.getId() == Long.parseLong(request.getParameter(
-                    PARAM_COLLECTION_ID)) ) {
-                request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, csb);
-            } else if ( request.getSession().getAttribute(
-                    SESSION_WORKINGCOLLECTION) != null && ((CollectionSummaryBean) request.getSession().getAttribute(
-                    SESSION_WORKINGCOLLECTION)).getCollection().getId().equals(col.getId()) ) {
-                request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, csb);
-
+        } else if (Strings.isValidLong(idParam)                                            // valid param
+                && (workingCollectionBean == null                                          // no working collection
+                || !workingCollectionBean.getCollection().getId().equals(collectionId))) { // or one which does not equal our requested collection
+            // Get the requested collection from the db and set it as our working collection
+            Collection workingCollection = em.find(Collection.class, collectionId);
+            if (workingCollection != null) {
+                workingCollectionBean = createCollectionSummary(workingCollection);
+                request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, workingCollectionBean);
             }
 
+        } else {
+            // Continue using the current working collection
+            request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, workingCollectionBean);
+        }
+
+
+        for (Collection col : items) {
+            CollectionSummaryBean csb = createCollectionSummary(col);
+            collections.add(csb);
         }
 
         request.setAttribute(PAGE_COLLECTIONS, collections);
         request.setAttribute(PAGE_COUNT, count);
         request.setAttribute(PAGE_NUMBER, pb);
-        if ( hasJson(request) ) {
+        if (hasJson(request)) {
             dispatcher = request.getRequestDispatcher("status-json.jsp");
-        } else if ( hasCsv(request) ) {
+        } else if (hasCsv(request)) {
             dispatcher = request.getRequestDispatcher("status-csv.jsp");
         } else {
             dispatcher = request.getRequestDispatcher("status.jsp");
@@ -222,7 +220,24 @@ public class StatusServlet extends EntityManagerServlet {
         dispatcher.forward(request, response);
     }
 
-    private boolean hasCsv( HttpServletRequest request ) {
+    private CollectionSummaryBean createCollectionSummary(Collection col) {
+        CollectionSummaryBean csb = new CollectionSummaryBean();
+        csb.setCollection(col);
+        csb.setTotalFiles(CollectionCountContext.getFileCount(col));
+        csb.setActiveFiles(CollectionCountContext.getActiveCount(col));
+        csb.setCorruptFiles(CollectionCountContext.getCorruptCount(col));
+        csb.setInvalidDigests(CollectionCountContext.getTokenMismatchCount(
+                col));
+        csb.setMissingFiles(CollectionCountContext.getMissingCount(col));
+        csb.setMissingTokens(CollectionCountContext.getMissingTokenCount(col));
+        csb.setTotalSize(CollectionCountContext.getTotelSize(col));
+        csb.setTotalErrors(CollectionCountContext.getTotalErrors(col));
+        csb.setRemoteMissing(CollectionCountContext.getRemoteMissing(col));
+        csb.setRemoteCorrupt(CollectionCountContext.getRemoteCorrupt(col));
+        return csb;
+    }
+
+    private boolean hasCsv(HttpServletRequest request) {
         String value = (String) request.getParameter(PARAM_CSV);
         return !Strings.isEmpty(value);
     }
