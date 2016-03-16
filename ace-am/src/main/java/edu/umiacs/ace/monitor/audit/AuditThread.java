@@ -191,6 +191,7 @@ public final class AuditThread extends Thread implements CancelCallback {
             iterableItems.cancel();
         }
 
+        /*
         if (batch != null) {
             batch.close();
         }
@@ -198,10 +199,12 @@ public final class AuditThread extends Thread implements CancelCallback {
         if (validator != null) {
             validator.close();
         }
+        */
 
         if (AuditThreadFactory.isRunning(coll) || AuditThreadFactory.isQueued(coll)) {
             AuditThreadFactory.finished(coll);
         }
+
         this.interrupt();
     }
 
