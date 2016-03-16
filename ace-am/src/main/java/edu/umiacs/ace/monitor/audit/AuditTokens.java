@@ -63,7 +63,7 @@ public final class AuditTokens extends Thread implements CancelCallback {
             new ConcurrentHashMap<>();
 //    private Map<TokenResponse, Token> tokenMap = new ConcurrentHashMap<TokenResponse, Token>();
     private Map<AceToken, MonitoredItem> itemMap =
-            new ConcurrentHashMap<AceToken, MonitoredItem>();
+        new ConcurrentHashMap<>();
     private static final Logger LOG = Logger.getLogger(AuditTokens.class);
     private Collection collection;
     private boolean cancel = false;
@@ -186,7 +186,7 @@ public final class AuditTokens extends Thread implements CancelCallback {
         } catch ( Throwable e ) {
             LOG.fatal("UNcaught exception in doWork()", e);
         } finally {
-            itemMap.clear(); // free memory in case this gets stuck hianging around
+            itemMap.clear(); // free memory in case this gets stuck hanging around
         }
 
     }
@@ -235,6 +235,7 @@ public final class AuditTokens extends Thread implements CancelCallback {
         TokenValidator validator = openIms();
 
         if ( validator == null ) {
+            runningThreads.remove(collection);
             return;
         }
         em = PersistUtil.getEntityManager();
