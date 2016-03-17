@@ -59,7 +59,7 @@ public class StatusServlet extends EntityManagerServlet {
     private static final String PAGE_NUMBER = "page";
 
     private static final long DEFAULT_PAGE = 0;
-    private static final int DEFAULT_COUNT = 20;
+    private static final int DEFAULT_COUNT = 100;
 
     // TODO: Add session fields for pagination and search params
     private static final String SESSION_WORKINGCOLLECTION = "workingCollection";

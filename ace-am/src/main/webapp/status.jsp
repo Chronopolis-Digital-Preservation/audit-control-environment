@@ -328,9 +328,9 @@
                 </td>
                 <td align="center">
                     Show per page:
-                    <a href="${page.getCount(20)}">20</a>
-                    <a href="${page.getCount(50)}">50</a>
                     <a href="${page.getCount(100)}">100</a>
+                    <a href="${page.getCount(500)}">500</a>
+                    <a href="${page.getCount(1000)}">1000</a>
                 </td>
                 <td align="right">
                     <%--
