@@ -167,6 +167,14 @@
                 margin-right: 5px;
             }
 
+            .form-select {
+                border: 1px solid #ccc;
+                width: 100%;
+                padding: 3px 8px;
+                margin-left: -3px;
+                margin-right: 5px;
+            }
+
             .btn {
                 padding: 2px;
                 width: 75px;
@@ -197,6 +205,14 @@
                 <div class="input">
                     <span class="input-group-addon">Collection</span>
                     <input type="text" class="form-input" id="coll-filter" name="collection" placeholder="Search Collection"/>
+                </div>
+                <div class="input">
+                    <span class="input-group-addon">State</span>
+                    <select name="state" id="state-filter" class="form-select">
+                        <c:forEach var="state" items="${states}">
+                           <option value="${state.state}">${state.name()}</option>
+                        </c:forEach>
+                    </select>
                 </div>
 
                 <button type="submit" class="btn" value="Submit"><span>Submit</span></button>

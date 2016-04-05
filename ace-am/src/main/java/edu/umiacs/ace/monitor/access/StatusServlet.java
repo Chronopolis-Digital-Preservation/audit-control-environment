@@ -30,8 +30,10 @@
 // $Id$
 package edu.umiacs.ace.monitor.access;
 
+import com.google.common.collect.ImmutableList;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.support.PageBean;
+import edu.umiacs.ace.monitor.support.CStateBean;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.util.Strings;
 import org.apache.log4j.Logger;
@@ -55,6 +57,7 @@ public class StatusServlet extends EntityManagerServlet {
     private static final Logger LOG = Logger.getLogger(StatusServlet.class);
 
     private static final String PAGE_COLLECTIONS = "collections";
+    private static final String PAGE_STATES = "states";
     private static final String PAGE_COUNT = "count";
     private static final String PAGE_NUMBER = "page";
 
@@ -72,6 +75,7 @@ public class StatusServlet extends EntityManagerServlet {
 
     // Search Params
     private static final String PARAM_GROUP = "group";
+    private static final String PARAM_STATE = "state";
     private static final String PARAM_COLLECTION_LIKE = "collection";
     private static final String PARAM_AUDIT_DATE = "audit";
 
@@ -99,6 +103,7 @@ public class StatusServlet extends EntityManagerServlet {
         int count = (int) getParameter(request, PARAM_COUNT, DEFAULT_COUNT);
         String group = getParameter(request, PARAM_GROUP, null);
         String collection = getParameter(request, PARAM_COLLECTION_LIKE, null);
+        String state = getParameter(request, PARAM_STATE, null);
         // String date = getParameter(request, PARAM_GROUP, null);
         PageBean pb = new PageBean((int) page, count, "Status");
 
@@ -116,13 +121,19 @@ public class StatusServlet extends EntityManagerServlet {
         List<String> queries = new ArrayList<>();
 
         if (!Strings.isEmpty(group)) {
-            queries.add("c.group = :group");
+            queries.add("c.group LIKE :group");
             pb.addParam(PARAM_GROUP, group);
         }
 
         if (!Strings.isEmpty(collection)) {
             queries.add("c.name LIKE :collection");
             pb.addParam(PARAM_COLLECTION_LIKE, collection);
+        }
+
+        // Enforce that the state is not empty, or larger than 1 character
+        if (!Strings.isEmpty(state) && state.length() == 1) {
+            queries.add("c.state = :state");
+            pb.addParam(PARAM_STATE, state);
         }
 
         queryString.append("SELECT c FROM Collection c");
@@ -136,7 +147,7 @@ public class StatusServlet extends EntityManagerServlet {
         while (it.hasNext()) {
             String query = it.next();
             params.append(" ")
-                    .append(query);
+                  .append(query);
             if (it.hasNext()) {
                 params.append(" AND");
             }
@@ -156,13 +167,18 @@ public class StatusServlet extends EntityManagerServlet {
         Query countQuery = em.createQuery(countString.toString());
 
         if (!Strings.isEmpty(group)) {
-            query.setParameter(PARAM_GROUP, group);
-            countQuery.setParameter(PARAM_GROUP, group);
+            query.setParameter(PARAM_GROUP, "%" + group + "%");
+            countQuery.setParameter(PARAM_GROUP, "%" + group + "%");
         }
 
         if (!Strings.isEmpty(collection)) {
             query.setParameter(PARAM_COLLECTION_LIKE, "%" + collection + "%");
             countQuery.setParameter(PARAM_COLLECTION_LIKE, "%" + collection + "%");
+        }
+
+        if (!Strings.isEmpty(state) && state.length() == 1) {
+            query.setParameter(PARAM_STATE, state.charAt(0));
+            countQuery.setParameter(PARAM_STATE, state.charAt(0));
         }
 
         items = query.getResultList();
@@ -208,6 +224,7 @@ public class StatusServlet extends EntityManagerServlet {
         }
 
         request.setAttribute(PAGE_COLLECTIONS, collections);
+        request.setAttribute(PAGE_STATES, ImmutableList.copyOf(CStateBean.values()));
         request.setAttribute(PAGE_COUNT, count);
         request.setAttribute(PAGE_NUMBER, pb);
         if (hasJson(request)) {
