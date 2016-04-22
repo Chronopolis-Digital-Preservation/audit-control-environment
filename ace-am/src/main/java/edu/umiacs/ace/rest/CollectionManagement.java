@@ -7,6 +7,7 @@ package edu.umiacs.ace.rest;
 
 import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.driver.StorageDriverFactory;
+import edu.umiacs.ace.monitor.access.CollectionCountContext;
 import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
@@ -150,6 +151,7 @@ public class CollectionManagement {
         EntityTransaction trans = em.getTransaction();
         trans.begin();
         em.persist(coll);
+        CollectionCountContext.incrementTotalCollections();
         trans.commit();
         em.close();
 

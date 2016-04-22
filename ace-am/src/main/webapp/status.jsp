@@ -1,6 +1,6 @@
 <%@page contentType="text/html"%>
 <%@page pageEncoding="UTF-8"%>
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%> 
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@taglib tagdir="/WEB-INF/tags" prefix="h" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@taglib uri="/WEB-INF/tlds/monitor" prefix="d"%>
@@ -80,10 +80,14 @@
                 background-color: #FFFFFF;
             }
 
+            #linktable {
+                width: 655px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
             #threaddetailsTD:hover div {
                 display: block;
-
-
             }
 
             #threaddetailsDIV {
@@ -128,6 +132,57 @@
             {
                 background-color: #e8e8e8;
             }
+
+            #searchtable {
+                margin-top: 10px;
+                margin-bottom: -10px;
+                margin-left: auto;
+                margin-right: auto;
+                width: 650px;
+            }
+
+            .input {
+                padding: 2px;
+                display: flex;
+                width: 650px;
+            }
+
+            .input-group-addon {
+                border: 1px solid #ccc;
+                font-size: 12px;
+                background-color: #e8e8e8;
+                text-align: center;
+                width: 75px;
+                height: 20px;
+                line-height: 20px;
+                padding: 3px 10px;
+            }
+
+            .form-input {
+                border: 1px solid #ccc;
+                width: 100%;
+                height: 20px;
+                padding: 3px 8px;
+                margin-left: -1px;
+                margin-right: 5px;
+            }
+
+            .form-select {
+                border: 1px solid #ccc;
+                width: 100%;
+                padding: 3px 8px;
+                margin-left: -3px;
+                margin-right: 5px;
+            }
+
+            .btn {
+                padding: 2px;
+                width: 75px;
+                height: 25px;
+                border: 1px solid #e8e8e8;
+                margin-left: 2px;
+                margin-top: 2px;
+            }
         </style>
     </head>
 
@@ -141,6 +196,28 @@
 
         </c:if>
 
+        <div id="searchtable">
+            <form method="GET" role="form">
+                <div class="input">
+                    <span class="input-group-addon">Group</span>
+                    <input type="text" class="form-input" id="group-filter" name="group" placeholder="Search Group"/>
+                </div>
+                <div class="input">
+                    <span class="input-group-addon">Collection</span>
+                    <input type="text" class="form-input" id="coll-filter" name="collection" placeholder="Search Collection"/>
+                </div>
+                <div class="input">
+                    <span class="input-group-addon">State</span>
+                    <select name="state" id="state-filter" class="form-select">
+                        <c:forEach var="state" items="${states}">
+                           <option value="${state.state}">${state.name()}</option>
+                        </c:forEach>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn" value="Submit"><span>Submit</span></button>
+            </form>
+        </div>
         <table id="statustable">
             <thead>
                 <td></td><td width="45%">Collection Name</td>
@@ -201,7 +278,7 @@
                         </c:choose>
                     </td>
                     <td>
-                        <a href="Status?collectionid=${item.collection.id}">${item.collection.name}</a>
+                        <a href="Status?collectionid=${item.collection.id}&page=${page.page}&count=${page.count}">${item.collection.name}</a>
                     </td>
                     <td>${item.collection.storage}</td>
                     <td><h:DefaultValue test="${item.totalFiles > -1}" success="${item.totalFiles}" failure="Unknown" /></td>
@@ -255,6 +332,30 @@
                         <c:otherwise>Automated auditing active.</c:otherwise>
                     </c:choose></td></tr>
 
+        </table>
+
+       <table id="linktable">
+            <tr>
+                <td align="left">
+                    <%-- <a href="Status?count=${count}">|&lt;</a>&nbsp;&nbsp;&nbsp;
+                    <a href="Status?page=${page - 1}&count=${count}">&lt;&lt;</a> --%>
+                    <a href="${page.first}">|&lt;</a>&nbsp;&nbsp;&nbsp;
+                    <a href="${page.previous}">&lt;&lt;</a>
+                </td>
+                <td align="center">
+                    Show per page:
+                    <a href="${page.getCount(100)}">100</a>
+                    <a href="${page.getCount(500)}">500</a>
+                    <a href="${page.getCount(1000)}">1000</a>
+                </td>
+                <td align="right">
+                    <%--
+                    <a href="Status?page=${page + 1}&count=${count}">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;
+                    <a href="Status?count=${count}&start=0&top=0">&gt;|</a> --%>
+                    <a href="${page.next}">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;
+                    <a href="${page.end}">&gt;|</a>
+                </td>
+            </tr>
         </table>
 
         <jsp:include page="footer.jsp" />

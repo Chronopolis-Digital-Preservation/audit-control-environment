@@ -33,17 +33,16 @@ package edu.umiacs.ace.monitor.access.browse;
 
 import edu.umiacs.ace.hashtree.Proof;
 import edu.umiacs.ace.hashtree.ProofValidator;
-import edu.umiacs.ace.monitor.core.MonitoredItem;
-import edu.umiacs.ace.util.EntityManagerServlet;
+import edu.umiacs.ace.monitor.access.browse.DirectoryTree.DirectoryNode;
 import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.audit.AuditTokens;
-import edu.umiacs.ace.monitor.access.browse.DirectoryTree.DirectoryNode;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.MonitoredItem;
+import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.util.HashValue;
 import edu.umiacs.ace.util.TokenUtil;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import org.apache.log4j.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.RequestDispatcher;
@@ -51,7 +50,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.apache.log4j.Logger;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Servlet to manage browsing a collection. This will store a directorytree in
@@ -102,6 +103,7 @@ public class BrowseServlet extends EntityManagerServlet {
                 isRunning = true;
             }
             dt = new DirectoryTree(c);
+            request.setAttribute("collection", c);
             session.setAttribute(SESSION_DIRECTORY_TREE, dt);
         } else if ( itemId > 0 ) {
             LOG.trace("Toggling item: " + itemId);
@@ -114,6 +116,8 @@ public class BrowseServlet extends EntityManagerServlet {
                     AuditThreadFactory.isQueued(c)) {
                 isRunning = true;
             }
+
+            request.setAttribute("collection", c);
             session.setAttribute(SESSION_FILE,
                     loadFileBean(dt.getDirectoryNode(itemId), em,c));
             if ( dt.getDirectoryNode(itemId).isDirectory() ) {
@@ -131,7 +135,12 @@ public class BrowseServlet extends EntityManagerServlet {
         dispatcher.forward(request, response);
     }
 
-    private FileBean loadFileBean( DirectoryNode node, EntityManager em,Collection c ) {
+    private FileBean loadFileBean( DirectoryNode node, EntityManager em, Collection c ) {
+        // avoid possible null references below
+        if (node == null) {
+            return null;
+        }
+
         FileBean retBean = new FileBean();
 
         try {

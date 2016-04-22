@@ -3,6 +3,9 @@ package edu.umiacs.ace.util;
 import edu.umiacs.ace.monitor.core.Collection;
 
 /**
+ * Encapsulate metadata about a Runnable to keep track of information regarding
+ * the type of task being run
+ *
  * Created by shake on 9/11/15.
  */
 public class Submittable<V extends Runnable> implements Comparable<Submittable> {

@@ -9,21 +9,14 @@ import edu.umiacs.ace.digest.DigestFactory;
 import edu.umiacs.ace.digest.DigestProvider;
 import edu.umiacs.ace.ims.processor.RoundProcessors;
 import edu.umiacs.ace.ims.processor.WitnessPublisher;
-import edu.umiacs.ace.server.exception.StartupException;
 import edu.umiacs.ace.ims.system.InitializeLocal;
 import edu.umiacs.ace.ims.tokenclass.TokenClass;
 import edu.umiacs.ace.ims.tokenclass.TokenClassLocal;
 import edu.umiacs.ace.server.ServletContextParameters;
 import edu.umiacs.ace.server.StartupBanner;
+import edu.umiacs.ace.server.exception.StartupException;
 import edu.umiacs.util.Parameters;
 import edu.umiacs.util.StringListBuilder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import javax.ejb.EJB;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import org.apache.log4j.Logger;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -33,7 +26,27 @@ import org.quartz.Trigger;
 import org.quartz.TriggerUtils;
 import org.quartz.impl.StdSchedulerFactory;
 
-import static edu.umiacs.ace.ims.IMSParameters.*;
+import javax.ejb.EJB;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static edu.umiacs.ace.ims.IMSParameters.DEFAULT_IMMEDIATE_TOKEN_RESPONSE_TIMEOUT;
+import static edu.umiacs.ace.ims.IMSParameters.DEFAULT_MAXIMUM_QUEUED_REQUESTS;
+import static edu.umiacs.ace.ims.IMSParameters.DEFAULT_MAXIMUM_TOKEN_STORE_AGE;
+import static edu.umiacs.ace.ims.IMSParameters.DEFAULT_REQUEST_PERMIT_TIMEOUT;
+import static edu.umiacs.ace.ims.IMSParameters.DEFAULT_THREAD_SHUTDOWN_TIMEOUT;
+import static edu.umiacs.ace.ims.IMSParameters.DEFAULT_TOKEN_PERSISTENCE_BATCH_SIZE;
+import static edu.umiacs.ace.ims.IMSParameters.IMMEDIATE_TOKEN_RESPONSE_TIMEOUT;
+import static edu.umiacs.ace.ims.IMSParameters.MAXIMUM_QUEUED_REQUESTS;
+import static edu.umiacs.ace.ims.IMSParameters.MAXIMUM_TOKEN_STORE_AGE;
+import static edu.umiacs.ace.ims.IMSParameters.PROCESSOR_PREFIX;
+import static edu.umiacs.ace.ims.IMSParameters.REQUEST_PERMIT_TIMEOUT;
+import static edu.umiacs.ace.ims.IMSParameters.THREAD_SHUTDOWN_TIMEOUT;
+import static edu.umiacs.ace.ims.IMSParameters.TOKEN_PERSISTENCE_BATCH_SIZE;
 
 /**
  * Web application lifecycle listener.
@@ -101,7 +114,7 @@ public class ApplicationListener implements ServletContextListener
 
         trigger.setName("cleanTrigger");
         trigger.setStartTime(new Date());
-        
+
         try
         {
             scheduler.scheduleJob(jobDetail, trigger);
@@ -148,11 +161,10 @@ public class ApplicationListener implements ServletContextListener
 
             scheduler.start();
             scheduler.scheduleJob(jobDetail, trigger);
-            Log.system("Scheduler started");
         }
         catch ( SchedulerException ex )
         {
-            throw new StartupException("Unexpected exception: " +
+            throw new StartupException("Unexpected exception starting PublishJob: " +
                     ex.getMessage(), ex);
         }
     }

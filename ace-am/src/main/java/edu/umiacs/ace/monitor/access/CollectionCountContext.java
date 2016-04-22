@@ -30,23 +30,25 @@
 // $Id$
 package edu.umiacs.ace.monitor.access;
 
-import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.sql.SQL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import org.apache.log4j.Logger;
+import org.apache.log4j.NDC;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Class to gather a count of all collections at startup.
@@ -70,6 +72,7 @@ public class CollectionCountContext implements ServletContextListener {
     private static Map<Collection, Long> totalSizeMap = new HashMap<Collection, Long>();
     private static Map<Collection, Long> fileRemoteMissing = new HashMap<Collection, Long>();
     private static Map<Collection, Long> fileRemoteCorrupt = new HashMap<Collection, Long>();
+    private static AtomicInteger totalCollections = new AtomicInteger(0);
     private static Lock lock = new ReentrantLock();
     private static boolean abort = false;
 
@@ -99,6 +102,7 @@ public class CollectionCountContext implements ServletContextListener {
                                 return;
                             }
                             queryCollection((Collection) o);
+                            incrementTotalCollections();
                         }
                         em.close();
                     } catch (Exception e) {
@@ -206,6 +210,18 @@ public class CollectionCountContext implements ServletContextListener {
             return fileRemoteCorrupt.get(c);
         }
         return -1;
+    }
+
+    public static void incrementTotalCollections() {
+        totalCollections.incrementAndGet();
+    }
+
+    public static void decrementTotalCollections() {
+        totalCollections.decrementAndGet();
+    }
+
+    public static int getTotalCollections() {
+        return totalCollections.get();
     }
 
     /**

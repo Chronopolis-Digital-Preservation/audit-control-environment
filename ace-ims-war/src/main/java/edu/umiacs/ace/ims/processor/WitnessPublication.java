@@ -13,6 +13,8 @@ import edu.umiacs.ace.ims.witness.Witness;
 import edu.umiacs.ace.ims.witness.WitnessLocal;
 import edu.umiacs.ace.server.ServiceLocator;
 import edu.umiacs.ace.util.HashValue;
+
+import javax.ejb.EJB;
 import java.security.MessageDigest;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +30,7 @@ import java.util.Random;
 public class WitnessPublication
 {
 
+    @EJB(name = "WitnessBean")
     private WitnessLocal witnessBean =
             ServiceLocator.getInstance().getLocal(WitnessLocal.class);
     private TokenClass tokenClass;

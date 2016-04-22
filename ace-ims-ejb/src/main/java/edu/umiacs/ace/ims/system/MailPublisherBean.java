@@ -5,9 +5,7 @@
 package edu.umiacs.ace.ims.system;
 
 import edu.umiacs.util.Check;
-import edu.umiacs.util.Strings;
-import java.util.ArrayList;
-import java.util.List;
+
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.mail.Message;
@@ -20,6 +18,8 @@ import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -56,7 +56,7 @@ public class MailPublisherBean implements MailPublisherLocal
 
     public List<InternetAddress> listRecipients()
     {
-        List<InternetAddress> recipients = new ArrayList();
+        List<InternetAddress> recipients = new ArrayList<>();
         Query query = em.createNamedQuery("MailRecipient.list");
         for (Object o : query.getResultList())
         {

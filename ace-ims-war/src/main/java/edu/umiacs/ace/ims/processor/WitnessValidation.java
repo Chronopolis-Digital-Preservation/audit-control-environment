@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.persistence.NoResultException;
 import org.apache.log4j.Logger;
@@ -31,10 +32,14 @@ import org.apache.log4j.Logger;
 public class WitnessValidation
 {
 
+    @EJB(name = "WitnessBean")
     private WitnessLocal witnessBean =
             ServiceLocator.getInstance().getLocal(WitnessLocal.class);
+
+    @EJB(name = "RoundBean")
     private RoundLocal roundBean =
             ServiceLocator.getInstance().getLocal(RoundLocal.class);
+
     private Map<Long, Witness> witnessMap = new HashMap<Long, Witness>();
     private Map<Witness, HashTree> hashMap = new HashMap<Witness, HashTree>();
     private static final Logger print = Logger.getLogger(WitnessValidation.class);
