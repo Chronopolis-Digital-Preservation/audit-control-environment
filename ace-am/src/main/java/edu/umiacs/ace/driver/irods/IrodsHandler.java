@@ -36,11 +36,12 @@ import edu.umiacs.ace.driver.filter.PathFilter;
 import edu.umiacs.ace.util.HashValue;
 import edu.umiacs.irods.operation.BulkFileHandler;
 import edu.umiacs.srb.util.StringUtil;
+import org.apache.log4j.Logger;
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.LinkedBlockingQueue;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -61,7 +62,6 @@ public class IrodsHandler implements BulkFileHandler {
      * @param readyList
      * @param filter
      * @param digestAlgorithm
-     * @param base prefix to add to returned files (no trailing /)
      */
     public IrodsHandler( LinkedBlockingQueue<FileBean> readyList,
             PathFilter filter, String digestAlgorithm ) {

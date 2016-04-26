@@ -43,7 +43,8 @@ import edu.umiacs.ace.util.TokenUtil;
 import edu.umiacs.util.Strings;
 import org.apache.log4j.Logger;
 
-import java.text.DecimalFormat;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -51,8 +52,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.RecursiveAction;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 
 /**
  * A recursive action for fork join pools. Splits its work up to worker threads
@@ -143,9 +142,9 @@ public class IngestThread extends RecursiveAction {
     }
 
     public void run() {
-        updatedTokens = new HashSet<String>();
-        newTokens = new HashSet<String>();
-        unchangedTokens = new HashSet<String>();
+        updatedTokens = new HashSet<>();
+        newTokens = new HashSet<>();
+        unchangedTokens = new HashSet<>();
         MonitoredItemManager mim = new MonitoredItemManager(em);
         MonitoredItem item = null;
         session = System.currentTimeMillis();
@@ -249,7 +248,7 @@ public class IngestThread extends RecursiveAction {
             String path, Collection coll) {
         // We don't have a FileBean, so build the pathList ourselves
         StringBuilder fullPath = new StringBuilder(path);
-        List <String> pathList = new LinkedList<String>();
+        List <String> pathList = new LinkedList<>();
         int index = 0;
         if (fullPath.charAt(0) != '/') {
             fullPath.insert(0, "/");

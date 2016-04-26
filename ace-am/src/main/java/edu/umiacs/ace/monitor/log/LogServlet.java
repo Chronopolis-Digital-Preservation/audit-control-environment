@@ -31,16 +31,12 @@
 
 package edu.umiacs.ace.monitor.log;
 
+import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.util.PersistUtil;
-import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.util.Strings;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.apache.log4j.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.servlet.RequestDispatcher;
@@ -48,7 +44,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.apache.log4j.Logger;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Event log querying servlet

@@ -15,14 +15,15 @@ import edu.umiacs.ace.ims.ws.RoundResponse;
 import edu.umiacs.ace.server.ServiceLocator;
 import edu.umiacs.ace.server.exception.InvalidParameterException;
 import edu.umiacs.ace.util.HashValue;
+import org.apache.log4j.Logger;
+
+import javax.ejb.EJB;
+import javax.ejb.EJBException;
+import javax.persistence.NoResultException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import javax.ejb.EJB;
-import javax.ejb.EJBException;
-import javax.persistence.NoResultException;
-import org.apache.log4j.Logger;
 
 /**
  * Class for generating proofs linking supplied rounds to witness values
@@ -120,7 +121,6 @@ public class WitnessValidation
     /**
      * Test to see if we've loaded the witness yet. If we have, update the cache to
      * reflect that.
-     * @param l roundId to look for
      * @param rs
      * @return
      */
