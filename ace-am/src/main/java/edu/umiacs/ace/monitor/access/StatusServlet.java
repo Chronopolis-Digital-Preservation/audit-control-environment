@@ -44,6 +44,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -101,6 +102,8 @@ public class StatusServlet extends EntityManagerServlet {
 
         long page = getParameter(request, PARAM_PAGE, DEFAULT_PAGE);
         int count = (int) getParameter(request, PARAM_COUNT, DEFAULT_COUNT);
+
+        // local getParameter so that the session is checked as well
         String group = getParameter(request, PARAM_GROUP, null);
         String collection = getParameter(request, PARAM_COLLECTION_LIKE, null);
         String state = getParameter(request, PARAM_STATE, null);
@@ -120,20 +123,21 @@ public class StatusServlet extends EntityManagerServlet {
 
         List<String> queries = new ArrayList<>();
 
+        // TODO: Can probably tidy this up a bit
         if (!Strings.isEmpty(group)) {
             queries.add("c.group LIKE :group");
-            pb.addParam(PARAM_GROUP, group);
+            request.setAttribute(PARAM_GROUP, group);
         }
 
         if (!Strings.isEmpty(collection)) {
             queries.add("c.name LIKE :collection");
-            pb.addParam(PARAM_COLLECTION_LIKE, collection);
+            request.setAttribute(PARAM_COLLECTION_LIKE, collection);
         }
 
         // Enforce that the state is not empty, or larger than 1 character
         if (!Strings.isEmpty(state) && state.length() == 1) {
             queries.add("c.state = :state");
-            pb.addParam(PARAM_STATE, state);
+            request.setAttribute(PARAM_STATE, state);
         }
 
         queryString.append("SELECT c FROM Collection c");
@@ -166,6 +170,7 @@ public class StatusServlet extends EntityManagerServlet {
 
         Query countQuery = em.createQuery(countString.toString());
 
+        // TODO: Can probably tidy this up a bit
         if (!Strings.isEmpty(group)) {
             query.setParameter(PARAM_GROUP, "%" + group + "%");
             countQuery.setParameter(PARAM_GROUP, "%" + group + "%");
@@ -191,33 +196,9 @@ public class StatusServlet extends EntityManagerServlet {
             pb.update(totalResults);
         }
 
+        setWorkingCollection(request, em);
+
         collections = new ArrayList<>();
-
-        long collectionId;
-        String idParam = request.getParameter(PARAM_COLLECTION_ID);
-        collectionId = Strings.isValidLong(idParam) ? Long.parseLong(idParam) : -1;
-        CollectionSummaryBean workingCollectionBean = (CollectionSummaryBean) request.getSession().getAttribute(SESSION_WORKINGCOLLECTION);
-
-        if (Strings.isValidLong(idParam) && -1 == collectionId) {
-            // clear the working collection
-            request.getSession().removeAttribute(SESSION_WORKINGCOLLECTION);
-
-        } else if (Strings.isValidLong(idParam)                                            // valid param
-                && (workingCollectionBean == null                                          // no working collection
-                || !workingCollectionBean.getCollection().getId().equals(collectionId))) { // or one which does not equal our requested collection
-            // Get the requested collection from the db and set it as our working collection
-            Collection workingCollection = em.find(Collection.class, collectionId);
-            if (workingCollection != null) {
-                workingCollectionBean = createCollectionSummary(workingCollection);
-                request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, workingCollectionBean);
-            }
-
-        } else {
-            // Continue using the current working collection
-            request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, workingCollectionBean);
-        }
-
-
         for (Collection col : items) {
             CollectionSummaryBean csb = createCollectionSummary(col);
             collections.add(csb);
@@ -235,6 +216,31 @@ public class StatusServlet extends EntityManagerServlet {
             dispatcher = request.getRequestDispatcher("status.jsp");
         }
         dispatcher.forward(request, response);
+    }
+
+    private void setWorkingCollection(HttpServletRequest request, EntityManager em) {
+        long collectionId;
+        String idParam = request.getParameter(PARAM_COLLECTION_ID);
+        collectionId = Strings.isValidLong(idParam) ? Long.parseLong(idParam) : -1;
+        CollectionSummaryBean workingCollectionBean = (CollectionSummaryBean) request.getSession().getAttribute(SESSION_WORKINGCOLLECTION);
+
+        if (Strings.isValidLong(idParam) && -1 == collectionId) {
+            // clear the working collection
+            request.getSession().removeAttribute(SESSION_WORKINGCOLLECTION);
+        } else if (Strings.isValidLong(idParam)                                            // valid param
+                && (workingCollectionBean == null                                          // no working collection
+                || !workingCollectionBean.getCollection().getId().equals(collectionId))) { // or one which does not equal our requested collection
+            // Get the requested collection from the db and set it as our working collection
+            Collection workingCollection = em.find(Collection.class, collectionId);
+            if (workingCollection != null) {
+                workingCollectionBean = createCollectionSummary(workingCollection);
+                request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, workingCollectionBean);
+            }
+
+        } else {
+            // Continue using the current working collection
+            request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, workingCollectionBean);
+        }
     }
 
     private CollectionSummaryBean createCollectionSummary(Collection col) {
@@ -255,7 +261,31 @@ public class StatusServlet extends EntityManagerServlet {
     }
 
     private boolean hasCsv(HttpServletRequest request) {
-        String value = (String) request.getParameter(PARAM_CSV);
+        String value = request.getParameter(PARAM_CSV);
         return !Strings.isEmpty(value);
+    }
+
+    @Override
+    public String getParameter(HttpServletRequest request, String paramName, String defaultValue) {
+        HttpSession s = request.getSession();
+        String requestParam = request.getParameter(paramName);
+        Object sessionAttr = s.getAttribute(paramName);
+
+        // req param: not null and not empty -> use
+        // session attr not null and req param null -> use
+        // session attr not null and req param empty -> default
+        if (!Strings.isEmpty(requestParam)) {
+            System.out.println("retrieving http param: " + requestParam);
+            s.setAttribute(paramName, requestParam);
+            return requestParam;
+        } else if (sessionAttr != null
+                && requestParam == null
+                && !Strings.isEmpty(String.valueOf(sessionAttr))) {
+            System.out.println("retrieving session attr: " + sessionAttr);
+            return String.valueOf(sessionAttr);
+        } else {
+            s.setAttribute(paramName, defaultValue);
+            return defaultValue;
+        }
     }
 }
