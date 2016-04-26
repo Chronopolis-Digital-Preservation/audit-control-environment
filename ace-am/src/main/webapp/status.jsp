@@ -200,17 +200,24 @@
             <form method="GET" role="form">
                 <div class="input">
                     <span class="input-group-addon">Group</span>
-                    <input type="text" class="form-input" id="group-filter" name="group" placeholder="Search Group"/>
+                    <input type="text" class="form-input" id="group-filter" name="group" placeholder="Search Group" value="${group}"/>
                 </div>
                 <div class="input">
                     <span class="input-group-addon">Collection</span>
-                    <input type="text" class="form-input" id="coll-filter" name="collection" placeholder="Search Collection"/>
+                    <input type="text" class="form-input" id="coll-filter" name="collection" placeholder="Search Collection" value="${collection}"/>
                 </div>
                 <div class="input">
                     <span class="input-group-addon">State</span>
                     <select name="state" id="state-filter" class="form-select">
-                        <c:forEach var="state" items="${states}">
-                           <option value="${state.state}">${state.name()}</option>
+                        <c:forEach var="s" items="${states}">
+                            <c:choose>
+                                <c:when test="${s.state eq state}">
+                                    <option value="${s.state}" selected="selected">${s.name()}</option>
+                                </c:when>
+                                <c:otherwise>
+                                    <option value="${s.state}">${s.name()}</option>
+                                </c:otherwise>
+                            </c:choose>
                         </c:forEach>
                     </select>
                 </div>
