@@ -4,7 +4,7 @@
   <parent>
     <artifactId>ace</artifactId>
     <groupId>edu.umiacs.ace</groupId>
-    <version>1.10-SNAPSHOT</version>
+    <version>1.11-SNAPSHOT</version>
   </parent>
   <groupId>edu.umiacs.ace</groupId>
   <artifactId>ace-common</artifactId>
