@@ -215,7 +215,7 @@ def doPull(shell, arg, file, contentID=None):
 
     ## Open the file to write in binary, and create if needed
     with open(file, 'w+b') as fnew:
-        for chunk in req.iter_content(8142)
+        for chunk in req.iter_content(8142):
             fnew.write(chunk)
 
     ## validate
