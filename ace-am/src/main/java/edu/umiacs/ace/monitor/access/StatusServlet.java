@@ -108,7 +108,7 @@ public class StatusServlet extends EntityManagerServlet {
         String collection = getParameter(request, PARAM_COLLECTION_LIKE, null);
         String state = getParameter(request, PARAM_STATE, null);
         // String date = getParameter(request, PARAM_GROUP, null);
-        PageBean pb = new PageBean((int) page, count, "/");
+        PageBean pb = new PageBean((int) page, count, "");
 
         long offset = page * count;
 
