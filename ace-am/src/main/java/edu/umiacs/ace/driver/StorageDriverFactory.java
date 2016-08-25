@@ -33,16 +33,17 @@ package edu.umiacs.ace.driver;
 import edu.umiacs.ace.driver.benchmark.BenchmarkAccess;
 import edu.umiacs.ace.driver.irods.IrodsAccess;
 import edu.umiacs.ace.driver.localfile.LocalFileAccess;
-import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.driver.srb.SrbAccess;
 import edu.umiacs.ace.driver.swap.SwapFileAccess;
+import edu.umiacs.ace.monitor.core.Collection;
+
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.EntityManager;
 
 /**
  * Factory to register all storage resources supported by this monitor.
@@ -56,7 +57,7 @@ public final class StorageDriverFactory {
      * Map to track descriptive storage type name to implementing class
      */
     private static final Map<String, Class<? extends StorageDriver>> implementationMap =
-            new HashMap<String, Class<? extends StorageDriver>>();
+            new HashMap<>();
 
     /**
      * All available storage gateways must be registered here
@@ -71,7 +72,7 @@ public final class StorageDriverFactory {
     }
 
     public static final List<String> listResources() {
-        List<String> lt = new ArrayList<String>(implementationMap.keySet());
+        List<String> lt = new ArrayList<>(implementationMap.keySet());
         Collections.sort(lt,comp);
         return lt;
     }

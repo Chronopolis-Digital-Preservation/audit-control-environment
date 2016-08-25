@@ -31,12 +31,12 @@
 
 package edu.umiacs.ace.monitor.peers;
 
-import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.peers.PartnerSiteContextListener.PartnerList;
 import edu.umiacs.ace.remote.StatusBean.CollectionBean;
-import java.io.IOException;
-import java.util.List;
+import edu.umiacs.ace.util.EntityManagerServlet;
+import org.apache.log4j.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
@@ -44,7 +44,8 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.log4j.Logger;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Add or remove peers from the list of available

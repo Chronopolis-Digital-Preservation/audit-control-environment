@@ -233,6 +233,7 @@ public final class IMSService
         }
     }
 
+    // TODO: This should really be in a circuit breaker type class
     private <E> E blockUntil(Method m, Object... args) throws Exception {
         boolean done = false;
         E fin = null;
