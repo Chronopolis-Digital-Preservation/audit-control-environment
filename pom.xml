@@ -37,10 +37,10 @@
             <name>ADAPT Project Repository</name>
         </repository>
         <repository>
-            <url>http://download.eclipse.org/rt/eclipselink/maven.repo</url>
-            <id>eclipselink</id>
+            <name>OSS Sonatype Staging</name>
+            <url>https://oss.sonatype.org/content/groups/staging</url>
+            <id>oss.sonatype.org</id>
             <layout>default</layout>
-            <name>Repository for library Library[eclipselink]</name>
         </repository>
         <repository>
             <id>central</id>

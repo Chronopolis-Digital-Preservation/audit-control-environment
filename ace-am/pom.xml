@@ -7,7 +7,6 @@
         <version>1.11-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>edu.umiacs.ace</groupId>
     <artifactId>ace-am</artifactId>
     <name>ace-am</name>
     <packaging>war</packaging>
@@ -102,12 +101,12 @@
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
-            <version>2.2.0</version>
+            <version>2.6.3</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
-            <artifactId>javax.persistence</artifactId>
-            <version>2.0.3</version>
+            <artifactId>org.eclipse.persistence.jpa</artifactId>
+            <version>2.6.3</version>
         </dependency>
 
         <dependency>
@@ -176,6 +175,12 @@
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.4</version>
         </dependency>
 
         <dependency>
