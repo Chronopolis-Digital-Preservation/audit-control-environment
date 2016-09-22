@@ -133,56 +133,7 @@
                 background-color: #e8e8e8;
             }
 
-            #searchtable {
-                margin-top: 10px;
-                margin-bottom: -10px;
-                margin-left: auto;
-                margin-right: auto;
-                width: 650px;
-            }
 
-            .input {
-                padding: 2px;
-                display: flex;
-                width: 650px;
-            }
-
-            .input-group-addon {
-                border: 1px solid #ccc;
-                font-size: 12px;
-                background-color: #e8e8e8;
-                text-align: center;
-                width: 75px;
-                height: 20px;
-                line-height: 20px;
-                padding: 3px 10px;
-            }
-
-            .form-input {
-                border: 1px solid #ccc;
-                width: 100%;
-                height: 20px;
-                padding: 3px 8px;
-                margin-left: -1px;
-                margin-right: 5px;
-            }
-
-            .form-select {
-                border: 1px solid #ccc;
-                width: 100%;
-                padding: 3px 8px;
-                margin-left: -3px;
-                margin-right: 5px;
-            }
-
-            .btn {
-                padding: 2px;
-                width: 75px;
-                height: 25px;
-                border: 1px solid #e8e8e8;
-                margin-left: 2px;
-                margin-top: 2px;
-            }
         </style>
     </head>
 
@@ -344,8 +295,6 @@
        <table id="linktable">
             <tr>
                 <td align="left">
-                    <%-- <a href="Status?count=${count}">|&lt;</a>&nbsp;&nbsp;&nbsp;
-                    <a href="Status?page=${page - 1}&count=${count}">&lt;&lt;</a> --%>
                     <a href="${page.first}">|&lt;</a>&nbsp;&nbsp;&nbsp;
                     <a href="${page.previous}">&lt;&lt;</a>
                 </td>
@@ -356,9 +305,6 @@
                     <a href="${page.getCount(1000)}">1000</a>
                 </td>
                 <td align="right">
-                    <%--
-                    <a href="Status?page=${page + 1}&count=${count}">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;
-                    <a href="Status?count=${count}&start=0&top=0">&gt;|</a> --%>
                     <a href="${page.next}">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;
                     <a href="${page.end}">&gt;|</a>
                 </td>
