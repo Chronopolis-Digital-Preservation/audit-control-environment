@@ -62,7 +62,7 @@ import java.util.concurrent.RecursiveAction;
 public class IngestThread extends RecursiveAction {
     private static final Logger LOG = Logger.getLogger(IngestThread.class);
 
-    // These only gets read from, never written to
+    // These only get read from, never written to
     private Map<String, Token> tokens;
     private Collection coll;
     private List<String> identifiers;
@@ -173,7 +173,8 @@ public class IngestThread extends RecursiveAction {
 
                     token.setParentCollection(coll);
 
-                    // Token 
+                    // Token
+                    // TODO: may be be able to do em.persist(item) and let the token get persisted along w/ it
                     em.persist(event[1]);
                     em.persist(token);
                     item.setToken(token);
