@@ -101,35 +101,48 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "MonitoredItem.listRemoteErrors", query =
     "SELECT m FROM MonitoredItem m WHERE (m.state = 'P' OR m.state = 'D') AND m.directory = false AND m.parentCollection = :coll"),
     @NamedQuery(name = "MonitoredItem.listLocalErrors", query =
-    "SELECT m FROM MonitoredItem m WHERE (m.state = 'C' OR m.state = 'M' OR m.state = 'T' OR m.state = 'I') AND m.directory = false AND m.parentCollection = :coll")
+    "SELECT m FROM MonitoredItem m WHERE (m.state = 'C' OR m.state = 'M' OR m.state = 'T' OR m.state = 'I') AND m.directory = false AND m.parentCollection = :coll"),
+    @NamedQuery(name = "MonitoredItem.updateMissing", query =
+    "UPDATE MonitoredItem SET state = 'M', stateChange = :date, lastVisited = :date WHERE parentCollection = :coll AND lastVisited < :date")
 })
 public class MonitoredItem implements Serializable, Comparable {
 
     private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false, columnDefinition = "VARCHAR(255) COLLATE utf8")
     private String path; // path relative to base directory
+
     @Column(columnDefinition = "VARCHAR(255) COLLATE utf8")
     private String parentPath;
+
     @Column(nullable = false)
     private boolean directory; // true if directory
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastSeen;
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date stateChange;
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastVisited;
+
     @ManyToOne
     @JoinColumn(nullable = false)
     private Collection parentCollection;
-    private String fileDigest;
+
     @Column(nullable = false)
     private char state;
+
     @ManyToOne(cascade = CascadeType.ALL)
     private Token token;
+
     private long size;
+    private String fileDigest;
 
     public void setId( Long id ) {
         this.id = id;
