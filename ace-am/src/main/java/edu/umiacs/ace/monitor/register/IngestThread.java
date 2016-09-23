@@ -174,14 +174,14 @@ public class IngestThread extends RecursiveAction {
                     token.setParentCollection(coll);
 
                     // Token 
-                    em.persist(event[1]);
-                    em.persist(token);
+                    // em.persist(token);
                     item.setToken(token);
 
                     //Finish adding the item
                     em.persist(event[0]);
-                    em.merge(item);
-                    numTransactions += 4;
+                    em.persist(event[1]);
+                    em.persist(item);
+                    numTransactions += 3;
 
                     newTokens.add(identifier);
                 }else{
@@ -193,7 +193,7 @@ public class IngestThread extends RecursiveAction {
                 // With large Token Stores, we get a large number of transactions
                 // Flushing and Clearing the EM helps to clear some memory
                 // TODO: W/ fork join this isn't needed anymore, unless we want to flush at a lower number
-                if ( numTransactions > 7000 ) {
+                if ( numTransactions > 30 ) {
                     em.flush();
                     em.clear();
                     numTransactions = 0;
@@ -229,12 +229,13 @@ public class IngestThread extends RecursiveAction {
         if ( update ) {
             LogEvent event = logManager.createItemEvent(LogEnum.TOKEN_INGEST_UPDATE,
                     identifier, coll.getDirectory() + identifier);
-            em.persist(token);
+            // em.persist(token);
             item.setToken(token);
+            // TODO: Why set 'I'? It's not necessarily invalid, maybe 'R' would be better
             item.setState('I');
             em.merge(item);
             em.persist(event);
-            numTransactions += 3;
+            numTransactions += 2;
             updatedTokens.add(identifier);
         }else{
             unchangedTokens.add(identifier);
@@ -286,8 +287,8 @@ public class IngestThread extends RecursiveAction {
         mi.setState(initialState);
         mi.setSize(size);
 
-        em.persist(mi);
-        numTransactions++;
+        // em.persist(mi);
+        // numTransactions++;
         return mi;
     }
 
