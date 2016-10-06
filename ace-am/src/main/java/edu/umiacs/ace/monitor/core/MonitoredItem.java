@@ -103,7 +103,7 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "MonitoredItem.listLocalErrors", query =
     "SELECT m FROM MonitoredItem m WHERE (m.state = 'C' OR m.state = 'M' OR m.state = 'T' OR m.state = 'I') AND m.directory = false AND m.parentCollection = :coll"),
     @NamedQuery(name = "MonitoredItem.updateMissing", query =
-    "UPDATE MonitoredItem SET state = 'M', stateChange = :date, lastVisited = :date WHERE parentCollection = :coll AND lastVisited < :date")
+    "UPDATE MonitoredItem SET state = 'M', stateChange = :date, lastVisited = :date WHERE parentCollection = :coll AND lastVisited < :date AND state != 'M'")
 })
 public class MonitoredItem implements Serializable, Comparable {
 
