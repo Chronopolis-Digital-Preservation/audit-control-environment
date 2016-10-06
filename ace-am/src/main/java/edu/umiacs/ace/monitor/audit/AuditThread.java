@@ -760,11 +760,11 @@ public final class AuditThread extends Thread implements CancelCallback {
 
         DataSource dataSource = PersistUtil.getDataSource();
         EntityManager em = PersistUtil.getEntityManager();
-        MonitoredItemManager mim = new MonitoredItemManager(em);
         EntityTransaction trans = em.getTransaction();
         trans.begin();
 
         try {
+            // Update the monitored item table
             Query query = em.createNamedQuery("MonitoredItem.updateMissing")
                 .setParameter("coll", coll)
                 .setParameter("date", d);
@@ -773,6 +773,7 @@ public final class AuditThread extends Thread implements CancelCallback {
             if (i > 0) {
                 LOG.info("Set " + i + " new missing items");
 
+                // Add log entries for the new missing items
                 Connection connection = dataSource.getConnection();
                 PreparedStatement ps = connection.prepareStatement("INSERT INTO logevent(session, path, date, logtype, collection_id) " +
                         "SELECT ?, path, NOW(), ?, parentcollection_id FROM monitored_item m WHERE m.parentcollection_id = ? AND m.state = ? AND m.statechange = ?");
@@ -788,7 +789,7 @@ public final class AuditThread extends Thread implements CancelCallback {
             trans.commit();
         } catch (SQLException e) {
             trans.rollback();
-            LOG.error(e);
+            LOG.error("SQL error, rolling back missing items and log entries", e);
         } finally {
             em.close();
         }
