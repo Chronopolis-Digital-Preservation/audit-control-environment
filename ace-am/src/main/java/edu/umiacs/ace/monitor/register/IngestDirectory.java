@@ -106,7 +106,7 @@ public class IngestDirectory extends RecursiveAction {
                 parent = Strings.cleanStringForXml(parent, '_');
                 createDirectory(pathList.get(i), parent);
 
-                if ( numTransactions > 10000 ) {
+                if ( numTransactions % 30 == 0 ) {
                     em.flush();
                     em.clear();
                 }
