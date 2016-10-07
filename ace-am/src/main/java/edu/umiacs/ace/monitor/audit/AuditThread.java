@@ -197,16 +197,6 @@ public final class AuditThread extends Thread implements CancelCallback {
             iterableItems.cancel();
         }
 
-        /*
-        if (batch != null) {
-            batch.close();
-        }
-
-        if (validator != null) {
-            validator.close();
-        }
-        */
-
         if (AuditThreadFactory.isRunning(coll) || AuditThreadFactory.isQueued(coll)) {
             AuditThreadFactory.finished(coll);
         }
@@ -711,8 +701,8 @@ public final class AuditThread extends Thread implements CancelCallback {
         if (parentName != null) {
             parentName = Strings.cleanStringForXml(parentName, '_');
             for (int i = 1; i < currentFile.getPathList().length; i++) {
-                String parent = (currentFile.getPathList().length > i + 1
-                        ? currentFile.getPathList()[i + 1] : null);
+                String parent = currentFile.getPathList().length > i + 1 ?
+                        currentFile.getPathList()[i + 1] : null;
                 parent = Strings.cleanStringForXml(parent, '_');
                 mim.createDirectory(currentFile.getPathList()[i], parent, coll);
             }
@@ -723,8 +713,7 @@ public final class AuditThread extends Thread implements CancelCallback {
 
     private String[] createMailList() {
         String addrs = SettingsUtil.getString(coll, ConfigConstants.ATTR_EMAIL_RECIPIENTS);
-        String[] maillist = (addrs == null ? null : addrs.split("\\s*,\\s*"));
-        return maillist;
+        return addrs == null ? null : addrs.split("\\s*,\\s*");
     }
 
     private void setCollectionState() {
@@ -793,32 +782,6 @@ public final class AuditThread extends Thread implements CancelCallback {
         } finally {
             em.close();
         }
-
-        /*
-        int idx = 0;
-        for (MonitoredItem mi : mim.listItemsBefore(coll, d)) {
-            LOG.trace("Updating missing item: " + mi.getPath());
-            LOG.trace("Item information: LS= " + mi.getLastSeen()
-                    + ", LV = " + mi.getLastVisited()
-                    + ", SC = " + mi.getStateChange()
-                    + "Audit started on: " + d);
-            if (mi.getState() != 'M'
-                && (mi.getStateChange() == null
-                    || d.after(mi.getStateChange()))) {
-                mi.setState('M');
-                mi.setStateChange(new Date());
-                em.persist(logManager.createItemEvent(LogEnum.FILE_MISSING,
-                        mi.getPath()));
-            }
-            mi.setLastVisited(new Date());
-            em.merge(mi);
-            idx++;
-            if (idx % 30 == 0) {
-                em.flush();
-                em.clear();
-            }
-        }
-        */
     }
 
     private void compareToPeers() {
