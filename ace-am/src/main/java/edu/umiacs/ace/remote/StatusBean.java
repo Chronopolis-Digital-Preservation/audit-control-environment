@@ -30,12 +30,13 @@
 // $Id$
 package edu.umiacs.ace.remote;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import edu.umiacs.util.Argument;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 /**
  *
