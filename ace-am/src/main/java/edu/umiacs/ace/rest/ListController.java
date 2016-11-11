@@ -5,15 +5,21 @@ import edu.umiacs.ace.util.PersistUtil;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Get a listing of groups/collections in ACE
+ *
  * Created by shake on 10/22/14.
  */
 @Path("/")
@@ -73,6 +79,33 @@ public class ListController {
             }
         }
         return groupless;
+    }
+
+    /**
+     * New API method to get all collections with query parameters
+     *
+     * @return
+     */
+    @GET
+    @Path("collections")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Collection> getCollections(@QueryParam("group") String group,
+                                           @QueryParam("active") Boolean active,
+                                           @QueryParam("corrupt") Boolean corrupt) {
+        EntityManager entityManager = PersistUtil.getEntityManager();
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Collection> cq = cb.createQuery(Collection.class);
+        Root<Collection> coll = cq.from(Collection.class);
+        cq.select(coll);
+        if (active != null && active) {
+            cq.where(cb.equal(coll.get("state"), 'A'));
+        }
+
+        if (corrupt != null && corrupt) {
+            cq.where(cb.equal(coll.get("state"), 'E'));
+        }
+
+        return entityManager.createQuery(cq).getResultList();
     }
 
 }
