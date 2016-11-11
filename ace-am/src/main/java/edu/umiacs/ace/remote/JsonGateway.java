@@ -31,6 +31,8 @@
 
 package edu.umiacs.ace.remote;
 
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.umiacs.ace.monitor.peers.PartnerSite;
 import edu.umiacs.util.Strings;
 import org.apache.http.HttpResponse;
@@ -42,8 +44,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,7 +78,7 @@ public class JsonGateway {
         mapper = new ObjectMapper();
 
         DeserializationConfig cfg = mapper.getDeserializationConfig();
-        cfg.setDateFormat(new SimpleDateFormat("EEE MMM dd hh:mm:ss zzz yyyy"));
+        cfg.with(new SimpleDateFormat("EEE MMM dd hh:mm:ss zzz yyyy"));
     }
 
     public static final JsonGateway getGateway() {

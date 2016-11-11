@@ -31,8 +31,9 @@
 
 package edu.umiacs.ace.remote;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.List;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  *

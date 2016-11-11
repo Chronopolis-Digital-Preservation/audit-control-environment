@@ -2,7 +2,6 @@ package edu.umiacs.ace.rest;
 
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.util.PersistUtil;
-import org.codehaus.jettison.json.JSONArray;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -28,11 +27,10 @@ public class ListController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("groups")
-    public JSONArray getGroups() {
+    public List<String> getGroups() {
         EntityManager em = PersistUtil.getEntityManager();
         Query q = em.createNamedQuery("Collection.listGroups");
-        List<String> groups = q.getResultList();
-        return new JSONArray(q.getResultList());
+        return q.getResultList();
     }
 
     /**
