@@ -254,7 +254,7 @@ public final class HashTreeBuilder {
         // Find out how many nodes are going to be in the parent level
         int parentNodeCount = size / order;
         List<HashTree.Node> parentLevel =
-                new ArrayList<HashTree.Node>(parentNodeCount);
+                new ArrayList<>(parentNodeCount);
 
         // Index for iterating through the nodes in this level
         int iterIndex = 0;
@@ -290,7 +290,7 @@ public final class HashTreeBuilder {
 
             // Construct the parent node
             List<HashTree.Node> childrenNodes =
-                    new ArrayList<HashTree.Node>(childrenNodeCount);
+                    new ArrayList<>(childrenNodeCount);
             HashTree.Node parentNode = new HashTree.Node();
 
             for ( int i = iterIndex, childIndex = 0;

@@ -34,6 +34,11 @@ package edu.umiacs.ace.monitor.core;
 import edu.umiacs.ace.monitor.log.LogEnum;
 import edu.umiacs.ace.monitor.log.LogEventManager;
 import edu.umiacs.ace.util.PersistUtil;
+import org.apache.log4j.Logger;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -42,10 +47,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Query;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -58,13 +59,13 @@ public class MonitoredItemManager {
             MonitoredItemManager.class);
     EntityManager em;
     // TODO: This may leak...
-    private Set<String> existingParents = new HashSet<String>();
+    private Set<String> existingParents = new HashSet<>();
 
     public MonitoredItemManager( EntityManager em ) {
         this.em = em;
     }
 
-    public List<MonitoredItem> listItemsBefore( Collection c, Date d ) {
+    public Iterable<MonitoredItem> listItemsBefore( Collection c, Date d ) {
         lock.lock();
         try {
 
