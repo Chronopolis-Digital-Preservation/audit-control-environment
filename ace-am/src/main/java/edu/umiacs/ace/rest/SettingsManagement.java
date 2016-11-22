@@ -4,10 +4,11 @@
  */
 package edu.umiacs.ace.rest;
 
-import com.sun.istack.logging.Logger;
 import edu.umiacs.ace.driver.irods.IrodsSetting;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.util.PersistUtil;
+import org.apache.log4j.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;

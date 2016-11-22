@@ -23,6 +23,9 @@
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <!-- <property name="toplink.logging.level" value="FINE"/> -->
+      <!-- <property name="eclipselink.logging.file" value="/tmp/eclipselink.log"/> -->
+      <!-- <property name="eclipselink.logging.level" value="FINE"/> -->
+      <!-- <property name="eclipselink.logging.level.sql" value="FINE"/> -->
       <property name="eclipselink.session.customizer" value="edu.umiacs.ace.util.DataSourceSessionCustomizer"/>
       <!-- <property name="eclipselink.create-ddl-jdbc-file-name" value="create.sql"/>
       <property name="eclipselink.ddl-generation.output-mode" value="sql-script"/>

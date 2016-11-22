@@ -31,12 +31,17 @@
 
 package edu.umiacs.ace.monitor.reporting;
 
-import edu.umiacs.ace.monitor.log.*;
-import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.log.LogEnum;
+import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.sql.SQL;
 import edu.umiacs.util.Argument;
 import edu.umiacs.util.Strings;
+import org.apache.log4j.Logger;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -45,10 +50,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.sql.DataSource;
-import org.apache.log4j.Logger;
 
 /**
  * Log summary generator, this will generate a report summarizing all log entries
@@ -168,7 +169,7 @@ public class SummaryGenerator extends ReportItemTypes {
                         + "MIN(logevent.ID), logevent.LOGTYPE, count(logevent.LOGTYPE)"
                         + "FROM logevent WHERE logevent.COLLECTION_ID = ? "
                         + "GROUP BY logevent.LOGTYPE");
-                ps.setLong(2, collection.getId());
+                ps.setLong(1, collection.getId());
             }
 
             // create entries for each result, for start date and session id
