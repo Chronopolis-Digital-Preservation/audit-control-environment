@@ -32,8 +32,8 @@ package edu.umiacs.ace.monitor.access;
 
 import com.google.common.collect.ImmutableList;
 import edu.umiacs.ace.monitor.core.Collection;
-import edu.umiacs.ace.monitor.support.PageBean;
 import edu.umiacs.ace.monitor.support.CStateBean;
+import edu.umiacs.ace.monitor.support.PageBean;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.util.Strings;
 import org.apache.log4j.Logger;
@@ -44,7 +44,6 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -126,17 +125,20 @@ public class StatusServlet extends EntityManagerServlet {
         // TODO: Can probably tidy this up a bit
         if (!Strings.isEmpty(group)) {
             queries.add("c.group LIKE :group");
+            pb.addParam(PARAM_GROUP, group);
             request.setAttribute(PARAM_GROUP, group);
         }
 
         if (!Strings.isEmpty(collection)) {
             queries.add("c.name LIKE :collection");
+            pb.addParam(PARAM_COLLECTION_LIKE, collection);
             request.setAttribute(PARAM_COLLECTION_LIKE, collection);
         }
 
         // Enforce that the state is not empty, or larger than 1 character
         if (!Strings.isEmpty(state) && state.length() == 1) {
             queries.add("c.state = :state");
+            pb.addParam(PARAM_STATE, state);
             request.setAttribute(PARAM_STATE, state);
         }
 
@@ -267,24 +269,16 @@ public class StatusServlet extends EntityManagerServlet {
 
     @Override
     public String getParameter(HttpServletRequest request, String paramName, String defaultValue) {
-        HttpSession s = request.getSession();
         String requestParam = request.getParameter(paramName);
-        Object sessionAttr = s.getAttribute(paramName);
+
+        // We could remove the session attributes here, not sure if that's a good idea though
 
         // req param: not null and not empty -> use
         // session attr not null and req param null -> use
         // session attr not null and req param empty -> default
         if (!Strings.isEmpty(requestParam)) {
-            System.out.println("retrieving http param: " + requestParam);
-            s.setAttribute(paramName, requestParam);
             return requestParam;
-        } else if (sessionAttr != null
-                && requestParam == null
-                && !Strings.isEmpty(String.valueOf(sessionAttr))) {
-            System.out.println("retrieving session attr: " + sessionAttr);
-            return String.valueOf(sessionAttr);
         } else {
-            s.setAttribute(paramName, defaultValue);
             return defaultValue;
         }
     }
