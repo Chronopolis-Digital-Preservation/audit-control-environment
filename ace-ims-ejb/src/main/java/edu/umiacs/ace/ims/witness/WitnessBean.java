@@ -15,12 +15,7 @@ import edu.umiacs.ace.ims.tokenclass.TokenClassLocal;
 import edu.umiacs.ace.util.HashValue;
 import edu.umiacs.sql.SQL;
 import edu.umiacs.util.Check;
-import java.security.MessageDigest;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
+
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -31,6 +26,12 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.sql.DataSource;
+import java.security.MessageDigest;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  *
@@ -182,9 +183,6 @@ public class WitnessBean implements WitnessLocal
      * Regenerate a witness proof tree for a given token class that includes
      * the round range that was described
      * 
-     * @param tokenClassName
-     * @param startRound
-     * @param finishRound
      * @return
      */
     public HashTree generateWitnessHashTree(Witness witness)

@@ -48,11 +48,20 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
             </td>
 
             <td align="center">
-                <div class="menucell">
-                    <a href="UpdateSettings">System Settings</a>
-                </div>
+                <um:Auth role="Status">
+                    <div class="menucell">
+                        <a href="UpdateSettings">System Settings</a>
+                    </div>
+                </um:Auth>
             </td>
 
+            <td align="center">
+                <um:Auth role="Status">
+                    <div class="menucell">
+                        <a href="Statistics">Statistics</a>
+                    </div>
+                </um:Auth>
+            </td>
         </tr>
     </table>
 </div>

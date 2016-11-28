@@ -133,7 +133,6 @@ public class SwapSettings implements Serializable {
     }
 
     /**
-     * @param server the server to set
      */
     public void setServers( String servers ) {
         this.servers = servers;

@@ -4,10 +4,9 @@
     <parent>
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
-        <version>1.10</version>
+        <version>1.11-RELEASE</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>edu.umiacs.ace</groupId>
     <artifactId>ace-am</artifactId>
     <name>ace-am</name>
     <packaging>war</packaging>
@@ -102,12 +101,12 @@
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
-            <version>2.2.0</version>
+            <version>2.6.3</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
-            <artifactId>javax.persistence</artifactId>
-            <version>2.0.3</version>
+            <artifactId>org.eclipse.persistence.jpa</artifactId>
+            <version>2.6.3</version>
         </dependency>
 
         <dependency>
@@ -118,9 +117,9 @@
 
         <!-- for json -->
         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.8.1</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.8.1</version>
         </dependency>
 
         <dependency>
@@ -176,6 +175,12 @@
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.4</version>
         </dependency>
 
         <dependency>
@@ -238,7 +243,7 @@
             </exclusions>
         </dependency> -->
         
-        <!-- web services -->
+        <!-- web services
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
@@ -249,10 +254,21 @@
             <artifactId>jersey-json</artifactId>
             <version>1.6</version>
         </dependency>
+        -->
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+            <version>2.24</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>2.24</version>
+        </dependency>
         <dependency>
             <groupId>edu.umiacs.ace</groupId>
             <artifactId>ace-ims-ws</artifactId>
-            <version>1.10</version>
+            <version>1.11-RELEASE</version>
             <type>jar</type>
         </dependency>
         <dependency>

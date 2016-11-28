@@ -31,17 +31,18 @@
 
 package edu.umiacs.ace.monitor.peers;
 
-import edu.umiacs.ace.remote.PeerAuthenticator;
 import edu.umiacs.ace.remote.JsonGateway;
-import edu.umiacs.ace.util.PersistUtil;
+import edu.umiacs.ace.remote.PeerAuthenticator;
 import edu.umiacs.ace.remote.StatusBean.CollectionBean;
-import java.net.Authenticator;
-import java.util.ArrayList;
-import java.util.List;
+import edu.umiacs.ace.util.PersistUtil;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.net.Authenticator;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Add a partner list to the application context.
@@ -74,7 +75,7 @@ public class PartnerSiteContextListener implements ServletContextListener {
             Query q = em.createNamedQuery("PartnerSite.listAll");
             List l = q.getResultList();
             if ( l != null ) {
-                List ret = new ArrayList();
+                List<ExtendedPartnerSite> ret = new ArrayList<>();
                 for ( Object o : l ) {
                     PartnerSite ps = (PartnerSite) o;
                     ret.add(new ExtendedPartnerSite(ps));

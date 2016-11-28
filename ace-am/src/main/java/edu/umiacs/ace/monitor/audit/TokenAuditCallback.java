@@ -31,20 +31,20 @@
 package edu.umiacs.ace.monitor.audit;
 
 import edu.umiacs.ace.ims.api.ValidationCallback;
-import edu.umiacs.ace.util.PersistUtil;
+import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.Token;
-import edu.umiacs.ace.monitor.log.LogEventManager;
-import java.util.Date;
-import java.util.Map;
-import edu.umiacs.ace.ims.ws.TokenResponse;
-import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.log.LogEnum;
+import edu.umiacs.ace.monitor.log.LogEventManager;
 import edu.umiacs.ace.token.AceToken;
+import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
+import org.apache.log4j.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import org.apache.log4j.Logger;
+import java.util.Date;
+import java.util.Map;
 
 /**
  *
@@ -89,7 +89,6 @@ public final class TokenAuditCallback implements ValidationCallback {
         // trans.commit();
         em.close();
         cancel.cancel();
-
     }
 
     @Override

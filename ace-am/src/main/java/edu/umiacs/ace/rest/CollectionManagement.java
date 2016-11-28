@@ -5,6 +5,8 @@
 
 package edu.umiacs.ace.rest;
 
+import atg.taglib.json.util.JSONException;
+import atg.taglib.json.util.JSONObject;
 import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.driver.StorageDriverFactory;
 import edu.umiacs.ace.monitor.access.CollectionCountContext;
@@ -13,8 +15,6 @@ import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.PersistUtil;
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 
 import javax.annotation.security.RolesAllowed;
 import javax.persistence.EntityManager;

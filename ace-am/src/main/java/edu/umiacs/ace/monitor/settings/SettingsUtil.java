@@ -106,7 +106,7 @@ public class SettingsUtil {
     // Get the names of all current settings
     public static Set<String> getParamNames() {
         List<SettingsParameter> settings = getCurrentSettings();
-        Set<String> paramSet = new HashSet<String>();
+        Set<String> paramSet = new HashSet<>();
         for ( SettingsParameter s : settings ) {
             paramSet.add(s.getName());
         }
@@ -115,7 +115,7 @@ public class SettingsUtil {
 
 
    public static List<SettingsParameter> getDefaultSettings() {
-        List<SettingsParameter> defaults = new ArrayList<SettingsParameter>();
+        List<SettingsParameter> defaults = new ArrayList<>();
 
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS,
                 SettingsConstants.ims,false));
@@ -174,8 +174,8 @@ public class SettingsUtil {
 
     /**
     *
-    * @param c
-    * @param attr
+    * @param c The collection to query
+    * @param attr The attribute to query for
     * @return true if collection, settings are not null and parameter is "true"
     */
     public static boolean getBoolean(Collection c, String attr) {
@@ -190,8 +190,8 @@ public class SettingsUtil {
         if (!containsKey(c, attr)) {
             return null;
         }
-        return c.getSettings().get(attr);
 
+        return c.getSettings().get(attr);
     }
 
     public static int getInt(Collection c, String attr, int def) {
@@ -205,10 +205,9 @@ public class SettingsUtil {
         }
     }
 
-    public static boolean containsKey(Collection c, String attr) {
+    private static boolean containsKey(Collection c, String attr) {
         return (c != null && c.getSettings() != null
                 && c.getSettings().containsKey(attr));
-
     }
 
     // Update the settings our context listeners would normally do

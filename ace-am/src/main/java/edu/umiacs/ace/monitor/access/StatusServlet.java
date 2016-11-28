@@ -32,8 +32,8 @@ package edu.umiacs.ace.monitor.access;
 
 import com.google.common.collect.ImmutableList;
 import edu.umiacs.ace.monitor.core.Collection;
-import edu.umiacs.ace.monitor.support.PageBean;
 import edu.umiacs.ace.monitor.support.CStateBean;
+import edu.umiacs.ace.monitor.support.PageBean;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.util.Strings;
 import org.apache.log4j.Logger;
@@ -101,11 +101,13 @@ public class StatusServlet extends EntityManagerServlet {
 
         long page = getParameter(request, PARAM_PAGE, DEFAULT_PAGE);
         int count = (int) getParameter(request, PARAM_COUNT, DEFAULT_COUNT);
+
+        // local getParameter so that the session is checked as well
         String group = getParameter(request, PARAM_GROUP, null);
         String collection = getParameter(request, PARAM_COLLECTION_LIKE, null);
         String state = getParameter(request, PARAM_STATE, null);
         // String date = getParameter(request, PARAM_GROUP, null);
-        PageBean pb = new PageBean((int) page, count, "Status");
+        PageBean pb = new PageBean((int) page, count, "");
 
         long offset = page * count;
 
@@ -120,20 +122,24 @@ public class StatusServlet extends EntityManagerServlet {
 
         List<String> queries = new ArrayList<>();
 
+        // TODO: Can probably tidy this up a bit
         if (!Strings.isEmpty(group)) {
             queries.add("c.group LIKE :group");
             pb.addParam(PARAM_GROUP, group);
+            request.setAttribute(PARAM_GROUP, group);
         }
 
         if (!Strings.isEmpty(collection)) {
             queries.add("c.name LIKE :collection");
             pb.addParam(PARAM_COLLECTION_LIKE, collection);
+            request.setAttribute(PARAM_COLLECTION_LIKE, collection);
         }
 
         // Enforce that the state is not empty, or larger than 1 character
         if (!Strings.isEmpty(state) && state.length() == 1) {
             queries.add("c.state = :state");
             pb.addParam(PARAM_STATE, state);
+            request.setAttribute(PARAM_STATE, state);
         }
 
         queryString.append("SELECT c FROM Collection c");
@@ -166,6 +172,7 @@ public class StatusServlet extends EntityManagerServlet {
 
         Query countQuery = em.createQuery(countString.toString());
 
+        // TODO: Can probably tidy this up a bit
         if (!Strings.isEmpty(group)) {
             query.setParameter(PARAM_GROUP, "%" + group + "%");
             countQuery.setParameter(PARAM_GROUP, "%" + group + "%");
@@ -191,33 +198,9 @@ public class StatusServlet extends EntityManagerServlet {
             pb.update(totalResults);
         }
 
+        setWorkingCollection(request, em);
+
         collections = new ArrayList<>();
-
-        long collectionId;
-        String idParam = request.getParameter(PARAM_COLLECTION_ID);
-        collectionId = Strings.isValidLong(idParam) ? Long.parseLong(idParam) : -1;
-        CollectionSummaryBean workingCollectionBean = (CollectionSummaryBean) request.getSession().getAttribute(SESSION_WORKINGCOLLECTION);
-
-        if (Strings.isValidLong(idParam) && -1 == collectionId) {
-            // clear the working collection
-            request.getSession().removeAttribute(SESSION_WORKINGCOLLECTION);
-
-        } else if (Strings.isValidLong(idParam)                                            // valid param
-                && (workingCollectionBean == null                                          // no working collection
-                || !workingCollectionBean.getCollection().getId().equals(collectionId))) { // or one which does not equal our requested collection
-            // Get the requested collection from the db and set it as our working collection
-            Collection workingCollection = em.find(Collection.class, collectionId);
-            if (workingCollection != null) {
-                workingCollectionBean = createCollectionSummary(workingCollection);
-                request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, workingCollectionBean);
-            }
-
-        } else {
-            // Continue using the current working collection
-            request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, workingCollectionBean);
-        }
-
-
         for (Collection col : items) {
             CollectionSummaryBean csb = createCollectionSummary(col);
             collections.add(csb);
@@ -235,6 +218,31 @@ public class StatusServlet extends EntityManagerServlet {
             dispatcher = request.getRequestDispatcher("status.jsp");
         }
         dispatcher.forward(request, response);
+    }
+
+    private void setWorkingCollection(HttpServletRequest request, EntityManager em) {
+        long collectionId;
+        String idParam = request.getParameter(PARAM_COLLECTION_ID);
+        collectionId = Strings.isValidLong(idParam) ? Long.parseLong(idParam) : -1;
+        CollectionSummaryBean workingCollectionBean = (CollectionSummaryBean) request.getSession().getAttribute(SESSION_WORKINGCOLLECTION);
+
+        if (Strings.isValidLong(idParam) && -1 == collectionId) {
+            // clear the working collection
+            request.getSession().removeAttribute(SESSION_WORKINGCOLLECTION);
+        } else if (Strings.isValidLong(idParam)                                            // valid param
+                && (workingCollectionBean == null                                          // no working collection
+                || !workingCollectionBean.getCollection().getId().equals(collectionId))) { // or one which does not equal our requested collection
+            // Get the requested collection from the db and set it as our working collection
+            Collection workingCollection = em.find(Collection.class, collectionId);
+            if (workingCollection != null) {
+                workingCollectionBean = createCollectionSummary(workingCollection);
+                request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, workingCollectionBean);
+            }
+
+        } else {
+            // Continue using the current working collection
+            request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, workingCollectionBean);
+        }
     }
 
     private CollectionSummaryBean createCollectionSummary(Collection col) {
@@ -255,7 +263,23 @@ public class StatusServlet extends EntityManagerServlet {
     }
 
     private boolean hasCsv(HttpServletRequest request) {
-        String value = (String) request.getParameter(PARAM_CSV);
+        String value = request.getParameter(PARAM_CSV);
         return !Strings.isEmpty(value);
+    }
+
+    @Override
+    public String getParameter(HttpServletRequest request, String paramName, String defaultValue) {
+        String requestParam = request.getParameter(paramName);
+
+        // We could remove the session attributes here, not sure if that's a good idea though
+
+        // req param: not null and not empty -> use
+        // session attr not null and req param null -> use
+        // session attr not null and req param empty -> default
+        if (!Strings.isEmpty(requestParam)) {
+            return requestParam;
+        } else {
+            return defaultValue;
+        }
     }
 }

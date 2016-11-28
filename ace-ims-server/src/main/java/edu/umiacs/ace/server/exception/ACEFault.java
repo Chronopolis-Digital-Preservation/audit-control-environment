@@ -18,7 +18,6 @@ public class ACEFault extends Exception
     
     /**
      * Constructs an instance of <code>ACEFault</code> with the specified detail message.
-     * @param msg the detail message.
      */
     public ACEFault(Exception e) 
     {

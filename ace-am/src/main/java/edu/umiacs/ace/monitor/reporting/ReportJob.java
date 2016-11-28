@@ -31,15 +31,9 @@
 
 package edu.umiacs.ace.monitor.reporting;
 
-import com.sun.jersey.api.MessageException;
 import edu.umiacs.ace.monitor.log.LogEnum;
 import edu.umiacs.ace.monitor.log.LogEventManager;
 import edu.umiacs.ace.util.PersistUtil;
-import java.text.ParseException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 import org.quartz.CronExpression;
@@ -47,6 +41,13 @@ import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+
+import javax.mail.MessagingException;
+import javax.persistence.EntityManager;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * Report Generation job for quartz
@@ -90,9 +91,9 @@ public class ReportJob implements Job {
         } catch ( ParseException ex ) {
             LOG.error("Unknown parse exception", ex);
             throw new JobExecutionException(ex);
-        } catch ( MessageException ex) {
+        } catch (MessagingException ex) {
             EntityManager em = PersistUtil.getEntityManager();
-            logManager.persistCollectionEvent(LogEnum.SMTP_ERROR, 
+            logManager.persistCollectionEvent(LogEnum.SMTP_ERROR,
                                               ex.getMessage(), em);
             em.close();
             LOG.error("Could not send report summary", ex);

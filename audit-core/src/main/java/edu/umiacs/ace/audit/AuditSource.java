@@ -4,9 +4,6 @@
  */
 package edu.umiacs.ace.audit;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 /**
  *
  * @author toaster
@@ -111,7 +108,6 @@ public abstract class AuditSource {
      * the preferred request.
      * 
      * Default implementation is a no-op.
-     * @param auditPolicy preferred items that should be available after this completes
      */
     public void queueNext(int preferred) {
     }

@@ -41,7 +41,7 @@ public class ReportItemTypes {
     public static final String TOTAL_ERRORS = "Total Errors";
     public static final String ACTIVE = "Active";
     public static final String MISSING_FILES = "Missing Files";
-    public static final String MISSING_TOKENS = "Missing Tokesn";
+    public static final String MISSING_TOKENS = "Missing Tokens";
     public static final String CORRUPT_FILES = "Corrupt Files";
     public static final String CORRUPT_DIGEST = "Corrupt Digest or Token";
 }

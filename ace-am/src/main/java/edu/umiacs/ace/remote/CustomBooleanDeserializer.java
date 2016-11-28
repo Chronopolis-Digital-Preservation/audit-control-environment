@@ -31,12 +31,13 @@
 
 package edu.umiacs.ace.remote;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import edu.umiacs.util.Strings;
+
 import java.io.IOException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.DeserializationContext;
-import org.codehaus.jackson.map.JsonDeserializer;
 
 /**
  * 
@@ -45,7 +46,7 @@ import org.codehaus.jackson.map.JsonDeserializer;
 public class CustomBooleanDeserializer extends JsonDeserializer<Boolean> {
 
     @Override
-    public Boolean deserialize( JsonParser arg0, DeserializationContext arg1 )
+    public Boolean deserialize(JsonParser arg0, DeserializationContext arg1 )
             throws IOException,
             JsonProcessingException {
 

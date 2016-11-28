@@ -43,7 +43,8 @@ import edu.umiacs.ace.util.TokenUtil;
 import edu.umiacs.util.Strings;
 import org.apache.log4j.Logger;
 
-import java.text.DecimalFormat;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -51,8 +52,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.RecursiveAction;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 
 /**
  * A recursive action for fork join pools. Splits its work up to worker threads
@@ -63,7 +62,7 @@ import javax.persistence.EntityTransaction;
 public class IngestThread extends RecursiveAction {
     private static final Logger LOG = Logger.getLogger(IngestThread.class);
 
-    // These only gets read from, never written to
+    // These only get read from, never written to
     private Map<String, Token> tokens;
     private Collection coll;
     private List<String> identifiers;
@@ -143,9 +142,9 @@ public class IngestThread extends RecursiveAction {
     }
 
     public void run() {
-        updatedTokens = new HashSet<String>();
-        newTokens = new HashSet<String>();
-        unchangedTokens = new HashSet<String>();
+        updatedTokens = new HashSet<>();
+        newTokens = new HashSet<>();
+        unchangedTokens = new HashSet<>();
         MonitoredItemManager mim = new MonitoredItemManager(em);
         MonitoredItem item = null;
         session = System.currentTimeMillis();
@@ -175,14 +174,14 @@ public class IngestThread extends RecursiveAction {
                     token.setParentCollection(coll);
 
                     // Token 
-                    em.persist(event[1]);
-                    em.persist(token);
+                    // em.persist(token);
                     item.setToken(token);
 
                     //Finish adding the item
                     em.persist(event[0]);
-                    em.merge(item);
-                    numTransactions += 4;
+                    em.persist(event[1]);
+                    em.persist(item);
+                    numTransactions += 3;
 
                     newTokens.add(identifier);
                 }else{
@@ -194,7 +193,7 @@ public class IngestThread extends RecursiveAction {
                 // With large Token Stores, we get a large number of transactions
                 // Flushing and Clearing the EM helps to clear some memory
                 // TODO: W/ fork join this isn't needed anymore, unless we want to flush at a lower number
-                if ( numTransactions > 7000 ) {
+                if ( numTransactions > 30 ) {
                     em.flush();
                     em.clear();
                     numTransactions = 0;
@@ -230,12 +229,13 @@ public class IngestThread extends RecursiveAction {
         if ( update ) {
             LogEvent event = logManager.createItemEvent(LogEnum.TOKEN_INGEST_UPDATE,
                     identifier, coll.getDirectory() + identifier);
-            em.persist(token);
+            // em.persist(token);
             item.setToken(token);
+            // TODO: Why set 'I'? It's not necessarily invalid, maybe 'R' would be better
             item.setState('I');
             em.merge(item);
             em.persist(event);
-            numTransactions += 3;
+            numTransactions += 2;
             updatedTokens.add(identifier);
         }else{
             unchangedTokens.add(identifier);
@@ -249,7 +249,7 @@ public class IngestThread extends RecursiveAction {
             String path, Collection coll) {
         // We don't have a FileBean, so build the pathList ourselves
         StringBuilder fullPath = new StringBuilder(path);
-        List <String> pathList = new LinkedList<String>();
+        List <String> pathList = new LinkedList<>();
         int index = 0;
         if (fullPath.charAt(0) != '/') {
             fullPath.insert(0, "/");
@@ -287,8 +287,8 @@ public class IngestThread extends RecursiveAction {
         mi.setState(initialState);
         mi.setSize(size);
 
-        em.persist(mi);
-        numTransactions++;
+        // em.persist(mi);
+        // numTransactions++;
         return mi;
     }
 

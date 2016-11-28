@@ -31,6 +31,7 @@
 
 package edu.umiacs.ace.monitor.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import edu.umiacs.ace.monitor.peers.PeerCollection;
 import edu.umiacs.util.Argument;
 
@@ -50,7 +51,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -79,11 +79,11 @@ import java.util.Map;
     @NamedQuery(name = "Collection.getCollectionsInGroup", query =
     "SELECT c FROM Collection c WHERE c.group = :group")
 })
-@XmlRootElement
 public class Collection implements Serializable {
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<PeerCollection> peerCollections;
+
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -134,6 +134,7 @@ public class Collection implements Serializable {
         this.peerCollections = peerCollections;
     }
 
+    @JsonIgnore
     public List<PeerCollection> getPeerCollections() {
         return peerCollections;
     }

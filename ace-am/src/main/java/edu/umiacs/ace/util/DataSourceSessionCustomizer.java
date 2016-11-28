@@ -31,20 +31,19 @@
 
 package edu.umiacs.ace.util;
 
-/**
-import oracle.toplink.essentials.jndi.JNDIConnector;
-import oracle.toplink.essentials.sessions.Session;
-import oracle.toplink.essentials.tools.sessionconfiguration.SessionCustomizer;*/
 import org.eclipse.persistence.config.SessionCustomizer;
 import org.eclipse.persistence.sessions.DatabaseLogin;
 import org.eclipse.persistence.sessions.JNDIConnector;
 import org.eclipse.persistence.sessions.Session;
 import org.eclipse.persistence.sessions.server.ServerSession;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
 
 /**
+ * Note: As of eclipselink 2.6.3 tomcat starts with NoServerPlatform, which defaults to COMPOSITE_NAME_LOOKUP
+ *
  * register jndi connection
  * @author toaster
  */

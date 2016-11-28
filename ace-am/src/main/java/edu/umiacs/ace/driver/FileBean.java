@@ -83,7 +83,6 @@ public class FileBean {
      * [0] /1k-10/d7/file-19
      * [1] /1k-10/d7
      * [2] /1k-10
-     * @param parentPathList
      */
     public void setPathList( String[] pathList ) {
         if ( pathList != null ) {
