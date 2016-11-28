@@ -91,7 +91,7 @@ public class LogServlet extends EntityManagerServlet {
         int count = getParameter(request, PARAM_COUNT, DEFAULT_COUNT);
         long session = getParameter(request, PARAM_SESSION, DEFAULT_SESSION);
         long top = getParameter(request, PARAM_TOP, DEFAULT_TOP);
-        long collection = getParameter(request, PARAM_COLLECTION, 0);
+        long collection = getParameter(request, PARAM_COLLECTION, 0L);
         String path = getParameter(request, PARAM_PATH, null);
         boolean reverseResults = false;
 
@@ -235,7 +235,7 @@ public class LogServlet extends EntityManagerServlet {
         } else if ( s.getAttribute(paramName) != null ) {
             return (Integer) s.getAttribute(paramName);
         } else {
-            s.setAttribute(paramName, defaultValue);
+            // s.setAttribute(paramName, defaultValue);
             return defaultValue;
         }
     }
@@ -251,7 +251,7 @@ public class LogServlet extends EntityManagerServlet {
         } else if ( s.getAttribute(paramName) != null ) {
             return (Long) s.getAttribute(paramName);
         } else {
-            s.setAttribute(paramName, defaultValue);
+            // s.setAttribute(paramName, defaultValue);
             return defaultValue;
         }
     }
