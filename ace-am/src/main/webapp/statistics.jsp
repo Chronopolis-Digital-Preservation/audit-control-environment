@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <jsp:include page="imports.jsp"/>
-    <title>Stats for Nerds</title>
+    <title>Statistics</title>
 
     <style type="text/css">
         .form-group-sm {
