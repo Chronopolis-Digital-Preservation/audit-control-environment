@@ -22,11 +22,13 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -70,7 +72,8 @@ public class CollectionManagement {
 
     @POST
     @Path("audit/{id}")
-    public Response startAudit(@PathParam("id")long id) {
+    public Response startAudit(@PathParam("id") long id, @DefaultValue("false") @QueryParam("corrupt") String corrupt) {
+        boolean auditCorrupt = Boolean.getBoolean(corrupt);
         EntityManager em = PersistUtil.getEntityManager();
         Collection c = em.find(Collection.class, id);
         if ( c == null ) {
@@ -84,6 +87,13 @@ public class CollectionManagement {
 
         // We use a null item so that the entire collection gets audited
         MonitoredItem[] item = null;
+        if (auditCorrupt) {
+            // todo: might be able to put this in some type of service class
+            Query query = em.createNamedQuery("MonitoredItem.listLocalErrors");
+            query.setParameter("coll", c);
+            List<MonitoredItem> resList = query.getResultList();
+            item = resList.toArray(new MonitoredItem[resList.size()]);
+        }
         AuditThreadFactory.createThread(c, driver, true, item);
         return Response.ok().build();
     }
