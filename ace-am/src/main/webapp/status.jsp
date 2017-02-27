@@ -231,7 +231,7 @@
                                 <img src="images/error.jpg" title="Collection contains errors" alt="Collection contains errors"/>
                             </c:when>
                             <c:otherwise>
-                                <img src="images/file-bad.jpg" title="Complete audit has not occured" alt="Complete audit has not occured"/>
+                                <img src="images/file-bad.jpg" title="Complete audit has not occurred" alt="Complete audit has not occurred"/>
                             </c:otherwise>
                         </c:choose>
                     </td>
