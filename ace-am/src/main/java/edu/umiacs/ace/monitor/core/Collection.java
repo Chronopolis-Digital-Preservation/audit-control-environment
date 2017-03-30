@@ -219,4 +219,7 @@ public class Collection implements Serializable {
         this.group = group;
     }
 
+    public void setState(CollectionState state) {
+        this.state = state;
+    }
 }
