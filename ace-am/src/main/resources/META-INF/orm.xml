@@ -15,5 +15,7 @@
         </constructor-result>
     </sql-result-set-mapping>
 
+    <converter class="edu.umiacs.ace.monitor.core.CollectionStateConverter"/>
+
 </entity-mappings>
 
