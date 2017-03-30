@@ -27,7 +27,7 @@
 <jsp:include page="header.jsp"/>
 <div class="container">
     <div id="searchtable">
-        <form method="GET" role="form">
+        <form method="POST" role="form">
             <div class="form-inline">
                 <div class="form-group form-group-sm">
                     <input type="text" class="form-input" id="before-filter" name="before" placeholder="Before"/>
