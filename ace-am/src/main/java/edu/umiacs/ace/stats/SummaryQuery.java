@@ -61,9 +61,10 @@ public class SummaryQuery {
     final String LE_BEFORE = "AND l1.date < ? ";
 
     // Collection Join
+    //Use coalesce in case the colgroup is null - prevents errors with the constructor
     // Gets the colgroup so that we can display it
     final String COL_JOIN = "JOIN ( " +
-            " SELECT id, name, colgroup FROM collection ";
+            " SELECT id, name, COALESCE(colgroup, '') AS colgroup FROM collection ";
     final String COL_JOIN_GROUP = "WHERE colgroup = ? ";
     final String COL_JOIN_END = ") AS c " +
             "ON l1.collection_id = c.id ";
