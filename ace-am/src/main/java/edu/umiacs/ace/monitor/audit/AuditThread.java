@@ -45,6 +45,7 @@ import edu.umiacs.ace.monitor.access.CollectionCountContext;
 import edu.umiacs.ace.monitor.compare.CollectionCompare2;
 import edu.umiacs.ace.monitor.compare.CompareResults;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.CollectionState;
 import edu.umiacs.ace.monitor.core.ConfigConstants;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.MonitoredItemManager;
@@ -729,10 +730,12 @@ public final class AuditThread extends Thread implements CancelCallback {
 
         MonitoredItemManager mim = new MonitoredItemManager(em);
 
-        if (mim.countErrorsInCollection(coll) == 0) {
-            coll.setState('A');
+        if (abortException != null || cancel) {
+            coll.setState(CollectionState.INTERRUPTED);
+        } else if (mim.countErrorsInCollection(coll) == 0) {
+            coll.setState(CollectionState.ACTIVE);
         } else {
-            coll.setState('E');
+            coll.setState(CollectionState.ERROR);
         }
 
         EntityTransaction trans = em.getTransaction();
