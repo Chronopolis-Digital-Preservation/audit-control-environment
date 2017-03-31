@@ -56,7 +56,6 @@ public class SummaryQuery {
             "AND l1.logtype = 20 ";
 
     // Optional parameters to query on for the log event
-    final String LE_COLLECTION = "AND collection_id = ? ";
     final String LE_AFTER = "AND l1.date > ? ";
     final String LE_BEFORE = "AND l1.date < ? ";
 
@@ -66,6 +65,7 @@ public class SummaryQuery {
     final String COL_JOIN = "JOIN ( " +
             " SELECT id, name, COALESCE(colgroup, '') AS colgroup FROM collection ";
     final String COL_JOIN_GROUP = "WHERE colgroup = ? ";
+    final String COL_JOIN_NAME = "name LIKE ? ";
     final String COL_JOIN_END = ") AS c " +
             "ON l1.collection_id = c.id ";
 
@@ -86,27 +86,11 @@ public class SummaryQuery {
 
     public List<IngestSummary> getSummary() {
         List<String> params = new ArrayList<>();
-        /*
-        StringBuilder query = new StringBuilder(SELECT);
-
-        // Start our LogEvent Join
-        query.append(LE_JOIN);
-        updateParams(params, query, LE_COLLECTION, collection);
-        query.append(LE_JOIN_FINISH);
-        updateParams(params, query, LE_AFTER, after);
-        updateParams(params, query, LE_BEFORE, before);
-
-        // Start our collection join
-        query.append(COL_JOIN);
-        updateParams(params, query, COL_JOIN_GROUP, group);
-
-        // Finish + MonitoredItem join
-        query.append(COL_JOIN_END).append(MI_JOIN);
-        */
-
         EntityManager em = PersistUtil.getEntityManager();
+
         // IngestSummaryMapping defined in META-INF/orm.xml
-        Query nq = em.createNativeQuery(buildQuery(params).toString(), "IngestSummaryMapping");
+        StringBuilder query = buildQuery(params);
+        Query nq = em.createNativeQuery(query.toString(), "IngestSummaryMapping");
 
         int i = 1;
         for (String param : params) {
@@ -168,14 +152,21 @@ public class SummaryQuery {
 
         // Start our LogEvent Join
         query.append(LE_JOIN);
-        updateParams(params, query, LE_COLLECTION, collection);
         query.append(LE_JOIN_FINISH);
         updateParams(params, query, LE_AFTER, after);
         updateParams(params, query, LE_BEFORE, before);
 
         // Start our collection join
         query.append(COL_JOIN);
-        updateParams(params, query, COL_JOIN_GROUP, group);
+
+        // Setup our conditional clauses
+        // todo: could wrap the two collection == null checks together
+        String groupQuery = collection == null ? COL_JOIN_GROUP : COL_JOIN_GROUP + " AND ";
+        String collVal = collection == null ? null : "%" + collection + "%";
+        String collQuery = group == null ? "WHERE " + COL_JOIN_NAME : COL_JOIN_NAME;
+
+        updateParams(params, query, groupQuery, group);
+        updateParams(params, query, collQuery, collVal);
 
         // Finish + MonitoredItem join
         query.append(COL_JOIN_END).append(MI_JOIN);
