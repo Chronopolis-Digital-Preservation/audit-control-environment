@@ -10,21 +10,17 @@
             width: 150px;
         }
 
-        .box {
-            margin-left: auto;
-            margin-right: auto;
-            margin-top: 12px;
-            margin-bottom: 10px;
-            width: 720px;
-            border-top: 1px solid #000000;
-            border-left: 1px solid #000000;
-            border-right: 1px solid #000000;
-            border-bottom: 1px solid #000000;
+        .results {
+            padding: 1rem;
+            margin: 1rem -15px;
+            background-color: #f7f7f9;
+            -ms-overflow-style: -ms-autohiding-scrollbar;
         }
     </style>
 </head>
 <body>
 <jsp:include page="header.jsp"/>
+<h3 style="text-align: center;">Ingestion Statistics</h3>
 <div class="container">
     <div id="searchtable">
         <form method="POST" role="form">
@@ -43,24 +39,21 @@
                 </div>
             </div>
 
-            <div class="form-group row">
-                <div class="col-sm-10">
-                    <div class="form-check">
-                        <label class="form-check-label">
-                            <input class="form-check-input" name="csv" type="checkbox"> Export to CSV
-                        </label>
-                    </div>
+            <div class="form-inline">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" name="csv" type="checkbox"> Export to CSV
+                    </label>
                 </div>
+
             </div>
 
-            <div class="form-group">
-                <button type="submit" class="btn btn-sm"
-                        value="Submit"><span>Submit</span></button>
-            </div>
+            <button type="submit" class="btn btn-primary"
+                    value="Submit"><span>Submit</span></button>
         </form>
     </div>
 
-    <div class="box">
+    <div class="results">
         <table class="table table-sm">
             <thead>
             <tr>
