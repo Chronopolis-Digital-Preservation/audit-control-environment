@@ -7,9 +7,9 @@ package edu.umiacs.ace.monitor.support;
  */
 public enum CStateBean {
 
-    NO_FILTER(""),
     ACTIVE("A"),
     ERROR("E"),
+    INTERRUPTED("I"),
     NEVER_SCANNED("N");
 
     private final String state;

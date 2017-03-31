@@ -160,6 +160,7 @@
                 <div class="input">
                     <span class="input-group-addon">State</span>
                     <select name="state" id="state-filter" class="form-select">
+                        <option value="">Select a Collection State</option>
                         <c:forEach var="s" items="${states}">
                             <c:choose>
                                 <c:when test="${s.state eq state}">
