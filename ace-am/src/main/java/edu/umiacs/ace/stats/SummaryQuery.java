@@ -74,6 +74,7 @@ public class SummaryQuery {
     final String MI_JOIN = "JOIN ( " +
             "  SELECT count(id) AS count, sum(size) AS size, parentcollection_id " +
             "  FROM monitored_item " +
+            "  WHERE directory = 0 " +
             "  GROUP BY parentcollection_id) AS m " +
             "  ON m.parentcollection_id = c.id ";
 
