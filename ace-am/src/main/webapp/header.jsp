@@ -12,59 +12,44 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 
-<div class="menuheader">
-    <table>
-        <tr>  
-            <td align="center">
-                <div class="menucell">
-                    <um:Auth role="Status" showUnauthenticated="true">
-                        <a href="Status">Status</a>
-                    </um:Auth>
-                    <BR>
-                </div>
-            </td>
+<ul class="nav justify-content-center">
+    <um:Auth role="Status" showUnauthenticated="true">
+        <li class="nav-item">
+        <a class="nav-link" href="Status">Status</a>
+        </li>
+    </um:Auth>
 
-            <td align="center">
-                <um:Auth role="Log">
-                    <div class="menucell">
-                        <a href="EventLog?clear=1">Event Log</a>
-                        <BR>
-                    </div>
-                </um:Auth>
-            </td>
+    <um:Auth role="Log" showUnauthenticated="true">
+        <li class="nav-item">
+        <a class="nav-link" href="EventLog?clear=1">Event Log</a>
+        </li>
+    </um:Auth>
 
-            <td align="center">
-                <div class="menucell">
-                    <c:if test="${authmanagement}">
-                        <um:Auth role="Users">
-                            <a href="Users">Accounts</a>
-                        </um:Auth>
-                        <um:Auth role="!Users">
-                            <a href="passwordchange.jsp">Change Password</a>
-                        </um:Auth>
-                    </c:if>
-                    <BR>
-                </div>
-            </td>
+    <c:if test="${authmanagement}">
+        <um:Auth role="Users">
+            <li class="nav-item">
+            <a class="nav-link" href="Users">Accounts</a>
+            </li>
+        </um:Auth>
+        <um:Auth role="!Users">
+            <li class="nav-item">
+            <a class="nav-link" href="passwordchange.jsp">Change Password</a>
+            </li>
+        </um:Auth>
+    </c:if>
+    <um:Auth role="Status">
+        <li class="nav-item">
+        <a class="nav-link" href="UpdateSettings">System Settings</a>
 
-            <td align="center">
-                <um:Auth role="Status">
-                    <div class="menucell">
-                        <a href="UpdateSettings">System Settings</a>
-                    </div>
-                </um:Auth>
-            </td>
+        </li>
+    </um:Auth>
 
-            <td align="center">
-                <um:Auth role="Status">
-                    <div class="menucell">
-                        <a href="Statistics">Statistics</a>
-                    </div>
-                </um:Auth>
-            </td>
-        </tr>
-    </table>
-</div>
+    <um:Auth role="Status">
+        <li class="nav-item">
+        <a class="nav-link" href="Statistics">Statistics</a>
+            </li>
+    </um:Auth>
+</ul>
 <div class="header">
     <img src="images/title.jpg" alt="ACE Audit Manager"><BR><div style="font-size: large; color: red">${globalMessage}</div>
 </div>
