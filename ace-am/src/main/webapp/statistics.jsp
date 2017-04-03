@@ -22,6 +22,13 @@
             margin-left: 0;
         }
 
+        td {
+            max-width: 100px;
+            overflow: scroll;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         .form-group-sm {
             width: 150px;
         }
@@ -83,9 +90,9 @@
             <tbody>
             <c:forEach var="item" items="${summary}">
                 <tr>
-                    <td>${item.date}</td>
-                    <td>${item.collection}</td>
-                    <td>${item.group}</td>
+                    <td title="${item.date}">${item.date}</td>
+                    <td title="${item.collection}">${item.collection}</td>
+                    <td title="${item.group}">${item.group}</td>
                     <td>${item.count}</td>
                     <td>${item.size}</td>
                 </tr>
