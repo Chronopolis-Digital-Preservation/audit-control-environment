@@ -6,6 +6,22 @@
     <title>Statistics</title>
 
     <style type="text/css">
+        /**
+         * some compatibility issues arise between the older css and bootstrap
+         * a few fixes to make everything in line with the rest of ACE
+         */
+        body {
+            width: 752px !important;
+            margin-top: 8px !important;
+        }
+
+        /**
+         * alignment for our button
+         */
+        .btn {
+            margin-left: 0;
+        }
+
         .form-group-sm {
             width: 150px;
         }
