@@ -1,5 +1,7 @@
 package edu.umiacs.ace.stats;
 
+import edu.umiacs.ace.util.FileSizeFormatter;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
@@ -8,12 +10,13 @@ import java.sql.Timestamp;
  *
  * Created by shake on 8/29/16.
  */
-public final class IngestSummary {
+public class IngestSummary {
     public final Timestamp date;
     public final String collection;
     public final String group;
     public final Long count;
     public final BigDecimal size;
+    private FileSizeFormatter formatter;
 
     public IngestSummary(Timestamp date, String collection, String group, Long count, BigDecimal size) {
         this.date = date;
@@ -42,4 +45,16 @@ public final class IngestSummary {
     public BigDecimal getSize() {
         return size;
     }
+
+    public String getFormattedSize() {
+        if (formatter == null) {
+            return size + " Bytes";
+        }
+        return formatter.format(size);
+    }
+    public IngestSummary setFormatter(FileSizeFormatter formatter) {
+        this.formatter = formatter;
+        return this;
+    }
+
 }
