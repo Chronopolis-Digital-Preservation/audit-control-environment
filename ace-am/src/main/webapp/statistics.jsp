@@ -47,6 +47,22 @@
 <div class="container">
     <div id="searchtable">
         <form method="POST" role="form">
+            <div class="form-group">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" name="csv" type="checkbox"> Export to CSV
+                    </label>
+                </div>
+
+                <select class="custom-select mb-2 mr-sm-2 mb-sm-0" name="truncate" id="truncate">
+                    <option selected>Truncate Bytes to...</option>
+                    <option value="KiB">KiB</option>
+                    <option value="MiB">MiB</option>
+                    <option value="GiB">GiB</option>
+                    <option value="TiB">TiB</option>
+                </select>
+            </div>
+
             <div class="form-inline">
                 <div class="form-group form-group-sm">
                     <input type="text" class="form-input" id="before-filter" name="before" placeholder="Before"/>
@@ -60,15 +76,6 @@
                 <div class="form-group form-group-sm">
                     <input type="text" class="form-input" id="coll-filter" name="collection" placeholder="Collection"/>
                 </div>
-            </div>
-
-            <div class="form-inline">
-                <div class="form-check">
-                    <label class="form-check-label">
-                        <input class="form-check-input" name="csv" type="checkbox"> Export to CSV
-                    </label>
-                </div>
-
             </div>
 
             <button type="submit" class="btn btn-primary"
@@ -94,7 +101,7 @@
                     <td title="${item.collection}">${item.collection}</td>
                     <td title="${item.group}">${item.group}</td>
                     <td>${item.count}</td>
-                    <td>${item.size}</td>
+                    <td>${item.formattedSize}</td>
                 </tr>
             </c:forEach>
             </tbody>
