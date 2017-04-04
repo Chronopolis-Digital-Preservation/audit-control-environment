@@ -100,6 +100,10 @@ public enum LogEnum {
     FILE_REGISTER(25, "File Registered", "New file registered but is not ready for auditing"),
     FILE_AUDIT_FALLBACK(26, "File Audit Fallback", "File Audit could not connect to the IMS, falling back to audit-only mode"),
     SMTP_ERROR(27, "SMTP Communication Error", "Could not connect to designated SMTP host"),
+    // audit stop errors
+    FILE_AUDIT_CANCEL(30, "File Audit Cancel", "Auditing of this collection's files was cancelled"),
+    FILE_AUDIT_ABORT(31, "File Audit Aborted", "Auditing of this collection's files was aborted"),
+
     SYSTEM_ERROR(99, "System Error", "Unknown system error occurred, check server logs");
     private int type;
     private String shortName;
@@ -177,6 +181,11 @@ public enum LogEnum {
                 return FILE_REGISTER;
             case 26:
                 return FILE_AUDIT_FALLBACK;
+
+            case 30:
+                return FILE_AUDIT_CANCEL;
+            case 31:
+                return FILE_AUDIT_ABORT;
 
             case 99:
                 return SYSTEM_ERROR;

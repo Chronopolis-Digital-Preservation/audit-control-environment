@@ -282,42 +282,43 @@ public class LogServlet extends EntityManagerServlet {
      * @return
      */
     private String generateTypeString( Map<String, String> selectedTypes ) {
-        String returnString = "";
+        StringBuilder returnString = new StringBuilder();
 
         if ( selectedTypes.size() > 0 ) {
-            returnString = " l.logType IN ( ";
+            returnString = new StringBuilder(" l.logType IN ( ");
         }
         for ( String key : selectedTypes.keySet() ) {
             if ( CHOICE_ERRORS.equals(key) ) {
-                returnString += LogEnum.SYSTEM_ERROR.getType() + ",";
-                returnString += LogEnum.SITE_UNACCESSABLE.getType() + ",";
-                returnString += LogEnum.LOG_TYPE_UNKNOWN.getType() + ",";
-                returnString += LogEnum.CREATE_TOKEN_ERROR.getType() + ",";
-                returnString += LogEnum.ERROR_READING.getType() + ",";
-                returnString += LogEnum.UNKNOWN_IMS_COMMUNICATION_ERROR.getType() + ",";
-
+                returnString.append(LogEnum.SYSTEM_ERROR.getType()).append(",");
+                returnString.append(LogEnum.SITE_UNACCESSABLE.getType()).append(",");
+                returnString.append(LogEnum.LOG_TYPE_UNKNOWN.getType()).append(",");
+                returnString.append(LogEnum.CREATE_TOKEN_ERROR.getType()).append(",");
+                returnString.append(LogEnum.ERROR_READING.getType()).append(",");
+                returnString.append(LogEnum.UNKNOWN_IMS_COMMUNICATION_ERROR.getType()).append(",");
             } else if ( CHOICE_MISSING.equals(key) ) {
-                returnString += LogEnum.FILE_MISSING.getType() + ",";
-                returnString += LogEnum.FILE_CORRUPT.getType() + ",";
-                returnString += LogEnum.MISSING_TOKEN.getType() + ",";
+                returnString.append(LogEnum.FILE_MISSING.getType()).append(",");
+                returnString.append(LogEnum.FILE_CORRUPT.getType()).append(",");
+                returnString.append(LogEnum.MISSING_TOKEN.getType()).append(",");
             } else if ( CHOICE_NEWMASTER.equals(key) ) {
-                returnString += LogEnum.FILE_NEW.getType() + ",";
-                returnString += LogEnum.ADD_TOKEN.getType() + ",";
-                returnString += LogEnum.FILE_ONLINE.getType() + ",";
-
+                returnString.append(LogEnum.FILE_NEW.getType()).append(",");
+                returnString.append(LogEnum.ADD_TOKEN.getType()).append(",");
+                returnString.append(LogEnum.FILE_ONLINE.getType()).append(",");
+                returnString.append(LogEnum.FILE_REGISTER.getType()).append(",");
             } else if ( CHOICE_SYNC.equals(key) ) {
-                returnString += LogEnum.FILE_AUDIT_FINISH.getType() + ",";
-                returnString += LogEnum.FILE_AUDIT_START.getType() + ",";
+                returnString.append(LogEnum.FILE_AUDIT_FINISH.getType()).append(",");
+                returnString.append(LogEnum.FILE_AUDIT_START.getType()).append(",");
+                returnString.append(LogEnum.FILE_AUDIT_CANCEL.getType()).append(",");
+                returnString.append(LogEnum.FILE_AUDIT_ABORT.getType()).append(",");
             }
         }
 
         if ( returnString.length() > 0 ) {
             // remove last ','
-            returnString = returnString.substring(0, returnString.length() - 1);
-            returnString += ")";
+            returnString = new StringBuilder(returnString.substring(0, returnString.length() - 1));
+            returnString.append(")");
         }
 
-        return returnString;
+        return returnString.toString();
     }
 
     /**
