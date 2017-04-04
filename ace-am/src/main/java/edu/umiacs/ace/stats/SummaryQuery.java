@@ -1,5 +1,6 @@
 package edu.umiacs.ace.stats;
 
+import edu.umiacs.ace.util.FileSizeFormatter;
 import edu.umiacs.ace.util.PersistUtil;
 
 import javax.persistence.EntityManager;
@@ -85,6 +86,11 @@ public class SummaryQuery {
         this.collection = collection;
     }
 
+    /**
+     * Get the IngestSummary for the SummaryQuery
+     *
+     * @return the IngestSummary
+     */
     public List<IngestSummary> getSummary() {
         List<String> params = new ArrayList<>();
         EntityManager em = PersistUtil.getEntityManager();
@@ -102,7 +108,17 @@ public class SummaryQuery {
         return (List<IngestSummary>)nq.getResultList();
     }
 
-    public void writeToCsv(ServletOutputStream os) throws SQLException, IOException {
+    /**
+     * Write the SummaryQuery to an OutputStream as comma separated values
+     *
+     * values are as follows:
+     * date,collection,group,file_count,total_size
+     *
+     * @param os the OutputStream to write to
+     * @throws SQLException if there's an exception with the sql statement
+     * @throws IOException if there's an exception writing data
+     */
+    public void writeToCsv(ServletOutputStream os, FileSizeFormatter formatter) throws SQLException, IOException {
         List<String> params = new ArrayList<>();
         DataSource db = PersistUtil.getDataSource();
         Connection conn = db.getConnection();
@@ -136,7 +152,7 @@ public class SummaryQuery {
             bldr.append(collection).append(",");
             bldr.append(group).append(",");
             bldr.append(count).append(",");
-            bldr.append(size);
+            bldr.append(formatter.format(size));
 
             os.write(bldr.toString().getBytes(charset));
             os.println();

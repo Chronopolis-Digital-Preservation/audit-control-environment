@@ -18,6 +18,7 @@ public class FileSizeFormatter {
     }
 
     public String format(BigDecimal decimal) {
+        // todo: not sure about the scale, it'll probably be something we want to investigate more
         BigDecimal result = decimal.divide(unit.divisor, 5, RoundingMode.HALF_UP);
         String displayUnit = unit == Unit.B ? "" : unit.name();
         return result.stripTrailingZeros().toPlainString() + " " + displayUnit;

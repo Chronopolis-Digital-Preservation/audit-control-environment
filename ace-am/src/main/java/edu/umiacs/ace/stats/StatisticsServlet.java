@@ -1,6 +1,7 @@
 package edu.umiacs.ace.stats;
 
 import edu.umiacs.ace.util.EntityManagerServlet;
+import edu.umiacs.ace.util.FileSizeFormatter;
 import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
@@ -28,6 +29,7 @@ public class StatisticsServlet extends EntityManagerServlet {
     private static final String AFTER = "after";
     private static final String BEFORE = "before";
     private static final String GROUP = "group";
+    private static final String TRUNCATE = "truncate";
     private static final String COLLECTION = "collection";
     private static final String CSV = "csv";
 
@@ -53,14 +55,20 @@ public class StatisticsServlet extends EntityManagerServlet {
         String group = getParameter(request, GROUP, null);
         String after = getParameter(request, AFTER, null);
         String before = getParameter(request, BEFORE, null);
+        String truncate = getParameter(request, TRUNCATE, null);
         String collection = getParameter(request, COLLECTION, null);
 
+        FileSizeFormatter formatter = new FileSizeFormatter(truncate);
         SummaryQuery q = new SummaryQuery(group, after, before, collection);
 
         // We only output to csv for now, so only check true/false
         // Might be better to have a radio w/ json/csv/none or smth
         if (csv == null) {
             List<IngestSummary> summary = q.getSummary();
+            // bleghhh
+            for (IngestSummary ingestSummary : summary) {
+                ingestSummary.setFormatter(formatter);
+            }
             request.setAttribute("summary", summary);
 
             RequestDispatcher dispatcher = request.getRequestDispatcher(SERVLET);
@@ -70,7 +78,7 @@ public class StatisticsServlet extends EntityManagerServlet {
                 response.setContentType("text/plain");
                 // Download instead of load a page
                 response.setHeader("Content-Disposition", "attachment; filename=ingest-summary.csv");
-                q.writeToCsv(response.getOutputStream());
+                q.writeToCsv(response.getOutputStream(), formatter);
             } catch (SQLException e) {
                 LOG.error("Error with statistics query", e);
             }
