@@ -230,6 +230,9 @@
                             <c:when test="${'E'.bytes[0] == item.collection.state }">
                                 <img src="images/error.jpg" title="Collection contains errors" alt="Collection contains errors"/>
                             </c:when>
+                            <c:when test="${'I'.bytes[0] == item.collection.state }">
+                                <img src="images/error.jpg" title="Last audit was interrupted" alt="Last audit was interrupted"/>
+                            </c:when>
                             <c:otherwise>
                                 <img src="images/file-bad.jpg" title="Complete audit has not occurred" alt="Complete audit has not occurred"/>
                             </c:otherwise>
