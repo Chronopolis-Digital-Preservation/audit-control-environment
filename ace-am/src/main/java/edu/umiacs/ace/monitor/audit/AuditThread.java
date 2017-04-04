@@ -348,7 +348,6 @@ public final class AuditThread extends Thread implements CancelCallback {
     private void performAudit() {
 
         // 1. Setup audit
-        //TODO Clean up filtering creation
         PathFilter filter = new SimpleFilter(coll);
         Date startDate = new Date();
 
@@ -400,6 +399,10 @@ public final class AuditThread extends Thread implements CancelCallback {
             iterableItems.cancel();
         }
 
+        // 4. Clean up, set local inactive
+        lastFileSeen = "looking for missed items";
+        setInactiveBefore(startDate);
+
         if (cancel || abortException != null) {
             return;
         }
@@ -412,14 +415,9 @@ public final class AuditThread extends Thread implements CancelCallback {
             batch = null;
         }
 
-        // 4. Clean up, set local inactive
-        lastFileSeen = "looking for missed items";
-        setInactiveBefore(startDate);
         // harvest remote collections
         lastFileSeen = "comparing to peer sites";
         compareToPeers();
-
-
     }
 
     private void generateAuditReport() {
@@ -451,7 +449,7 @@ public final class AuditThread extends Thread implements CancelCallback {
             if (abortException instanceof InterruptedException
                     || abortException.getCause() instanceof InterruptedException) {
                 LOG.trace("Audit ending with Interrupt");
-                logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH,
+                logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_ABORT,
                         "Audit Interrupted", em);
             } else {
                 LOG.error("Uncaught exception in audit thread", abortException);
@@ -459,12 +457,12 @@ public final class AuditThread extends Thread implements CancelCallback {
                 String message = Strings.exceptionAsString(abortException);
                 logManager.persistCollectionEvent(
                         LogEnum.SYSTEM_ERROR, message, em);
-                logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH,
+                logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_ABORT,
                         "Uncaught audit thread exception ", em);
             }
 
         } else if (cancel) {
-            logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH,
+            logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_CANCEL,
                     "Audit interrupted by user or token registration", em);
             LOG.trace("Audit ending on cancel request");
         } else {
@@ -746,7 +744,7 @@ public final class AuditThread extends Thread implements CancelCallback {
     }
 
     private void setInactiveBefore(Date d) {
-        if (baseItemPathList != null || cancel || abortException != null) {
+        if (baseItemPathList != null) {
             return;
         }
 
