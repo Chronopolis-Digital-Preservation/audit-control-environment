@@ -326,6 +326,7 @@ public class CollectionCountContext implements ServletContextListener {
 
                 try {
                     queryCollection(c);
+                    GroupSummaryContext.updateGroup(c.getGroup());
                 } finally {
                     lock.unlock();
                 }
