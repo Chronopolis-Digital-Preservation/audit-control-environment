@@ -57,6 +57,7 @@ public class GroupSummaryContext implements ServletContextListener {
      */
     public static void updateGroup(String group) {
         if (group != null) {
+            log.debug("Updating group summary for " + group);
             updateSummaries(
                     ImmutableList.of(SUMMARY_QUERY, SUMMARY_QUERY_PARAM, SUMMARY_QUERY_END),
                     ImmutableList.of(group));
