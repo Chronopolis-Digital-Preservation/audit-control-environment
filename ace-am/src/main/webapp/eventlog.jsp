@@ -131,10 +131,10 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             
             <tr>
                 <td>Show Only:</td>
-                <td><b>Errors</b></td> 
-                <td><b>Missing Files</b></td> 
+                <td><b>System Errors</b></td>
+                <td><b>Monitored File Errors</b></td>
                 <td><b>New Master Items</b></td> 
-                <td><b>Sync start/stop</b></td> 
+                <td><b>Sync Start/Stop Events</b></td>
                 
             </tr>
             
