@@ -2,6 +2,8 @@
     Document   : settings
     Created on : Jul 30, 2012, 4:07:16 PM
     Author     : shake
+    TODO: Enable sampling when we have it properly implemented
+    TODO: The Settings should come from a bean or smth so we can loop similar to the custom settings
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -37,13 +39,6 @@
                     <div class="settingsVal"><input type=text name="throttle.maxaudit" value="${currSettings['throttle.maxaudit']}"/></div>
                     <div class="settingsHelp"><img src="images/help.png" title="Max number of running audits"></div>
                 </div>
-                <!-- TODO: Get proper sampling in the future
-                <div class="settingsRow">
-                    <div class="settingsName">Audit Sampling:</div>
-                    <div class="settingsVal"><input type=text name="audit.sample" value="${currSettings['audit.sample']}"/></div>
-                    <div class="settingsHelp"><img src="images/help.png" title="Enable or disable statistical sampling while auditing (samples sqrt n files)"></div>
-                </div>
-                -->
                 <div class="settingsRow">
                     <div class="settingsName">Audit IMS Blocking:</div>
                     <div class="settingsVal"><input type=text name="audit.blocking" value="${currSettings['audit.blocking']}"/></div>
@@ -65,9 +60,9 @@
                     <div class="settingsHelp"><img src="images/help.png" title="Maximum bytes per second per running audit, default = 0 = unlimited"></div>
                 </div>
                 <div class="settingsRow">
-                    <div class="settingsName">Disable Auto Audit:</div>
-                    <div class="settingsVal"><input type=text name="auto.audit.disable" value="${currSettings['auto.audit.disable']}"/></div>
-                    <div class="settingsHelp"><img src="images/help.png" title="Disable automated auditing"></div>
+                    <div class="settingsName">Enable Auto Audit:</div>
+                    <div class="settingsVal"><input type=text name="auto.audit.enable" value="${currSettings['auto.audit.enable']}"/></div>
+                    <div class="settingsHelp"><img src="images/help.png" title="Enable automated auditing"></div>
                 </div>
                 <div class="settingsRow">
                     <div class="settingsName">Audit Only Mode:</div>

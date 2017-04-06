@@ -65,8 +65,7 @@ public class SettingsMigrationContextListener implements ServletContextListener{
         }
 
         if (!newTable) {
-            //LOG.info("SQL patch to 1.7+ has not been installed, table 'settings' does no exist, shutting down!");
-            throw new IllegalStateException("SQL patch to 1.7+ has not been installed, table 'settings' does no exist");
+            throw new IllegalStateException("SQL patch to 1.7+ has not been installed, table 'settings' does not exist");
         }
 
         // Find out if there are any elements in the table
