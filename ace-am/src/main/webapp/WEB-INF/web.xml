@@ -27,10 +27,6 @@
     </filter-mapping>
 
     <listener>
-        <description>Settings migration to db</description>
-        <listener-class>edu.umiacs.ace.monitor.settings.SettingsMigrationContextListener</listener-class>
-    </listener>
-    <listener>
         <description>listener to configure log4j properties</description>
         <listener-class>edu.umiacs.ace.util.LogContextListener</listener-class>
     </listener>
@@ -53,6 +49,14 @@
     <listener>
         <description>ServletContextListener</description>
         <listener-class>edu.umiacs.ace.monitor.core.CollectionSettingsMigrationListener</listener-class>
+    </listener>
+    <listener>
+        <description>Settings migration to db</description>
+        <listener-class>edu.umiacs.ace.monitor.settings.SettingsMigrationContextListener</listener-class>
+    </listener>
+    <listener>
+        <description>Auto Audit Disabled migration</description>
+        <listener-class>edu.umiacs.ace.monitor.settings.AutoAuditMigrationContextListener</listener-class>
     </listener>
     <!-- normal startup listeners, schedulers, etc -->
     <listener>
