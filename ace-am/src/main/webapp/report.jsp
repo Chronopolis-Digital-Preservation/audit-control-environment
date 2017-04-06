@@ -5,7 +5,7 @@ The taglib directive below imports the JSTL library. If you uncomment it,
 you must also add the JSTL library to the project. The Add Library... action
 on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 --%>
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%> 
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@taglib tagdir="/WEB-INF/tags" prefix="h" %>
 
@@ -19,9 +19,16 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Collection Errors</title>
-        <link rel="stylesheet" type="text/css" href="style.css" />
-        <script src="jquery-1.7.1.min.js" type="text/javascript"></script>
+        <jsp:include page="imports.jsp"/>
+        <!--<script src="jquery-1.7.1.min.js" type="text/javascript"></script> -->
+
         <style type="text/css">
+            body {
+                width: 752px !important;
+                margin-top: 8px !important;
+                padding-right: 0px !important;
+            }
+
             #summaryTable {
                 margin-left: 50px;
                 margin-right: auto;
@@ -42,7 +49,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                 border-right: 1px solid #000000;
                 border-top: 1px solid #000000;
                 border-bottom: 1px solid #000000;
-
+                border-collapse: separate;
             }
             #reportTable thead {
                 border-bottom: 1px solid #000000;
@@ -90,7 +97,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
             </tr>
         </table>
 
-            <span>Select All:&nbsp;</span>    <input type="checkbox" id="selectall" />
+            <span>Select All:&nbsp;</span> <input type="checkbox" id="selectall"/>
 
         <form method="GET" action="RemoveItem">
             <input type="hidden" name="redirect" value="Report"/>
@@ -108,7 +115,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
             <c:forEach var="item" items="${items}">
                 <tr>
                     <td>
-                          <input type="checkbox" name="removal" value="${item.id}" />
+                          <input type="checkbox" name="removal" id="removal" value="${item.id}" />
                     </td>
                     <td>
                         <c:choose>
@@ -160,18 +167,56 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                     </table>
                 </td></tr>
         </table>
-        <input type="submit" value="Remove Selected Items" onclick="document.location = 'report.jsp';"/>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" style="width: 25%">
+            Remove Selected
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <h6 class="modal-body">
+                        Submitting will remove all selected items and their tokens from tracking in ACE.
+                        <br><br>
+                        Continue?
+                    </h6>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" onclick="docment.location = 'report.jsp">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         </form>
 
-    <script type="text/javascript">
-        $("#selectall").click(function(){
-            if($("#selectall").attr("checked")=="checked")
-                $('input[name="removal"]').attr('checked', 'checked');
-            else
-                $('input[name="removal"]').removeAttr('checked');
-        });
-    </script>
-
         <jsp:include page="footer.jsp" />
+        <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+        <script type="text/javascript">
+            $("#selectall").click(function() {
+
+                $("input[name=removal]").prop('checked', $(this).prop("checked"));
+                /*
+                if ($("#selectall").is(":checked")) {
+                    $("#removal").toggle(this.checked);
+                } else {
+                    $("#removal").checked;
+                }
+                if($("#selectall").attr("checked")=="checked")
+                    $('input[name="removal"]').attr('checked', 'checked');
+                else
+                    $('input[name="removal"]').removeAttr('checked');
+                    */
+            });
+        </script>
     </body>
 </html>

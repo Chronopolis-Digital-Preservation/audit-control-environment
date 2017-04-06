@@ -31,14 +31,15 @@
 
 package edu.umiacs.ace.monitor.core;
 
-import edu.umiacs.ace.util.EntityManagerServlet;
-import edu.umiacs.ace.util.PersistUtil;
-import edu.umiacs.ace.monitor.log.LogEventManager;
 import edu.umiacs.ace.monitor.access.browse.BrowseServlet;
 import edu.umiacs.ace.monitor.access.browse.DirectoryTree;
 import edu.umiacs.ace.monitor.log.LogEnum;
+import edu.umiacs.ace.monitor.log.LogEventManager;
+import edu.umiacs.ace.util.EntityManagerServlet;
+import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
-import java.io.IOException;
+import org.apache.log4j.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.servlet.RequestDispatcher;
@@ -46,7 +47,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.apache.log4j.Logger;
+import java.io.IOException;
 
 /**
  * Remove an item from list of actively monitored items. This will not remove
@@ -74,27 +75,7 @@ public class RemoveItemServlet extends EntityManagerServlet {
         if ( itemId > 0 ) {
             item = em.getReference(MonitoredItem.class, itemId);
             removeItem(item, em, dt);
-            /*if ( item != null ) {
-                LogEventManager lem =
-                        new LogEventManager(System.currentTimeMillis(), item.getParentCollection());
-                lem.persistItemEvent(LogEnum.REMOVE_ITEM, item.getPath(), null, em);
-                if ( !item.isDirectory() ) {
-                    String parent = item.getParentPath();
-                    Collection c = item.getParentCollection();
-                    EntityTransaction trans = em.getTransaction();
-                    trans.begin();
-                    if ( item.getToken() != null ) {
-                        em.remove(item.getToken());
-                    }
-                    em.remove(item);
-                    trans.commit();
-                    reloadTree(dt, parent, c, em);
-                } else {
-                    new MyDeleteThread(item, dt).start();
-                }
-            }*/
-        }
-        else{
+        } else {
             itemIds = getParameterList(request,REMOVAL, 0);
             if(itemIds != null){
                 for(long l:itemIds){
