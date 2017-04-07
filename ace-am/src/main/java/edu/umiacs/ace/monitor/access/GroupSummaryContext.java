@@ -21,27 +21,35 @@ public class GroupSummaryContext implements ServletContextListener {
 
     public static Map<String, GroupSummary> summaries;
 
-    // Main query
-    private static final String SUMMARY_QUERY = "SELECT c.colgroup, sum(m.size) AS size, sum(m.count) AS count " +
+    /**
+     * Query to get ALL group summaries
+     */
+    private static final String SUMMARY_QUERY_ALL = "SELECT c.colgroup, sum(m.size) AS size, sum(m.count) AS count " +
             "FROM collection c " +
             "JOIN (  " +
             "SELECT sum(size) AS size, count(id) AS count, parentcollection_id   " +
             "FROM monitored_item   " +
             "WHERE directory = 0   " +
             "GROUP BY parentcollection_id " +
-            ") AS m ON c.id = m.parentcollection_id ";
+            ") AS m ON c.id = m.parentcollection_id " +
+            "WHERE c.colgroup IS NOT NULL " +
+            "GROUP BY c.colgroup";
 
-    // clauses depending on if we're querying on a group or not
-    private static final String SUMMARY_QUERY_NOT_NULL = "WHERE c.colgroup IS NOT NULL ";
-    private static final String SUMMARY_QUERY_PARAM = "WHERE c.colgroup = ? ";
-
-    // and the wrap up
-    private static final String SUMMARY_QUERY_END = "GROUP BY c.colgroup";
+    /**
+     * Query to get the group summary for a single group
+     */
+    private static final String SUMMARY_QUERY_GROUP = "select c.colgroup, sum(m.size) AS size, count(m.id) AS count " +
+            "FROM monitored_item m " +
+            "JOIN ( " +
+            "  select colgroup, id " +
+            "  FROM collection " +
+            "  WHERE colgroup = ? " +
+            ") c ON c.id = m.parentcollection_id WHERE directory = 0";
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         summaries = new HashMap<>();
-        updateSummaries(ImmutableList.of(SUMMARY_QUERY, SUMMARY_QUERY_NOT_NULL, SUMMARY_QUERY_END),
+        updateSummaries(ImmutableList.of(SUMMARY_QUERY_ALL),
                 ImmutableList.<String>of());
     }
 
@@ -55,11 +63,12 @@ public class GroupSummaryContext implements ServletContextListener {
      *
      * @param group the group to update
      */
+    @SuppressWarnings("WeakerAccess")
     public static void updateGroup(String group) {
         if (group != null) {
             log.debug("Updating group summary for " + group);
             updateSummaries(
-                    ImmutableList.of(SUMMARY_QUERY, SUMMARY_QUERY_PARAM, SUMMARY_QUERY_END),
+                    ImmutableList.of(SUMMARY_QUERY_GROUP),
                     ImmutableList.of(group));
         }
     }
@@ -87,6 +96,7 @@ public class GroupSummaryContext implements ServletContextListener {
 
         List<GroupSummary> results = (List<GroupSummary>)groupSummary.getResultList();
         for (GroupSummary result : results) {
+            log.info("Result: group " + result.getGroup() + ", size: " + result.getSize() + ", count: " + result.getCount());
             summaries.put(result.getGroup(), result);
         }
     }
