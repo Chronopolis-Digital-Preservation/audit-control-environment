@@ -44,9 +44,9 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -63,16 +63,16 @@ public class CollectionCountContext implements ServletContextListener {
     public static final String CTX_STARTUP = "startup_complete";
     private static final Logger LOG = Logger.getLogger(
             CollectionCountContext.class);
-    private static Map<Collection, Long> fileCountMap = new HashMap<>();
-    private static Map<Collection, Long> fileActiveMap = new HashMap<>();
-    private static Map<Collection, Long> fileCorruptMap = new HashMap<>();
-    private static Map<Collection, Long> fileMissingMap = new HashMap<>();
-    private static Map<Collection, Long> fileMissingTokenMap = new HashMap<>();
-    private static Map<Collection, Long> fileTokenMismatchMap = new HashMap<>();
-    private static Map<Collection, Long> totalErrorMap = new HashMap<>();
-    private static Map<Collection, Long> totalSizeMap = new HashMap<>();
-    private static Map<Collection, Long> fileRemoteMissing = new HashMap<>();
-    private static Map<Collection, Long> fileRemoteCorrupt = new HashMap<>();
+    private static Map<Collection, Long> fileCountMap = new ConcurrentHashMap<>();
+    private static Map<Collection, Long> fileActiveMap = new ConcurrentHashMap<>();
+    private static Map<Collection, Long> fileCorruptMap = new ConcurrentHashMap<>();
+    private static Map<Collection, Long> fileMissingMap = new ConcurrentHashMap<>();
+    private static Map<Collection, Long> fileMissingTokenMap = new ConcurrentHashMap<>();
+    private static Map<Collection, Long> fileTokenMismatchMap = new ConcurrentHashMap<>();
+    private static Map<Collection, Long> totalErrorMap = new ConcurrentHashMap<>();
+    private static Map<Collection, Long> totalSizeMap = new ConcurrentHashMap<>();
+    private static Map<Collection, Long> fileRemoteMissing = new ConcurrentHashMap<>();
+    private static Map<Collection, Long> fileRemoteCorrupt = new ConcurrentHashMap<>();
     private static AtomicInteger totalCollections = new AtomicInteger(0);
     private static Lock lock = new ReentrantLock();
     private static boolean abort = false;
@@ -217,8 +217,20 @@ public class CollectionCountContext implements ServletContextListener {
         totalCollections.incrementAndGet();
     }
 
-    public static void decrementTotalCollections() {
+    public static void decrementTotalCollections(Collection collection) {
         totalCollections.decrementAndGet();
+
+        fileCountMap.remove(collection);
+        fileActiveMap.remove(collection);
+        fileCorruptMap.remove(collection);
+        fileMissingMap.remove(collection);
+        fileMissingTokenMap.remove(collection);
+        fileTokenMismatchMap.remove(collection);
+        totalErrorMap.remove(collection);
+        totalSizeMap.remove(collection);
+        fileRemoteMissing.remove(collection);
+        fileRemoteCorrupt.remove(collection);
+        GroupSummaryContext.updateGroup(collection.getGroup());
     }
 
     public static int getTotalCollections() {
