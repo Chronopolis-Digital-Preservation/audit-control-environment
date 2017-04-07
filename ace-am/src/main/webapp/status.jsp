@@ -186,25 +186,22 @@
             </thead>
             <c:set var="count" value="0" />
             <jsp:useBean id="today" class="java.util.Date"/>
-            <c:set var="counttotal" value="0" />
-            <c:set var="sizetotal" value="0" />
             <c:forEach var="item" items="${collections}">
 
                 <c:if test="${currgroup != item.collection.group && item.collection.group != null}">
-                    <script type="text/javascript">
-                        myp=document.getElementById("group${currgroup}");
-                        if (myp != null)
-                        {
-                            myp.innerHTML='${counttotal} / <c:choose><c:when test="${sizetotal > 0}"><d:FileSize value="${sizetotal}" /></c:when><c:otherwise>0 B</c:otherwise></c:choose>';
-                        }
-                    </script>
+                    <c:set var="group" value="${item.collection.group}"/>
+                    <c:set var="group_count" value="${groups[group].count}"/>
+                    <c:set var="size" value="${groups[group].size}"/>
+
                     <tr>
-                        <td class="groupheader" colspan="3" onclick="toggleVisibility('spexpand${item.collection.group}','inline'); toggleVisibility('sphide${item.collection.group}','inline');">
-                            <span onclick="showGroup('grouptr${item.collection.group}')" id="spexpand${item.collection.group}" style="display:none;float: left;width: 25px;" >[+]</span>
-                            <span onclick="hideGroup('grouptr${item.collection.group}')" id="sphide${item.collection.group}" style="display:inline;float: left;width: 25px;" >[-]</span>
-                            ${item.collection.group}
+                        <td class="groupheader" colspan="3" onclick="toggleVisibility('spexpand${group}','inline'); toggleVisibility('sphide${group}','inline');">
+                            <span onclick="showGroup('grouptr${group}')" id="spexpand${group}" style="display:none;float: left;width: 25px;" >[+]</span>
+                            <span onclick="hideGroup('grouptr${group}')" id="sphide${group}" style="display:inline;float: left;width: 25px;" >[-]</span>
+                            ${group}
                         </td>
-                        <td class="groupheader" colspan="3" id="group${item.collection.group}"></td>
+                        <td class="groupheader" colspan="3" id="group${group}">
+                                ${group_count} /<c:choose><c:when test="${size > 0}"><d:FileSize value="${size}" /></c:when><c:otherwise>0 B</c:otherwise></c:choose>
+                        </td>
                     </tr>
                     <c:set var="counttotal" value="0" />
                     <c:set var="sizetotal" value="0" />
@@ -271,13 +268,7 @@
                 </tr>
                 <c:set var="count" value="${count + 1}" />
                 <c:set var="currgroup" value="${item.collection.group}" />
-                <c:set var="counttotal" value="${counttotal + item.totalFiles}" />
-                <c:set var="sizetotal" value="${sizetotal + item.totalSize}" />
             </c:forEach>
-            <script type="text/javascript">
-                myp=document.getElementById("group${currgroup}");
-                myp.innerHTML='${counttotal} / <c:choose><c:when test="${sizetotal > 0}"><d:FileSize value="${sizetotal}" /></c:when><c:otherwise>0 B</c:otherwise></c:choose>';
-            </script>
 
             <tr><td colspan="5"><br/><d:Auth role="Collection Modify" showUnauthenticated="true"><a href="ManageCollection">Add Collection</a></d:Auth> &nbsp;&nbsp;&nbsp&nbsp;&nbsp;
                     <d:Auth role="Audit">

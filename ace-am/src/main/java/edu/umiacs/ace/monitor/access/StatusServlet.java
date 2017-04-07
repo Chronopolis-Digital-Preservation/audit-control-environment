@@ -210,6 +210,7 @@ public class StatusServlet extends EntityManagerServlet {
         request.setAttribute(PAGE_STATES, ImmutableList.copyOf(CStateBean.values()));
         request.setAttribute(PAGE_COUNT, count);
         request.setAttribute(PAGE_NUMBER, pb);
+        request.setAttribute("groups", GroupSummaryContext.summaries);
         if (hasJson(request)) {
             dispatcher = request.getRequestDispatcher("status-json.jsp");
         } else if (hasCsv(request)) {

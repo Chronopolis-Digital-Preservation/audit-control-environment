@@ -66,6 +66,9 @@
         <listener-class>edu.umiacs.ace.monitor.access.CollectionCountContext</listener-class>
     </listener>
     <listener>
+        <listener-class>edu.umiacs.ace.monitor.access.GroupSummaryContext</listener-class>
+    </listener>
+    <listener>
         <description>HttpSessionListener</description>
         <listener-class>edu.umiacs.ace.monitor.users.UserSessionTracker</listener-class>
     </listener>

@@ -96,7 +96,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
         String paramCheckResponse = null;
 
 
-        /**
+        /*
          * Modification, view, or removal of an existing collection       
          *  if we have an int, and its > 0, and it is the key for a resource
          */
@@ -109,16 +109,16 @@ public class ManageCollectionServlet extends EntityManagerServlet {
             }
 
 
-            /**
+            /*
              * Tst to see if we're removing a collection
              */
             if (!Strings.isEmpty(request.getParameter(PARAM_REMOVE))
                     && request.getParameter(PARAM_REMOVE).toLowerCase().equals("yes")) {
-                LOG.debug("removing collection" + collection.getName());
+                LOG.debug("removing collection " + collection.getName());
                 removeCollection(em, collection, storage);
                 response.sendRedirect("Status?collectionid=-1");
                 return;
-            } /**
+            } /*
              * otherwise, are we updating?
              */
             else if (checkParameters(request)
@@ -132,7 +132,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
                 }
                 trans.commit();
                 dispatcher = request.getRequestDispatcher("collectionfinish.jsp");
-            } /**
+            } /*
              * ok, we're just opening an existing collection for modification
              *  - this should display the storage page since storage will be set
              */
@@ -140,7 +140,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
                 LOG.debug("loading existing collection: " + collection.getName());
                 dispatcher = request.getRequestDispatcher("collectionmodify.jsp");
             }
-        } /**
+        } /*
          * its either a new submission, or requesting a blank page.
          *  We shouldn't set storage information here yet, just create the 
          *  new collection and create a blank storage
@@ -209,7 +209,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
             storage.remove(em);
         }
         em.remove(collection);
-        CollectionCountContext.decrementTotalCollections();
+        CollectionCountContext.decrementTotalCollections(collection);
         trans.commit();
     }
 
