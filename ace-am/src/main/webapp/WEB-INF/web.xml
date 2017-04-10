@@ -34,10 +34,7 @@
         <description>listener to close factory on shutdown</description>
         <listener-class>edu.umiacs.ace.util.PersistenceContextListener</listener-class>
     </listener>
-    
-    <listener>
-        <listener-class>edu.umiacs.ace.monitor.audit.AuditConfigurationContext</listener-class>
-    </listener>
+
     <!-- migration, initialization listeners -->
     <listener>
         <listener-class>edu.umiacs.ace.monitor.users.DefaultAccountContextListener</listener-class>
@@ -58,6 +55,10 @@
         <description>Auto Audit Disabled migration</description>
         <listener-class>edu.umiacs.ace.monitor.settings.AutoAuditMigrationContextListener</listener-class>
     </listener>
+    <listener>
+        <listener-class>edu.umiacs.ace.monitor.audit.AuditConfigurationContext</listener-class>
+    </listener>
+
     <!-- normal startup listeners, schedulers, etc -->
     <listener>
         <listener-class>edu.umiacs.ace.util.CollectionThreadPoolContextListener</listener-class>
