@@ -34,6 +34,14 @@
         <description>listener to close factory on shutdown</description>
         <listener-class>edu.umiacs.ace.util.PersistenceContextListener</listener-class>
     </listener>
+    <listener>
+        <description>Auto Audit Disabled migration</description>
+        <listener-class>edu.umiacs.ace.monitor.settings.AutoAuditMigrationContextListener</listener-class>
+    </listener>
+    <!-- Some of the migrations rely on the pause bean from the ACC, so init it early -->
+    <listener>
+        <listener-class>edu.umiacs.ace.monitor.audit.AuditConfigurationContext</listener-class>
+    </listener>
 
     <!-- migration, initialization listeners -->
     <listener>
@@ -50,13 +58,6 @@
     <listener>
         <description>Settings migration to db</description>
         <listener-class>edu.umiacs.ace.monitor.settings.SettingsMigrationContextListener</listener-class>
-    </listener>
-    <listener>
-        <description>Auto Audit Disabled migration</description>
-        <listener-class>edu.umiacs.ace.monitor.settings.AutoAuditMigrationContextListener</listener-class>
-    </listener>
-    <listener>
-        <listener-class>edu.umiacs.ace.monitor.audit.AuditConfigurationContext</listener-class>
     </listener>
 
     <!-- normal startup listeners, schedulers, etc -->
