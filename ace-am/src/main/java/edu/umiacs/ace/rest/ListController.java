@@ -1,6 +1,7 @@
 package edu.umiacs.ace.rest;
 
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.CollectionState;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.PersistUtil;
 import org.apache.log4j.Logger;
@@ -9,6 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -67,6 +69,7 @@ public class ListController {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("collections/by-group")
     public List<Collection> getCollectionsNoGroup() {
+        // We can search on group == null if we do where group is null
         // Because we can't search on group == NULL, we need to do processing here
         EntityManager em = PersistUtil.getEntityManager();
 
@@ -101,11 +104,11 @@ public class ListController {
         Root<Collection> coll = cq.from(Collection.class);
         cq.select(coll);
         if (active != null && active) {
-            cq.where(cb.equal(coll.get("state"), 'A'));
+            cq.where(cb.equal(coll.get("state"), CollectionState.ACTIVE));
         }
 
         if (corrupt != null && corrupt) {
-            cq.where(cb.equal(coll.get("state"), 'E'));
+            cq.where(cb.equal(coll.get("state"), CollectionState.ERROR));
         }
 
         return entityManager.createQuery(cq).getResultList();
@@ -137,10 +140,14 @@ public class ListController {
                 mi.get("size"), mi.get("lastSeen"),
                 mi.get("stateChange"), mi.get("lastVisited")));
 
-        cq.where(cb.equal(mi.get("parentCollection"), c));
+        Predicate predicate = cb.and(cb.equal(mi.get("directory"), false), cb.equal(mi.get("parentCollection"), c));
+
         if (state != null && !state.isEmpty()) {
-            cq.where(cb.equal(mi.get("state"), state));
+            predicate = cb.and(predicate, cb.equal(mi.get("state"), state));
+            // predicates.add(cb.equal(mi.get("parentCollection"), c));
         }
+
+        cq.where(predicate);
 
         return entityManager.createQuery(cq).getResultList();
     }
