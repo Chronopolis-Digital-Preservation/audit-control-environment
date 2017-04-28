@@ -94,6 +94,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
             <tr>
                 <td class="tblLinks"><a href="Report?collectionid=${collection.collection.id}&amp;text=1&amp;count=-1">Download List</a></td>
                 <td class="tblLinks"><a href="StartSync?collectionid=${collection.collection.id}&amp;type=corrupt">Audit Corrupt Files</a></td>
+                <td class="tblLinks"><a href="EventLog?sessionId=${session}">Recent Events</a></td>
             </tr>
         </table>
 
@@ -203,19 +204,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 
         <script type="text/javascript">
             $("#selectall").click(function() {
-
                 $("input[name=removal]").prop('checked', $(this).prop("checked"));
-                /*
-                if ($("#selectall").is(":checked")) {
-                    $("#removal").toggle(this.checked);
-                } else {
-                    $("#removal").checked;
-                }
-                if($("#selectall").attr("checked")=="checked")
-                    $('input[name="removal"]').attr('checked', 'checked');
-                else
-                    $('input[name="removal"]').removeAttr('checked');
-                    */
             });
         </script>
     </body>
