@@ -199,10 +199,6 @@ public class Collection implements Serializable {
         return state.asChar();
     }
 
-    public void setState( char state ) {
-        this.state = CollectionState.fromChar(state);
-    }
-
     public String getStorage() {
         return storage;
     }

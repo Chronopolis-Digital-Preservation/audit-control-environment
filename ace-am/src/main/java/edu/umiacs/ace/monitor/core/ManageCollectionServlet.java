@@ -147,7 +147,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
          */
         else {
             collection = new Collection();
-            collection.setState('N');
+            collection.setState(CollectionState.NEVER);
             populateCollection(request, collection);
 
             // is all the collection params match, commit and create a storage
