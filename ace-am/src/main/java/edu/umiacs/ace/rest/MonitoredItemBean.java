@@ -4,6 +4,7 @@ import java.util.Date;
 
 /**
  * Bean for displaying certain MonitoredItem properties in our api
+ * todo: java.time???
  *
  * Created by shake on 11/14/16.
  */
