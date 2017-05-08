@@ -12,6 +12,7 @@ import edu.umiacs.ace.driver.StorageDriverFactory;
 import edu.umiacs.ace.monitor.access.CollectionCountContext;
 import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.CollectionState;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.PersistUtil;
 import org.apache.log4j.Logger;
@@ -150,6 +151,7 @@ public class CollectionManagement {
 
         // Check against the name collection name in the group. This could 
         // make things very confusing in the interface
+        // TODO: Why not just query name + group?
         Query q = em.createNamedQuery("Collection.getCollectionByName");
         q.setParameter("name", coll.getName());
         List<Collection> colls = q.getResultList();
@@ -157,7 +159,8 @@ public class CollectionManagement {
             em.close();
             return Response.status(Status.BAD_REQUEST).build();
         }
-    
+
+        coll.setState(CollectionState.NEVER);
         EntityTransaction trans = em.getTransaction();
         trans.begin();
         em.persist(coll);
