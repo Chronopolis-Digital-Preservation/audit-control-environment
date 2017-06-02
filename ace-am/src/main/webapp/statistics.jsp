@@ -48,12 +48,6 @@
     <div id="searchtable">
         <form method="POST" role="form">
             <div class="form-group">
-                <div class="form-check">
-                    <label class="form-check-label">
-                        <input class="form-check-input" name="csv" type="checkbox"> Export to CSV
-                    </label>
-                </div>
-
                 <select class="custom-select mb-2 mr-sm-2 mb-sm-0" name="truncate" id="truncate">
                     <option selected>Truncate Bytes to...</option>
                     <option value="KiB">KiB</option>
@@ -80,6 +74,8 @@
 
             <button type="submit" class="btn btn-primary"
                     value="Submit"><span>Submit</span></button>
+            <button type="submit" class="btn btn-primary" name="csv"
+                    value="true" style="width: 10rem;"><span>Download As CSV</span></button>
         </form>
     </div>
 
