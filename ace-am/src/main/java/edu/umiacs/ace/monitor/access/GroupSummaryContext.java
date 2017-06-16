@@ -13,6 +13,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Servlet context listener which acts as a cache for Summary information about
+ * groups in ACE
+ *
+ * If there are many groups, it's conceivable that this could be a strain on memory
  *
  * Created by shake on 4/4/17.
  */
