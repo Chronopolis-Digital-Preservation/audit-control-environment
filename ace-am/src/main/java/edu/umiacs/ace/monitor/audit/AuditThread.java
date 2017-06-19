@@ -719,7 +719,8 @@ public final class AuditThread extends Thread implements CancelCallback {
         EntityManager em = PersistUtil.getEntityManager();
 
         if (baseItemPathList != null) {
-            if (coll.getState() == '\0' || coll.getState() == 'N') {
+            CollectionState state = coll.getStateEnum();
+            if (state == null || state == CollectionState.NEVER) {
                 return;
             }
         } else {
