@@ -43,7 +43,7 @@ public class CompareController {
     public CompareResponse compare(@PathParam("id") Long id, CompareRequest request) {
         if (request == null) {
             request = new CompareRequest();
-            request.setComparisons(ImmutableList.<CompareFile>of());
+            request.setComparisons(ImmutableList.of());
         }
 
         EntityManager em = PersistUtil.getEntityManager();

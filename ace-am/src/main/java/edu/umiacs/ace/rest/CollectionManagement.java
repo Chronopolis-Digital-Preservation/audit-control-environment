@@ -39,6 +39,8 @@ import java.util.List;
 /**
  * REST Service for adding and viewing collections
  *
+ * todo: we should update most of the endpoints to be /collection/<id>/action
+ *
  * @author shake
  */
 @Path("collection")

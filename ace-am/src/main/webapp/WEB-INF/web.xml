@@ -773,6 +773,7 @@
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>Rest Audit</web-resource-name>
+            <url-pattern>/rest/compare/*</url-pattern>
             <url-pattern>/rest/collection/audit/*</url-pattern>
             <http-method>POST</http-method>
         </web-resource-collection>
@@ -785,7 +786,7 @@
         <web-resource-collection>
             <web-resource-name>Rest Status</web-resource-name>
             <url-pattern>/rest/groups</url-pattern>
-            <url-pattern>/rest/collections/by-group/*</url-pattern>
+            <url-pattern>/rest/collections/*</url-pattern>
             <http-method>GET</http-method>
         </web-resource-collection>
         <auth-constraint>
