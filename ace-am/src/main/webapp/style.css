@@ -293,7 +293,6 @@ vertical-align: top;
 .form-select {
     border: 1px solid #ccc;
     width: 100%;
-    padding: 3px 8px;
     margin-left: -3px;
     margin-right: 5px;
 }
