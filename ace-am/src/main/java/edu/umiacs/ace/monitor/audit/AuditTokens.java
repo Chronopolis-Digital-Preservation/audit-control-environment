@@ -33,6 +33,7 @@ package edu.umiacs.ace.monitor.audit;
 import edu.umiacs.ace.ims.api.IMSService;
 import edu.umiacs.ace.ims.api.TokenValidator;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.CollectionState;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.MonitoredItemManager;
 import edu.umiacs.ace.monitor.log.LogEnum;
@@ -306,9 +307,9 @@ public final class AuditTokens extends Thread implements CancelCallback {
         MonitoredItemManager mim = new MonitoredItemManager(em);
 
         if ( mim.countErrorsInCollection(collection) == 0 ) {
-            collection.setState('A');
+            collection.setState(CollectionState.ACTIVE);
         } else {
-            collection.setState('E');
+            collection.setState(CollectionState.ERROR);
         }
 
         EntityTransaction trans = em.getTransaction();

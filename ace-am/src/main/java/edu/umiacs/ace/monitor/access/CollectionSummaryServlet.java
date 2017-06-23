@@ -30,19 +30,20 @@
 // $Id$
 package edu.umiacs.ace.monitor.access;
 
+import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.EntityManagerServlet;
-import edu.umiacs.ace.monitor.core.Collection;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.List;
+import org.apache.log4j.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.log4j.Logger;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.List;
 
 /**
  * Show the current status of a collection, listing any non-active files
@@ -60,6 +61,7 @@ public class CollectionSummaryServlet extends EntityManagerServlet {
     public static final String PAGE_COLLECTION = "collection";
     public static final String PAGE_ITEMS = "items";
     public static final String PAGE_COUNT = "count";
+    public static final String PAGE_SESSION = "session";
 
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -122,6 +124,9 @@ public class CollectionSummaryServlet extends EntityManagerServlet {
             return;
         }
 
+        // get latest session
+        Long session = getRecentSession(c, em);
+
         CollectionSummaryBean csb = new CollectionSummaryBean();
         csb.setCollection(c);
         csb.setTotalFiles(CollectionCountContext.getFileCount(c));
@@ -135,6 +140,7 @@ public class CollectionSummaryServlet extends EntityManagerServlet {
         csb.setRemoteMissing(CollectionCountContext.getRemoteMissing(c));
         csb.setRemoteCorrupt(CollectionCountContext.getRemoteCorrupt(c));
 
+        request.setAttribute(PAGE_SESSION, session);
         request.setAttribute(PAGE_ITEMS, miList);
         request.setAttribute(PAGE_COLLECTION, csb);
         request.setAttribute(PAGE_COUNT, count);
@@ -147,5 +153,13 @@ public class CollectionSummaryServlet extends EntityManagerServlet {
         }
         dispatch.forward(request, response);
 
+    }
+
+    private Long getRecentSession(Collection c, EntityManager em) {
+        String query = "SELECT e.session FROM LogEvent e WHERE e.collection = :c ORDER BY e.id DESC";
+        Query q = em.createQuery(query);
+        q.setParameter("c", c);
+        q.setMaxResults(1);
+        return (Long) q.getSingleResult();
     }
 }

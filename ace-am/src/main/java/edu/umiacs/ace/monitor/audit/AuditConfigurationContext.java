@@ -190,10 +190,11 @@ public final class AuditConfigurationContext implements ServletContextListener {
         PauseBean pb = new PauseBean();
         ctx.setAttribute(ATTRIBUTE_PAUSE, pb);
 
-        q.setParameter("attr", SettingsConstants.PARAM_DISABLE_AUTO_AUDIT);
+        q.setParameter("attr", SettingsConstants.PARAM_AUTO_AUDIT_ENABLE);
         s = (SettingsParameter) q.getSingleResult();
-        String startPaused = s.getValue();
-        pb.setPaused(Boolean.valueOf(startPaused));
+        // Invert the boolean because the PB checks if we're paused, not enabled
+        String enableAudits = s.getValue();
+        pb.setPaused(!Boolean.valueOf(enableAudits));
 
         q.setParameter("attr", SettingsConstants.PARAM_THROTTLE_MAXAUDIT);
         s = (SettingsParameter) q.getSingleResult();

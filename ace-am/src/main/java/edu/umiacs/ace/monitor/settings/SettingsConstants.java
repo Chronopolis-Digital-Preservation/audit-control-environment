@@ -14,7 +14,7 @@ public class SettingsConstants {
     public static final String PARAM_IMS_PORT = "ims.port";
     public static final String PARAM_IMS_TOKEN_CLASS = "ims.tokenclass";
     public static final String PARAM_IMS_SSL = "ims.ssl";
-    public static final String PARAM_DISABLE_AUTO_AUDIT = "auto.audit.disable";
+    public static final String PARAM_AUTO_AUDIT_ENABLE = "auto.audit.enable";
     public static final String PARAM_THROTTLE_MAXAUDIT = "throttle.maxaudit";
     public static final String PARAM_TIME = "throttle.wait";
     public static final String PARAM_BPS = "throttle.bps";

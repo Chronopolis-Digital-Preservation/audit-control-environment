@@ -4,7 +4,7 @@
     <parent>
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
-        <version>1.11-RELEASE</version>
+        <version>1.12-RELEASE</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>ace-am</artifactId>
@@ -39,6 +39,14 @@
                           </excludes>
                         </resource>-->
                     </webResources>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <!-- debian package made easy -->
@@ -268,7 +276,7 @@
         <dependency>
             <groupId>edu.umiacs.ace</groupId>
             <artifactId>ace-ims-ws</artifactId>
-            <version>1.11-RELEASE</version>
+            <version>1.12-RELEASE</version>
             <type>jar</type>
         </dependency>
         <dependency>

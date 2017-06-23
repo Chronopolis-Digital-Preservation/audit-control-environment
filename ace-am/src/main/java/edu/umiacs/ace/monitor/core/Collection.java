@@ -38,6 +38,7 @@ import edu.umiacs.util.Argument;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -59,6 +60,7 @@ import java.util.Map;
 /**
  * Collection states
  *  - A active
+ *  - I interrupted
  *  - N - never completely scanned (default for new collections)
  *  - E - 
  * @author toaster
@@ -73,7 +75,7 @@ import java.util.Map;
     @NamedQuery(name = "Collection.getCollectionByName", query =
     "SELECT c FROM Collection c WHERE c.name = :name"),
     @NamedQuery(name = "Collection.listGroups", query =
-    "SELECT DISTINCT c.group FROM Collection c"),
+    "SELECT DISTINCT c.group FROM Collection c WHERE c.group IS NOT NULL"),
     @NamedQuery(name = "Collection.getCollectionById", query =
     "SELECT c FROM Collection c WHERE c.id = :id"),
     @NamedQuery(name = "Collection.getCollectionsInGroup", query =
@@ -101,7 +103,8 @@ public class Collection implements Serializable {
 
     private String storage;
 
-    private char state;
+    @Convert(converter = CollectionStateConverter.class)
+    private CollectionState state;
 
     @Column(name = "COLGROUP")
     private String group;
@@ -193,11 +196,11 @@ public class Collection implements Serializable {
     }
 
     public char getState() {
-        return state;
+        return state.asChar();
     }
 
-    public void setState( char state ) {
-        this.state = state;
+    public CollectionState getStateEnum() {
+        return state;
     }
 
     public String getStorage() {
@@ -216,4 +219,7 @@ public class Collection implements Serializable {
         this.group = group;
     }
 
+    public void setState(CollectionState state) {
+        this.state = state;
+    }
 }

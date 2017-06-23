@@ -3,8 +3,8 @@ body {
     font-size: 10px;
     width: 750px;
     border: 1px solid #000000;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 h1 {
@@ -29,6 +29,39 @@ a img {
 
 input {
     font-size: 12px;
+}
+
+
+/*
+ * Taken from bootstrap. If we import a lot of rules break and we end up
+ * with broken pages. The ui in general needs an overhaul but that's a lot
+ * of work.
+ */
+ul {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.nav {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flex;
+    display: flex;
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+}
+
+.nav-link {
+    display: block;
+    padding: .5em 1em;
+}
+
+.justify-content-center {
+    -webkit-box-pack: center !important;
+    -webkit-justify-content: center !important;
+    -ms-flex-pack: center !important;
+    justify-content: center !important;
 }
 
 .standardBody {
@@ -260,7 +293,6 @@ vertical-align: top;
 .form-select {
     border: 1px solid #ccc;
     width: 100%;
-    padding: 3px 8px;
     margin-left: -3px;
     margin-right: 5px;
 }
@@ -270,6 +302,7 @@ vertical-align: top;
     width: 75px;
     height: 25px;
     border: 1px solid #e8e8e8;
+    border-radius: 0;
     margin-left: 2px;
     margin-top: 2px;
 }

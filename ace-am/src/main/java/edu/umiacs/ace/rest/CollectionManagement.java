@@ -12,6 +12,7 @@ import edu.umiacs.ace.driver.StorageDriverFactory;
 import edu.umiacs.ace.monitor.access.CollectionCountContext;
 import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.CollectionState;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.PersistUtil;
 import org.apache.log4j.Logger;
@@ -22,11 +23,13 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -35,6 +38,8 @@ import java.util.List;
 
 /**
  * REST Service for adding and viewing collections
+ *
+ * todo: we should update most of the endpoints to be /collection/<id>/action
  *
  * @author shake
  */
@@ -70,7 +75,8 @@ public class CollectionManagement {
 
     @POST
     @Path("audit/{id}")
-    public Response startAudit(@PathParam("id")long id) {
+    public Response startAudit(@PathParam("id") long id, @DefaultValue("false") @QueryParam("corrupt") String corrupt) {
+        boolean auditCorrupt = Boolean.getBoolean(corrupt);
         EntityManager em = PersistUtil.getEntityManager();
         Collection c = em.find(Collection.class, id);
         if ( c == null ) {
@@ -84,6 +90,13 @@ public class CollectionManagement {
 
         // We use a null item so that the entire collection gets audited
         MonitoredItem[] item = null;
+        if (auditCorrupt) {
+            // todo: might be able to put this in some type of service class
+            Query query = em.createNamedQuery("MonitoredItem.listLocalErrors");
+            query.setParameter("coll", c);
+            List<MonitoredItem> resList = query.getResultList();
+            item = resList.toArray(new MonitoredItem[resList.size()]);
+        }
         AuditThreadFactory.createThread(c, driver, true, item);
         return Response.ok().build();
     }
@@ -140,6 +153,7 @@ public class CollectionManagement {
 
         // Check against the name collection name in the group. This could 
         // make things very confusing in the interface
+        // TODO: Why not just query name + group?
         Query q = em.createNamedQuery("Collection.getCollectionByName");
         q.setParameter("name", coll.getName());
         List<Collection> colls = q.getResultList();
@@ -147,7 +161,8 @@ public class CollectionManagement {
             em.close();
             return Response.status(Status.BAD_REQUEST).build();
         }
-    
+
+        coll.setState(CollectionState.NEVER);
         EntityTransaction trans = em.getTransaction();
         trans.begin();
         em.persist(coll);

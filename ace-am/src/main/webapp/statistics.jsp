@@ -6,28 +6,57 @@
     <title>Statistics</title>
 
     <style type="text/css">
+        /**
+         * some compatibility issues arise between the older css and bootstrap
+         * a few fixes to make everything in line with the rest of ACE
+         */
+        body {
+            width: 752px !important;
+            margin-top: 8px !important;
+        }
+
+        /**
+         * alignment for our button
+         */
+        .btn {
+            margin-left: 0;
+        }
+
+        td {
+            max-width: 100px;
+            overflow: scroll;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         .form-group-sm {
             width: 150px;
         }
 
-        .box {
-            margin-left: auto;
-            margin-right: auto;
-            margin-top: 12px;
-            margin-bottom: 10px;
-            width: 720px;
-            border-top: 1px solid #000000;
-            border-left: 1px solid #000000;
-            border-right: 1px solid #000000;
-            border-bottom: 1px solid #000000;
+        .results {
+            padding: 1rem;
+            margin: 1rem -15px;
+            background-color: #f7f7f9;
+            -ms-overflow-style: -ms-autohiding-scrollbar;
         }
     </style>
 </head>
 <body>
 <jsp:include page="header.jsp"/>
+<h3 style="text-align: center;">Ingestion Statistics</h3>
 <div class="container">
     <div id="searchtable">
-        <form method="GET" role="form">
+        <form method="POST" role="form">
+            <div class="form-group">
+                <select class="custom-select mb-2 mr-sm-2 mb-sm-0" name="truncate" id="truncate">
+                    <option selected>Truncate Bytes to...</option>
+                    <option value="KiB">KiB</option>
+                    <option value="MiB">MiB</option>
+                    <option value="GiB">GiB</option>
+                    <option value="TiB">TiB</option>
+                </select>
+            </div>
+
             <div class="form-inline">
                 <div class="form-group form-group-sm">
                     <input type="text" class="form-input" id="before-filter" name="before" placeholder="Before"/>
@@ -43,24 +72,14 @@
                 </div>
             </div>
 
-            <div class="form-group row">
-                <div class="col-sm-10">
-                    <div class="form-check">
-                        <label class="form-check-label">
-                            <input class="form-check-input" name="csv" type="checkbox"> Export to CSV
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <button type="submit" class="btn btn-sm"
-                        value="Submit"><span>Submit</span></button>
-            </div>
+            <button type="submit" class="btn btn-primary"
+                    value="Submit"><span>Submit</span></button>
+            <button type="submit" class="btn btn-primary" name="csv"
+                    value="true" style="width: 10rem;"><span>Download As CSV</span></button>
         </form>
     </div>
 
-    <div class="box">
+    <div class="results">
         <table class="table table-sm">
             <thead>
             <tr>
@@ -74,11 +93,11 @@
             <tbody>
             <c:forEach var="item" items="${summary}">
                 <tr>
-                    <td>${item.date}</td>
-                    <td>${item.collection}</td>
-                    <td>${item.group}</td>
+                    <td title="${item.date}">${item.date}</td>
+                    <td title="${item.collection}">${item.collection}</td>
+                    <td title="${item.group}">${item.group}</td>
                     <td>${item.count}</td>
-                    <td>${item.size}</td>
+                    <td>${item.formattedSize}</td>
                 </tr>
             </c:forEach>
             </tbody>

@@ -27,10 +27,6 @@
     </filter-mapping>
 
     <listener>
-        <description>Settings migration to db</description>
-        <listener-class>edu.umiacs.ace.monitor.settings.SettingsMigrationContextListener</listener-class>
-    </listener>
-    <listener>
         <description>listener to configure log4j properties</description>
         <listener-class>edu.umiacs.ace.util.LogContextListener</listener-class>
     </listener>
@@ -38,10 +34,15 @@
         <description>listener to close factory on shutdown</description>
         <listener-class>edu.umiacs.ace.util.PersistenceContextListener</listener-class>
     </listener>
-    
+    <listener>
+        <description>Auto Audit Disabled migration</description>
+        <listener-class>edu.umiacs.ace.monitor.settings.AutoAuditMigrationContextListener</listener-class>
+    </listener>
+    <!-- Some of the migrations rely on the pause bean from the ACC, so init it early -->
     <listener>
         <listener-class>edu.umiacs.ace.monitor.audit.AuditConfigurationContext</listener-class>
     </listener>
+
     <!-- migration, initialization listeners -->
     <listener>
         <listener-class>edu.umiacs.ace.monitor.users.DefaultAccountContextListener</listener-class>
@@ -54,12 +55,20 @@
         <description>ServletContextListener</description>
         <listener-class>edu.umiacs.ace.monitor.core.CollectionSettingsMigrationListener</listener-class>
     </listener>
+    <listener>
+        <description>Settings migration to db</description>
+        <listener-class>edu.umiacs.ace.monitor.settings.SettingsMigrationContextListener</listener-class>
+    </listener>
+
     <!-- normal startup listeners, schedulers, etc -->
     <listener>
         <listener-class>edu.umiacs.ace.util.CollectionThreadPoolContextListener</listener-class>
     </listener>
     <listener>
         <listener-class>edu.umiacs.ace.monitor.access.CollectionCountContext</listener-class>
+    </listener>
+    <listener>
+        <listener-class>edu.umiacs.ace.monitor.access.GroupSummaryContext</listener-class>
     </listener>
     <listener>
         <description>HttpSessionListener</description>
@@ -764,6 +773,7 @@
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>Rest Audit</web-resource-name>
+            <url-pattern>/rest/compare/*</url-pattern>
             <url-pattern>/rest/collection/audit/*</url-pattern>
             <http-method>POST</http-method>
         </web-resource-collection>
@@ -776,7 +786,7 @@
         <web-resource-collection>
             <web-resource-name>Rest Status</web-resource-name>
             <url-pattern>/rest/groups</url-pattern>
-            <url-pattern>/rest/collections/by-group/*</url-pattern>
+            <url-pattern>/rest/collections/*</url-pattern>
             <http-method>GET</http-method>
         </web-resource-collection>
         <auth-constraint>

@@ -242,15 +242,7 @@ public class AuditThreadFactory {
         // Clean up everything which may contain a reference to the thread
         // Thread will only ever be removed once, so no need to worry about
         // race conditions
-        // AuditThread thread = runningAudits.remove(c);
-        // if ( thread != null ) {
-        //    LOG.debug("Removing old audit thread from thread pool executor");
-            // executor.remove(thread);
-            // blockingQueue.remove(thread);
-            // runningAudits.remove(c);
-            // thread = null;
-        // }
-        KSFuture<AuditThread> future = audits.remove(c);
+        audits.remove(c);
     }
 
     public static boolean useSSL() {

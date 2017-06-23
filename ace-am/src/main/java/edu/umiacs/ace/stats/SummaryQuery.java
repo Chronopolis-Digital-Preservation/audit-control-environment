@@ -1,5 +1,6 @@
 package edu.umiacs.ace.stats;
 
+import edu.umiacs.ace.util.FileSizeFormatter;
 import edu.umiacs.ace.util.PersistUtil;
 
 import javax.persistence.EntityManager;
@@ -56,15 +57,16 @@ public class SummaryQuery {
             "AND l1.logtype = 20 ";
 
     // Optional parameters to query on for the log event
-    final String LE_COLLECTION = "AND collection_id = ? ";
     final String LE_AFTER = "AND l1.date > ? ";
     final String LE_BEFORE = "AND l1.date < ? ";
 
     // Collection Join
+    //Use coalesce in case the colgroup is null - prevents errors with the constructor
     // Gets the colgroup so that we can display it
     final String COL_JOIN = "JOIN ( " +
-            " SELECT id, name, colgroup FROM collection ";
+            " SELECT id, name, COALESCE(colgroup, '') AS colgroup FROM collection ";
     final String COL_JOIN_GROUP = "WHERE colgroup = ? ";
+    final String COL_JOIN_NAME = "name LIKE ? ";
     final String COL_JOIN_END = ") AS c " +
             "ON l1.collection_id = c.id ";
 
@@ -73,6 +75,7 @@ public class SummaryQuery {
     final String MI_JOIN = "JOIN ( " +
             "  SELECT count(id) AS count, sum(size) AS size, parentcollection_id " +
             "  FROM monitored_item " +
+            "  WHERE directory = 0 " +
             "  GROUP BY parentcollection_id) AS m " +
             "  ON m.parentcollection_id = c.id ";
 
@@ -83,29 +86,18 @@ public class SummaryQuery {
         this.collection = collection;
     }
 
+    /**
+     * Get the IngestSummary for the SummaryQuery
+     *
+     * @return the IngestSummary
+     */
     public List<IngestSummary> getSummary() {
         List<String> params = new ArrayList<>();
-        /*
-        StringBuilder query = new StringBuilder(SELECT);
-
-        // Start our LogEvent Join
-        query.append(LE_JOIN);
-        updateParams(params, query, LE_COLLECTION, collection);
-        query.append(LE_JOIN_FINISH);
-        updateParams(params, query, LE_AFTER, after);
-        updateParams(params, query, LE_BEFORE, before);
-
-        // Start our collection join
-        query.append(COL_JOIN);
-        updateParams(params, query, COL_JOIN_GROUP, group);
-
-        // Finish + MonitoredItem join
-        query.append(COL_JOIN_END).append(MI_JOIN);
-        */
-
         EntityManager em = PersistUtil.getEntityManager();
+
         // IngestSummaryMapping defined in META-INF/orm.xml
-        Query nq = em.createNativeQuery(buildQuery(params).toString(), "IngestSummaryMapping");
+        StringBuilder query = buildQuery(params);
+        Query nq = em.createNativeQuery(query.toString(), "IngestSummaryMapping");
 
         int i = 1;
         for (String param : params) {
@@ -116,7 +108,17 @@ public class SummaryQuery {
         return (List<IngestSummary>)nq.getResultList();
     }
 
-    public void writeToCsv(ServletOutputStream os) throws SQLException, IOException {
+    /**
+     * Write the SummaryQuery to an OutputStream as comma separated values
+     *
+     * values are as follows:
+     * date,collection,group,file_count,total_size
+     *
+     * @param os the OutputStream to write to
+     * @throws SQLException if there's an exception with the sql statement
+     * @throws IOException if there's an exception writing data
+     */
+    public void writeToCsv(ServletOutputStream os, FileSizeFormatter formatter) throws SQLException, IOException {
         List<String> params = new ArrayList<>();
         DataSource db = PersistUtil.getDataSource();
         Connection conn = db.getConnection();
@@ -150,7 +152,7 @@ public class SummaryQuery {
             bldr.append(collection).append(",");
             bldr.append(group).append(",");
             bldr.append(count).append(",");
-            bldr.append(size);
+            bldr.append(formatter.format(size));
 
             os.write(bldr.toString().getBytes(charset));
             os.println();
@@ -167,14 +169,21 @@ public class SummaryQuery {
 
         // Start our LogEvent Join
         query.append(LE_JOIN);
-        updateParams(params, query, LE_COLLECTION, collection);
         query.append(LE_JOIN_FINISH);
         updateParams(params, query, LE_AFTER, after);
         updateParams(params, query, LE_BEFORE, before);
 
         // Start our collection join
         query.append(COL_JOIN);
-        updateParams(params, query, COL_JOIN_GROUP, group);
+
+        // Setup our conditional clauses
+        // todo: could wrap the two collection == null checks together
+        String groupQuery = collection == null ? COL_JOIN_GROUP : COL_JOIN_GROUP + " AND ";
+        String collVal = collection == null ? null : "%" + collection + "%";
+        String collQuery = group == null ? "WHERE " + COL_JOIN_NAME : COL_JOIN_NAME;
+
+        updateParams(params, query, groupQuery, group);
+        updateParams(params, query, collQuery, collVal);
 
         // Finish + MonitoredItem join
         query.append(COL_JOIN_END).append(MI_JOIN);

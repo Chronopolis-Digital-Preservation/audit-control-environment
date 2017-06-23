@@ -45,6 +45,7 @@ import edu.umiacs.ace.monitor.access.CollectionCountContext;
 import edu.umiacs.ace.monitor.compare.CollectionCompare2;
 import edu.umiacs.ace.monitor.compare.CompareResults;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.CollectionState;
 import edu.umiacs.ace.monitor.core.ConfigConstants;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.MonitoredItemManager;
@@ -347,7 +348,6 @@ public final class AuditThread extends Thread implements CancelCallback {
     private void performAudit() {
 
         // 1. Setup audit
-        //TODO Clean up filtering creation
         PathFilter filter = new SimpleFilter(coll);
         Date startDate = new Date();
 
@@ -399,6 +399,10 @@ public final class AuditThread extends Thread implements CancelCallback {
             iterableItems.cancel();
         }
 
+        // 4. Clean up, set local inactive
+        lastFileSeen = "looking for missed items";
+        setInactiveBefore(startDate);
+
         if (cancel || abortException != null) {
             return;
         }
@@ -411,14 +415,9 @@ public final class AuditThread extends Thread implements CancelCallback {
             batch = null;
         }
 
-        // 4. Clean up, set local inactive
-        lastFileSeen = "looking for missed items";
-        setInactiveBefore(startDate);
         // harvest remote collections
         lastFileSeen = "comparing to peer sites";
         compareToPeers();
-
-
     }
 
     private void generateAuditReport() {
@@ -450,7 +449,7 @@ public final class AuditThread extends Thread implements CancelCallback {
             if (abortException instanceof InterruptedException
                     || abortException.getCause() instanceof InterruptedException) {
                 LOG.trace("Audit ending with Interrupt");
-                logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH,
+                logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_ABORT,
                         "Audit Interrupted", em);
             } else {
                 LOG.error("Uncaught exception in audit thread", abortException);
@@ -458,12 +457,12 @@ public final class AuditThread extends Thread implements CancelCallback {
                 String message = Strings.exceptionAsString(abortException);
                 logManager.persistCollectionEvent(
                         LogEnum.SYSTEM_ERROR, message, em);
-                logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH,
+                logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_ABORT,
                         "Uncaught audit thread exception ", em);
             }
 
         } else if (cancel) {
-            logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_FINISH,
+            logManager.persistCollectionEvent(LogEnum.FILE_AUDIT_CANCEL,
                     "Audit interrupted by user or token registration", em);
             LOG.trace("Audit ending on cancel request");
         } else {
@@ -720,7 +719,8 @@ public final class AuditThread extends Thread implements CancelCallback {
         EntityManager em = PersistUtil.getEntityManager();
 
         if (baseItemPathList != null) {
-            if (coll.getState() == '\0' || coll.getState() == 'N') {
+            CollectionState state = coll.getStateEnum();
+            if (state == null || state == CollectionState.NEVER) {
                 return;
             }
         } else {
@@ -729,10 +729,12 @@ public final class AuditThread extends Thread implements CancelCallback {
 
         MonitoredItemManager mim = new MonitoredItemManager(em);
 
-        if (mim.countErrorsInCollection(coll) == 0) {
-            coll.setState('A');
+        if (abortException != null || cancel) {
+            coll.setState(CollectionState.INTERRUPTED);
+        } else if (mim.countErrorsInCollection(coll) == 0) {
+            coll.setState(CollectionState.ACTIVE);
         } else {
-            coll.setState('E');
+            coll.setState(CollectionState.ERROR);
         }
 
         EntityTransaction trans = em.getTransaction();
@@ -743,7 +745,7 @@ public final class AuditThread extends Thread implements CancelCallback {
     }
 
     private void setInactiveBefore(Date d) {
-        if (baseItemPathList != null || cancel || abortException != null) {
+        if (baseItemPathList != null) {
             return;
         }
 

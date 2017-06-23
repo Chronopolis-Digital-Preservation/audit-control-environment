@@ -12,19 +12,19 @@ public class PageBean {
     private static Logger LOG = Logger.getLogger(PageBean.class);
 
     // current page
-    int page;
+    private int page;
 
-    // page number
-    int count;
+    // number of items per page
+    private int count;
 
     // item offset (for db queries)
-    int offset;
+    private int offset;
 
-    int previous;
-    int next;
-    int end;
+    private int previous;
+    private int next;
+    private int end;
 
-    StringBuilder url;
+    private StringBuilder url;
     private boolean firstParam;
 
     public PageBean(int page, int count, String root) {

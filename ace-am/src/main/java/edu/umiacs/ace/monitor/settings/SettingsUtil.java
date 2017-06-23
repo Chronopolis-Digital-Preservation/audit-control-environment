@@ -20,7 +20,12 @@ import java.util.Set;
  */
 public class SettingsUtil {
 
-    // Get an item by its attribute name
+    /**
+     * Retrieve a Setting based off it's attribute name
+     *
+     * @param attr the attribute to query on
+     * @return the Setting associated with the attribute
+     */
     public static SettingsParameter getItemByAttr( String attr ) {
         EntityManager em = PersistUtil.getEntityManager();
         Query q = em.createNamedQuery("SettingsParameter.getAttr");
@@ -35,7 +40,11 @@ public class SettingsUtil {
         return null;
     }
 
-    // Return a list of all custom settings
+    /**
+     * Get a list of all custom settings
+     *
+     * @return custom settings
+     */
     public static List<SettingsParameter> getCustomSettings() {
         EntityManager em = PersistUtil.getEntityManager();
         Query q = em.createNamedQuery("SettingsParameter.getCustomSettings");
@@ -43,7 +52,11 @@ public class SettingsUtil {
         return q.getResultList();
     }
 
-    // Return a list of all settings
+    /**
+     * Get a list of all settings
+     *
+     * @return all  settings
+     */
     public static List<SettingsParameter> getCurrentSettings() {
         EntityManager em = PersistUtil.getEntityManager();
         Query q = em.createNamedQuery("SettingsParameter.getCurrentSettings");
@@ -51,7 +64,11 @@ public class SettingsUtil {
         return q.getResultList();
     }
 
-    // Update settings based on their name and value, and add new settings
+    /**
+     * Update a given List of settings
+     *
+     * @param settings the settings to update
+     */
     public static void updateSettings(List<SettingsParameter> settings) {
         EntityManager em = PersistUtil.getEntityManager();
         EntityTransaction trans = em.getTransaction();
@@ -60,7 +77,7 @@ public class SettingsUtil {
         for ( SettingsParameter setting : settings ) {
             // Skip any empty settings
             if ( setting.getName().trim().isEmpty() ||
-                 setting.getValue().trim().isEmpty() ) {
+                    setting.getValue().trim().isEmpty() ) {
                 continue;
             }
 
@@ -82,6 +99,11 @@ public class SettingsUtil {
         reloadSettings();
     }
 
+    /**
+     * Delete a given List of settings
+     *
+     * @param settings the settings to delete
+     */
     public static void deleteSettings(List<String> settings) {
         EntityManager em = PersistUtil.getEntityManager();
         EntityTransaction trans = em.getTransaction();
@@ -114,7 +136,12 @@ public class SettingsUtil {
     }
 
 
-   public static List<SettingsParameter> getDefaultSettings() {
+    /**
+     * Get the default values for all settings
+     *
+     * @return the default settings
+     */
+    public static List<SettingsParameter> getDefaultSettings() {
         List<SettingsParameter> defaults = new ArrayList<>();
 
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS,
@@ -125,7 +152,7 @@ public class SettingsUtil {
                 SettingsConstants.imsSSL,false));
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS_TOKEN_CLASS,
                 SettingsConstants.imsTokenClass,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_DISABLE_AUTO_AUDIT,
+        defaults.add(new SettingsParameter(SettingsConstants.PARAM_AUTO_AUDIT_ENABLE,
                 SettingsConstants.autoAudit,false));
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_THROTTLE_MAXAUDIT,
                 SettingsConstants.maxAudit,false));
@@ -173,11 +200,11 @@ public class SettingsUtil {
     }
 
     /**
-    *
-    * @param c The collection to query
-    * @param attr The attribute to query for
-    * @return true if collection, settings are not null and parameter is "true"
-    */
+     *
+     * @param c The collection to query
+     * @param attr The attribute to query for
+     * @return true if collection, settings are not null and parameter is "true"
+     */
     public static boolean getBoolean(Collection c, String attr) {
         if (!containsKey(c, attr)) {
             return false;

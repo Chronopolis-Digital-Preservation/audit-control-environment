@@ -32,6 +32,7 @@ package edu.umiacs.ace.monitor.access;
 
 import com.google.common.collect.ImmutableList;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.CollectionState;
 import edu.umiacs.ace.monitor.support.CStateBean;
 import edu.umiacs.ace.monitor.support.PageBean;
 import edu.umiacs.ace.util.EntityManagerServlet;
@@ -96,8 +97,6 @@ public class StatusServlet extends EntityManagerServlet {
         RequestDispatcher dispatcher;
         List<CollectionSummaryBean> collections;
         List<Collection> items;
-        LOG.info("Processing /Status request");
-        LOG.info("Processing /Status additional info");
 
         long page = getParameter(request, PARAM_PAGE, DEFAULT_PAGE);
         int count = (int) getParameter(request, PARAM_COUNT, DEFAULT_COUNT);
@@ -184,8 +183,8 @@ public class StatusServlet extends EntityManagerServlet {
         }
 
         if (!Strings.isEmpty(state) && state.length() == 1) {
-            query.setParameter(PARAM_STATE, state.charAt(0));
-            countQuery.setParameter(PARAM_STATE, state.charAt(0));
+            query.setParameter(PARAM_STATE, CollectionState.fromChar(state.charAt(0)));
+            countQuery.setParameter(PARAM_STATE, CollectionState.fromChar(state.charAt(0)));
         }
 
         items = query.getResultList();
@@ -210,6 +209,7 @@ public class StatusServlet extends EntityManagerServlet {
         request.setAttribute(PAGE_STATES, ImmutableList.copyOf(CStateBean.values()));
         request.setAttribute(PAGE_COUNT, count);
         request.setAttribute(PAGE_NUMBER, pb);
+        request.setAttribute("groups", GroupSummaryContext.summaries);
         if (hasJson(request)) {
             dispatcher = request.getRequestDispatcher("status-json.jsp");
         } else if (hasCsv(request)) {

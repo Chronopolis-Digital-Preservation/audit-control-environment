@@ -14,6 +14,15 @@
             <column name="size"/>
         </constructor-result>
     </sql-result-set-mapping>
+    <sql-result-set-mapping name="GroupSummaryMapping">
+        <constructor-result target-class="edu.umiacs.ace.monitor.access.GroupSummary">
+            <column name="colgroup"/>
+            <column name="size"/>
+            <column name="count"/>
+        </constructor-result>
+    </sql-result-set-mapping>
+
+    <converter class="edu.umiacs.ace.monitor.core.CollectionStateConverter"/>
 
 </entity-mappings>
 
