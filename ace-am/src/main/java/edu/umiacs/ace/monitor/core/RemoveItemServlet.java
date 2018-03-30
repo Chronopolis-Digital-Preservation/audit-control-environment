@@ -31,6 +31,7 @@
 
 package edu.umiacs.ace.monitor.core;
 
+import edu.umiacs.ace.monitor.access.CollectionCountContext;
 import edu.umiacs.ace.monitor.access.browse.BrowseServlet;
 import edu.umiacs.ace.monitor.access.browse.DirectoryTree;
 import edu.umiacs.ace.monitor.log.LogEnum;
@@ -158,6 +159,7 @@ public class RemoveItemServlet extends EntityManagerServlet {
                 clearDir(em.merge(item));
                 trans.commit();
                 reloadTree(dt, parent, c, em);
+                CollectionCountContext.updateCollection(c);
             } catch ( Throwable t ) {
                 LOG.error("Error removing", t);
             } finally {
@@ -176,7 +178,6 @@ public class RemoveItemServlet extends EntityManagerServlet {
                     LOG.trace("Removing file: " + mi.getPath());
                     em.remove(mi);
                 }
-
             }
             em.remove(item);
         }
