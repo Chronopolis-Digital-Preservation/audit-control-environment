@@ -31,6 +31,7 @@
 
 package edu.umiacs.ace.monitor.core;
 
+import com.google.common.collect.ImmutableSet;
 import edu.umiacs.ace.monitor.access.CollectionCountContext;
 import edu.umiacs.ace.monitor.access.browse.BrowseServlet;
 import edu.umiacs.ace.monitor.access.browse.DirectoryTree;
@@ -49,6 +50,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Remove an item from list of actively monitored items. This will not remove
@@ -67,6 +70,7 @@ public class RemoveItemServlet extends EntityManagerServlet {
     protected void processRequest( HttpServletRequest request,
             HttpServletResponse response, EntityManager em ) throws ServletException, IOException {
         MonitoredItem item;
+        Set<Collection> mutations;
         long[] itemIds;
         HttpSession session = request.getSession();
         DirectoryTree dt =
@@ -76,17 +80,26 @@ public class RemoveItemServlet extends EntityManagerServlet {
         if ( itemId > 0 ) {
             item = em.getReference(MonitoredItem.class, itemId);
             removeItem(item, em, dt);
+            mutations = ImmutableSet.of(item.getParentCollection());
         } else {
             itemIds = getParameterList(request,REMOVAL, 0);
+            mutations = new HashSet<>();
             if(itemIds != null){
                 for(long l:itemIds){
                     if(l > 0){
                         item =  em.getReference(MonitoredItem.class, l);
                         removeItem(item, em, dt);
+                        mutations.add(item.getParentCollection());
                     }
                 }
             }
         }
+
+        LOG.trace(mutations.size() + " collections to update");
+        for (Collection collection : mutations) {
+            CollectionCountContext.updateCollection(collection);
+        }
+
         String redirect = request.getParameter(PARAM_REDIRECT);
         if ( Strings.isEmpty(redirect) ) {
             redirect = DEFAULT_REDIRECT;
@@ -129,8 +142,6 @@ public class RemoveItemServlet extends EntityManagerServlet {
             dt.toggleItem(mi.getId());
             dt.toggleItem(mi.getId());
         }
-
-
     }
 
     private static class MyDeleteThread extends Thread {
@@ -149,22 +160,31 @@ public class RemoveItemServlet extends EntityManagerServlet {
         @Override
         public void run() {
             LOG.trace("Starting delete thread");
+
+            // because the delete is async, we should do this again here
+            // it would be better to have both deletes on a separate thread and then do
+            // the context refresh when they finish... but... whatever
+            Set<Collection> mutations = new HashSet<>();
             em = PersistUtil.getEntityManager();
             try {
                 String parent = item.getParentPath();
                 Collection c = item.getParentCollection();
+                mutations.add(c);
                 mim = new MonitoredItemManager(em);
                 EntityTransaction trans = em.getTransaction();
                 trans.begin();
                 clearDir(em.merge(item));
                 trans.commit();
                 reloadTree(dt, parent, c, em);
-                CollectionCountContext.updateCollection(c);
             } catch ( Throwable t ) {
                 LOG.error("Error removing", t);
             } finally {
                 em.close();
                 LOG.trace("Finishing delete thread");
+
+                for (Collection mutation : mutations) {
+                    CollectionCountContext.updateCollection(mutation);
+                }
             }
         }
 
