@@ -41,14 +41,8 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
             }
             #reportTable {
                 width: 90%;
-                margin-left: auto;
-                margin-right: auto;
-                margin-top: 20px;
-                margin-bottom: 10px;
-                border-left: 1px solid #000000;
-                border-right: 1px solid #000000;
-                border-top: 1px solid #000000;
-                border-bottom: 1px solid #000000;
+                margin: 20px auto 10px;
+                border: 1px solid #000000;
                 border-collapse: separate;
             }
             #reportTable thead {
@@ -190,7 +184,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
                     </h6>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" onclick="docment.location = 'report.jsp">Submit</button>
+                        <button type="submit" class="btn btn-primary" onclick="docment.location = 'report.jsp'">Submit</button>
                     </div>
                 </div>
             </div>
