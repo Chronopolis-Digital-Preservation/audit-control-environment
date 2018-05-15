@@ -33,19 +33,6 @@ package edu.umiacs.ace.monitor.peers;
 
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.util.Strings;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Query;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -56,6 +43,17 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import sun.misc.BASE64Encoder;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Manage partner sites
@@ -126,8 +124,7 @@ public final class PartnerSiteServlet extends EntityManagerServlet {
             et.begin();
             em.persist(partner);
             et.commit();
-        } else if ( !Strings.isEmpty(user) || !Strings.isEmpty(pass) || !Strings.isEmpty(
-                url) ) {
+        } else if (!Strings.isEmpty(user) || !Strings.isEmpty(pass) || !Strings.isEmpty(url)) {
             request.setAttribute(PAGE_ERROR, outcome);
         }
 

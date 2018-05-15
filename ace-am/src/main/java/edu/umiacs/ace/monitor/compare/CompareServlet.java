@@ -31,21 +31,12 @@
 
 package edu.umiacs.ace.monitor.compare;
 
-import edu.umiacs.ace.monitor.access.CollectionCountContext;
-import edu.umiacs.ace.util.EntityManagerServlet;
-import edu.umiacs.ace.remote.JsonGateway;
-import edu.umiacs.ace.monitor.peers.PartnerSite;
-import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.MonitoredItem;
+import edu.umiacs.ace.monitor.peers.PartnerSite;
+import edu.umiacs.ace.remote.JsonGateway;
+import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.util.Strings;
-import java.io.IOException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
@@ -53,8 +44,16 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
 import org.apache.log4j.Logger;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+
 /**
- *
  * @author toaster
  */
 public class CompareServlet extends EntityManagerServlet {
@@ -67,14 +66,15 @@ public class CompareServlet extends EntityManagerServlet {
     public static final String PARAM_REMOTRE_COLLECTIONID = "remotecollectionid";
     public static final String PARAM_SOURCE = "source";
 
-    /** 
+    /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
+     *
+     * @param request  servlet request
      * @param response servlet response
      */
     @Override
-    protected void processRequest( HttpServletRequest request,
-            HttpServletResponse response, EntityManager em )
+    protected void processRequest(HttpServletRequest request,
+                                  HttpServletResponse response, EntityManager em)
             throws ServletException, IOException {
         Collection c = null;
         MonitoredItem monItem = null;
@@ -86,7 +86,7 @@ public class CompareServlet extends EntityManagerServlet {
         long remoteCollection = 0;
 
 
-        if ( !ServletFileUpload.isMultipartContent(request) ) {
+        if (!ServletFileUpload.isMultipartContent(request)) {
             throw new ServletException("No file is attached");
         }
 
@@ -96,68 +96,68 @@ public class CompareServlet extends EntityManagerServlet {
         // Parse the request
         try {
             FileItemIterator iter = upload.getItemIterator(request);
-            while ( iter.hasNext() ) {
+            while (iter.hasNext()) {
                 FileItemStream item = iter.next();
-                if ( item.isFormField() ) {
-                    if ( PARAM_COLLECTION_ID.equals(item.getFieldName()) ) {
+                if (item.isFormField()) {
+                    if (PARAM_COLLECTION_ID.equals(item.getFieldName())) {
                         String col = Streams.asString(item.openStream());
-                        if ( Strings.isValidLong(col) ) {
+                        if (Strings.isValidLong(col)) {
                             long colId = Long.parseLong(col);
                             c = em.getReference(Collection.class, colId);
 
-                            if ( c == null ) {
+                            if (c == null) {
                                 throw new ServletException(
                                         "Collection does not exist: " + colId);
                             }
 
                         }
-                    } else if ( PARAM_ITEM_ID.equals(item.getFieldName()) ) {
+                    } else if (PARAM_ITEM_ID.equals(item.getFieldName())) {
                         String itemString = Streams.asString(item.openStream());
 
                         long itemId = Long.parseLong(itemString);
                         try {
                             monItem = em.getReference(MonitoredItem.class,
                                     itemId);
-                        } catch ( EntityNotFoundException e ) {
+                        } catch (EntityNotFoundException e) {
                             monItem = null;
                         }
-                    } else if ( PARAM_REMOTESITEID.equals(item.getFieldName()) ) {
+                    } else if (PARAM_REMOTESITEID.equals(item.getFieldName())) {
                         String siteString = Streams.asString(item.openStream());
-                        if ( Strings.isValidLong(siteString) ) {
+                        if (Strings.isValidLong(siteString)) {
                             long partnerId = Long.parseLong(siteString);
                             try {
                                 partner = em.getReference(PartnerSite.class,
                                         partnerId);
-                            } catch ( EntityNotFoundException e ) {
+                            } catch (EntityNotFoundException e) {
                                 partner = null;
                             }
                         }
-                    } else if ( PARAM_REMOTRE_COLLECTIONID.equals(
-                            item.getFieldName()) ) {
+                    } else if (PARAM_REMOTRE_COLLECTIONID.equals(
+                            item.getFieldName())) {
                         String collString = Streams.asString(item.openStream());
-                        if ( Strings.isValidLong(collString) ) {
+                        if (Strings.isValidLong(collString)) {
                             remoteCollection = Long.parseLong(collString);
                         }
-                    } else if ( PARAM_FILTER.equals(item.getFieldName()) ) {
+                    } else if (PARAM_FILTER.equals(item.getFieldName())) {
                         inputFilter = Streams.asString(item.openStream());
-                        if ( Strings.isEmpty(inputFilter) ) {
+                        if (Strings.isEmpty(inputFilter)) {
                             inputFilter = null;
                         }
-                    } else if ( PARAM_SOURCE.equals(item.getFieldName()) ) {
+                    } else if (PARAM_SOURCE.equals(item.getFieldName())) {
                         String isAttached = Streams.asString(item.openStream());
 
                         fileAttached = "upload".equals(isAttached);
 
                     }
                 }
-                if ( !item.isFormField() && fileAttached ) {
+                if (!item.isFormField() && fileAttached) {
                     LOG.debug(
                             "item " + monItem + " filter " + inputFilter + " loading attached file");
 
                     CollectionCompare2 cc = new CollectionCompare2(
                             item.openStream(), inputFilter);
                     CompareResults cr = new CompareResults(cc);
-                    Thread t = new Thread(new TableCompareRunnable(cr,cc, c,
+                    Thread t = new Thread(new TableCompareRunnable(cr, cc, c,
                             monItem), "Compare Thread " + c.getName());
                     t.start();
                     session.setAttribute(PAGE_RESULTS, cr);
@@ -166,21 +166,21 @@ public class CompareServlet extends EntityManagerServlet {
 
             LOG.debug(
                     "fileattached: " + fileAttached + " partner " + partner + " remote coll: "
-                    + remoteCollection);
+                            + remoteCollection);
             // we have no attached file, load remote
-            if ( !fileAttached && partner != null && remoteCollection > 0 ) {
+            if (!fileAttached && partner != null && remoteCollection > 0) {
                 LOG.debug("Remote digest request " + partner.getRemoteURL());
                 CollectionCompare2 cc = new CollectionCompare2(
                         JsonGateway.getGateway().getDigestList(partner,
-                        remoteCollection), inputFilter);
-                                    CompareResults cr = new CompareResults(cc);
+                                remoteCollection), inputFilter);
+                CompareResults cr = new CompareResults(cc);
 
-                Thread t = new Thread(new TableCompareRunnable(cr,cc, c,
+                Thread t = new Thread(new TableCompareRunnable(cr, cc, c,
                         monItem), "Compare Thread " + c.getName());
                 t.start();
                 session.setAttribute(PAGE_RESULTS, cr);
             }
-        } catch ( FileUploadException ful ) {
+        } catch (FileUploadException ful) {
             throw new ServletException(ful);
         }
 
@@ -196,8 +196,8 @@ public class CompareServlet extends EntityManagerServlet {
         private MonitoredItem baseItem;
         private CompareResults cr;
 
-        private TableCompareRunnable( CompareResults cr,CollectionCompare2 cc, Collection c,
-                MonitoredItem baseItem ) {
+        private TableCompareRunnable(CompareResults cr, CollectionCompare2 cc, Collection c,
+                                     MonitoredItem baseItem) {
             this.cr = cr;
             this.cc = cc;
             this.c = c;
@@ -206,15 +206,7 @@ public class CompareServlet extends EntityManagerServlet {
 
         @Override
         public void run() {
-            try {
-                cc.compareTo(cr,c, baseItem);
-//                cc.loadCollectionTable(c, baseItem);
-//                cc.doCompare();
-//                cc.getUnseenTargetFiles();
-//                cc.getUnseenSuppliedFiles();
-            } finally {
-//                cc.cleanup();
-            }
+            cc.compareTo(cr, c, baseItem);
         }
     }
 }
