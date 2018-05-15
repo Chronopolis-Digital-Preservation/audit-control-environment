@@ -77,9 +77,10 @@ public class RemoveItemServlet extends EntityManagerServlet {
                 (DirectoryTree) session.getAttribute(BrowseServlet.SESSION_DIRECTORY_TREE);
 
         long itemId = getParameter(request, PARAM_ITEM_ID, 0);
+        long eventSession = System.currentTimeMillis();
         if ( itemId > 0 ) {
             item = em.getReference(MonitoredItem.class, itemId);
-            removeItem(item, em, dt);
+            removeItem(item, em, eventSession, dt);
             mutations = ImmutableSet.of(item.getParentCollection());
         } else {
             itemIds = getParameterList(request,REMOVAL, 0);
@@ -88,7 +89,7 @@ public class RemoveItemServlet extends EntityManagerServlet {
                 for(long l:itemIds){
                     if(l > 0){
                         item =  em.getReference(MonitoredItem.class, l);
-                        removeItem(item, em, dt);
+                        removeItem(item, em, eventSession, dt);
                         mutations.add(item.getParentCollection());
                     }
                 }
@@ -109,10 +110,9 @@ public class RemoveItemServlet extends EntityManagerServlet {
         dispatcher.forward(request, response);
     }
 
-    private void removeItem(MonitoredItem item, EntityManager em, DirectoryTree dt){
+    private void removeItem(MonitoredItem item, EntityManager em, Long session, DirectoryTree dt){
         if ( item != null ) {
-                LogEventManager lem =
-                        new LogEventManager(System.currentTimeMillis(), item.getParentCollection());
+                LogEventManager lem = new LogEventManager(session, item.getParentCollection());
                 lem.persistItemEvent(LogEnum.REMOVE_ITEM, item.getPath(), null, em);
                 if ( !item.isDirectory() ) {
                     String parent = item.getParentPath();
