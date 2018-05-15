@@ -255,7 +255,7 @@ public class StatusServlet extends EntityManagerServlet {
                 col));
         csb.setMissingFiles(CollectionCountContext.getMissingCount(col));
         csb.setMissingTokens(CollectionCountContext.getMissingTokenCount(col));
-        csb.setTotalSize(CollectionCountContext.getTotelSize(col));
+        csb.setTotalSize(CollectionCountContext.getTotalSize(col));
         csb.setTotalErrors(CollectionCountContext.getTotalErrors(col));
         csb.setRemoteMissing(CollectionCountContext.getRemoteMissing(col));
         csb.setRemoteCorrupt(CollectionCountContext.getRemoteCorrupt(col));
