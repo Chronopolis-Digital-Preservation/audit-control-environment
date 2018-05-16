@@ -33,6 +33,10 @@ import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.sql.SQL;
+import org.apache.log4j.Logger;
+
+import javax.persistence.EntityManager;
+import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,9 +49,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import javax.persistence.EntityManager;
-import javax.sql.DataSource;
-import org.apache.log4j.Logger;
 
 /**
  * Currently does all comparison in memory, this limits collections to a million
@@ -64,8 +65,8 @@ public final class CollectionCompare2 {
     private List<String> parseErrors = new ArrayList<String>();
 
     public CollectionCompare2(InputStream sourceFile, String prefix) {
-        sourceMap = new TreeMap<String, String>();
-        sourceReverseMap = new TreeMap<String, String>();
+        sourceMap = new TreeMap<>();
+        sourceReverseMap = new TreeMap<>();
         LOG.trace("initializing collection compare with");
         try {
             parseInputStream(sourceFile, prefix);
@@ -107,26 +108,13 @@ public final class CollectionCompare2 {
             stmt.setLong(1, c.getId());
             stmt.setFetchSize(Integer.MIN_VALUE);
             rs = stmt.executeQuery();
-//            Query q = em.createNamedQuery("MonitoredItem.listFilesInCollection");
-////            q.setLockMode(LockModeType.NONE);
-//            q.setHint(QueryHints.JDBC_FETCH_SIZE, 5000);
-////            q.setHint(QueryHints.RESULT_SET_TYPE, ResultSetType.ForwardOnly);
-//            q.setHint("eclipselink.cursor.scrollable",true);
-//            q.setParameter("coll", c);
-////            em.getTransaction().begin();
-//            ScrollableCursor cursor = (ScrollableCursor) q.getSingleResult();
-////            List items = q.getResultList();
-//
-////            for (Object o : items) {
-//            Object o;
-//            while ((o = cursor.next()) != null) {
+
             while (rs.next()) {
                 total++;
 
                 if ((total % 100000) == 0) {
                     LOG.trace("Compared " + total);
                 }
-//                MonitoredItem aceItem = (MonitoredItem) o;
                 String acePath = rs.getString(1);//aceItem.getPath();
                 String aceDigest = rs.getString(2);//aceItem.getFileDigest();
 
@@ -134,9 +122,9 @@ public final class CollectionCompare2 {
                     cr.fileExistsAtTarget(acePath);
 
                     if (sourceMap.get(acePath).matches(aceDigest)) {
-//Perfect file, no-op
+                        //Perfect file, no-op
                     } else {
-                        cr.mismatchedDigests(acePath, sourceMap.get(acePath), aceDigest);
+                        cr.mismatchedDigests(acePath, aceDigest, sourceMap.get(acePath));
                     }
                 } else if (sourceReverseMap.containsKey(aceDigest)) {
                     cr.fileExistsAtTarget(sourceReverseMap.get(aceDigest));
@@ -159,54 +147,37 @@ public final class CollectionCompare2 {
     }
 
     private void parseInputStream(InputStream sourceFile, String prefix) throws IOException {
-
         BufferedReader input = new BufferedReader(new InputStreamReader(sourceFile));
         String line = input.readLine();
-
 
         long total = 0;
 
         // ignore ace manifest header
-
-
         if (line != null && line.matches("^[A-Z0-9\\-]+:.+$")) {
             line = input.readLine();
-
-
         }
 
         while (line != null) {
             total++;
-
-
             if ((total % 100000) == 0) {
                 LOG.trace("Loaded " + total);
-
-
             }
             String tokens[] = line.split("\\s+", 2);
-
 
             if (tokens == null || tokens.length != 2) {
                 LOG.error("Error processing line: " + line);
                 parseErrors.add("Corrupt Line: " + line);
-
-
             } else {
                 String path = tokens[1];
                 // temp hack to make sure all paths start w/ / as ace expectes
-
-
                 if (!path.startsWith("/")) {
                     path = "/" + path;
                 }
+
                 sourceMap.put(path, tokens[0]);
                 sourceReverseMap.put(tokens[0], path);
-
-
             }
             line = input.readLine();
-
         }
     }
 }
