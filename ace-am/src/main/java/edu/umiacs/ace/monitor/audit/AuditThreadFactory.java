@@ -57,8 +57,8 @@ import static edu.umiacs.ace.util.Submittable.RunState.RUNNING;
 public class AuditThreadFactory {
     private static final Logger LOG = Logger.getLogger(AuditThreadFactory.class);
 
-    private static ConcurrentHashMap<Collection, KSFuture<AuditThread>> audits
-            = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Collection, KSFuture<AuditThread>> audits =
+            new ConcurrentHashMap<>();
     private static int max_audits = 3;
     private static String imsHost = null;
     private static int imsPort = 8080;
@@ -66,8 +66,8 @@ public class AuditThreadFactory {
     private static boolean auditOnly = false;
     private static boolean auditSample = false;
     private static boolean ssl = false;
-    public static boolean blocking = false;
-    public static int maxBlockTime = 0;
+    private static boolean blocking = false;
+    private static int maxBlockTime = 0;
 
     public static void setIMS( String ims ) {
         if (Strings.isEmpty(ims)) {
@@ -151,7 +151,7 @@ public class AuditThreadFactory {
         newThread.setImsHost(imsHost);
         newThread.setImsPort(imsPort);
         newThread.setTokenClassName(tokenClass);
-        KSFuture f = executor.submitFileAudit(c, newThread);
+        KSFuture<AuditThread> f = executor.submitFileAudit(c, newThread);
         if (f != null) {
             audits.put(c, f);
         }
@@ -168,11 +168,11 @@ public class AuditThreadFactory {
         return null;
     }
 
-    public static final boolean isQueued(Collection c) {
+    public static boolean isQueued(Collection c) {
         return checkState(c, QUEUED);
     }
 
-    public static final boolean isRunning(Collection c) {
+    public static boolean isRunning(Collection c) {
         return checkState(c, RUNNING);
     }
 
@@ -215,22 +215,6 @@ public class AuditThreadFactory {
     public static void setSSL(Boolean ssl) {
         AuditThreadFactory.ssl = ssl;
     }
-
-    /**
-     * Return the current thread for a collection.
-     * @param c collection to fetch
-     * 
-     * @return current running thread or null if nothing is running
-     * 
-    public static AuditThread getThread( Collection c ) {
-        synchronized ( runningThreads ) {
-            if ( isRunning(c) ) {
-                return runningThreads.get(c);
-            }
-        }
-        return null;
-    }
-    */
 
     /**
      * Method for AuditThread to notify its finished
