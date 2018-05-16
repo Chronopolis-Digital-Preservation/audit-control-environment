@@ -43,6 +43,7 @@ import edu.umiacs.util.Strings;
 import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -56,7 +57,7 @@ import java.util.Set;
 /**
  * Remove an item from list of actively monitored items. This will not remove
  * log entries for the file. It will log the delete.
- * 
+ *
  * @author toaster
  */
 public class RemoveItemServlet extends EntityManagerServlet {
@@ -79,18 +80,27 @@ public class RemoveItemServlet extends EntityManagerServlet {
         long itemId = getParameter(request, PARAM_ITEM_ID, 0);
         long eventSession = System.currentTimeMillis();
         if ( itemId > 0 ) {
-            item = em.getReference(MonitoredItem.class, itemId);
-            removeItem(item, em, eventSession, dt);
-            mutations = ImmutableSet.of(item.getParentCollection());
+            try {
+                item = em.getReference(MonitoredItem.class, itemId);
+                removeItem(item, em, eventSession, dt);
+                mutations = ImmutableSet.of(item.getParentCollection());
+            } catch (EntityNotFoundException exception) {
+                mutations = ImmutableSet.of();
+                LOG.warn("MonitoredItem " + itemId + " already removed. Ignoring.", exception);
+            }
         } else {
             itemIds = getParameterList(request,REMOVAL, 0);
             mutations = new HashSet<>();
-            if(itemIds != null){
-                for(long l:itemIds){
-                    if(l > 0){
-                        item =  em.getReference(MonitoredItem.class, l);
-                        removeItem(item, em, eventSession, dt);
-                        mutations.add(item.getParentCollection());
+            if(itemIds != null) {
+                for(long l:itemIds) {
+                    if(l > 0) {
+                        try {
+                            item = em.getReference(MonitoredItem.class, l);
+                            removeItem(item, em, eventSession, dt);
+                            mutations.add(item.getParentCollection());
+                        } catch (EntityNotFoundException exception) {
+                            LOG.warn("MonitoredItem " + itemId + " already removed. Ignoring.", exception);
+                        }
                     }
                 }
             }
@@ -110,7 +120,7 @@ public class RemoveItemServlet extends EntityManagerServlet {
         dispatcher.forward(request, response);
     }
 
-    private void removeItem(MonitoredItem item, EntityManager em, Long session, DirectoryTree dt){
+    private void removeItem(MonitoredItem item, EntityManager em, Long session, DirectoryTree dt) {
         if ( item != null ) {
                 LogEventManager lem = new LogEventManager(session, item.getParentCollection());
                 lem.persistItemEvent(LogEnum.REMOVE_ITEM, item.getPath(), null, em);
@@ -131,8 +141,10 @@ public class RemoveItemServlet extends EntityManagerServlet {
             }
     }
 
-    private static void reloadTree( DirectoryTree dt, String parent,
-            Collection c, EntityManager em ) {
+    private static void reloadTree(DirectoryTree dt,
+                                   String parent,
+                                   Collection c,
+                                   EntityManager em ) {
         if ( dt == null ) {
             return;
         }
