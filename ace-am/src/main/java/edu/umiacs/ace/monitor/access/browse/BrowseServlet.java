@@ -120,22 +120,16 @@ public class BrowseServlet extends EntityManagerServlet {
             request.setAttribute("collection", c);
             session.setAttribute(SESSION_FILE,
                     loadFileBean(dt.getDirectoryNode(itemId), em,c));
-            if ( dt.getDirectoryNode(itemId).isDirectory() ) {
+            if (dt.getDirectoryNode(itemId) != null && dt.getDirectoryNode(itemId).isDirectory()) {
                 dt.toggleItem(itemId);
-
             }
-            //            else
-            //            {
-            //                session.setAttribute(SESSION_FILE,
-            //                        loadFileBean(dt.getDirectoryNode(itemId)));
-            //            }
         }
         request.setAttribute(PAGE_ISAUDITING, isRunning);
         RequestDispatcher dispatcher = request.getRequestDispatcher("browse.jsp");
         dispatcher.forward(request, response);
     }
 
-    private FileBean loadFileBean( DirectoryNode node, EntityManager em, Collection c ) {
+    private FileBean loadFileBean(DirectoryNode node, EntityManager em, Collection c) {
         // avoid possible null references below
         if (node == null) {
             return null;
@@ -144,20 +138,20 @@ public class BrowseServlet extends EntityManagerServlet {
         FileBean retBean = new FileBean();
 
         try {
-            MonitoredItem master = em.getReference(MonitoredItem.class,
-                    node.getId());
+            MonitoredItem master = em.getReference(MonitoredItem.class, node.getId());
             retBean.root = master;
             retBean.name = node.getName();
 
             if (master.getToken() != null) {
-                //            TokenResponse resp = (TokenResponse)master.getToken().getToken();
-                MessageDigest digest = MessageDigest.getInstance(master.getToken().getProofAlgorithm());
+                MessageDigest digest = MessageDigest.getInstance(
+                        master.getToken().getProofAlgorithm());
 
                 ProofValidator pv = new ProofValidator();
                 Proof proof = TokenUtil.extractProof(master.getToken());
                 String fileDigest = master.getFileDigest();
-                if ( fileDigest != null ){
-                    byte[] root = pv.rootHash(digest, proof, HashValue.asBytes(master.getFileDigest()));
+                if (fileDigest != null){
+                    byte[] root = pv.rootHash(digest, proof,
+                            HashValue.asBytes(master.getFileDigest()));
                     retBean.itemProof = HashValue.asHexString(root);
                 }else {
                     retBean.itemProof = null;
