@@ -110,6 +110,7 @@ public class ListController {
         if (corrupt != null && corrupt) {
             cq.where(cb.equal(coll.get("state"), CollectionState.ERROR));
         }
+        cq.orderBy(cb.asc(coll.get("group")));
 
         return entityManager.createQuery(cq).getResultList();
     }
@@ -148,6 +149,7 @@ public class ListController {
         }
 
         cq.where(predicate);
+        cq.orderBy(cb.asc(mi.get("path")));
 
         return entityManager.createQuery(cq).getResultList();
     }
