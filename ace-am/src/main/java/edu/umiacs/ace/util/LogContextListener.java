@@ -32,6 +32,7 @@
 package edu.umiacs.ace.util;
 
 import edu.umiacs.ace.monitor.settings.SettingsParameter;
+import edu.umiacs.ace.monitor.settings.SettingsUtil;
 import org.apache.log4j.PropertyConfigurator;
 
 import javax.persistence.EntityManager;
@@ -40,6 +41,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 /**
  * Configure log4j on startup
@@ -52,12 +54,18 @@ public class LogContextListener implements ServletContextListener {
     public void contextInitialized( ServletContextEvent arg0 ) {
         Properties log4jProp = new Properties();
 
-        // what happens when this is empty?
         EntityManager em = PersistUtil.getEntityManager();
         TypedQuery<SettingsParameter> q = em.createNamedQuery("SettingsParameter.getAttrList",
                 SettingsParameter.class);
         q.setParameter("attr", "%log4j%");
         List<SettingsParameter> settings = q.getResultList();
+        if (settings.isEmpty()) {
+            settings = SettingsUtil.getDefaultSettings()
+                    .stream()
+                    .filter(s -> s.getName().startsWith("log4"))
+                    .collect(Collectors.toList());
+            SettingsUtil.updateSettings(settings);
+        }
 
         for(SettingsParameter s: settings) {
             log4jProp.setProperty(s.getName(), s.getValue());
@@ -68,6 +76,5 @@ public class LogContextListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed( ServletContextEvent arg0 ) {
-//        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
