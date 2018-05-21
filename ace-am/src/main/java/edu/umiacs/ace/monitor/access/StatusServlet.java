@@ -41,6 +41,7 @@ import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -75,9 +76,9 @@ public class StatusServlet extends EntityManagerServlet {
     private static final String PARAM_PAGE = "page";
 
     // Search Params
-    private static final String PARAM_GROUP = "group";
-    private static final String PARAM_STATE = "state";
-    private static final String PARAM_COLLECTION_LIKE = "collection";
+    private static final String PARAM_GROUP = "status_group";
+    private static final String PARAM_STATE = "status_state";
+    private static final String PARAM_COLLECTION_LIKE = "status_collection";
     private static final String PARAM_AUDIT_DATE = "audit";
 
     // Filter params?
@@ -103,8 +104,8 @@ public class StatusServlet extends EntityManagerServlet {
 
         // local getParameter so that the session is checked as well
         String group = getParameter(request, PARAM_GROUP, null);
-        String collection = getParameter(request, PARAM_COLLECTION_LIKE, null);
         String state = getParameter(request, PARAM_STATE, null);
+        String collection = getParameter(request, PARAM_COLLECTION_LIKE, null);
         // String date = getParameter(request, PARAM_GROUP, null);
         PageBean pb = new PageBean((int) page, count, "");
 
@@ -123,20 +124,20 @@ public class StatusServlet extends EntityManagerServlet {
 
         // TODO: Can probably tidy this up a bit
         if (!Strings.isEmpty(group)) {
-            queries.add("c.group LIKE :group");
+            queries.add("c.group LIKE :status_group");
             pb.addParam(PARAM_GROUP, group);
             request.setAttribute(PARAM_GROUP, group);
         }
 
         if (!Strings.isEmpty(collection)) {
-            queries.add("c.name LIKE :collection");
+            queries.add("c.name LIKE :status_collection");
             pb.addParam(PARAM_COLLECTION_LIKE, collection);
             request.setAttribute(PARAM_COLLECTION_LIKE, collection);
         }
 
         // Enforce that the state is not empty, or larger than 1 character
         if (!Strings.isEmpty(state) && state.length() == 1) {
-            queries.add("c.state = :state");
+            queries.add("c.state = :status_state");
             pb.addParam(PARAM_STATE, state);
             request.setAttribute(PARAM_STATE, state);
         }
@@ -163,8 +164,8 @@ public class StatusServlet extends EntityManagerServlet {
         queryString.append(" ORDER BY c.group ASC, c.name ASC");
         countString.append(params);
 
-        Query query =
-                em.createQuery(queryString.toString());
+        TypedQuery<Collection> query =
+                em.createQuery(queryString.toString(), Collection.class);
         // em.createNamedQuery("Collection.listAllCollections");
         query.setFirstResult((int) offset);
         query.setMaxResults(count);
