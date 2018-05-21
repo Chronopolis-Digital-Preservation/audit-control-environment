@@ -33,6 +33,7 @@ package edu.umiacs.ace.monitor.audit;
 import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
+import edu.umiacs.ace.monitor.settings.SettingsConstants;
 import edu.umiacs.ace.util.CollectionThreadPoolExecutor;
 import edu.umiacs.ace.util.KSFuture;
 import edu.umiacs.ace.util.PersistUtil;
@@ -61,7 +62,7 @@ public class AuditThreadFactory {
             new ConcurrentHashMap<>();
     private static int max_audits = 3;
     private static String imsHost = null;
-    private static int imsPort = 8080;
+    private static int imsPort = 80;
     private static String tokenClass = "SHA-256";
     private static boolean auditOnly = false;
     private static boolean auditSample = false;
@@ -71,8 +72,8 @@ public class AuditThreadFactory {
 
     public static void setIMS( String ims ) {
         if (Strings.isEmpty(ims)) {
-            LOG.error("Empty ims string, ignoring");
-            return;
+            LOG.error("Empty ims string, setting from default value");
+            ims = SettingsConstants.ims;
         }
         imsHost = ims;
     }
@@ -93,10 +94,10 @@ public class AuditThreadFactory {
         return imsPort;
     }
 
-    public static void setImsPort( int imsPort ) {
-        if ( imsPort < 1 && imsPort > 32768 ) {
-            LOG.error("ims port must be between 1 and 32768");
-            return;
+    public static void setImsPort(int imsPort) {
+        if (imsPort < 1 && imsPort > 32768) {
+            LOG.error("ims port must be between 1 and 32768, setting default");
+            imsPort = Integer.parseInt(SettingsConstants.imsPort);
         }
         AuditThreadFactory.imsPort = imsPort;
     }
