@@ -30,21 +30,11 @@
 // $Id$
 package edu.umiacs.ace.monitor.reporting;
 
+import edu.umiacs.ace.monitor.settings.SettingsConstants;
 import edu.umiacs.ace.monitor.settings.SettingsParameter;
+import edu.umiacs.ace.monitor.settings.SettingsUtil;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
-import java.text.ParseException;
-import java.util.Properties;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 import org.quartz.CronTrigger;
@@ -53,6 +43,19 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import java.text.ParseException;
+import java.util.Properties;
 
 /**
  * Context listener to control the starting and stopping of the quartz scheduler used to generate
@@ -75,27 +78,23 @@ public class SchedulerContextListener implements ServletContextListener {
         NDC.push("[schedstartup]");
         try {
             EntityManager em = PersistUtil.getEntityManager();
-            Query q1 = em.createNamedQuery("SettingsParameter.getAttr");
 
-            q1.setParameter("attr", PARAM_SMTP_SERVER);
-            SettingsParameter s = (SettingsParameter)q1.getSingleResult();
+            SettingsParameter s = SettingsUtil.getOrDefault(PARAM_SMTP_SERVER,
+                    SettingsConstants.mailServer, em);
             mailserver = s.getValue();
 
-            q1.setParameter("attr", PARAM_FROM);
-            s = (SettingsParameter) q1.getSingleResult();
+            s = SettingsUtil.getOrDefault(PARAM_FROM, SettingsConstants.mailFrom, em);
             mailfrom = s.getValue();
-            if (Strings.isEmpty(mailserver)) {
-                mailserver = "127.0.0.1";
-            }
 
             schedFact = new org.quartz.impl.StdSchedulerFactory();
             sched = schedFact.getScheduler();
             sched.start();
             LOG.debug("Starting the scheduler, registering all jobs");
 
-            Query q2 = em.createNamedQuery("ReportPolicy.listAll");
-            for (Object o : q2.getResultList()) {
-                addJob((ReportPolicy) o);
+            TypedQuery<ReportPolicy> query =
+                    em.createNamedQuery("ReportPolicy.listAll", ReportPolicy.class);
+            for (ReportPolicy policy : query.getResultList()) {
+                addJob(policy);
             }
         } catch (Exception ex) {
             LOG.error("Error starting report scheduling", ex);

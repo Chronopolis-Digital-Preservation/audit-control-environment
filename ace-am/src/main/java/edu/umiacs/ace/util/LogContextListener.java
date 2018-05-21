@@ -32,13 +32,14 @@
 package edu.umiacs.ace.util;
 
 import edu.umiacs.ace.monitor.settings.SettingsParameter;
-import java.util.List;
-import java.util.Properties;
+import org.apache.log4j.PropertyConfigurator;
+
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import org.apache.log4j.PropertyConfigurator;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Configure log4j on startup
@@ -51,12 +52,14 @@ public class LogContextListener implements ServletContextListener {
     public void contextInitialized( ServletContextEvent arg0 ) {
         Properties log4jProp = new Properties();
 
+        // what happens when this is empty?
         EntityManager em = PersistUtil.getEntityManager();
-        Query q = em.createNamedQuery("SettingsParameter.getAttrList");
+        TypedQuery<SettingsParameter> q = em.createNamedQuery("SettingsParameter.getAttrList",
+                SettingsParameter.class);
         q.setParameter("attr", "%log4j%");
-        List<SettingsParameter> l = q.getResultList();
+        List<SettingsParameter> settings = q.getResultList();
 
-        for(SettingsParameter s: l ) {
+        for(SettingsParameter s: settings) {
             log4jProp.setProperty(s.getName(), s.getValue());
         }
 

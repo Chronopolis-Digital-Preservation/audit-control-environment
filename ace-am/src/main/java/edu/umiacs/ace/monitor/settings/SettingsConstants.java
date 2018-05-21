@@ -23,14 +23,11 @@ public class SettingsConstants {
     public static final String PARAM_USER_AUTH = "auth.management";
     public static final String PARAM_4J_FILE = "log4j.appender.A1.File";
     public static final String PARAM_4J_APPENDER = "log4j.appender.A1"; 
-    public static final String PARAM_4J_FILE_SIZE = 
-	    "log4j.appender.A1.maxFileSize";
-    public static final String PARAM_4J_BACKUP_INDEX = 
-	    "log4j.appender.A1.maxBackupIndex"; 
+    public static final String PARAM_4J_FILE_SIZE = "log4j.appender.A1.maxFileSize";
+    public static final String PARAM_4J_BACKUP_INDEX = "log4j.appender.A1.maxBackupIndex";
     public static final String PARAM_4J_ROOT_LOGGER = "log4j.rootLogger";
     public static final String PARAM_4J_LAYOUT = "log4j.appender.A1.layout"; 
-    public static final String PARAM_4J_CONV_PAT = 
-	    "log4j.appender.A1.layout.ConversionPattern"; 
+    public static final String PARAM_4J_CONV_PAT = "log4j.appender.A1.layout.ConversionPattern";
     public static final String PARAM_4J_IRODS = "log4j.logger.edu.umiacs.irods";
     public static final String PARAM_4J_CLASS ="log4j.logger.edu.umiacs";
     public static final String PARAM_INGEST = "ingest.maxthreads";
@@ -59,8 +56,8 @@ public class SettingsConstants {
     public static final String log4JA1MaxBackupIndex = "5";
     public static final String log4JRootLogger = "FATAL, A1";
     public static final String log4JA1Layout   = "org.apache.log4j.PatternLayout";
-    public static final String log4JA1layoutConversationPattern 
-	    = "%d{[dd/MMM/yyyy:HH:mm:ss]} %x%m%n";
+    public static final String log4JA1layoutConversationPattern =
+            "%d{[dd/MMM/yyyy:HH:mm:ss]} %x%m%n";
     public static final String log4JLoggerIrods = "ERROR";
     public static final String log4JLoggerUMIACS = "TRACE";
 

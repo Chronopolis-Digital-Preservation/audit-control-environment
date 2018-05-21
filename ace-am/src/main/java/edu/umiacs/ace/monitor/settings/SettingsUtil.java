@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +36,8 @@ public class SettingsUtil {
             return (SettingsParameter) q.getSingleResult();
         } catch (NoResultException ex) {
             // zzz
+        } finally {
+            em.close();
         }
 
         return null;
@@ -47,9 +50,14 @@ public class SettingsUtil {
      */
     public static List<SettingsParameter> getCustomSettings() {
         EntityManager em = PersistUtil.getEntityManager();
-        Query q = em.createNamedQuery("SettingsParameter.getCustomSettings");
-
-        return q.getResultList();
+        TypedQuery<SettingsParameter> q = em.createNamedQuery(
+                "SettingsParameter.getCustomSettings",
+                SettingsParameter.class);
+        try {
+            return q.getResultList();
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -59,9 +67,14 @@ public class SettingsUtil {
      */
     public static List<SettingsParameter> getCurrentSettings() {
         EntityManager em = PersistUtil.getEntityManager();
-        Query q = em.createNamedQuery("SettingsParameter.getCurrentSettings");
-
-        return q.getResultList();
+        TypedQuery<SettingsParameter> q = em.createNamedQuery(
+                "SettingsParameter.getCurrentSettings",
+                SettingsParameter.class);
+        try {
+            return q.getResultList();
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -195,7 +208,6 @@ public class SettingsUtil {
         defaults.add(new SettingsParameter(SettingsConstants.PARAM_AUDIT_MAX_BLOCK_TIME,
                 SettingsConstants.auditMaxBlockTime, false));
 
-
         return defaults;
     }
 
@@ -297,8 +309,36 @@ public class SettingsUtil {
         q.setParameter("attr", SettingsConstants.PARAM_AUDIT_MAX_BLOCK_TIME);
         s = (SettingsParameter) q.getSingleResult();
         AuditThreadFactory.setMaxBlockTime(Integer.parseInt(s.getValue()));
-
-
     }
 
+    /**
+     * Get a SettingsParameter by its attribute name or set the default value and persist it
+     *
+     * @param attr the Attribute to query for
+     * @param defaultValue the default value of the attribute
+     * @param em the EntityManager to query with
+     * @return the queried SettingsParameter
+     */
+    public static SettingsParameter getOrDefault(String attr,
+                                                 String defaultValue,
+                                                 EntityManager em) {
+        SettingsParameter result = new SettingsParameter(attr, defaultValue, false);
+        TypedQuery<SettingsParameter> q = em.createNamedQuery("SettingsParameter.getAttr",
+                SettingsParameter.class);
+        q.setParameter("attr", attr);
+
+        try {
+            result = q.getSingleResult();
+            // just in case
+            if (result.getValue() == null || result.getValue().isEmpty()) {
+                result.setValue(defaultValue);
+            }
+        } catch (NoResultException ex) {
+            em.getTransaction().begin();
+            em.persist(result);
+            em.getTransaction().commit();
+        }
+
+        return result;
+    }
 }

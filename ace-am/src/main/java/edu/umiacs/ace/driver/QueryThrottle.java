@@ -31,15 +31,16 @@
 package edu.umiacs.ace.driver;
 
 import edu.umiacs.ace.monitor.settings.SettingsParameter;
+import edu.umiacs.ace.monitor.settings.SettingsUtil;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
-import java.util.Timer;
-import java.util.TimerTask;
+import org.apache.log4j.Logger;
+
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import org.apache.log4j.Logger;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  *
@@ -94,23 +95,21 @@ public class QueryThrottle implements ServletContextListener {
     @Override
     public void contextInitialized( ServletContextEvent sce ) {
         EntityManager em = PersistUtil.getEntityManager();
-        Query q = em.createNamedQuery("SettingsParameter.getAttr");
-        q.setParameter("attr", PARAM_TIME);
-        SettingsParameter s = (SettingsParameter) q.getSingleResult();
-        String time = s.getValue();
 
-        if ( Strings.isValidInt(time) ) {
-            setMinWait(Integer.parseInt(time));
+        // Todo: migrate these out of here
+        SettingsParameter blockTime = SettingsUtil.getOrDefault(PARAM_TIME,
+                String.valueOf(minWait), em);
+        SettingsParameter bps = SettingsUtil.getOrDefault(PARAM_BPS,
+                String.valueOf(maxBps), em);
+
+        if (Strings.isValidInt(blockTime.getValue())) {
+            setMinWait(Integer.parseInt(blockTime.getValue()));
             LOG.info("Setting query throttle minwait to " + minWait);
         }
 
-        q.setParameter("attr", PARAM_BPS);
-        s = (SettingsParameter) q.getSingleResult();
-        String maxBpsString = s.getValue();
-        if ( Strings.isValidLong(maxBpsString) ) {
-           setMaxBps(Long.parseLong(maxBpsString));
+        if (Strings.isValidLong(bps.getValue())) {
+           setMaxBps(Long.parseLong(bps.getValue()));
         }
-
 
         if ( minWait > 0 ) {
             checkTimer = new Timer("srb timer");
@@ -122,8 +121,6 @@ public class QueryThrottle implements ServletContextListener {
                 }
             }, 0, minWait);
         }
-
-
     }
 
     @Override
