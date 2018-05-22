@@ -34,18 +34,17 @@ import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
-import org.apache.log4j.Logger;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
+import javax.persistence.Query;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.RecursiveAction;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
 
 /**
  * Class to register directories from a token store
@@ -53,14 +52,13 @@ import javax.persistence.Query;
  * @author shake
  */
 public class IngestDirectory extends RecursiveAction {
-    private static final Logger LOG = Logger.getLogger(IngestDirectory.class);
     private Collection coll;
     private Set<String> identifiers;
-    private Set<String> existingParents = new HashSet<String>();
+    private Set<String> existingParents = new HashSet<>();
     private EntityManager em = PersistUtil.getEntityManager();
     private int numTransactions = 0;
 
-    public IngestDirectory(Set<String> identifiers , Collection coll){
+    public IngestDirectory(Set<String> identifiers, Collection coll) {
         this.identifiers = identifiers;
         this.coll = coll;
     }
@@ -68,13 +66,13 @@ public class IngestDirectory extends RecursiveAction {
     @Override
     protected void compute() {
         // We want this to remain single threaded, so we just leave it be
-        if ( identifiers == null || coll == null ) {
+        if (identifiers == null || coll == null) {
             return;
         }
 
         EntityTransaction trans = em.getTransaction();
         trans.begin();
-        for ( String identifier : identifiers ) {
+        for (String identifier : identifiers) {
             extractAndRegisterParentDirs(identifier);
         }
         trans.commit();
@@ -82,31 +80,30 @@ public class IngestDirectory extends RecursiveAction {
 
     private void extractAndRegisterParentDirs(String path) {
         // We don't have a FileBean, so build the pathList ourselves
+        int index;
+        List<String> pathList = new LinkedList<>();
         StringBuilder fullPath = new StringBuilder(path);
-        List <String> pathList = new LinkedList<String>();
-        if ( fullPath.charAt(0) != '/' ) {
+        if (fullPath.charAt(0) != '/') {
             fullPath.insert(0, "/");
         }
-        int index = 0;
-        while( (index = fullPath.lastIndexOf("/")) != 0 ) {
+        while ((index = fullPath.lastIndexOf("/")) != 0) {
             pathList.add(fullPath.toString());
             fullPath.delete(index, fullPath.length());
         }
         pathList.add(fullPath.toString());
 
         // Same as AuditThread, but with our pathList
-        String parentName = (pathList.size() > 1
-                ? pathList.get(1) : null);
+        String parentName = pathList.size() > 1 ? pathList.get(1) : null;
 
         // 1. make sure directory path is registered
         if (parentName != null) {
             //parentName = Strings.cleanStringForXml(parentName, '_');
-            for ( int i = 1; i < pathList.size(); i++) {
-                String parent = (pathList.size() > i + 1 ? pathList.get(i+1) : null);
+            for (int i = 1; i < pathList.size(); i++) {
+                String parent = (pathList.size() > i + 1 ? pathList.get(i + 1) : null);
                 parent = Strings.cleanStringForXml(parent, '_');
                 createDirectory(pathList.get(i), parent);
 
-                if ( numTransactions % 30 == 0 ) {
+                if (numTransactions % 30 == 0) {
                     em.flush();
                     em.clear();
                 }
@@ -116,10 +113,10 @@ public class IngestDirectory extends RecursiveAction {
 
     private void createDirectory(String directory, String root) {
         MonitoredItem mi;
-        if ( existingParents.contains(directory) || directory == null ) {
+        if (existingParents.contains(directory) || directory == null) {
             return;
         }
-        if ( (mi = getItemByPath(directory)) != null ) {
+        if ((mi = getItemByPath(directory)) != null) {
             Date d = new Date();
             mi.setLastSeen(d);
             mi.setLastVisited(d);
@@ -133,13 +130,13 @@ public class IngestDirectory extends RecursiveAction {
     }
 
 
-    public MonitoredItem getItemByPath( String path ) {
+    public MonitoredItem getItemByPath(String path) {
         Query q = em.createNamedQuery("MonitoredItem.getItemByPath");
         q.setParameter("path", path);
         q.setParameter("coll", coll);
         try {
             return (MonitoredItem) q.getSingleResult();
-        } catch ( NoResultException ex ) {
+        } catch (NoResultException ex) {
             return null;
         }
 
@@ -161,9 +158,9 @@ public class IngestDirectory extends RecursiveAction {
         mi.setPath(path);
         mi.setState(initialState);
         mi.setSize(size);
+
         em.persist(mi);
         numTransactions++;
-
         return mi;
     }
 

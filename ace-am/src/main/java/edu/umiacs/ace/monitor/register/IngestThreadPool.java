@@ -30,18 +30,21 @@
 
 package edu.umiacs.ace.monitor.register;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.Token;
-import edu.umiacs.ace.monitor.settings.SettingsConstants;
 import edu.umiacs.ace.token.TokenStoreEntry;
 import edu.umiacs.ace.token.TokenStoreReader;
 import edu.umiacs.ace.util.CollectionThreadPoolExecutor;
+import edu.umiacs.ace.util.KSFuture;
 import edu.umiacs.ace.util.TokenUtil;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * TODO - Possibly make a LinkedBlockingQueue that threads can poll from
@@ -56,9 +59,7 @@ public class IngestThreadPool {
     private static final IngestThreadPool instance = new IngestThreadPool();
     private static final Logger LOG = Logger.getLogger(IngestThreadPool.class);
 
-    private static Map<Collection, Set<String>> hasSeen;
-    private static int maxThreads =
-            Integer.parseInt(SettingsConstants.maxIngestThreads);
+    private static Cache<Collection, KSFuture<IngestSupervisor>> cache;
 
     private IngestThreadPool() {
     }
@@ -67,8 +68,11 @@ public class IngestThreadPool {
         // We instantiate here to ensure 2 things:
         // 1 - We use the correct number for max threads from the DB
         // 2 - Java will throw an exception otherwise
-        if (hasSeen == null) {
-            hasSeen = new HashMap<>();
+        if (cache == null) {
+            // WeakReference instead?
+            cache = Caffeine.newBuilder()
+                    .expireAfterAccess(10, TimeUnit.MINUTES)
+                    .build();
         }
 
         return instance;
@@ -85,7 +89,7 @@ public class IngestThreadPool {
             throw new RuntimeException("Token file is corrupt");
         }
         IngestThreadPool thePool = IngestThreadPool.getInstance();
-        HashMap<String, Token> batchTokens = new HashMap<String, Token>();
+        HashMap<String, Token> batchTokens = new HashMap<>();
 
         while (tokenReader.hasNext()) {
             TokenStoreEntry tokenEntry = tokenReader.next();
@@ -113,35 +117,22 @@ public class IngestThreadPool {
 
         // We may want to save the Future so that we can display information
         // about the current ingestion
-        executor.submitIngestThread(coll, new IngestSupervisor(tokens, coll));
+        KSFuture<IngestSupervisor> future =
+                executor.submitIngestThread(coll, new IngestSupervisor(tokens, coll));
+        cache.put(coll, future);
     }
 
-    // TODO: Figure out how to display this... probably will move to the status display like audits
+    public ConcurrentMap<Collection, KSFuture<IngestSupervisor>> getCache() {
+        return cache.asMap();
+    }
+
     public String getStatus() {
-        return String.format("[Thread Pool] Active"); /*: %d, Completed: %d, Total: %d",
-                executor.getActiveCount(),
-                executor.getCompletedTaskCount(),
-                executor.getTaskCount());*/
-    }
-
-    // Not entirely accurate for the jsp, but it'll show what collections are
-    // ingesting what
-    public Map<Collection, Set<String>> getIngestedItems() {
-        return hasSeen;
-    }
-
-    public static void setMaxThreads(int maxThreads) {
-        IngestThreadPool.maxThreads = maxThreads;
+        return "[Thread Pool] Active";
     }
 
     protected static void shutdownPools() {
         LOG.debug("[Ingest] Shutting down thread pools.");
-        /*
-        executor.shutdown();
-        if (!executor.isTerminated()) {
-            executor.shutdownNow();
-        }
-        */
+        cache.invalidateAll();
     }
 
 }
