@@ -27,6 +27,10 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             padding-right: 0px !important;
         }
 
+        a.badge {
+            font-size: 95%;
+        }
+
         #summaryTable {
             margin-left: 50px;
             margin-right: auto;
@@ -87,7 +91,13 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         <td class="lblTd">Missing Files</td>
         <td class="dataTd"><h:DefaultValue test="${collection.missingFiles > -1}"
                                            success="${collection.missingFiles}" failure="0"/>
-            <c:if test="${collection.missingFiles > 0}"><a>Remove All</a></c:if>
+            <c:if test="${collection.missingFiles > 0}">
+                <a class="badge badge-danger text-white"
+                   data-toggle="modal" data-target="#missingModal"
+                   data-href="RemoveItem?redirect=Report&collectionid=${collection.collection.id}&type=missing">
+                    Remove All
+                </a>
+            </c:if>
         </td>
         <td class="lblTd">Missing Remote Files</td>
         <td class="dataTd"><h:DefaultValue test="${collection.remoteMissing > -1}"
@@ -101,7 +111,12 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         <td class="dataTd"><h:DefaultValue test="${collection.corruptFiles > -1}"
                                            success="${collection.corruptFiles}" failure="0"/>
             <c:if test="${collection.corruptFiles > 0}">
-                <a href="RemoveItem?redirect=Report&collectionid=${collection.collection.id}&type=corrupt">Remove All</a></c:if>
+                <a class="badge badge-danger text-white"
+                   data-toggle="modal" data-target="#mutableModal"
+                   data-href="RemoveItem?redirect=Report&collectionid=${collection.collection.id}&type=corrupt">
+                    Remove All
+                </a>
+            </c:if>
         </td>
     </tr>
     <tr>
@@ -174,8 +189,11 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                     </td>
                     <td class="datecol"><span>${fn:replace(item.lastSeen, " ", "&nbsp;")}</span>
                     </td>
-                    <td><a href="EventLog?logpath=${item.path}">log</a> <a
-                            href="RemoveItem?itemid=${item.id}&amp;redirect=Report%3Fcollectionid=${collection.collection.id}">remove</a>
+                    <td><a class="badge badge-primary text-white" href="EventLog?logpath=${item.path}">log</a>
+                        <a class="badge badge-danger text-white" data-toggle="modal" data-target="#mutableModal"
+                           data-href="RemoveItem?itemid=${item.id}&amp;redirect=Report%3Fcollectionid=${collection.collection.id}">
+                            remove
+                        </a>
                     </td>
                 </tr>
             </c:forEach>
@@ -195,19 +213,20 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 </td>
             </tr>
         </table>
+
         <!-- Button trigger -->
         <button type="button" class="btn btn-primary" data-toggle="modal"
-                data-target="#exampleModal" style="width: 25%">
+                data-target="#formModal" style="width: 25%">
             Remove Selected
         </button>
 
         <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
-             aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="formModal" tabindex="-1" role="dialog"
+             aria-labelledby="formModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
+                        <h5 class="modal-title" id="formModalLabel">Confirmation</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -219,17 +238,42 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                         Continue?
                     </h6>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            Close
                         </button>
-                        <button type="submit" class="btn btn-primary"
-                                onclick="docment.location = 'report.jsp'">Submit
-                        </button>
+                        <button type="submit" class="btn btn-danger">Submit</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </form>
+
+<!-- A separate modal outside the form to handle the hrefs -->
+<div class="modal fade" id="mutableModal" tabindex="-1" role="dialog"
+     aria-labelledby="mutableModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mutableModalLabel">Confirmation</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <h6 class="modal-body">
+                Submitting will remove all selected items and their tokens from tracking in ACE.
+                <br><br>
+                Continue?
+            </h6>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    Close
+                </button>
+                <button type="submit" class="btn btn-danger">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <jsp:include page="footer.jsp"/>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -245,6 +289,17 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 <script type="text/javascript">
     $("#selectall").click(function () {
         $("input[name=removal]").prop('checked', $(this).prop("checked"));
+    });
+
+    $('#mutableModal').on('show.bs.modal', function (event) {
+        var whatever = $(event.relatedTarget);
+        var href = whatever.data('href');
+
+        console.log(whatever);
+        console.log(href);
+
+        var modal = $(this);
+        modal.find('.btn-danger').attr('onClick', 'location.href="' + href + '"');
     });
 </script>
 </body>
