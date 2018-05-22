@@ -28,7 +28,7 @@ public class KSFuture<V extends Runnable> extends KnownFuture<Submittable<V>> {
     }
 
     private void beforeExecute(Submittable<V> result) {
-        Collection c = result.collection;
+        Collection c = result.getCollection();
         Semaphore semaphore = locks.get(c);
         // LOG.debug(info(result) + " acquiring semaphore");
         semaphore.acquireUninterruptibly();
@@ -37,7 +37,7 @@ public class KSFuture<V extends Runnable> extends KnownFuture<Submittable<V>> {
     }
 
     private void afterExecute(Submittable<V> result) {
-        Collection c = result.collection;
+        Collection c = result.getCollection();
         Semaphore semaphore = locks.get(c);
         semaphore.release();
         LOG.debug(info(result) + " released semaphore");
@@ -54,7 +54,7 @@ public class KSFuture<V extends Runnable> extends KnownFuture<Submittable<V>> {
     }
 
     private String info(Submittable s) {
-        Collection c = s.collection;
+        Collection c = s.getCollection();
         String group = c.getGroup();
         if (group == null) {
             group = "";
