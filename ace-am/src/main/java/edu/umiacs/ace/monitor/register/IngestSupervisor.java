@@ -67,6 +67,10 @@ public class IngestSupervisor implements Runnable {
     }
 
     // jsp helpers
+    public Collection getCollection() {
+        return coll;
+    }
+
     public int getQueuedSize() {
         return states.get(IngestState.QUEUED).size();
     }

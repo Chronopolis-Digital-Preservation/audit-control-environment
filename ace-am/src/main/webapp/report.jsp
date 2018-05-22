@@ -27,6 +27,10 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             padding-right: 0px !important;
         }
 
+        button.btn {
+            height: 100%
+        }
+
         a.badge {
             font-size: 95%;
         }
@@ -215,7 +219,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         </table>
 
         <!-- Button trigger -->
-        <button type="button" class="btn btn-primary" data-toggle="modal"
+        <button type="button" class="btn btn-danger" data-toggle="modal"
                 data-target="#formModal" style="width: 25%">
             Remove Selected
         </button>

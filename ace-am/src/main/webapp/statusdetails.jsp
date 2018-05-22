@@ -172,7 +172,7 @@
                             <um:Auth role="Collection Modify">
                                 <a href="ManageCollection?collectionid=${workingCollection.collection.id}" title="Configure connection settings for this collection" >Collection Settings</a><br>
                                 <a href="collectionremove.jsp" title="Delete Collection">Remove Collection</a><br>
-                                <a href="ingest_form.jsp" title="Ingest Tokens">Ingest Tokens</a><br>
+                                <a href="ingest_form.jsp" title="Import Tokens">Import Tokens</a><br>
                                 <a href="ManageFilters?collectionid=${workingCollection.collection.id}">Modify Filters</a><BR>                                
                             </um:Auth>
                             <um:Auth role="Modify Activity Reporting">
