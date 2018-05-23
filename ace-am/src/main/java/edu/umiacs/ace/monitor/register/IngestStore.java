@@ -33,37 +33,31 @@ package edu.umiacs.ace.monitor.register;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.Token;
-import edu.umiacs.ace.monitor.log.LogEventManager;
 import edu.umiacs.ace.token.TokenStoreEntry;
 import edu.umiacs.ace.token.TokenStoreReader;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.util.TokenUtil;
 import edu.umiacs.util.Strings;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import javax.persistence.EntityManager;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
-//import org.apache.tomcat.util.http.fileupload.FileUploadBase;
+
+import javax.persistence.EntityManager;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Servlet to ingest token stores
  * @author toaster
  */
 public class IngestStore extends EntityManagerServlet {
-    // private static final Logger LOG = Logger.getLogger(IngestStore.class);
-    private LogEventManager logManager;
-    // private long session;
     public static final String PAGE_RESULTS = "results";
 
     @Override
@@ -73,8 +67,7 @@ public class IngestStore extends EntityManagerServlet {
         Collection coll = null; //getCollection(request, em);
         MonitoredItem item = getItem(request, em);
         TokenStoreReader tokenReader = null;
-        RequestDispatcher dispatcher;
-        Map<String, Token> batchTokens = new HashMap<String, Token>();
+        Map<String, Token> batchTokens = new HashMap<>();
 
         if (item != null && !item.isDirectory())
             throw new ServletException( "Selected item is not a directory "
@@ -92,6 +85,11 @@ public class IngestStore extends EntityManagerServlet {
                 FileItemStream fileItem = iter.next();
                 InputStream stream = fileItem.openStream();
 
+                // todo: find a better way to do this
+                // going to add some documentation for the next time anyone comes through here
+                // the "upload" has the form fields as well, so we need to iterate over it in order
+                // to get both the collection id (and instantiate the collection) as well as get
+                // the token store
                 if (fileItem.isFormField()) {
 
                     // Basic find collection id and set the collection
@@ -112,6 +110,7 @@ public class IngestStore extends EntityManagerServlet {
                     // May want to log this stuff
                     tokenReader = new TokenStoreReader(fileItem.openStream());
 
+                    // If the above fails an exception is thrown rendering this useless
                     if ( tokenReader == null ) {
                         throw new ServletException("Token file is corrupt");
                     }
@@ -140,11 +139,7 @@ public class IngestStore extends EntityManagerServlet {
 
         IngestThreadPool tPool = IngestThreadPool.getInstance();
         tPool.submitTokens(batchTokens, coll);
-        HttpSession session = request.getSession();
-        session.setAttribute(PAGE_RESULTS, tPool);
-
-        dispatcher = request.getRequestDispatcher("ingeststatus.jsp");
-        dispatcher.forward(request, response);
+        response.sendRedirect("/TokenImportStatus?active=" + coll.getId());
     }
 
 }

@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <context-param>
-        <description>Parameter used by replication startup listener to check replicas for new files every specified number of days</description>
+        <description>Parameter used by replication startup listener to check replicas for new files
+            every specified number of days
+        </description>
         <param-name>checkPeriod</param-name>
         <param-value>5</param-value>
     </context-param>
-     <filter>
+    <filter>
         <filter-name>PersistenceFilter</filter-name>
         <filter-class>edu.umiacs.ace.rest.PersistenceServiceFilter</filter-class>
     </filter>
@@ -36,7 +40,8 @@
     </listener>
     <listener>
         <description>Auto Audit Disabled migration</description>
-        <listener-class>edu.umiacs.ace.monitor.settings.AutoAuditMigrationContextListener</listener-class>
+        <listener-class>edu.umiacs.ace.monitor.settings.AutoAuditMigrationContextListener
+        </listener-class>
     </listener>
     <!-- Some of the migrations rely on the pause bean from the ACC, so init it early -->
     <listener>
@@ -53,11 +58,13 @@
     </listener>
     <listener>
         <description>ServletContextListener</description>
-        <listener-class>edu.umiacs.ace.monitor.core.CollectionSettingsMigrationListener</listener-class>
+        <listener-class>edu.umiacs.ace.monitor.core.CollectionSettingsMigrationListener
+        </listener-class>
     </listener>
     <listener>
         <description>Settings migration to db</description>
-        <listener-class>edu.umiacs.ace.monitor.settings.SettingsMigrationContextListener</listener-class>
+        <listener-class>edu.umiacs.ace.monitor.settings.SettingsMigrationContextListener
+        </listener-class>
     </listener>
 
     <!-- normal startup listeners, schedulers, etc -->
@@ -86,7 +93,7 @@
         <listener-class>edu.umiacs.ace.driver.QueryThrottle</listener-class>
     </listener>
     <listener>
-        <description>Initial ingestion configuration </description>
+        <description>Initial ingestion configuration</description>
         <listener-class>edu.umiacs.ace.monitor.register.IngestContextListener</listener-class>
     </listener>
     <servlet>
@@ -196,6 +203,10 @@
         <servlet-class>edu.umiacs.ace.monitor.register.IngestStore</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>TokenImportStatus</servlet-name>
+        <servlet-class>edu.umiacs.ace.monitor.register.ImportStatusServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>ChangePassword</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.users.ChangePasswordServlet</servlet-class>
     </servlet>
@@ -211,7 +222,7 @@
         <servlet-name>DeleteSettingsServlet</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.settings.DeleteSettingsServlet</servlet-class>
     </servlet>
-        <servlet>
+    <servlet>
         <servlet-name>StatisticsServlet</servlet-name>
         <servlet-class>edu.umiacs.ace.stats.StatisticsServlet</servlet-class>
     </servlet>
@@ -312,10 +323,6 @@
         <servlet-name>ClearResourceServlet</servlet-name>
         <url-pattern>/ClearResource</url-pattern>
     </servlet-mapping>
-    <!--<servlet-mapping>
-        <servlet-name>IngestStore</servlet-name>
-        <url-pattern>/IngestStore</url-pattern>
-    </servlet-mapping>-->
     <servlet-mapping>
         <servlet-name>ChangePassword</servlet-name>
         <url-pattern>/ChangePassword</url-pattern>
@@ -323,6 +330,10 @@
     <servlet-mapping>
         <servlet-name>IngestStore</servlet-name>
         <url-pattern>/Ingest</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>TokenImportStatus</servlet-name>
+        <url-pattern>/TokenImportStatus</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>SettingsServlet</servlet-name>
@@ -861,9 +872,9 @@
     <security-role>
         <description>Add/edit/remove stuff in /PartnerSite</description>
         <role-name>Modify Partner Sites</role-name>
-    </security-role> 
+    </security-role>
     <security-role>
         <description>Role used to modify system settings</description>
         <role-name>Modify System Settings</role-name>
     </security-role>
-    </web-app>
+</web-app>
