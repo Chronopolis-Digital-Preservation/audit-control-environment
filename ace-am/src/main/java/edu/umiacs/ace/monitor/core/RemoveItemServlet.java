@@ -129,6 +129,18 @@ public class RemoveItemServlet extends EntityManagerServlet {
         dispatcher.forward(request, response);
     }
 
+    /**
+     * Remove all MonitoredItems for a collection depending on the type which is passed in. As this
+     * is a query parameter, we allow it to be either 'C' for corrupt items or 'M' for missing
+     * items. Upon completion, return the Collection owning the MonitoredItems so that we can
+     * update the cached values in the CollectionCountContext.
+     *
+     * @param collection   the Collection owning the MonitoredItems
+     * @param type         the type (state) of MonitoredItem to remove
+     * @param em           the EntityManager to query/update the database
+     * @param eventSession the session id to use for log entries
+     * @return A Set of all Collections affected
+     */
     private Set<Collection> removeForType(Collection collection,
                                           String type,
                                           EntityManager em,
@@ -148,7 +160,7 @@ public class RemoveItemServlet extends EntityManagerServlet {
                 state = 'M';
                 break;
             default:
-                LOG.warn("Not remove type of " + type + "; needs to be corrupt or missing");
+                LOG.warn("Unable to remove type " + type + "; needs to be corrupt or missing");
         }
 
         if (state != 0) {
@@ -162,8 +174,8 @@ public class RemoveItemServlet extends EntityManagerServlet {
                 // items at once time which can be very slow when iterating each item individually
                 PreparedStatement logStatement = connection.prepareStatement(
                         "INSERT INTO logevent(session, path, date, logtype, collection_id) " +
-                        "SELECT ?, path, NOW(), ?, parentcollection_id FROM monitored_item m " +
-                        "WHERE m.parentcollection_id = ? AND m.state = ?");
+                                "SELECT ?, path, NOW(), ?, parentcollection_id FROM monitored_item m " +
+                                "WHERE m.parentcollection_id = ? AND m.state = ?");
                 connection.setAutoCommit(false);
                 logStatement.setLong(1, eventSession);
                 logStatement.setInt(2, LogEnum.REMOVE_ITEM.getType());
@@ -193,6 +205,11 @@ public class RemoveItemServlet extends EntityManagerServlet {
         return ImmutableSet.of(collection);
     }
 
+    /**
+     * Rollback a transaction on a Connection
+     *
+     * @param connection the Connection whose transaction to rollback
+     */
     private void rollback(@Nullable Connection connection) {
         try {
             if (connection != null) {
@@ -203,6 +220,16 @@ public class RemoveItemServlet extends EntityManagerServlet {
         }
     }
 
+    /**
+     * Query the Database and get a reference for an Entity. If the Entity cannot be found, return
+     * and empty Optional.
+     *
+     * @param clazz the class to query on
+     * @param id    the id of the entity
+     * @param em    the EntityManager to query with
+     * @param <T>   the Type, matching the Class being queried
+     * @return the reference for the entity wrapped in an Optional
+     */
     private <T> Optional<T> referenceFor(Class<T> clazz, Long id, EntityManager em) {
         try {
             return Optional.of(em.getReference(clazz, id));
@@ -212,6 +239,16 @@ public class RemoveItemServlet extends EntityManagerServlet {
         }
     }
 
+    /**
+     * Remove an individual MonitoredItem from the database and return the affected Collection so we
+     * know if its CollectionCountContext cache should be updated
+     *
+     * @param item    the MonitoredItem to remove
+     * @param em      the EntityManager to access the db
+     * @param session the id of the session for LogEvents
+     * @param dt      the DirectoryTree of the MonitoredItem
+     * @return the Collection which owns the MonitoredItem
+     */
     private Collection removeItem(MonitoredItem item, EntityManager em, Long session, DirectoryTree dt) {
         Collection c = null;
         if (item != null) {
@@ -297,8 +334,7 @@ public class RemoveItemServlet extends EntityManagerServlet {
 
         private void clearDir(MonitoredItem item) {
             LOG.trace("Removing dir: " + item.getPath());
-            for (MonitoredItem mi : mim.listChildren(item.getParentCollection(),
-                    item.getPath())) {
+            for (MonitoredItem mi : mim.listChildren(item.getParentCollection(), item.getPath())) {
                 if (mi.isDirectory()) {
                     clearDir(mi);
                 } else {

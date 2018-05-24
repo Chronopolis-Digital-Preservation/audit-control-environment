@@ -97,7 +97,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                                            success="${collection.missingFiles}" failure="0"/>
             <c:if test="${collection.missingFiles > 0}">
                 <a class="badge badge-danger text-white"
-                   data-toggle="modal" data-target="#missingModal"
+                   data-toggle="modal" data-target="#mutableModal"
                    data-href="RemoveItem?redirect=Report&collectionid=${collection.collection.id}&type=missing">
                     Remove All
                 </a>
@@ -280,16 +280,6 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 </div>
 
 <jsp:include page="footer.jsp"/>
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
-        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
-        crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
-        integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
-        crossorigin="anonymous"></script>
-
 <script type="text/javascript">
     $("#selectall").click(function () {
         $("input[name=removal]").prop('checked', $(this).prop("checked"));

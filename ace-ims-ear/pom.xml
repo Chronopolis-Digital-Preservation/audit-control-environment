@@ -5,11 +5,10 @@
     <parent>
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
-        <version>1.13-SNAPSHOT</version>
+        <version>1.13-RELEASE</version>
     </parent>
 
     <packaging>ear</packaging>
-    <groupId>edu.umiacs.ace</groupId>
     <artifactId>ace-ims-ear</artifactId>
     <name>ace-ims-ear</name>
     <url>http://maven.apache.org</url>

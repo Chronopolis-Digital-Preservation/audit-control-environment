@@ -26,19 +26,18 @@ public class ImportStatusServlet extends EntityManagerServlet {
         long id = getParameter(request, ACTIVE_PARAM, -1);
 
         if (id > 0) {
-            LOG.info("Querying for collection " + id);
             EntityManager manager = PersistUtil.getEntityManager();
             Collection collection = manager.find(Collection.class, id);
             if (collection != null) {
-                LOG.info("Found collection " + id);
                 KSFuture<IngestSupervisor> ksSupervisor = pool.getCache().get(collection);
 
                 if (ksSupervisor != null) {
-                    request.setAttribute(ACTIVE_PARAM, ksSupervisor.getKnownResult());
+                    request.setAttribute(ACTIVE_PARAM, ksSupervisor.getKnownResult().getThread());
+                } else {
+                    LOG.debug("Collection has a null supervisor!");
                 }
             } else {
-
-                LOG.info("Unable to get collection " + id);
+                LOG.debug("Collection " + id + " does not exist");
             }
         }
 

@@ -4,9 +4,8 @@
   <parent>
     <artifactId>ace</artifactId>
     <groupId>edu.umiacs.ace</groupId>
-    <version>1.13-SNAPSHOT</version>
+    <version>1.13-RELEASE</version>
   </parent>
-  <groupId>edu.umiacs.ace</groupId>
   <artifactId>audit-core</artifactId>
   <name>Core audit queue</name>
   <url>http://maven.apache.org</url>
