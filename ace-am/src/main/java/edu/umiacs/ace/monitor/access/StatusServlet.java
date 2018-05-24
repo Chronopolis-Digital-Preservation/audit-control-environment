@@ -212,8 +212,10 @@ public class StatusServlet extends EntityManagerServlet {
         request.setAttribute(PAGE_NUMBER, pb);
         request.setAttribute("groups", GroupSummaryContext.summaries);
         if (hasJson(request)) {
+            response.setContentType("application/json");
             dispatcher = request.getRequestDispatcher("status-json.jsp");
         } else if (hasCsv(request)) {
+            response.setContentType("text/csv");
             dispatcher = request.getRequestDispatcher("status-csv.jsp");
         } else {
             dispatcher = request.getRequestDispatcher("status.jsp");
