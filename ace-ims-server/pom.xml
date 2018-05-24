@@ -4,7 +4,7 @@
     <parent>
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
-        <version>1.13-RELEASE</version>
+        <version>1.14-SNAPSHOT</version>
     </parent>
     <artifactId>ace-ims-server</artifactId>
     <name>ace-ims-server</name>
