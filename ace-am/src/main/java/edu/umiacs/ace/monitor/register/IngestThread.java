@@ -150,7 +150,6 @@ public class IngestThread extends RecursiveAction {
                 em.persist(item);
                 numTransactions += 3;
 
-                // stateMap.put(identifier, IngestState.NEW);
                 states.get(IngestState.NEW).add(identifier);
             } else {
                 LOG.debug("[Ingest Thread " + Thread.currentThread().getId()
@@ -204,10 +203,8 @@ public class IngestThread extends RecursiveAction {
             numTransactions += 2;
 
             states.get(IngestState.UPDATED).add(identifier);
-            // stateMap.put(identifier, IngestState.UPDATED);
         } else {
             states.get(IngestState.MATCH).add(identifier);
-            // stateMap.put(identifier, IngestState.MATCH);
         }
     }
 

@@ -56,25 +56,25 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                             <a class="nav-link active" id="pills-queued-tab" role="tab"
                                href="#pills-queued" data-toggle="pill"
                                aria-controls="pills-queued" aria-selected="true">Queued
-                                (${supervisor.queuedSize})</a>
+                                (${active.queuedSize})</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" id="pills-new-tab" role="tab"
                                href="#pills-new" data-toggle="pill"
                                aria-controls="pills-new" aria-selected="false">New
-                                (${supervisor.newSize})</a>
+                                (${active.newSize})</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" id="pills-updated-tab" role="tab"
                                href="#pills-updated" data-toggle="pill"
                                aria-controls="pills-updated" aria-selected="false">Updated
-                                (${supervisor.updatedSize})</a>
+                                (${active.updatedSize})</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" id="pills-match-tab" role="tab"
                                href="#pills-match" data-toggle="pill"
                                aira-controls="pills-match" aria-selected="false">
-                                Matched (${supervisor.matchSize})</a>
+                                Matched (${active.matchSize})</a>
                         </li>
 
                         <%-- Maybe in the future
@@ -91,7 +91,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                              role="tabpanel"
                              aria-labelledby="pills-queued-tab">
                             <ul class="list-group list-group-flush">
-                                <c:forEach items="${supervisor.queued}" var="identifier">
+                                <c:forEach items="${active.queued}" var="identifier">
                                     <li class="list-group-item">${identifier}</li>
                                 </c:forEach>
                             </ul>
@@ -99,7 +99,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                         <div class="tab-pane fade" id="pills-new" role="tabpanel"
                              aria-labelledby="pills-new-tab">
                             <ul class="list-group list-group-flush">
-                                <c:forEach items="${supervisor.newItems}" var="identifier">
+                                <c:forEach items="${active.newItems}" var="identifier">
                                     <li class="list-group-item">${identifier}</li>
                                 </c:forEach>
                             </ul>
@@ -107,7 +107,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                         <div class="tab-pane fade" id="pills-updated" role="tabpanel"
                              aria-labelledby="pills-updated-tab">
                             <ul class="list-group list-group-flush">
-                                <c:forEach items="${supervisor.updated}" var="identifier">
+                                <c:forEach items="${active.updated}" var="identifier">
                                     <li class="list-group-item">${identifier}</li>
                                 </c:forEach>
                             </ul>
@@ -115,7 +115,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                         <div class="tab-pane fade" id="pills-match" role="tabpanel"
                              aria-labelledby="pills-match-tab">
                             <ul class="list-group list-group-flush">
-                                <c:forEach items="${supervisor.matched}" var="identifier">
+                                <c:forEach items="${active.matched}" var="identifier">
                                     <li class="list-group-item">${identifier}</li>
                                 </c:forEach>
                             </ul>

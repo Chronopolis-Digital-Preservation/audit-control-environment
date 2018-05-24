@@ -32,7 +32,9 @@ public class ImportStatusServlet extends EntityManagerServlet {
                 KSFuture<IngestSupervisor> ksSupervisor = pool.getCache().get(collection);
 
                 if (ksSupervisor != null) {
-                    request.setAttribute(ACTIVE_PARAM, ksSupervisor.getKnownResult());
+                    request.setAttribute(ACTIVE_PARAM, ksSupervisor.getKnownResult().getThread());
+                } else {
+                    LOG.debug("Collection has a null supervisor!");
                 }
             } else {
                 LOG.debug("Collection " + id + " does not exist");
