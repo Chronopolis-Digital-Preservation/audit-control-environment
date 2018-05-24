@@ -273,13 +273,10 @@ public final class AuditTokens extends Thread implements CancelCallback {
             interrupted = true;
         } finally {
             validator.close();
+            LOG.trace("Validator closed");
+
             if (em != null) {
                 em.close();
-            }
-
-            LOG.trace("Validator closed");
-            synchronized (runningThreads) {
-                runningThreads.remove(collection);
             }
 
             setCollectionState();
@@ -295,6 +292,10 @@ public final class AuditTokens extends Thread implements CancelCallback {
                         LogEnum.TOKEN_AUDIT_FINISH, "successful audit", em);
                 em.close();
                 LOG.trace("Token Audit ending successfully for " + collection.getName());
+            }
+
+            synchronized (runningThreads) {
+                runningThreads.remove(collection);
             }
         }
     }
