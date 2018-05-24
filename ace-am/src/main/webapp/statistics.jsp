@@ -59,15 +59,19 @@
 
             <div class="form-inline">
                 <div class="form-group form-group-sm">
-                    <input type="text" class="form-input" id="before-filter" name="before" placeholder="Before"/>
+                    <label for="after-filter">Created After</label>
+                    <input type="date" class="form-input" id="after-filter" name="after" placeholder="After"/>
                 </div>
                 <div class="form-group form-group-sm">
-                    <input type="text" class="form-input" id="after-filter" name="after" placeholder="After"/>
+                    <label for="before-filter">Created Before</label>
+                    <input type="date" class="form-input" id="before-filter" name="before" placeholder="Before"/>
                 </div>
                 <div class="form-group form-group-sm">
+                    <label for="group-filter">Group Name</label>
                     <input type="text" class="form-input" id="group-filter" name="group" placeholder="Group"/>
                 </div>
                 <div class="form-group form-group-sm">
+                    <label for="coll-filter">Collection Name</label>
                     <input type="text" class="form-input" id="coll-filter" name="collection" placeholder="Collection"/>
                 </div>
             </div>

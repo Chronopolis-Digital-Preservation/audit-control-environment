@@ -30,6 +30,8 @@
 // $Id$
 package edu.umiacs.ace.monitor.access;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.sql.SQL;
@@ -44,35 +46,48 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static com.google.common.collect.ImmutableList.of;
+
 
 /**
  * Class to gather a count of all collections at startup.
  * This class includes the ability to update a collection and has the appropriate
  * servlet listeners
- * 
+ *
  * @author toaster
  */
 public class CollectionCountContext implements ServletContextListener {
 
     public static final String CTX_STARTUP = "startup_complete";
-    private static final Logger LOG = Logger.getLogger(
-            CollectionCountContext.class);
-    private static Map<Collection, Long> fileCountMap = new ConcurrentHashMap<>();
-    private static Map<Collection, Long> fileActiveMap = new ConcurrentHashMap<>();
-    private static Map<Collection, Long> fileCorruptMap = new ConcurrentHashMap<>();
-    private static Map<Collection, Long> fileMissingMap = new ConcurrentHashMap<>();
-    private static Map<Collection, Long> fileMissingTokenMap = new ConcurrentHashMap<>();
-    private static Map<Collection, Long> fileTokenMismatchMap = new ConcurrentHashMap<>();
-    private static Map<Collection, Long> totalErrorMap = new ConcurrentHashMap<>();
-    private static Map<Collection, Long> totalSizeMap = new ConcurrentHashMap<>();
-    private static Map<Collection, Long> fileRemoteMissing = new ConcurrentHashMap<>();
-    private static Map<Collection, Long> fileRemoteCorrupt = new ConcurrentHashMap<>();
+    private static final Logger LOG = Logger.getLogger(CollectionCountContext.class);
+
+    private static LoadingCache<Collection, Long> fileCount = Caffeine.newBuilder()
+            .build(CollectionCountContext::getCountForCollection);
+    private static LoadingCache<Collection, Long> activeCount = Caffeine.newBuilder()
+            .build((key) -> getCountForCollectionAndState(key, of("A", "R")));
+    private static LoadingCache<Collection, Long> corruptCount = Caffeine.newBuilder()
+            .build((key) -> getCountForCollectionAndState(key, of("C")));
+    private static LoadingCache<Collection, Long> missingCount = Caffeine.newBuilder()
+            .build((key) -> getCountForCollectionAndState(key, of("M")));
+    private static LoadingCache<Collection, Long> missingTokenCount = Caffeine.newBuilder()
+            .build((key) -> getCountForCollectionAndState(key, of("T")));
+    private static LoadingCache<Collection, Long> tokenMismatchCount = Caffeine.newBuilder()
+            .build((key) -> getCountForCollectionAndState(key, of("I")));
+    private static LoadingCache<Collection, Long> remoteMissingCount = Caffeine.newBuilder()
+            .build((key) -> getCountForCollectionAndState(key, of("P")));
+    private static LoadingCache<Collection, Long> remoteCorruptCount = Caffeine.newBuilder()
+            .build((key) -> getCountForCollectionAndState(key, of("D")));
+    private static LoadingCache<Collection, Long> totalErrorCount = Caffeine.newBuilder()
+            .build((key) -> getCountForCollectionAndState(key, of("C", "M", "T", "I", "P", "D")));
+    private static LoadingCache<Collection, Long> totalSize = Caffeine.newBuilder()
+            .build(CollectionCountContext::getSize);
+
     private static AtomicInteger totalCollections = new AtomicInteger(0);
     private static Lock lock = new ReentrantLock();
     private static boolean abort = false;
@@ -80,48 +95,43 @@ public class CollectionCountContext implements ServletContextListener {
     @Override
     public void contextInitialized(final ServletContextEvent arg0) {
         abort = false;
-        Runnable r = new Runnable() {
+        Runnable r = () -> {
+            try {
 
-            @Override
-            public void run() {
+                arg0.getServletContext().setAttribute(CTX_STARTUP, false);
+
+                Thread.currentThread().setName("Startup Count Thread");
+                NDC.push("[Count]");
+                lock.lock();
+                LOG.debug("Starting count for all collections");
                 try {
+                    EntityManager em = PersistUtil.getEntityManager();
+                    Query collQuery = em.createNamedQuery(
+                            "Collection.listAllCollections", Collection.class);
 
-                    arg0.getServletContext().setAttribute(CTX_STARTUP, false);
-
-                    Thread.currentThread().setName("Startup Count Thread");
-                    NDC.push("[Count]");
-                    lock.lock();
-                    LOG.debug("Starting count for all collections");
-                    try {
-                        EntityManager em = PersistUtil.getEntityManager();
-                        Query collQuery = em.createNamedQuery(
-                                "Collection.listAllCollections");
-
-                        for (Object o : collQuery.getResultList()) {
-                            if (abort) {
-                                LOG.info("Collection count aborting, tomcat probably shutting down");
-                                return;
-                            }
-                            queryCollection((Collection) o);
-                            incrementTotalCollections();
+                    for (Object o : collQuery.getResultList()) {
+                        Collection collection = (Collection) o;
+                        if (abort) {
+                            LOG.info("Collection count aborting, tomcat probably shutting down");
+                            return;
                         }
-                        em.close();
-                    } catch (Exception e) {
-                        LOG.error("Error starting up, collection count", e);
-                    } finally {
-                        lock.unlock();
+                        queryCollection(collection);
+                        incrementTotalCollections();
                     }
-
-                    LOG.debug("Finished startup count");
-                    NDC.pop();
+                    em.close();
+                } catch (Exception e) {
+                    LOG.error("Error starting up, collection count", e);
                 } finally {
-                    arg0.getServletContext().setAttribute(CTX_STARTUP, true);
+                    lock.unlock();
                 }
+
+                LOG.debug("Finished startup count");
+                NDC.pop();
+            } finally {
+                arg0.getServletContext().setAttribute(CTX_STARTUP, true);
             }
         };
         new Thread(r).start();
-
-
     }
 
     @Override
@@ -130,87 +140,75 @@ public class CollectionCountContext implements ServletContextListener {
 
         // Null these out so that the references to the collections are dropped
         // after tomcat stops the webapp
-        fileCountMap = null;
-        fileActiveMap = null;
-        fileCorruptMap = null;
-        fileMissingMap = null;
-        fileMissingTokenMap = null;
-        fileTokenMismatchMap = null;
-        totalErrorMap = null;
-        totalSizeMap = null;
-        fileRemoteMissing = null;
-        fileRemoteCorrupt = null;
+        fileCount.invalidateAll();
+        fileCount = null;
+        activeCount.invalidateAll();
+        activeCount = null;
+        corruptCount.invalidateAll();
+        corruptCount = null;
+        missingCount.invalidateAll();
+        missingCount = null;
+        missingTokenCount.invalidateAll();
+        missingTokenCount = null;
+        remoteCorruptCount.invalidateAll();
+        remoteCorruptCount = null;
+        remoteMissingCount.invalidateAll();
+        remoteMissingCount = null;
+        tokenMismatchCount.invalidateAll();
+        totalSize.invalidateAll();
+        totalSize = null;
+        totalErrorCount.invalidateAll();
+        totalErrorCount = null;
     }
 
     public static long getTokenMismatchCount(Collection c) {
-        if (fileTokenMismatchMap.containsKey(c)) {
-            return fileTokenMismatchMap.get(c);
-        }
-        return -1;
+        Long count = tokenMismatchCount.get(c);
+        return count != null ? count : -1;
     }
 
     public static long getMissingTokenCount(Collection c) {
-        if (fileMissingTokenMap.containsKey(c)) {
-            return fileMissingTokenMap.get(c);
-        }
-        return -1;
+        Long count = missingTokenCount.get(c);
+        return count != null ? count : -1;
     }
 
     public static long getMissingCount(Collection c) {
-        if (fileMissingMap.containsKey(c)) {
-            return fileMissingMap.get(c);
-        }
-        return -1;
+        Long count = missingCount.get(c);
+        return count != null ? count : -1;
     }
 
     public static long getCorruptCount(Collection c) {
-        if (fileCorruptMap.containsKey(c)) {
-            return fileCorruptMap.get(c);
-        }
-        return -1;
-
+        Long count = corruptCount.get(c);
+        return count != null ? count : -1;
     }
 
     public static long getActiveCount(Collection c) {
-        if (fileActiveMap.containsKey(c)) {
-            return fileActiveMap.get(c);
-        }
-        return -1;
+        Long count = activeCount.get(c);
+        return count != null ? count : -1;
     }
 
     public static long getTotalErrors(Collection c) {
-        if (totalErrorMap.containsKey(c)) {
-            return totalErrorMap.get(c);
-        }
-        return -1;
+        Long count = totalErrorCount.get(c);
+        return count != null ? count : -1;
     }
 
     public static long getFileCount(Collection c) {
-        if (fileCountMap.containsKey(c)) {
-            return fileCountMap.get(c);
-        }
-        return -1;
+        Long count = fileCount.get(c);
+        return count != null ? count : -1;
     }
 
-    public static long getTotelSize(Collection c) {
-        if (totalSizeMap.containsKey(c)) {
-            return totalSizeMap.get(c);
-        }
-        return -1;
+    public static long getTotalSize(Collection c) {
+        Long size = totalSize.get(c);
+        return size != null ? size : -1;
     }
 
     public static long getRemoteMissing(Collection c) {
-        if (fileRemoteMissing.containsKey(c)) {
-            return fileRemoteMissing.get(c);
-        }
-        return -1;
+        Long count = remoteMissingCount.get(c);
+        return count != null ? count : -1;
     }
 
     public static long getRemoteCorrupt(Collection c) {
-        if (fileRemoteCorrupt.containsKey(c)) {
-            return fileRemoteCorrupt.get(c);
-        }
-        return -1;
+        Long count = remoteCorruptCount.get(c);
+        return count != null ? count : -1;
     }
 
     public static void incrementTotalCollections() {
@@ -220,16 +218,16 @@ public class CollectionCountContext implements ServletContextListener {
     public static void decrementTotalCollections(Collection collection) {
         totalCollections.decrementAndGet();
 
-        fileCountMap.remove(collection);
-        fileActiveMap.remove(collection);
-        fileCorruptMap.remove(collection);
-        fileMissingMap.remove(collection);
-        fileMissingTokenMap.remove(collection);
-        fileTokenMismatchMap.remove(collection);
-        totalErrorMap.remove(collection);
-        totalSizeMap.remove(collection);
-        fileRemoteMissing.remove(collection);
-        fileRemoteCorrupt.remove(collection);
+        fileCount.invalidate(collection);
+        activeCount.invalidate(collection);
+        corruptCount.invalidate(collection);
+        missingCount.invalidate(collection);
+        missingTokenCount.invalidate(collection);
+        tokenMismatchCount.invalidate(collection);
+        remoteCorruptCount.invalidate(collection);
+        remoteMissingCount.invalidate(collection);
+        totalSize.invalidate(collection);
+        totalErrorCount.invalidate(collection);
         GroupSummaryContext.updateGroup(collection.getGroup());
     }
 
@@ -237,116 +235,149 @@ public class CollectionCountContext implements ServletContextListener {
         return totalCollections.get();
     }
 
-    /**
-     * Update statistics for a collection.
-     *
-     * @param c
-     */
-    private static boolean queryCollection(Collection c) {
-        boolean update = false;
-        Connection connection = null;
-        PreparedStatement ps = null;
+    private static Long getCountForCollection(Collection key) {
+        Long count = 0L;
         ResultSet rs = null;
+        PreparedStatement ps = null;
+        Connection connection = null;
 
+        DataSource ds = PersistUtil.getDataSource();
         try {
-
-            DataSource ds = PersistUtil.getDataSource();
             connection = ds.getConnection();
+
             ps = connection.prepareStatement(
-                    "SELECT monitored_item.STATE, count(monitored_item.STATE) "
-                    + "FROM monitored_item " + "WHERE monitored_item.PARENTCOLLECTION_ID = ? AND "
-                    + "monitored_item.DIRECTORY = 0 " + "GROUP BY monitored_item.STATE");
-            ps.setLong(1, c.getId());
+                    "SELECT count(monitored_item.id) FROM monitored_item " +
+                            "WHERE monitored_item.PARENTCOLLECTION_ID = ? " +
+                            "AND monitored_item.directory = 0");
+            ps.setLong(1, key.getId());
             rs = ps.executeQuery();
-            long total = 0;
-            long totalErrors = 0;
 
-            while (rs.next()) {
-                if (abort) {
-                    return update;
-                }
-                char state = rs.getString(1).charAt(0);
-                long count = rs.getLong(2);
-
-                total += count;
-
-                switch (state) {
-                    case 'A':
-                        fileActiveMap.put(c, count);
-                        break;
-                    case 'C':
-                        fileCorruptMap.put(c, count);
-                        totalErrors += count;
-                        break;
-                    case 'M':
-                        fileMissingMap.put(c, count);
-                        totalErrors += count;
-                        break;
-                    case 'T':
-                        fileMissingTokenMap.put(c, count);
-                        totalErrors += count;
-                        break;
-                    case 'I':
-                        fileTokenMismatchMap.put(c, count);
-                        totalErrors += count;
-                        break;
-                    case 'P':
-                        fileRemoteMissing.put(c, count);
-                        totalErrors += count;
-                        break;
-                    case 'D':
-                        fileRemoteCorrupt.put(c, count);
-                        totalErrors += count;
-                        break;
-                }
+            if (rs.next()) {
+                count = rs.getLong(1);
             }
-
-            update = !Objects.equals(fileCountMap.put(c, total), total);
-            totalErrorMap.put(c, totalErrors);
-            SQL.release(rs);
-            SQL.release(ps);
-
-            // sum up the collection size
-
-            ps = connection.prepareStatement(
-                    "SELECT sum(SIZE) " + "FROM monitored_item "
-                    + "WHERE monitored_item.PARENTCOLLECTION_ID = ? AND "
-                    + "monitored_item.DIRECTORY = 0 ");
-            ps.setLong(1, c.getId());
-            rs = ps.executeQuery();
-            rs.next();
-            long totalSize = rs.getLong(1);
-            update = update | !Objects.equals(totalSizeMap.put(c, totalSize), totalSize);
-        } catch (Exception e) {
-            LOG.error("Error starting up, collection count", e);
+        } catch (SQLException e) {
+            LOG.error("[Count] Unable to get file count for " + key.getName(), e);
         } finally {
             SQL.release(rs);
             SQL.release(ps);
             SQL.release(connection);
-            LOG.trace("Finished count on " + c.getName());
         }
 
-        return update;
+        return count;
+    }
+
+    private static Long getCountForCollectionAndState(Collection key, List<String> states) {
+        Long count = 0L;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        Connection connection = null;
+
+        try {
+            DataSource ds = PersistUtil.getDataSource();
+            connection = ds.getConnection();
+
+            StringBuilder inClause = new StringBuilder();
+            for (int i = 0; i < states.size(); i++) {
+                inClause.append("?");
+                if (i < states.size() - 1) {
+                    inClause.append(",");
+                }
+            }
+
+            ps = connection.prepareStatement(
+                    "SELECT count(monitored_item.STATE) FROM monitored_item " +
+                            "WHERE monitored_item.PARENTCOLLECTION_ID = ? " +
+                            "AND monitored_item.directory = 0 AND monitored_item.state IN (" +
+                            inClause.toString() + ")");
+            ps.setLong(1, key.getId());
+            int index = 2;
+            for (String state : states) {
+                ps.setString(index, state);
+                index++;
+            }
+
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                count = rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            LOG.error("[COUNT] Unable to get item count for collection " + key.getName()
+                    + " with state(s) " + states, e);
+        } finally {
+            SQL.release(rs);
+            SQL.release(ps);
+            SQL.release(connection);
+        }
+
+        return count;
+    }
+
+    private static Long getSize(Collection key) {
+        Long sum = 0L;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        Connection connection = null;
+
+        try {
+            DataSource ds = PersistUtil.getDataSource();
+            connection = ds.getConnection();
+
+            ps = connection.prepareStatement(
+                    "SELECT sum(SIZE) " + "FROM monitored_item "
+                            + "WHERE monitored_item.PARENTCOLLECTION_ID = ? AND "
+                            + "monitored_item.DIRECTORY = 0");
+
+            ps.setLong(1, key.getId());
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                sum = rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            LOG.error("[COUNT] Unable to get sum for collection " + key.getName(), e);
+        } finally {
+            SQL.release(rs);
+            SQL.release(ps);
+            SQL.release(connection);
+        }
+
+        return sum;
+    }
+
+    /**
+     * Update statistics for a collection.
+     *
+     * @param c the collection to query
+     */
+    private static boolean queryCollection(Collection c) {
+        // todo: compare old/new file count to determine if we need to refresh the group cache
+        fileCount.refresh(c);
+        activeCount.refresh(c);
+        corruptCount.refresh(c);
+        missingCount.refresh(c);
+        missingTokenCount.refresh(c);
+        tokenMismatchCount.refresh(c);
+        remoteCorruptCount.refresh(c);
+        remoteMissingCount.refresh(c);
+        totalSize.refresh(c);
+        totalErrorCount.refresh(c);
+        LOG.trace("Finished count on " + c.getName());
+        return true;
     }
 
     public static void updateCollection(final Collection c) {
         LOG.debug("Starting update for: " + c.getName());
-        Runnable r = new Runnable() {
+        Runnable r = () -> {
+            lock.lock();
 
-            @Override
-            public void run() {
-                lock.lock();
-
-                try {
-                    boolean update = queryCollection(c);
-                    if (update) {
-                        GroupSummaryContext.updateGroup(c.getGroup());
-                    }
-                } finally {
-                    lock.unlock();
+            try {
+                boolean update = queryCollection(c);
+                if (update) {
+                    GroupSummaryContext.updateGroup(c.getGroup());
                 }
-
+            } finally {
+                lock.unlock();
             }
+
         };
         new Thread(r).start();
     }

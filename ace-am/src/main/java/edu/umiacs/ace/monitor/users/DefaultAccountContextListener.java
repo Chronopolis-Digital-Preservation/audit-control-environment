@@ -31,17 +31,20 @@
 // $Id$
 package edu.umiacs.ace.monitor.users;
 
+import edu.umiacs.ace.monitor.settings.SettingsConstants;
 import edu.umiacs.ace.monitor.settings.SettingsParameter;
+import edu.umiacs.ace.monitor.settings.SettingsUtil;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
-import java.util.List;
+import org.apache.log4j.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import org.apache.log4j.Logger;
+import java.util.List;
 
 /**
  *
@@ -60,12 +63,11 @@ public class DefaultAccountContextListener implements ServletContextListener {
         ServletContext ctx = arg0.getServletContext();
         EntityManager em = PersistUtil.getEntityManager();
 
-        Query q1 = em.createNamedQuery("SettingsParameter.getAttr");
-        q1.setParameter("attr", PARAM_USER_AUTH);
-        SettingsParameter s = (SettingsParameter) q1.getSingleResult();
-        String authStr = s.getValue();
-        boolean isAuthMgt = true;
+        Boolean isAuthMgt = true;
+        SettingsParameter userAuth = SettingsUtil.getOrDefault(PARAM_USER_AUTH,
+                SettingsConstants.authManagement, em);
 
+        String authStr = userAuth.getValue();
         if (!Strings.isEmpty(authStr)) {
             isAuthMgt = Boolean.valueOf(authStr);
         }

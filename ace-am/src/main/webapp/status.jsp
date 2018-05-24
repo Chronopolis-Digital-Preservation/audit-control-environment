@@ -151,19 +151,21 @@
             <form method="GET" role="form">
                 <div class="input">
                     <span class="input-group-addon">Group</span>
-                    <input type="text" class="form-input" id="group-filter" name="group" placeholder="Search Group" value="${group}"/>
+                    <input type="text" class="form-input" id="group-filter"
+                           name="status_group" placeholder="Search Group" value="${status_group}"/>
                 </div>
                 <div class="input">
                     <span class="input-group-addon">Collection</span>
-                    <input type="text" class="form-input" id="coll-filter" name="collection" placeholder="Search Collection" value="${collection}"/>
+                    <input type="text" class="form-input" id="coll-filter"
+                           name="status_collection" placeholder="Search Collection" value="${status_collection}"/>
                 </div>
                 <div class="input">
                     <span class="input-group-addon">State</span>
-                    <select name="state" id="state-filter" class="form-select">
+                    <select name="status_state" id="state-filter" class="form-select">
                         <option value="">Select a Collection State</option>
                         <c:forEach var="s" items="${states}">
                             <c:choose>
-                                <c:when test="${s.state eq state}">
+                                <c:when test="${s.state eq status_state}">
                                     <option value="${s.state}" selected="selected">${s.name()}</option>
                                 </c:when>
                                 <c:otherwise>

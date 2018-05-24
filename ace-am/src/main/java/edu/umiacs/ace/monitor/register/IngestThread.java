@@ -46,11 +46,11 @@ import org.apache.log4j.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.RecursiveAction;
 
 /**
@@ -67,58 +67,29 @@ public class IngestThread extends RecursiveAction {
     private Collection coll;
     private List<String> identifiers;
 
-    // Unique to each IngestThread
-    private boolean running = true;
+    // Writable map for updating the state of items
+    private ConcurrentMap<IngestState, ConcurrentSkipListSet<String>> states;
+
     private long session;
-    private LogEventManager logManager;
-    private Set<String> updatedTokens;
-    private Set<String> newTokens;
-    private Set<String> unchangedTokens;
     private int numTransactions = 0;
+    private LogEventManager logManager;
 
     // May cause problems
     private EntityManager em;
 
-    public IngestThread(Map<String,
-                        Token> tokens,
+    public IngestThread(Map<String, Token> tokens,
                         Collection coll,
-                        List<String> subList) {
-        this.tokens = tokens;
+                        List<String> subList,
+                        ConcurrentMap<IngestState, ConcurrentSkipListSet<String>> states) {
         this.coll = coll;
+        this.tokens = tokens;
         this.identifiers = subList;
-    }
-
-    private void finished() {
-        running = false;
-    }
-
-    public boolean isRunning() {
-        return running;
-    }
-
-    public Set<String> getUpdatedTokens() {
-        return updatedTokens;
-    }
-
-    public Set<String> getNewTokens() {
-        return newTokens;
-    }
-
-    public int getUpdatedTokensSize() {
-        return updatedTokens.size();
-    }
-
-    public int getNewTokensSize() {
-        return newTokens.size();
-    }
-
-    public int getUnchangedSize() {
-        return unchangedTokens.size();
+        this.states = states;
     }
 
     @Override
     protected void compute() {
-        if ( identifiers == null || coll == null ) {
+        if (identifiers == null || coll == null) {
             return;
         }
 
@@ -135,127 +106,123 @@ public class IngestThread extends RecursiveAction {
             }
         } else {
             int mid = identifiers.size() >>> 1;
-            invokeAll(new IngestThread(tokens, coll, identifiers.subList(0, mid)),
-                      new IngestThread(tokens, coll, identifiers.subList(mid, identifiers.size())));
+            invokeAll(new IngestThread(tokens, coll, identifiers.subList(0, mid), states),
+                    new IngestThread(tokens, coll, identifiers.subList(mid, identifiers.size()), states));
         }
-
     }
 
     public void run() {
-        updatedTokens = new HashSet<>();
-        newTokens = new HashSet<>();
-        unchangedTokens = new HashSet<>();
-        MonitoredItemManager mim = new MonitoredItemManager(em);
-        MonitoredItem item = null;
+        MonitoredItem item;
         session = System.currentTimeMillis();
         logManager = new LogEventManager(session, coll);
+        MonitoredItemManager mim = new MonitoredItemManager(em);
 
         // Cycle through all items read in and add/update tokens
         // Commit only if there are no errors in all transactions
-        try{
-            for(String identifier: identifiers) {
-                Token token = tokens.get(identifier);
-                item = mim.getItemByPath(identifier, coll);
-                if ( item == null ) {
-                    LOG.debug("[Ingest Thread " + Thread.currentThread().getId()
-                            + "] Adding new item " + identifier);
-                    LogEvent[] event = new LogEvent[2];
-                    // LOG.trace does not exist
-                    event[0] = logManager.createItemEvent(LogEnum.FILE_REGISTER,
-                            identifier, coll.getDirectory() + identifier);
-                    event[1] = logManager.createItemEvent(LogEnum.ADD_TOKEN, 
-                            identifier, coll.getDirectory() + identifier);
+        ConcurrentSkipListSet<String> queued = states.get(IngestState.QUEUED);
+        for (String identifier : identifiers) {
+            queued.remove(identifier);
+            Token token = tokens.get(identifier);
+            item = mim.getItemByPath(identifier, coll);
+            if (item == null) {
+                LOG.debug("[Ingest Thread " + Thread.currentThread().getId()
+                        + "] Adding new item " + identifier);
+                LogEvent[] event = new LogEvent[2];
+                // LOG.trace does not exist
+                event[0] = logManager.createItemEvent(LogEnum.FILE_REGISTER,
+                        identifier, coll.getDirectory() + identifier);
+                event[1] = logManager.createItemEvent(LogEnum.ADD_TOKEN,
+                        identifier, coll.getDirectory() + identifier);
 
-                    String parent = null;
-                    parent = extractParent(mim, identifier, coll);
+                String parent;
+                parent = extractParent(identifier);
 
-                    item = addItem(identifier, parent, false, coll, 'R', 0);
+                item = addItem(identifier, parent, false, coll, 'R', 0);
 
-                    token.setParentCollection(coll);
+                token.setParentCollection(coll);
 
-                    // Token 
-                    // em.persist(token);
-                    item.setToken(token);
+                // Token
+                item.setToken(token);
 
-                    //Finish adding the item
-                    em.persist(event[0]);
-                    em.persist(event[1]);
-                    em.persist(item);
-                    numTransactions += 3;
+                //Finish adding the item
+                em.persist(event[0]);
+                em.persist(event[1]);
+                em.persist(item);
+                numTransactions += 3;
 
-                    newTokens.add(identifier);
-                }else{
-                    LOG.debug("[Ingest Thread " + Thread.currentThread().getId()
-                            + "] Updating existing item " + identifier);
-                    updateToken(em, token, item, coll, identifier);
-                }
-
-                // With large Token Stores, we get a large number of transactions
-                // Flushing and Clearing the EM helps to clear some memory
-                // TODO: W/ fork join this isn't needed anymore, unless we want to flush at a lower number
-                if ( numTransactions > 30 ) {
-                    em.flush();
-                    em.clear();
-                    numTransactions = 0;
-                }
+                // stateMap.put(identifier, IngestState.NEW);
+                states.get(IngestState.NEW).add(identifier);
+            } else {
+                LOG.debug("[Ingest Thread " + Thread.currentThread().getId()
+                        + "] Updating existing item " + identifier);
+                updateToken(em, token, item, coll, identifier);
             }
-        }finally{
-            finished();
+
+            // With large Token Stores, we get a large number of transactions
+            // Flushing and Clearing the EM helps to clear some memory
+            if (numTransactions > 30) {
+                em.flush();
+                em.clear();
+                numTransactions = 0;
+            }
         }
     }
 
     // If we have a monitored item already in the database, check against the
     // new token and update if necessary
-    private void updateToken(EntityManager em, Token token, MonitoredItem item,
-            Collection coll, String identifier) {
+    private void updateToken(EntityManager em,
+                             Token token,
+                             MonitoredItem item,
+                             Collection coll,
+                             String identifier) {
         boolean update = false;
         Token registeredToken = item.getToken();
-        if ( registeredToken != null ) {
+        if (registeredToken != null) {
             token.setParentCollection(coll);
 
             // TODO: Find a way to compare tokens w/o converting to AceTokens
-            // Opted not to use token.equals because we want to compare the
-            // proof text
+            // Opted not to use token.equals because we want to compare the proof text
             AceToken registeredAceToken = TokenUtil.convertToAceToken(registeredToken);
             AceToken aceToken = TokenUtil.convertToAceToken(token);
 
-            if ( !registeredAceToken.getProof().equals(aceToken.getProof()) ) {
+            if (!registeredAceToken.getProof().equals(aceToken.getProof())) {
                 update = true;
             }
-        }else{
+        } else {
             update = true;
         }
 
-        if ( update ) {
+        if (update) {
             LogEvent event = logManager.createItemEvent(LogEnum.TOKEN_INGEST_UPDATE,
                     identifier, coll.getDirectory() + identifier);
-            // em.persist(token);
             item.setToken(token);
             // TODO: Why set 'I'? It's not necessarily invalid, maybe 'R' would be better
+            //       or even better yet 'UpdatedToken'!
             item.setState('I');
             em.merge(item);
             em.persist(event);
             numTransactions += 2;
-            updatedTokens.add(identifier);
-        }else{
-            unchangedTokens.add(identifier);
+
+            states.get(IngestState.UPDATED).add(identifier);
+            // stateMap.put(identifier, IngestState.UPDATED);
+        } else {
+            states.get(IngestState.MATCH).add(identifier);
+            // stateMap.put(identifier, IngestState.MATCH);
         }
     }
 
 
     // From MonitoredItemManager, but without any registration
     // Can probably be trimmed down
-    private String extractParent(MonitoredItemManager mim,
-            String path, Collection coll) {
+    private String extractParent(String path) {
         // We don't have a FileBean, so build the pathList ourselves
         StringBuilder fullPath = new StringBuilder(path);
-        List <String> pathList = new LinkedList<>();
-        int index = 0;
+        List<String> pathList = new LinkedList<>();
+        int index;
         if (fullPath.charAt(0) != '/') {
             fullPath.insert(0, "/");
         }
-        while( (index = fullPath.lastIndexOf("/")) != 0 ) {
-            //System.out.println(fullPath);
+        while ((index = fullPath.lastIndexOf("/")) != 0) {
             pathList.add(fullPath.toString());
             fullPath.delete(index, fullPath.length());
         }
@@ -274,8 +241,12 @@ public class IngestThread extends RecursiveAction {
     }
 
     // MIM method without transaction
-    public MonitoredItem addItem( String path, String parentDir,boolean directory,
-            Collection parentCollection, char initialState, long size ) {
+    private MonitoredItem addItem(String path,
+                                  String parentDir,
+                                  boolean directory,
+                                  Collection parentCollection,
+                                  char initialState,
+                                  long size) {
         MonitoredItem mi = new MonitoredItem();
         mi.setDirectory(directory);
         mi.setLastSeen(new Date());
@@ -286,11 +257,6 @@ public class IngestThread extends RecursiveAction {
         mi.setPath(path);
         mi.setState(initialState);
         mi.setSize(size);
-
-        // em.persist(mi);
-        // numTransactions++;
         return mi;
     }
-
-
 }

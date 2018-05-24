@@ -44,22 +44,23 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.NoResultException;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 /**
  * Set the IMS for the AuditThread to use. Also, startup a background task
  * to handle firing off monitor tasks.
- * 
+ * <p>
  * TODO: Handle token validation
- * 
+ *
  * @author toaster
  */
 public final class AuditConfigurationContext implements ServletContextListener {
@@ -77,174 +78,97 @@ public final class AuditConfigurationContext implements ServletContextListener {
     private static final Logger LOG = Logger.getLogger(AuditConfigurationContext.class);
 
     @Override
-    public void contextInitialized( ServletContextEvent arg0 ) {
+    public void contextInitialized(ServletContextEvent arg0) {
         EntityManager em = PersistUtil.getEntityManager();
-        Query q = em.createNamedQuery("SettingsParameter.getAttr");
-        SettingsParameter s = null;
+        TypedQuery<SettingsParameter> nq = em.createNamedQuery(
+                "SettingsParameter.getCurrentSettings",
+                SettingsParameter.class);
+        List<SettingsParameter> resultList = nq.getResultList();
+        Map<String, String> resultMap = resultList.stream()
+                .collect(Collectors.toMap((SettingsParameter::getName),
+                        (SettingsParameter::getValue)));
+        em.close();
+        if (resultList.isEmpty()) {
+            SettingsUtil.updateSettings(SettingsUtil.getDefaultSettings());
+        }
 
+        // PauseBean first because of dependencies
         ServletContext ctx = arg0.getServletContext();
-        // set IMS for audit Thread from server parameter
-        q.setParameter("attr", SettingsConstants.PARAM_IMS);
-        s = (SettingsParameter) q.getSingleResult();
-        AuditThreadFactory.setIMS(s.getValue());
-        if ( Strings.isEmpty(AuditThreadFactory.getIMS()) ) {
-            throw new RuntimeException("IMS is empty");
-        }
-
-        q.setParameter("attr", SettingsConstants.PARAM_IMS_TOKEN_CLASS);
-        s = (SettingsParameter) q.getSingleResult();
-        if ( !Strings.isEmpty(s.getValue()) ) {
-            String tokenClass = s.getValue();
-            AuditThreadFactory.setTokenClass(tokenClass);
-        }
-
-
-        q.setParameter("attr", SettingsConstants.PARAM_IMS_PORT);
-        s = (SettingsParameter) q.getSingleResult();
-        if ( Strings.isValidInt(s.getValue()) ) {
-            int port = Integer.parseInt(s.getValue());
-            if ( port > 1 && port < 32768 ) {
-                AuditThreadFactory.setImsPort(port);
-            } else {
-                throw new RuntimeException("ims.port must be between 1 and 32768");
-            }
-        }
-
-        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_ONLY);
-        try {
-            s = (SettingsParameter) q.getSingleResult();
-            AuditThreadFactory.setAuditOnly(Boolean.valueOf(s.getValue()));
-        }catch ( NoResultException ex ) {
-            EntityTransaction trans = em.getTransaction();
-            trans.begin();
-            em.persist(new SettingsParameter(SettingsConstants.PARAM_AUDIT_ONLY,
-                    SettingsConstants.auditOnly, false));
-            trans.commit();
-            AuditThreadFactory.setAuditOnly(false);
-        }
-
-        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_SAMPLE);
-        try {
-            s = (SettingsParameter) q.getSingleResult();
-            AuditThreadFactory.setAuditSampling(Boolean.valueOf(s.getValue()));
-        } catch (NoResultException ex) {
-            EntityTransaction trans = em.getTransaction();
-            trans.begin();
-            em.persist(new SettingsParameter(SettingsConstants.PARAM_AUDIT_SAMPLE,
-                    SettingsConstants.auditSample, false));
-            trans.commit();
-            AuditThreadFactory.setAuditSampling(false);
-        }
-
-        q.setParameter("attr", SettingsConstants.PARAM_IMS_SSL);
-        try {
-            s = (SettingsParameter) q.getSingleResult();
-            AuditThreadFactory.setSSL(Boolean.valueOf(s.getValue()));
-        } catch (NoResultException ex) {
-            EntityTransaction trans = em.getTransaction();
-            trans.begin();
-            em.persist(new SettingsParameter(SettingsConstants.PARAM_IMS_SSL,
-                    SettingsConstants.imsSSL, false));
-            trans.commit();
-            AuditThreadFactory.setSSL(false);
-        }
-
-        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_BLOCKING);
-        try {
-            s = (SettingsParameter) q.getSingleResult();
-            AuditThreadFactory.setBlocking(Boolean.valueOf(s.getValue()));
-        } catch (NoResultException ex) {
-            EntityTransaction trans = em.getTransaction();
-            trans.begin();
-            em.persist(new SettingsParameter(SettingsConstants.PARAM_AUDIT_BLOCKING,
-                                             SettingsConstants.auditBlocking,
-                                             false));
-            trans.commit();
-            AuditThreadFactory.setBlocking(false);
-        }
-
-        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_MAX_BLOCK_TIME);
-        try {
-            s = (SettingsParameter) q.getSingleResult();
-            int blockTime = 0;
-            String val = s.getValue();
-            if (Strings.isValidInt(val)) {
-                blockTime = Integer.parseInt(val);
-            }
-
-            // Just in case...
-            if ( blockTime < 0 ) {
-                blockTime = 0;
-            }
-            AuditThreadFactory.setMaxBlockTime(blockTime);
-        } catch (NoResultException ex) {
-            EntityTransaction trans = em.getTransaction();
-            trans.begin();
-            em.persist(new SettingsParameter(SettingsConstants.PARAM_AUDIT_MAX_BLOCK_TIME,
-                    SettingsConstants.auditMaxBlockTime,
-                    false));
-            trans.commit();
-            AuditThreadFactory.setBlocking(false);
-        }
-
         PauseBean pb = new PauseBean();
         ctx.setAttribute(ATTRIBUTE_PAUSE, pb);
 
-        q.setParameter("attr", SettingsConstants.PARAM_AUTO_AUDIT_ENABLE);
-        s = (SettingsParameter) q.getSingleResult();
         // Invert the boolean because the PB checks if we're paused, not enabled
-        String enableAudits = s.getValue();
+        String enableAudits = resultMap.getOrDefault(
+                SettingsConstants.PARAM_AUTO_AUDIT_ENABLE,
+                SettingsConstants.autoAudit);
         pb.setPaused(!Boolean.valueOf(enableAudits));
 
-        q.setParameter("attr", SettingsConstants.PARAM_THROTTLE_MAXAUDIT);
-        s = (SettingsParameter) q.getSingleResult();
-        String maxRun = s.getValue();
-        if ( Strings.isValidInt(maxRun) ) {
-            int audit = Integer.parseInt(maxRun);
-            if ( audit > 0 ) {
-                AuditThreadFactory.setMaxAudits(audit);
-            }
-        }
-
-        // q.setParam(attr, continuous audit)
-        // s = q.getSingleResult
-        // seed = s.getValue
-        //bgAudit = new BackgroundAuditorFactory();
-        //BackgroundAuditorFactory.start();
-
-        em.close();
         checkTimer = new Timer("Audit Check Timer");
         checkTimer.schedule(new MyTimerTask(pb), 0, HOUR);
 
-    }
+        // set IMS for audit Thread from server parameter
+        AuditThreadFactory.setIMS(resultMap.getOrDefault(
+                SettingsConstants.PARAM_IMS,
+                SettingsConstants.ims));
 
-    /**
-     * TODO: Use this to eliminate a lot of the boilerplate above with this
-     *
-    private void doDbStuff(EntityManager em, String param, String defaultVal, Method method) throws InvocationTargetException, IllegalAccessException {
-        SettingsParameter s = null;
-        Query q = em.createNamedQuery("SettingsParameter.getAttr");
+        String tokenClass = resultMap.getOrDefault(
+                SettingsConstants.PARAM_IMS_TOKEN_CLASS,
+                SettingsConstants.imsTokenClass);
+        AuditThreadFactory.setTokenClass(tokenClass);
 
-        q.setParameter("attr", param);
-        try {
-            s = (SettingsParameter) q.getSingleResult();
-            method.invoke(null, s.getValue());
-        } catch (NoResultException ex) {
-            EntityTransaction trans = em.getTransaction();
-            trans.begin();
-            em.persist(new SettingsParameter(param,
-                    defaultVal,
-                    false));
-            trans.commit();
-            method.invoke(null, defaultVal);
+        String port = resultMap.getOrDefault(
+                SettingsConstants.PARAM_IMS_PORT,
+                SettingsConstants.imsPort);
+        if (Strings.isValidInt(port)) {
+           AuditThreadFactory.setImsPort(Integer.parseInt(port));
         }
 
+        String auditOnly = resultMap.getOrDefault(
+                SettingsConstants.PARAM_AUDIT_ONLY,
+                SettingsConstants.auditOnly);
+        AuditThreadFactory.setAuditOnly(Boolean.valueOf(auditOnly));
+
+        // keep this off for now even though it isn't used
+        AuditThreadFactory.setAuditSampling(false);
+
+        String imsSsl = resultMap.getOrDefault(
+                SettingsConstants.PARAM_IMS_SSL,
+                SettingsConstants.imsSSL);
+        AuditThreadFactory.setSSL(Boolean.valueOf(imsSsl));
+
+        String blocking = resultMap.getOrDefault(
+                SettingsConstants.PARAM_AUDIT_BLOCKING,
+                SettingsConstants.auditBlocking);
+        AuditThreadFactory.setBlocking(Boolean.valueOf(blocking));
+
+        String blockTimeS = resultMap.getOrDefault(
+                SettingsConstants.PARAM_AUDIT_MAX_BLOCK_TIME,
+                SettingsConstants.auditMaxBlockTime);
+        int blockTime = 0;
+        if (Strings.isValidInt(blockTimeS)) {
+            blockTime = Integer.parseInt(blockTimeS);
+        }
+
+        // Just in case...
+        if (blockTime < 0) {
+            blockTime = 0;
+        }
+        AuditThreadFactory.setMaxBlockTime(blockTime);
+
+        String maxAudit = resultMap.getOrDefault(
+                SettingsConstants.PARAM_THROTTLE_MAXAUDIT,
+                SettingsConstants.maxAudit);
+        if (Strings.isValidInt(maxAudit)) {
+            int audit = Integer.parseInt(maxAudit);
+            if (audit > 0) {
+                AuditThreadFactory.setMaxAudits(audit);
+            }
+        }
     }
-    */
 
     @Override
-    public void contextDestroyed( ServletContextEvent arg0 ) {
-        if ( checkTimer != null ) {
+    public void contextDestroyed(ServletContextEvent arg0) {
+        if (checkTimer != null) {
             checkTimer.cancel();
         }
         AuditThreadFactory.cancellAll();
@@ -258,7 +182,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
         private PauseBean() {
         }
 
-        public void setPaused( boolean paused ) {
+        public void setPaused(boolean paused) {
             this.paused = paused;
         }
 
@@ -276,7 +200,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
 
         private PauseBean pb;
 
-        private MyTimerTask( PauseBean pb ) {
+        private MyTimerTask(PauseBean pb) {
             this.pb = pb;
         }
 
@@ -292,7 +216,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
             List<Collection> items;
             LOG.trace("START - checking for required audit");
             try {
-                if ( pb.isPaused() ) {
+                if (pb.isPaused()) {
                     return;
                 }
 
@@ -301,39 +225,39 @@ public final class AuditConfigurationContext implements ServletContextListener {
 
                 items = query.getResultList();
 
-                for ( Collection c : items ) {
+                for (Collection c : items) {
                     StorageDriver sa;
                     int checkperiod = SettingsUtil.getInt(c, ConfigConstants.ATTR_AUDIT_PERIOD, 0);
-                    if ( checkperiod < 1 ) {
+                    if (checkperiod < 1) {
                         LOG.trace("Skipping auditing for collection: " + c.getName()
                                 + " check period: " + checkperiod);
                         continue;
                     }
                     // if last sync is null, fire away since we haven't run yet
-                    if ( c.getLastSync() == null ) {
+                    if (c.getLastSync() == null) {
                         LOG.debug("No last sync for " + c.getName() + " running");
                         sa = StorageDriverFactory.createStorageAccess(c,
                                 em);
-                        AuditThreadFactory.createThread(c, sa, true, (MonitoredItem[])null);
+                        AuditThreadFactory.createThread(c, sa, true, (MonitoredItem[]) null);
                     } else {
                         long syncTime = c.getLastSync().getTime();
                         long currTime = System.currentTimeMillis();
                         // if the next audit is due and we haven't already started the audit
                         long lastSyncTime = currTime - syncTime;
-                        if ( lastSyncTime > ((long) (checkperiod * HOUR * 24)) && 
-                             !auditing(c) ) {
-                                
+                        if (lastSyncTime > ((long) (checkperiod * HOUR * 24)) &&
+                                !auditing(c)) {
+
                             LOG.debug("last sync difference: " + (currTime - syncTime)
                                     + " greater than " + (checkperiod * HOUR * 24));
                             sa = StorageDriverFactory.createStorageAccess(c, em);
-                                    
+
                             AuditThreadFactory.createThread(c, sa, true, (MonitoredItem[]) null);
                         } else {
                             LOG.trace("No Sync on " + c.getName());
                         }
                     }
                 }
-            } catch ( Throwable t ) {
+            } catch (Throwable t) {
                 LOG.error("Error testing to see if collections need auditing", t);
             } finally {
                 LOG.trace("FINISH - checking for required audit");

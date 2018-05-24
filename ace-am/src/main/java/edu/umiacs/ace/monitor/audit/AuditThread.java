@@ -508,10 +508,10 @@ public final class AuditThread extends Thread implements CancelCallback {
         MonitoredItemManager mim;
 
         LOG.trace(
-                "Driver returned Item: " + currentFile.getPathList()[0]
-                + " error: " + currentFile.isError() + " error msg: "
-                + currentFile.getErrorMessage() + " hash: "
-                + currentFile.getHash());
+                "Driver returned {Item=" + currentFile.getPathList()[0]
+                + ";error=" + currentFile.isError() + ";error-msg="
+                + currentFile.getErrorMessage() + ";hash="
+                + currentFile.getHash() + "}");
 
         mim = new MonitoredItemManager(em);
 

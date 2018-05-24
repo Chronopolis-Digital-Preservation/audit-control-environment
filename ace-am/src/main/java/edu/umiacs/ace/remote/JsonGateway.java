@@ -33,6 +33,7 @@ package edu.umiacs.ace.remote;
 
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.peers.PartnerSite;
 import edu.umiacs.util.Strings;
 import org.apache.http.HttpResponse;
@@ -50,7 +51,9 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -71,8 +74,10 @@ public class JsonGateway {
     private static String ITEM_SUFFIX = "/ListItem?json=1&collectionid=";
     private static String ITEMROOT_SUFFIX = "/ListItem?json=1&collectionid=";
     private static String DIGEST_SUFFIX = "/Summary?collectionid=";
+    private static String GROUP_LIST_SUFFIX = "/rest/groups";
+    private static String COLL_LIST_SUFFIX = "/rest/collections";
     private final ObjectMapper mapper;
-    private Map<PartnerSite, JsonCache> cache = new HashMap();
+    private Map<PartnerSite, JsonCache> cache = new HashMap<>();
 
     private JsonGateway() {
         mapper = new ObjectMapper();
@@ -258,18 +263,28 @@ public class JsonGateway {
         }
     }
 
+    public List<Collection> getCollectionListRest(PartnerSite site) {
+        try {
+            URL u = new URL(site.getRemoteURL() + COLL_LIST_SUFFIX);
+            return readJSONValue(u, site.getCredentials(), List.class);
+        } catch (IOException e) {
+            LOG.error("Error reading site " + site.getRemoteURL(), e);
+            return Collections.emptyList();
+        }
+    }
+
     private static class JsonCache {
 
         private StatusBean status = null;
         private long statusUpdate = 0;
         private SummaryBean summary = null;
         private long summaryUpdate = 0;
-        private Map<Long, ReportBean> reportMap = new HashMap<Long, ReportBean>();
-        private Map<Long, Long> reportMapUpdate = new HashMap<Long, Long>();
-        private Map<String, ParentChildBean> itemMap = new HashMap<String, ParentChildBean>();
-        private Map<String, Long> itemMapUpdate = new HashMap<String, Long>();
-        private Map<Long, ParentChildBean> itemRootMap = new HashMap<Long, ParentChildBean>();
-        private Map<Long, Long> itemRootMapUpdate = new HashMap<Long, Long>();
+        private Map<Long, ReportBean> reportMap = new HashMap<>();
+        private Map<Long, Long> reportMapUpdate = new HashMap<>();
+        private Map<String, ParentChildBean> itemMap = new HashMap<>();
+        private Map<String, Long> itemMapUpdate = new HashMap<>();
+        private Map<Long, ParentChildBean> itemRootMap = new HashMap<>();
+        private Map<Long, Long> itemRootMapUpdate = new HashMap<>();
     }
 
     private <T> T readJSONValue( URL u, String auth, Class<T> clazz ) throws IOException {

@@ -75,7 +75,7 @@ import java.util.Map;
     @NamedQuery(name = "Collection.getCollectionByName", query =
     "SELECT c FROM Collection c WHERE c.name = :name"),
     @NamedQuery(name = "Collection.listGroups", query =
-    "SELECT DISTINCT c.group FROM Collection c WHERE c.group IS NOT NULL"),
+    "SELECT DISTINCT c.group FROM Collection c WHERE c.group IS NOT NULL ORDER BY c.group ASC"),
     @NamedQuery(name = "Collection.getCollectionById", query =
     "SELECT c FROM Collection c WHERE c.id = :id"),
     @NamedQuery(name = "Collection.getCollectionsInGroup", query =

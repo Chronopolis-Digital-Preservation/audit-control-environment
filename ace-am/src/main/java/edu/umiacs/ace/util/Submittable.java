@@ -9,10 +9,10 @@ import edu.umiacs.ace.monitor.core.Collection;
  * Created by shake on 9/11/15.
  */
 public class Submittable<V extends Runnable> implements Comparable<Submittable> {
-    final Collection collection;
-    final V runnable;
-    final RunType type;
-    RunState state;
+    private final Collection collection;
+    private final V runnable;
+    private final RunType type;
+    private RunState state;
 
     Submittable(Collection collection, RunType type, V runnable) {
         this.collection = collection;
@@ -35,6 +35,10 @@ public class Submittable<V extends Runnable> implements Comparable<Submittable> 
 
     public RunType getType() {
         return type;
+    }
+
+    public Collection getCollection() {
+        return collection;
     }
 
     @Override

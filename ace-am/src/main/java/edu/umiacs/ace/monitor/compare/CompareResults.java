@@ -4,11 +4,7 @@
  */
 package edu.umiacs.ace.monitor.compare;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -21,15 +17,14 @@ public final class CompareResults {
 
     private Set<String> unseenSupplied;
     private Set<String> unseenTarget;
-    private Set<DifferingName> differingNames = new TreeSet<DifferingName>();
-    private Set<DifferingDigest> differingDigests = new TreeSet<DifferingDigest>();
+    private Set<DifferingName> differingNames = new TreeSet<>();
+    private Set<DifferingDigest> differingDigests = new TreeSet<>();
     private boolean running = true;
     private String message = null;
 
     public CompareResults(CollectionCompare2 cc2) {
-        unseenTarget = new TreeSet<String>();
-//differingNames = new TreeSet<DifferingName>(hint);
-        unseenSupplied = new TreeSet<String>(cc2.getSourceMap().keySet());
+        unseenTarget = new TreeSet<>();
+        unseenSupplied = new TreeSet<>(cc2.getSourceMap().keySet());
     }
 
     void finished() {
@@ -56,8 +51,8 @@ public final class CompareResults {
         differingDigests.add(new DifferingDigest(file, sourceDigest, targetDigest));
     }
 
-    void mismatchedNames(String digest, String sourcename, String targetName) {
-        differingNames.add(new DifferingName(sourcename, targetName, digest));
+    void mismatchedNames(String digest, String sourceName, String targetName) {
+        differingNames.add(new DifferingName(sourceName, targetName, digest));
     }
 
     /**
@@ -110,8 +105,7 @@ public final class CompareResults {
         private String destinationName;
         private String digest;
 
-        private DifferingName(String sourceName, String destinationName,
-                String digest) {
+        private DifferingName(String sourceName, String destinationName, String digest) {
             this.sourceName = sourceName;
             this.destinationName = destinationName;
             this.digest = digest;
@@ -169,8 +163,7 @@ public final class CompareResults {
         private String targetDigest;
         private String compString;
 
-        private DifferingDigest(String name, String sourceDigest,
-                String targetDigest) {
+        private DifferingDigest(String name, String sourceDigest, String targetDigest) {
             this.name = name;
             this.sourceDigest = sourceDigest;
             this.targetDigest = targetDigest;

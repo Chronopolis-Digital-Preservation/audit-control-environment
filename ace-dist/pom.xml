@@ -4,9 +4,8 @@
   <parent>
     <artifactId>ace</artifactId>
     <groupId>edu.umiacs.ace</groupId>
-    <version>1.12-RELEASE</version>
+    <version>1.13-RELEASE</version>
   </parent>
-  <groupId>edu.umiacs.ace</groupId>
   <artifactId>ace-dist</artifactId>
   <name>ace-dist</name>
   <url>http://adapt.umiacs.umd.edu/ace</url>

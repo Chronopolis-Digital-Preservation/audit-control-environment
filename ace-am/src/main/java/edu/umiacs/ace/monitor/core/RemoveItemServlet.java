@@ -31,63 +31,97 @@
 
 package edu.umiacs.ace.monitor.core;
 
+import com.google.common.collect.ImmutableSet;
+import edu.umiacs.ace.monitor.access.CollectionCountContext;
 import edu.umiacs.ace.monitor.access.browse.BrowseServlet;
 import edu.umiacs.ace.monitor.access.browse.DirectoryTree;
 import edu.umiacs.ace.monitor.log.LogEnum;
 import edu.umiacs.ace.monitor.log.LogEventManager;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.util.PersistUtil;
+import edu.umiacs.sql.SQL;
 import edu.umiacs.util.Strings;
 import org.apache.log4j.Logger;
 
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Remove an item from list of actively monitored items. This will not remove
  * log entries for the file. It will log the delete.
- * 
+ *
  * @author toaster
  */
 public class RemoveItemServlet extends EntityManagerServlet {
 
-    public static final String PARAM_REDIRECT = "redirect";
-    public static final String DEFAULT_REDIRECT = "browse.jsp";
-    public static final String REMOVAL = "removal";
+    private static final String PARAM_TYPE = "type";
+    private static final String PARAM_REDIRECT = "redirect";
+    private static final String DEFAULT_REDIRECT = "browse.jsp";
+    private static final String REMOVAL = "removal";
     private static final Logger LOG = Logger.getLogger(RemoveItemServlet.class);
 
     @Override
-    protected void processRequest( HttpServletRequest request,
-            HttpServletResponse response, EntityManager em ) throws ServletException, IOException {
-        MonitoredItem item;
+    protected void processRequest(HttpServletRequest request,
+                                  HttpServletResponse response, EntityManager em) throws ServletException, IOException {
+
         long[] itemIds;
+        Set<Collection> mutations;
         HttpSession session = request.getSession();
         DirectoryTree dt =
                 (DirectoryTree) session.getAttribute(BrowseServlet.SESSION_DIRECTORY_TREE);
 
+        long eventSession = System.currentTimeMillis();
+
+        String type = getParameter(request, PARAM_TYPE, null);
         long itemId = getParameter(request, PARAM_ITEM_ID, 0);
-        if ( itemId > 0 ) {
-            item = em.getReference(MonitoredItem.class, itemId);
-            removeItem(item, em, dt);
+        long collectionid = getParameter(request, PARAM_COLLECTION_ID, 0);
+
+        if (type != null && !type.isEmpty() && collectionid > 0) {
+            mutations = referenceFor(Collection.class, collectionid, em)
+                    .map(c -> removeForType(c, type, em, eventSession))
+                    .orElseGet(ImmutableSet::of);
+        } else if (itemId > 0) {
+            mutations = referenceFor(MonitoredItem.class, itemId, em)
+                    .map(mi -> removeItem(mi, em, eventSession, dt))
+                    .map(ImmutableSet::of).orElseGet(ImmutableSet::of);
         } else {
-            itemIds = getParameterList(request,REMOVAL, 0);
-            if(itemIds != null){
-                for(long l:itemIds){
-                    if(l > 0){
-                        item =  em.getReference(MonitoredItem.class, l);
-                        removeItem(item, em, dt);
+            itemIds = getParameterList(request, REMOVAL, 0);
+            mutations = new HashSet<>();
+            if (itemIds != null) {
+                for (long l : itemIds) {
+                    if (l > 0) {
+                        referenceFor(MonitoredItem.class, l, em)
+                                .map(i -> removeItem(i, em, eventSession, dt))
+                                .ifPresent(mutations::add);
                     }
                 }
             }
         }
+
+        LOG.trace(mutations.size() + " collections to update");
+        for (Collection collection : mutations) {
+            CollectionCountContext.updateCollection(collection);
+        }
+
         String redirect = request.getParameter(PARAM_REDIRECT);
-        if ( Strings.isEmpty(redirect) ) {
+        if (Strings.isEmpty(redirect)) {
             redirect = DEFAULT_REDIRECT;
         }
 
@@ -95,41 +129,163 @@ public class RemoveItemServlet extends EntityManagerServlet {
         dispatcher.forward(request, response);
     }
 
-    private void removeItem(MonitoredItem item, EntityManager em, DirectoryTree dt){
-        if ( item != null ) {
-                LogEventManager lem =
-                        new LogEventManager(System.currentTimeMillis(), item.getParentCollection());
-                lem.persistItemEvent(LogEnum.REMOVE_ITEM, item.getPath(), null, em);
-                if ( !item.isDirectory() ) {
-                    String parent = item.getParentPath();
-                    Collection c = item.getParentCollection();
-                    EntityTransaction trans = em.getTransaction();
-                    trans.begin();
-                    if ( item.getToken() != null ) {
-                        em.remove(item.getToken());
-                    }
-                    em.remove(item);
-                    trans.commit();
-                    reloadTree(dt, parent, c, em);
-                } else {
-                    new MyDeleteThread(item, dt).start();
-                }
+    /**
+     * Remove all MonitoredItems for a collection depending on the type which is passed in. As this
+     * is a query parameter, we allow it to be either 'C' for corrupt items or 'M' for missing
+     * items. Upon completion, return the Collection owning the MonitoredItems so that we can
+     * update the cached values in the CollectionCountContext.
+     *
+     * @param collection   the Collection owning the MonitoredItems
+     * @param type         the type (state) of MonitoredItem to remove
+     * @param em           the EntityManager to query/update the database
+     * @param eventSession the session id to use for log entries
+     * @return A Set of all Collections affected
+     */
+    private Set<Collection> removeForType(Collection collection,
+                                          String type,
+                                          EntityManager em,
+                                          long eventSession) {
+        TypedQuery<MonitoredItem> query = em.createNamedQuery(
+                "MonitoredItem.itemsByState",
+                MonitoredItem.class);
+        char state = 0;
+        query.setParameter("coll", collection);
+
+        // Only remove corrupt or missing items for now
+        switch (type.toLowerCase(Locale.ENGLISH)) {
+            case "corrupt":
+                state = 'C';
+                break;
+            case "missing":
+                state = 'M';
+                break;
+            default:
+                LOG.warn("Unable to remove type " + type + "; needs to be corrupt or missing");
+        }
+
+        if (state != 0) {
+            DataSource dataSource;
+            Connection connection = null;
+            try {
+                dataSource = PersistUtil.getDataSource();
+                connection = dataSource.getConnection();
+                // Create log_event items
+                // We do this through a PreparedStatement because we can be working on many
+                // items at once time which can be very slow when iterating each item individually
+                PreparedStatement logStatement = connection.prepareStatement(
+                        "INSERT INTO logevent(session, path, date, logtype, collection_id) " +
+                                "SELECT ?, path, NOW(), ?, parentcollection_id FROM monitored_item m " +
+                                "WHERE m.parentcollection_id = ? AND m.state = ?");
+                connection.setAutoCommit(false);
+                logStatement.setLong(1, eventSession);
+                logStatement.setInt(2, LogEnum.REMOVE_ITEM.getType());
+                logStatement.setLong(3, collection.getId());
+                logStatement.setString(4, String.valueOf(state));
+
+                // And remove with a PreparedStatement for the same reason
+                PreparedStatement deleteStatement = connection.prepareStatement(
+                        "DELETE FROM monitored_item WHERE parentcollection_id = ? AND state = ?");
+                deleteStatement.setLong(1, collection.getId());
+                deleteStatement.setString(2, String.valueOf(state));
+
+                logStatement.executeUpdate();
+                logStatement.close();
+                deleteStatement.executeUpdate();
+                deleteStatement.close();
+                // I don't think we need this since we close the connection when we finish
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                LOG.error("Error removing items ", e);
+                rollback(connection);
+            } finally {
+                SQL.release(connection);
             }
+        }
+
+        return ImmutableSet.of(collection);
     }
 
-    private static void reloadTree( DirectoryTree dt, String parent,
-            Collection c, EntityManager em ) {
-        if ( dt == null ) {
+    /**
+     * Rollback a transaction on a Connection
+     *
+     * @param connection the Connection whose transaction to rollback
+     */
+    private void rollback(@Nullable Connection connection) {
+        try {
+            if (connection != null) {
+                connection.rollback();
+            }
+        } catch (SQLException e) {
+            LOG.warn("Unable to rollback last remove transaction!", e);
+        }
+    }
+
+    /**
+     * Query the Database and get a reference for an Entity. If the Entity cannot be found, return
+     * and empty Optional.
+     *
+     * @param clazz the class to query on
+     * @param id    the id of the entity
+     * @param em    the EntityManager to query with
+     * @param <T>   the Type, matching the Class being queried
+     * @return the reference for the entity wrapped in an Optional
+     */
+    private <T> Optional<T> referenceFor(Class<T> clazz, Long id, EntityManager em) {
+        try {
+            return Optional.of(em.getReference(clazz, id));
+        } catch (EntityNotFoundException ex) {
+            LOG.warn("EntityNotFound " + id, ex);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Remove an individual MonitoredItem from the database and return the affected Collection so we
+     * know if its CollectionCountContext cache should be updated
+     *
+     * @param item    the MonitoredItem to remove
+     * @param em      the EntityManager to access the db
+     * @param session the id of the session for LogEvents
+     * @param dt      the DirectoryTree of the MonitoredItem
+     * @return the Collection which owns the MonitoredItem
+     */
+    private Collection removeItem(MonitoredItem item, EntityManager em, Long session, DirectoryTree dt) {
+        Collection c = null;
+        if (item != null) {
+            LogEventManager lem = new LogEventManager(session, item.getParentCollection());
+            lem.persistItemEvent(LogEnum.REMOVE_ITEM, item.getPath(), null, em);
+            if (!item.isDirectory()) {
+                String parent = item.getParentPath();
+                c = item.getParentCollection();
+                EntityTransaction trans = em.getTransaction();
+                trans.begin();
+                if (item.getToken() != null) {
+                    em.remove(item.getToken());
+                }
+                em.remove(item);
+                trans.commit();
+                reloadTree(dt, parent, c, em);
+            } else {
+                new MyDeleteThread(item, dt).start();
+            }
+        }
+
+        return c;
+    }
+
+    private static void reloadTree(DirectoryTree dt,
+                                   String parent,
+                                   Collection c,
+                                   EntityManager em) {
+        if (dt == null) {
             return;
         }
         MonitoredItemManager mim = new MonitoredItemManager(em);
         MonitoredItem mi = mim.getItemByPath(parent, c);
-        if ( mi != null ) {
+        if (mi != null) {
             dt.toggleItem(mi.getId());
             dt.toggleItem(mi.getId());
         }
-
-
     }
 
     private static class MyDeleteThread extends Thread {
@@ -139,7 +295,7 @@ public class RemoveItemServlet extends EntityManagerServlet {
         private EntityManager em;
         private DirectoryTree dt;
 
-        private MyDeleteThread( MonitoredItem item, DirectoryTree dt ) {
+        private MyDeleteThread(MonitoredItem item, DirectoryTree dt) {
             super("Delete thread " + item.getId());
             this.item = item;
             this.dt = dt;
@@ -148,35 +304,43 @@ public class RemoveItemServlet extends EntityManagerServlet {
         @Override
         public void run() {
             LOG.trace("Starting delete thread");
+
+            // because the delete is async, we should do this again here
+            // it would be better to have both deletes on a separate thread and then do
+            // the context refresh when they finish... but... whatever
+            Set<Collection> mutations = new HashSet<>();
             em = PersistUtil.getEntityManager();
             try {
                 String parent = item.getParentPath();
                 Collection c = item.getParentCollection();
+                mutations.add(c);
                 mim = new MonitoredItemManager(em);
                 EntityTransaction trans = em.getTransaction();
                 trans.begin();
                 clearDir(em.merge(item));
                 trans.commit();
                 reloadTree(dt, parent, c, em);
-            } catch ( Throwable t ) {
+            } catch (Throwable t) {
                 LOG.error("Error removing", t);
             } finally {
                 em.close();
                 LOG.trace("Finishing delete thread");
+
+                for (Collection mutation : mutations) {
+                    CollectionCountContext.updateCollection(mutation);
+                }
             }
         }
 
-        private void clearDir( MonitoredItem item ) {
+        private void clearDir(MonitoredItem item) {
             LOG.trace("Removing dir: " + item.getPath());
-            for ( MonitoredItem mi : mim.listChildren(item.getParentCollection(),
-                    item.getPath()) ) {
-                if ( mi.isDirectory() ) {
+            for (MonitoredItem mi : mim.listChildren(item.getParentCollection(), item.getPath())) {
+                if (mi.isDirectory()) {
                     clearDir(mi);
                 } else {
                     LOG.trace("Removing file: " + mi.getPath());
                     em.remove(mi);
                 }
-
             }
             em.remove(item);
         }

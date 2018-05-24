@@ -18,6 +18,12 @@ public final class GroupSummary {
         this.count = count;
     }
 
+    public GroupSummary(String group, BigDecimal size, Long count) {
+        this.group = group;
+        this.size = size;
+        this.count = new BigDecimal(count);
+    }
+
     public String getGroup() {
         return group;
     }

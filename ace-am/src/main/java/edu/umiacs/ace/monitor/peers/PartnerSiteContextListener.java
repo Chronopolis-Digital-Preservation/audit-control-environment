@@ -31,6 +31,7 @@
 
 package edu.umiacs.ace.monitor.peers;
 
+import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.remote.JsonGateway;
 import edu.umiacs.ace.remote.PeerAuthenticator;
 import edu.umiacs.ace.remote.StatusBean.CollectionBean;
@@ -103,6 +104,10 @@ public class PartnerSiteContextListener implements ServletContextListener {
                 return null;
             }
             return JsonGateway.getGateway().getStatusBean(site).getCollections();
+        }
+
+        public List<Collection> getCollectionsRest() {
+            return JsonGateway.getGateway().getCollectionListRest(site);
         }
 
         @Override

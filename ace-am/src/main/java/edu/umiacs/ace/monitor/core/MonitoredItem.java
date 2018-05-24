@@ -50,7 +50,7 @@ import javax.persistence.TemporalType;
 
 /**
  *
- * state: 
+ * state:
  * A - active
  * C - corrupt, file and checksum do not match
  * M - local file is missing
@@ -94,6 +94,8 @@ import javax.persistence.TemporalType;
     "SELECT count(m) FROM MonitoredItem m WHERE m.directory = true AND m.parentCollection = :coll"),
     @NamedQuery(name = "MonitoredItem.countErrorsInCollection", query =
     "SELECT count(m) FROM MonitoredItem m WHERE m.state <> 'A' AND m.parentCollection = :coll"),
+    @NamedQuery(name = "MonitoredItem.itemsByState", query =
+    "SELECT m FROM MonitoredItem m WHERE m.parentCollection = :coll AND m.directory = false AND m.state = :state ORDER BY m.id"),
     @NamedQuery(name = "MonitoredItem.listDuplicates", query =
     "SELECT m FROM MonitoredItem m WHERE m.fileDigest = :digest AND m.parentCollection = :coll"),
     @NamedQuery(name = "MonitoredItem.listNullTokens", query =

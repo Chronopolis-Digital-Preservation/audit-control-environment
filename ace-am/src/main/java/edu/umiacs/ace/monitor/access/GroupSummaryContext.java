@@ -15,9 +15,9 @@ import java.util.Map;
 /**
  * Servlet context listener which acts as a cache for Summary information about
  * groups in ACE
- *
+ * <p>
  * If there are many groups, it's conceivable that this could be a strain on memory
- *
+ * <p>
  * Created by shake on 4/4/17.
  */
 public class GroupSummaryContext implements ServletContextListener {
@@ -28,33 +28,35 @@ public class GroupSummaryContext implements ServletContextListener {
     /**
      * Query to get ALL group summaries
      */
-    private static final String SUMMARY_QUERY_ALL = "SELECT c.colgroup, sum(m.size) AS size, sum(m.count) AS count " +
-            "FROM collection c " +
-            "JOIN (  " +
-            "SELECT sum(size) AS size, count(id) AS count, parentcollection_id   " +
-            "FROM monitored_item   " +
-            "WHERE directory = 0   " +
-            "GROUP BY parentcollection_id " +
-            ") AS m ON c.id = m.parentcollection_id " +
-            "WHERE c.colgroup IS NOT NULL " +
-            "GROUP BY c.colgroup";
+    private static final String SUMMARY_QUERY_ALL =
+            "SELECT c.colgroup, sum(m.size) AS size, sum(m.count) AS count " +
+                    "FROM collection c " +
+                    "JOIN (  " +
+                    "SELECT sum(size) AS size, count(id) AS count, parentcollection_id   " +
+                    "FROM monitored_item   " +
+                    "WHERE directory = 0   " +
+                    "GROUP BY parentcollection_id " +
+                    ") AS m ON c.id = m.parentcollection_id " +
+                    "WHERE c.colgroup IS NOT NULL " +
+                    "GROUP BY c.colgroup";
 
     /**
      * Query to get the group summary for a single group
      */
-    private static final String SUMMARY_QUERY_GROUP = "select c.colgroup, sum(m.size) AS size, count(m.id) AS count " +
-            "FROM monitored_item m " +
-            "JOIN ( " +
-            "  select colgroup, id " +
-            "  FROM collection " +
-            "  WHERE colgroup = ? " +
-            ") c ON c.id = m.parentcollection_id WHERE directory = 0";
+    private static final String SUMMARY_QUERY_GROUP =
+            "select c.colgroup, sum(m.size) AS size, count(m.id) AS count " +
+                    "FROM monitored_item m " +
+                    "JOIN ( " +
+                    "  select colgroup, id " +
+                    "  FROM collection " +
+                    "  WHERE colgroup = ? " +
+                    ") c ON c.id = m.parentcollection_id WHERE directory = 0";
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         summaries = new HashMap<>();
         updateSummaries(ImmutableList.of(SUMMARY_QUERY_ALL),
-                ImmutableList.<String>of());
+                ImmutableList.of());
     }
 
     @Override
@@ -80,7 +82,7 @@ public class GroupSummaryContext implements ServletContextListener {
     /**
      * Static method to allow us to update the summary of a group
      *
-     * @param sql the sql query to build
+     * @param sql    the sql query to build
      * @param params the parameters to pass along to the query
      */
     private static void updateSummaries(List<String> sql, List<String> params) {
@@ -98,7 +100,7 @@ public class GroupSummaryContext implements ServletContextListener {
             i++;
         }
 
-        List<GroupSummary> results = (List<GroupSummary>)groupSummary.getResultList();
+        List<GroupSummary> results = (List<GroupSummary>) groupSummary.getResultList();
         for (GroupSummary result : results) {
             log.info("Result: group " + result.getGroup() + ", size: " + result.getSize() + ", count: " + result.getCount());
             summaries.put(result.getGroup(), result);
