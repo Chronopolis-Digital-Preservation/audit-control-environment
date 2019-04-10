@@ -34,6 +34,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.Token;
+import edu.umiacs.ace.monitor.support.SubmissionResult;
 import edu.umiacs.ace.token.TokenStoreEntry;
 import edu.umiacs.ace.token.TokenStoreReader;
 import edu.umiacs.ace.util.CollectionThreadPoolExecutor;
@@ -84,7 +85,7 @@ public class IngestThreadPool {
      * @param tokenReader The token store
      * @param coll The collection to ingest to
      */
-    public static void submitTokenStore(TokenStoreReader tokenReader, Collection coll) {
+    public static SubmissionResult submitTokenStore(TokenStoreReader tokenReader, Collection coll) {
         if (tokenReader == null) {
             throw new RuntimeException("Token file is corrupt");
         }
@@ -101,7 +102,8 @@ public class IngestThreadPool {
             }
             batchTokens.put(tokenEntry.getIdentifiers().get(0), token);
         }
-        thePool.submitTokens(batchTokens, coll);
+
+        return thePool.submitTokens(batchTokens, coll);
     }
 
     /**
@@ -112,14 +114,21 @@ public class IngestThreadPool {
      * @param tokens The tokens to ingest (mapping path to the token)
      * @param coll The collection to ingest to
      */
-    public void submitTokens(Map<String, Token> tokens, Collection coll) {
+    public SubmissionResult submitTokens(Map<String, Token> tokens, Collection coll) {
+        SubmissionResult result = SubmissionResult.CONFLICT;
         CollectionThreadPoolExecutor executor = CollectionThreadPoolExecutor.getExecutor();
 
         // We may want to save the Future so that we can display information
         // about the current ingestion
         KSFuture<IngestSupervisor> future =
                 executor.submitIngestThread(coll, new IngestSupervisor(tokens, coll));
-        cache.put(coll, future);
+
+        if (future != null) {
+            cache.put(coll, future);
+            result = SubmissionResult.SUCCESS;
+        }
+
+        return result;
     }
 
     public ConcurrentMap<Collection, KSFuture<IngestSupervisor>> getCache() {
