@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>edu.umiacs.ace</groupId>
@@ -58,6 +60,11 @@
             <name>Internal Releases</name>
             <url>https://scm.umiacs.umd.edu/adapt/repository/maven-releases/</url>
         </repository>
+        <snapshotRepository>
+            <id>adapt-snapshots</id>
+            <name>Internal Releases</name>
+            <url>https://scm.umiacs.umd.edu/adapt/repository/maven-snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <dependencies>
@@ -83,17 +90,6 @@
                 <build.identifier>${project.version}</build.identifier>
             </properties>
         </profile>
-        <profile>
-            <id>hudson</id>
-            <activation>
-                <property>
-                    <name>BUILD_NUMBER</name>
-                </property>
-            </activation>
-            <properties>
-                <build.identifier>${project.version} (hudson build:${BUILD_NUMBER} revision:${SVN_REVISION})</build.identifier>
-            </properties>
-        </profile>
     </profiles>
     <modules>
         <module>ace-common</module>
@@ -108,16 +104,5 @@
         <module>ace-ims-ear</module> 
     </modules>
 
-    <!--<reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <configuration>
-                    <configLocation>config/sun_checks.xml</configLocation>
-                </configuration>
-            </plugin>
-        </plugins>
-    </reporting>-->
 </project>
 
