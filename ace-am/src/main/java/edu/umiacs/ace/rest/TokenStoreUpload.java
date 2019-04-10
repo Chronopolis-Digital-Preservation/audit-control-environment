@@ -7,10 +7,16 @@ package edu.umiacs.ace.rest;
 
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.register.IngestThreadPool;
+import edu.umiacs.ace.monitor.support.SubmissionResult;
 import edu.umiacs.ace.token.TokenStoreReader;
 import edu.umiacs.ace.util.PersistUtil;
-import java.io.IOException;
-import java.util.List;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.log4j.Logger;
+
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
@@ -19,12 +25,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.log4j.Logger;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Service for manipulating whole token stores
@@ -46,7 +48,9 @@ public class TokenStoreUpload {
             FileItemFactory factory = new DiskFileItemFactory();
             ServletFileUpload upload = new ServletFileUpload(factory);
             
-            List<FileItem> items = null;
+            List<FileItem> items;
+            SubmissionResult subResult = null;
+            Response response = Response.ok().build();
             try {
                 items = upload.parseRequest(request);
                 LOG.info("item size: " + items.size());
@@ -54,9 +58,16 @@ public class TokenStoreUpload {
                     LOG.info("item " + item.getSize() + " " + item.getName() + " " + item.getContentType());
                     Collection coll = em.find(Collection.class, collectionId);
                     TokenStoreReader reader = new TokenStoreReader(item.getInputStream());
-                    IngestThreadPool.submitTokenStore(reader, coll);
+                    subResult = IngestThreadPool.submitTokenStore(reader, coll);
                 }
-                return Response.ok().build();
+
+                if (subResult == null) {
+                    response = Response.status(Status.BAD_REQUEST).build();
+                } else if (subResult == SubmissionResult.CONFLICT) {
+                    response = Response.status(Status.CONFLICT).build();
+                }
+
+                return response;
             }
             catch (FileUploadException e) {
                 LOG.error("Error parsing token store upload",e);
