@@ -62,7 +62,7 @@ upload:
     - /^release-.*$/
   script:
     - 'mvn package'
-    - 'for f in `find ace-am/src/main/sql -type f`; do curl -X POST -H "Content-Type: application/octet-stream" -H "Authorization: token $BUILD_TOKEN" --data-binary @$f $SERVER/artifacts/ace/$CI_BUILD_REF_NAME/$(echo $CI_BUILD_REF | cut -c -7)/$(basename $f); done'
-    - 'for f in `find ace-am/target -type f -name "*.war"`; do curl -X POST -H "Content-Type: application/octet-stream" -H "Authorization: token $BUILD_TOKEN" --data-binary @$f $SERVER/artifacts/ace/$CI_BUILD_REF_NAME/$(echo $CI_BUILD_REF | cut -c -7)/$(basename $f); done'
-    - 'for f in `find ace-ims-ear/target -type f -name "*.ear"`; do curl -X POST -H "Content-Type: application/octet-stream" -H "Authorization: token $BUILD_TOKEN" --data-binary @$f $SERVER/artifacts/ace/$CI_BUILD_REF_NAME/$(echo $CI_BUILD_REF | cut -c -7)/$(basename $f); done'
+    - 'for f in `find ace-am/src/main/sql -type f`; do curl -X POST -H "Content-Type: application/octet-stream" -H "Authorization: token $BUILD_TOKEN" --data-binary @$f $SERVER/resource/ace/$CI_BUILD_REF_NAME/$(echo $CI_BUILD_REF | cut -c -7)/$(basename $f); done'
+    - 'for f in `find ace-am/target -type f -name "*.war"`; do curl -X POST -H "Content-Type: application/octet-stream" -H "Authorization: token $BUILD_TOKEN" --data-binary @$f $SERVER/resource/ace/$CI_BUILD_REF_NAME/$(echo $CI_BUILD_REF | cut -c -7)/$(basename $f); done'
+    - 'for f in `find ace-ims-ear/target -type f -name "*.ear"`; do curl -X POST -H "Content-Type: application/octet-stream" -H "Authorization: token $BUILD_TOKEN" --data-binary @$f $SERVER/resource/ace/$CI_BUILD_REF_NAME/$(echo $CI_BUILD_REF | cut -c -7)/$(basename $f); done'
 
