@@ -5,7 +5,6 @@
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
         <version>1.14-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>ace-am</artifactId>
     <name>ace-am</name>
@@ -105,7 +104,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>jstl</groupId>
+            <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
             <version>1.1.2</version>
         </dependency>
@@ -196,34 +195,8 @@
             <artifactId>irods-api</artifactId>
             <version>1.6</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.apache.jackrabbit</groupId>
-            <artifactId>jackrabbit-core</artifactId>
-            <version>2.2.7</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency> -->
-        
-        <!-- web services
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-server</artifactId>
-            <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-json</artifactId>
-            <version>1.6</version>
-        </dependency>
-        -->
+
+        <!-- web services -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
@@ -233,12 +206,6 @@
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
             <version>2.24</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.umiacs.ace</groupId>
-            <artifactId>ace-ims-ws</artifactId>
-            <version>1.14-SNAPSHOT</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>

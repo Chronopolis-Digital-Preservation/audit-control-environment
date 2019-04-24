@@ -42,339 +42,308 @@ import edu.umiacs.ace.ims.ws.TokenReceipt;
 import edu.umiacs.ace.ims.ws.TokenRequest;
 import edu.umiacs.ace.ims.ws.TokenResponse;
 import edu.umiacs.util.Check;
+import org.apache.log4j.Logger;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import javax.xml.namespace.QName;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.xml.namespace.QName;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.WebServiceException;
+import java.util.function.Supplier;
+
+import static java.util.Collections.emptyList;
 
 /**
- *
  * @author mmcgann
  */
-public final class IMSService
-{
+public final class IMSService {
+
+    private static final Logger print = Logger.getLogger(IMSService.class);
+
+    private static final int DEFAULT_RETRY = 3;
     private static final int DEFAULT_PORT = 8080;
+    private static final int DEFAULT_TIMEOUT = 5000;
     private static final String DEFAULT_PATH = "/ace-ims/IMSWebService?wsdl";
     private static final boolean DEFAULT_SSL = false;
     private static final boolean DEFAULT_BLOCKING = false;
+
     private boolean blocking;
-    private long maxBlockTime;
+    private final int imsRetryAttempts;
+    private final int imsResetTimeout;
 
     private IMSWebService port;
-    
-    private IMSService(URL url, boolean blocking, int maxBlockTimeMinutes) {
+
+    private IMSService(URL url, boolean blocking, int imsRetryAttempts, int imsResetTimeout) {
         this.blocking = blocking;
-        this.maxBlockTime = TimeUnit.MILLISECONDS.convert(maxBlockTimeMinutes,
-                                                          TimeUnit.MINUTES);
+        this.imsRetryAttempts = imsRetryAttempts;
+        this.imsResetTimeout = imsResetTimeout;
 
         try {
             IMSWebService_Service service = new IMSWebService_Service(url,
-                  new QName("http://ws.ims.ace.umiacs.edu/", "IMSWebService"));
+                    new QName("http://ws.ims.ace.umiacs.edu/", "IMSWebService"));
             port = service.getIMSWebServicePort();
-            ((BindingProvider)port).getRequestContext()
+            ((BindingProvider) port).getRequestContext()
                     .put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             throw handleException(e);
         }
     }
 
     /**
      * Open a connection to the IMS
-     * 
-     * @param hostName hostname of the ims, usually ims.umiacs.umd.edu
+     *
+     * @param hostName   hostname of the ims, usually ims.umiacs.umd.edu
      * @param portNumber port number for the ims, usually 8080
-     * @param path url path to the ims web service wsdl, usually /ace-ims/IMSWebService?wsdl
-     * @param ssl flag for connecting with ssl
+     * @param path       url path to the ims web service wsdl, usually /ace-ims/IMSWebService?wsdl
+     * @param ssl        flag for connecting with ssl
      * @return ims connection
      */
-    public static IMSService connect(String hostName, 
-                                     int portNumber, 
-                                     String path, 
+    public static IMSService connect(String hostName,
+                                     int portNumber,
+                                     String path,
                                      boolean ssl,
                                      boolean blocking,
-                                     int maxBlockTimeMinutes) {
+                                     int imsRetryAttempts,
+                                     int imsResetTimeout) {
         Check.notEmpty("hostName", hostName);
         Check.isPositive("portNumber", portNumber);
-        Check.notNegative("maxBlockTime", maxBlockTimeMinutes);
+        Check.notNegative("imsRetryAttempts", imsRetryAttempts);
+        Check.notNegative("imsResetTimeout", imsResetTimeout);
         Check.notEmpty("path", path);
-        
-        if ( !path.startsWith("/") ) {
+
+        if (!path.startsWith("/")) {
             path = "/" + path;
         }
         StringBuilder url = new StringBuilder();
-        if ( ssl ) {
+        if (ssl) {
             url.append("https://").append(hostName).append(":")
-               .append(portNumber).append(path);
+                    .append(portNumber).append(path);
 
-        }else {
+        } else {
             url.append("http://").append(hostName).append(":")
-               .append(portNumber).append(path);
+                    .append(portNumber).append(path);
         }
+
         try {
-            return new IMSService(new URL(url.toString()), blocking, maxBlockTimeMinutes);
-        } catch ( MalformedURLException mue ) {
+            return new IMSService(new URL(url.toString()), blocking, imsRetryAttempts, imsResetTimeout);
+        } catch (MalformedURLException mue) {
             throw new IllegalArgumentException("Invalid URL: " + url);
         }
     }
-    
+
     /**
      * Open a connection to the IMS on the specified host using port 8080
      * and the default wsdl path
-     * 
+     *
      * @param hostName IMS server
      * @return ims connection
      */
-    public static IMSService connect(String hostName)
-    {
-        return IMSService.connect(hostName, 
-                                  DEFAULT_PORT, 
-                                  DEFAULT_PATH, 
-                                  DEFAULT_SSL,
-                                  DEFAULT_BLOCKING,
-                                  0);
+    public static IMSService connect(String hostName) {
+        return IMSService.connect(hostName,
+                DEFAULT_PORT,
+                DEFAULT_PATH,
+                DEFAULT_SSL,
+                DEFAULT_BLOCKING,
+                DEFAULT_RETRY,
+                DEFAULT_TIMEOUT);
     }
-    
+
     public static IMSService connect(String hostName, int port) {
-        return IMSService.connect(hostName, port, DEFAULT_PATH, DEFAULT_SSL, DEFAULT_BLOCKING, 0);
+        return IMSService.connect(hostName, port, DEFAULT_PATH, DEFAULT_SSL, DEFAULT_BLOCKING, DEFAULT_RETRY, DEFAULT_TIMEOUT);
     }
 
     public static IMSService connect(String hostName, int port, boolean ssl) {
-        return IMSService.connect(hostName, port, DEFAULT_PATH, ssl, DEFAULT_BLOCKING, 0);
+        return IMSService.connect(hostName, port, DEFAULT_PATH, ssl, DEFAULT_BLOCKING, DEFAULT_RETRY, DEFAULT_TIMEOUT);
     }
 
-    public static IMSService connect(String hostName, int port, boolean ssl, boolean blocking, int maxBlockTimeMinutes) {
-        return IMSService.connect(hostName, port, DEFAULT_PATH, ssl, blocking, maxBlockTimeMinutes);
+    public static IMSService connect(String hostName,
+                                     int port,
+                                     boolean ssl,
+                                     boolean blocking,
+                                     int imsRetryAttempts,
+                                     int imsResetTimeout) {
+        return IMSService.connect(hostName, port, DEFAULT_PATH, ssl, blocking, imsRetryAttempts, imsResetTimeout);
     }
-    
-//    public TokenClass createTokenClass(TokenClass tokenClass)
-//    {
-//        try
-//        {
-//            return port.createTokenClass(tokenClass);
-//        }
-//        catch ( Exception e )
-//        {
-//            throw handleException(e);
-//        }
-//    }
-    
-    public List<RoundResponse> requestWitnessProofForRounds(List<Long> rounds)
-    {
-        try
-        {
-            if ( blocking) {
-                Class c = port.getClass();
-                Method reqWitnessProof = c.getMethod("requestWitnessProofForRounds", List.class);
-                return blockUntil(reqWitnessProof, rounds);
-            } else {
-                return port.createWitnessProofForRound(rounds);
+
+    public List<RoundResponse> requestWitnessProofForRounds(List<Long> rounds) {
+        Supplier<IMSResult<List<RoundResponse>>> supplier = () -> {
+            try {
+                List<RoundResponse> witness = port.createWitnessProofForRound(rounds);
+                return new IMSResult<>(witness);
+            } catch (Exception e) {
+                return new IMSResult<>(e);
             }
-        }
-        catch ( Exception e )
-        {
-            throw handleException(e);
-        }
+        };
+
+        return invoke(supplier);
     }
-    
+
     /**
-     * Blocking call requesting the IMS close current round and return with 
+     * Blocking call requesting the IMS close current round and return with
      * responses to the requested tokens.
-     * 
+     *
      * @param tokenClassName name of token service to use, usually 'SHA-256-0'
-     * @param requests list of token requests
-     * 
+     * @param requests       list of token requests
      * @return list of token responses.
      */
-    public List<TokenResponse> requestTokensImmediate(String tokenClassName, 
-            List<TokenRequest> requests)
-    {
-        try
-        {
-            if ( blocking) {
-                Class c = port.getClass();
-                Method reqTokensImmediate = c.getMethod("requestTokensImmediate",
-                                                        String.class,
-                                                        List.class);
-                return blockUntil(reqTokensImmediate, tokenClassName, requests);
-            } else {
-                return port.requestTokensImmediate(tokenClassName, requests);
-            }
-        }
-        catch ( Exception e )
-        {
-            throw handleException(e);
-        }
-    }
-    
-    public List<RoundSummary> getRoundSummaries(List<Long> rounds)
-    {
-        try
-        {
-            if ( blocking) {
-                Class c = port.getClass();
-                Method roundSummaries = c.getMethod("getRoundSummaries", List.class);
-                return blockUntil(roundSummaries, rounds);
-            } else {
-                return port.getRoundSummaries(rounds);
-            }
-        }
-        catch ( Exception e )
-        {
-            throw handleException(e);
-        }
-    }
-
-    // TODO: This should really be in a circuit breaker type class
-    private <E> E blockUntil(Method m, Object... args) throws Exception {
-        boolean done = false;
-        E fin = null;
-
-        long start = System.currentTimeMillis();
-        long elapsed = 0;
-        while ( !done && elapsed <= maxBlockTime ) {
+    public List<TokenResponse> requestTokensImmediate(String tokenClassName,
+                                                      List<TokenRequest> requests) {
+        Supplier<IMSResult<List<TokenResponse>>> supplier = () -> {
             try {
-                // avoid sleeping on the first pass
-                if ( elapsed != 0 ) {
-                    TimeUnit.MINUTES.sleep(15);
-                }
-
-                fin = (E) m.invoke(port, args);
-
-                done = true;
+                List<TokenResponse> responses = port.requestTokensImmediate(tokenClassName, requests);
+                return new IMSResult<>(responses);
             } catch (Exception e) {
-                long now = System.currentTimeMillis();
-                elapsed = now - start;
-
-                // We want to catch when we simply could not connect to the IMS
-                // server then continue to block, or when java.lang.reflect catches
-                // an exception on the invocation of the method
-                if ( e instanceof WebServiceException ) {
-                    Throwable cause = e.getCause();
-                    if ( cause instanceof java.net.ConnectException ) {
-                        continue;
-                    }
-                } else if ( e instanceof  InvocationTargetException) {
-                    // TODO: Properly catch java.net.ConnectException
-                    // it's kind of tricky as the invocation exception makes
-                    // the stack trace murky
-                    continue;
-                }
-                throw handleException(e);
+                return new IMSResult<>(e);
             }
+        };
 
-        }
+        return invoke(supplier);
+    }
 
-        // TODO: Throw timeout exception
+    public List<RoundSummary> getRoundSummaries(List<Long> rounds) {
+        Supplier<IMSResult<List<RoundSummary>>> supplier = () -> {
+            try {
+                List<RoundSummary> summaries = port.getRoundSummaries(rounds);
+                return new IMSResult<>(summaries);
+            } catch (Exception e) {
+                return new IMSResult<>(e);
+            }
+        } ;
 
-        return fin;
+        return invoke(supplier);
     }
 
     public TokenReceipt requestTokensAsync(String tokenClassName,
-            List<TokenRequest> requests)
-    {
-        try
-        {
-            if ( blocking) {
-                Class c = port.getClass();
-                Method m = c.getMethod("requestTokensAsync", String.class, List.class);
-                return blockUntil(m, tokenClassName, requests);
-            } else {
-                return port.requestTokensAsync(tokenClassName, requests);
+                                           List<TokenRequest> requests) {
+        Supplier<IMSResult<TokenReceipt>> supplier = () -> {
+            try {
+                TokenReceipt receipt = port.requestTokensAsync(tokenClassName, requests);
+                return new IMSResult<>(receipt);
+            } catch (Exception e) {
+                return new IMSResult<>(e);
             }
-        }
-        catch ( Exception e )
-        {
-            throw handleException(e);
-        }
+        };
+
+        return invoke(supplier);
     }
 
-    public List<TokenResponse> retrieveAsyncTokens(List<TokenReceipt> receiptList)
-    {
-        if (receiptList == null || receiptList.isEmpty())
-        {
-            return Collections.emptyList();
+    public List<TokenResponse> retrieveAsyncTokens(List<TokenReceipt> receiptList) {
+        if (receiptList == null || receiptList.isEmpty()) {
+            return emptyList();
         }
 
-        List<TokenResponse> responses = new ArrayList<TokenResponse>();
+        List<TokenResponse> responses = new ArrayList<>();
 
-        try
-        {
-            for (TokenReceipt receipt : receiptList)
-            {
+        try {
+            for (TokenReceipt receipt : receiptList) {
                 long sessionKey = receipt.getSessionKey();
                 long requestNumber = receipt.getRequestNumber();
                 List<TokenResponse> rResp = port.retrieveTokens(requestNumber, sessionKey);
                 responses.addAll(rResp);
             }
             return responses;
-            
-        } catch (Exception e)
-        {
+
+        } catch (Exception e) {
             throw handleException(e);
         }
     }
-    
+
     /**
-     * Create a request batch based on the requestTokensImmediate call. 
-     * 
+     * Create a request batch based on the requestTokensImmediate call.
+     *
+     * @param identifier     a unique identifier for tracking what the request batch is working on
      * @param tokenClassName token class name to use 'SHA-256-0'
-     * @param callback calback to handle token responses and errors
+     * @param callback       callback to handle token responses and errors
      * @param maxQueueLength maximum queue size before requests will be forced
-     * @param maxWaitTime time to wait between sending requests
-     * 
+     * @param maxWaitTime    time to wait between sending requests
      * @return batched request
      */
-    public TokenRequestBatch createImmediateTokenRequestBatch(
-            String tokenClassName, RequestBatchCallback callback, 
-            int maxQueueLength, int maxWaitTime)
-    {
+    public TokenRequestBatch createImmediateTokenRequestBatch(String identifier,
+                                                              String tokenClassName,
+                                                              RequestBatchCallback callback,
+                                                              int maxQueueLength,
+                                                              int maxWaitTime) {
         Check.notEmpty("tokenClassName", tokenClassName);
         Check.notNull("callback", callback);
         Check.isPositive("maxQueueLength", maxQueueLength);
         Check.isPositive("maxWaitTime", maxWaitTime);
-        
-        return new ImmediateTokenRequestBatch(this, tokenClassName, callback, 
-                maxQueueLength, maxWaitTime);
+
+        return new ImmediateTokenRequestBatch(this, identifier, tokenClassName, callback, maxQueueLength, maxWaitTime);
     }
-    
-    public TokenValidator createTokenValidator(ValidationCallback callback, 
-            int maxQueueLength, int maxWaitTime, MessageDigest digest)
-    {
+
+    /**
+     * Create a {@link TokenValidator}
+     *
+     * @param identifier     a unique identifier for tracking what the request batch is working on
+     * @param callback       callback to handle token validation and errors
+     * @param maxQueueLength maximum queue size before requests will be forced
+     * @param maxWaitTime    time to wait between sending requests
+     * @param digest         type of {@link MessageDigest} used
+     * @return the {@link TokenValidator}
+     */
+    public TokenValidator createTokenValidator(String identifier,
+                                               ValidationCallback callback,
+                                               int maxQueueLength,
+                                               int maxWaitTime,
+                                               MessageDigest digest) {
         Check.notNull("callback", callback);
         Check.isPositive("maxQueueLength", maxQueueLength);
         Check.isPositive("maxWaitTime", maxWaitTime);
-        
-        return new TokenValidator(this, callback,  
-                maxWaitTime, maxQueueLength, digest);
+
+        return new TokenValidator(this, identifier, callback, maxWaitTime, maxQueueLength, digest);
     }
-    
-    private IMSException handleException(Exception e)
-    {
-        if ( e instanceof WebServiceException )
-        {
+
+    private <E> E invoke(Supplier<IMSResult<E>> supplier) {
+        boolean done = false;
+        IMSResult<E> imsResult = new IMSResult<>(new RuntimeException("IMS not contacted"));
+
+        long attempt = 0;
+
+        // first attempt always goes through (attempt == 0)
+        // when blocking, make sure that attempt is less than maxAttempts
+        while (!done && (attempt == 0 || (attempt <= imsRetryAttempts && blocking))) {
+            if (attempt > 0) {
+                try {
+                    TimeUnit.MILLISECONDS.sleep(imsResetTimeout);
+                } catch (InterruptedException exception) {
+                    // we were probably cancelled, get out of here now
+                    IMSConnectionException imsException = new IMSConnectionException(
+                            exception.getMessage(),
+                            exception.getCause());
+                    imsResult = new IMSResult<>(imsException);
+                    break;
+                }
+            }
+
+            print.trace("Supplier: attempt = " + attempt
+                    + ", maxBlock = " + imsRetryAttempts
+                    + ", blocking = " + blocking);
+            imsResult = supplier.get();
+            done = imsResult.getResult().isPresent();
+            attempt++;
+        }
+
+        return imsResult.getOrThrow();
+    }
+
+    private IMSException handleException(Exception e) {
+        if (e instanceof WebServiceException) {
             Throwable cause = e.getCause();
-            if ( cause instanceof java.net.ConnectException ||
-                 cause instanceof java.io.FileNotFoundException )
-            {
+            if (cause instanceof java.net.ConnectException ||
+                    cause instanceof java.io.FileNotFoundException) {
                 return new IMSConnectionException(cause.getMessage(), cause);
             }
-            
+
         }
-        if ( e instanceof IMSFault_Exception )
-        {
-            IMSFault fault = ((IMSFault_Exception)e).getFaultInfo();
+        if (e instanceof IMSFault_Exception) {
+            IMSFault fault = ((IMSFault_Exception) e).getFaultInfo();
             return new IMSException(fault.getStatusCode(), fault.getMessage());
         }
-        throw new IMSException(StatusCode.CLIENT_ERROR, "Client error: " + 
+        throw new IMSException(StatusCode.CLIENT_ERROR, "Client error: " +
                 e.getMessage(), e);
     }
 }

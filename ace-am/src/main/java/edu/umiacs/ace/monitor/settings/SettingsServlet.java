@@ -63,10 +63,8 @@ public class SettingsServlet extends EntityManagerServlet {
             }
         }
 
-        Map<String, String> settingsMap =
-                settingsToMap(SettingsUtil.getCurrentSettings());
-        Map<String, String> customMap =
-                settingsToMap(SettingsUtil.getCustomSettings());
+        Map<String, String> settingsMap = settingsToMap(SettingsUtil.getCurrentSettings());
+        Map<String, String> customMap = settingsToMap(SettingsUtil.getCustomSettings());
 
         request.setAttribute("currSettings", settingsMap);
         request.setAttribute("customSettings", customMap);

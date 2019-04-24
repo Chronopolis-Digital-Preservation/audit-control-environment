@@ -197,9 +197,13 @@ public final class AuditTokens extends Thread implements CancelCallback {
                     imsPort,
                     AuditThreadFactory.useSSL(),
                     AuditThreadFactory.isBlocking(),
-                    AuditThreadFactory.getMaxBlockTime());
+                    AuditThreadFactory.getImsRetryAttempts(),
+                    AuditThreadFactory.getImsResetTimeout());
             callback = new TokenAuditCallback(itemMap, this, collection, session);
-            validator = ims.createTokenValidator(callback, 1000, 5000,
+            validator = ims.createTokenValidator(collection.getId().toString(),
+                    callback,
+                    1000,
+                    5000,
                     digest);
         } catch (Throwable e) {
             EntityManager em;
