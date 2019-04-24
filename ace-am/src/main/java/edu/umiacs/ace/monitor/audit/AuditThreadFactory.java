@@ -65,10 +65,10 @@ public class AuditThreadFactory {
     private static int imsPort = 80;
     private static String tokenClass = "SHA-256";
     private static boolean auditOnly = false;
-    private static boolean auditSample = false;
     private static boolean ssl = false;
     private static boolean blocking = false;
-    private static int maxBlockTime = 0;
+    private static int imsRetryAttempts = 3;
+    private static int imsResetTimeout = 3000;
 
     public static void setIMS( String ims ) {
         if (Strings.isEmpty(ims)) {
@@ -95,8 +95,8 @@ public class AuditThreadFactory {
     }
 
     public static void setImsPort(int imsPort) {
-        if (imsPort < 1 && imsPort > 32768) {
-            LOG.error("ims port must be between 1 and 32768, setting default");
+        if (imsPort < 1 || imsPort > 32768) {
+            LOG.warn("ims port must be between 1 and 32768, setting default");
             imsPort = Integer.parseInt(SettingsConstants.imsPort);
         }
         AuditThreadFactory.imsPort = imsPort;
@@ -106,8 +106,24 @@ public class AuditThreadFactory {
         AuditThreadFactory.auditOnly = auditOnlyMode;
     }
 
-    public static void setAuditSampling(boolean auditSampling ) {
-        AuditThreadFactory.auditSample = auditSampling;
+    public static int getImsRetryAttempts() {
+        return imsRetryAttempts;
+    }
+
+    public static void setImsRetryAttempts(int attempts) {
+        if (attempts >= 0) {
+            imsRetryAttempts = attempts;
+        }
+    }
+
+    public static int getImsResetTimeout() {
+        return imsResetTimeout;
+    }
+
+    public static void setImsResetTimeout(int timeout) {
+        if (timeout >= 0) {
+            imsResetTimeout = timeout;
+        }
     }
 
     public static void setBlocking(boolean blocking) {
@@ -116,17 +132,6 @@ public class AuditThreadFactory {
 
     public static boolean isBlocking() {
         return AuditThreadFactory.blocking;
-    }
-
-    public static void setMaxBlockTime(int maxBlockTime) {
-        if ( maxBlockTime < 0 ) {
-            maxBlockTime = 0;
-        }
-        AuditThreadFactory.maxBlockTime = maxBlockTime;
-    }
-
-    public static int getMaxBlockTime() {
-       return maxBlockTime;
     }
 
     public static boolean isAuditing() {

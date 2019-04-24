@@ -4,6 +4,7 @@ import edu.umiacs.ace.monitor.audit.AuditThreadFactory;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.reporting.SchedulerContextListener;
 import edu.umiacs.ace.util.PersistUtil;
+import edu.umiacs.util.Strings;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -11,12 +12,11 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+
+import static edu.umiacs.ace.monitor.settings.SettingsConstants.*;
 
 /**
- *
  * @author shake
  */
 public class SettingsUtil {
@@ -27,7 +27,7 @@ public class SettingsUtil {
      * @param attr the attribute to query on
      * @return the Setting associated with the attribute
      */
-    public static SettingsParameter getItemByAttr( String attr ) {
+    public static SettingsParameter getItemByAttr(String attr) {
         EntityManager em = PersistUtil.getEntityManager();
         Query q = em.createNamedQuery("SettingsParameter.getAttr");
         q.setParameter("attr", attr);
@@ -35,7 +35,7 @@ public class SettingsUtil {
         try {
             return (SettingsParameter) q.getSingleResult();
         } catch (NoResultException ex) {
-            // zzz
+            // ignore, return null
         } finally {
             em.close();
         }
@@ -87,17 +87,17 @@ public class SettingsUtil {
         EntityTransaction trans = em.getTransaction();
         trans.begin();
 
-        for ( SettingsParameter setting : settings ) {
+        for (SettingsParameter setting : settings) {
             // Skip any empty settings
-            if ( setting.getName().trim().isEmpty() ||
-                    setting.getValue().trim().isEmpty() ) {
+            if (setting.getName().trim().isEmpty() ||
+                    setting.getValue().trim().isEmpty()) {
                 continue;
             }
 
             SettingsParameter old = getItemByAttr(setting.getName());
 
             // If there is no item, persist the new setting
-            if ( old == null ) {
+            if (old == null) {
                 em.persist(setting);
             } else {
                 // Else update and merge the old item
@@ -122,30 +122,20 @@ public class SettingsUtil {
         EntityTransaction trans = em.getTransaction();
         trans.begin();
 
-        for ( String name : settings ) {
+        for (String name : settings) {
             // TODO: Find a better way to do this
             //       Could possibly wrap the ID into the settings list
             SettingsParameter setting = getItemByAttr(name);
             SettingsParameter managedSetting =
                     em.find(SettingsParameter.class, setting.getId());
 
-            if ( setting != null ) {
+            if (setting != null) {
                 em.remove(managedSetting);
             }
         }
 
         trans.commit();
         em.close();
-    }
-
-    // Get the names of all current settings
-    public static Set<String> getParamNames() {
-        List<SettingsParameter> settings = getCurrentSettings();
-        Set<String> paramSet = new HashSet<>();
-        for ( SettingsParameter s : settings ) {
-            paramSet.add(s.getName());
-        }
-        return paramSet;
     }
 
 
@@ -157,68 +147,43 @@ public class SettingsUtil {
     public static List<SettingsParameter> getDefaultSettings() {
         List<SettingsParameter> defaults = new ArrayList<>();
 
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS,
-                SettingsConstants.ims,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS_PORT,
-                SettingsConstants.imsPort,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS_SSL,
-                SettingsConstants.imsSSL,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_IMS_TOKEN_CLASS,
-                SettingsConstants.imsTokenClass,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_AUTO_AUDIT_ENABLE,
-                SettingsConstants.autoAudit,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_THROTTLE_MAXAUDIT,
-                SettingsConstants.maxAudit,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_TIME,
-                SettingsConstants.throttleWait,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_BPS,
-                SettingsConstants.throttleBPS,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_SMTP_SERVER,
-                SettingsConstants.mailServer,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_FROM,
-                SettingsConstants.mailFrom,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_USER_AUTH,
-                SettingsConstants.authManagement,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_APPENDER,
-                SettingsConstants.log4JA1,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_BACKUP_INDEX,
-                SettingsConstants.log4JA1MaxBackupIndex,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_CLASS,
-                SettingsConstants.log4JLoggerUMIACS,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_CONV_PAT,
-                SettingsConstants.log4JA1layoutConversationPattern,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_FILE,
-                SettingsConstants.log4JA1File,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_FILE_SIZE,
-                SettingsConstants.log4JA1MaxFileSize,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_IRODS,
-                SettingsConstants.log4JLoggerIrods,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_LAYOUT,
-                SettingsConstants.log4JA1Layout,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_4J_ROOT_LOGGER,
-                SettingsConstants.log4JRootLogger,false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_INGEST,
-                SettingsConstants.maxIngestThreads, false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_AUDIT_ONLY,
-                SettingsConstants.auditOnly, false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_AUDIT_SAMPLE,
-                SettingsConstants.auditSample, false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_AUDIT_BLOCKING,
-                SettingsConstants.auditBlocking, false));
-        defaults.add(new SettingsParameter(SettingsConstants.PARAM_AUDIT_MAX_BLOCK_TIME,
-                SettingsConstants.auditMaxBlockTime, false));
+        defaults.add(new SettingsParameter(PARAM_IMS, ims));
+        defaults.add(new SettingsParameter(PARAM_IMS_PORT, imsPort));
+        defaults.add(new SettingsParameter(PARAM_IMS_SSL, imsSSL));
+        defaults.add(new SettingsParameter(PARAM_IMS_TOKEN_CLASS, imsTokenClass));
+        defaults.add(new SettingsParameter(PARAM_AUTO_AUDIT_ENABLE, autoAudit));
+        defaults.add(new SettingsParameter(PARAM_THROTTLE_MAXAUDIT, maxAudit));
+        defaults.add(new SettingsParameter(PARAM_TIME, throttleWait));
+        defaults.add(new SettingsParameter(PARAM_BPS, throttleBPS));
+        defaults.add(new SettingsParameter(PARAM_SMTP_SERVER, mailServer));
+        defaults.add(new SettingsParameter(PARAM_FROM, mailFrom));
+        defaults.add(new SettingsParameter(PARAM_USER_AUTH, authManagement));
+        defaults.add(new SettingsParameter(PARAM_4J_APPENDER, log4JA1));
+        defaults.add(new SettingsParameter(PARAM_4J_BACKUP_INDEX, log4JA1MaxBackupIndex));
+        defaults.add(new SettingsParameter(PARAM_4J_CLASS, log4JLoggerUMIACS));
+        defaults.add(new SettingsParameter(PARAM_4J_CONV_PAT, log4JA1layoutConversationPattern));
+        defaults.add(new SettingsParameter(PARAM_4J_FILE, log4JA1File));
+        defaults.add(new SettingsParameter(PARAM_4J_FILE_SIZE, log4JA1MaxFileSize));
+        defaults.add(new SettingsParameter(PARAM_4J_IRODS, log4JLoggerIrods));
+        defaults.add(new SettingsParameter(PARAM_4J_LAYOUT, log4JA1Layout));
+        defaults.add(new SettingsParameter(PARAM_4J_ROOT_LOGGER, log4JRootLogger));
+        // defaults.add(new SettingsParameter(PARAM_INGEST, maxIngestThreads));
+        defaults.add(new SettingsParameter(PARAM_AUDIT_ONLY, auditOnly));
+        defaults.add(new SettingsParameter(PARAM_AUDIT_SAMPLE, auditSample));
+        defaults.add(new SettingsParameter(PARAM_AUDIT_BLOCKING, auditBlocking));
+        defaults.add(new SettingsParameter(PARAM_IMS_MAX_RETRY, imsMaxRetry));
+        defaults.add(new SettingsParameter(PARAM_IMS_RESET_TIMEOUT, imsResetTimeout));
 
         return defaults;
     }
 
     /**
-     *
-     * @param c The collection to query
+     * @param c    The collection to query
      * @param attr The attribute to query for
      * @return true if collection, settings are not null and parameter is "true"
      */
     public static boolean getBoolean(Collection c, String attr) {
-        if (!containsKey(c, attr)) {
+        if (notContains(c, attr)) {
             return false;
         }
 
@@ -226,7 +191,7 @@ public class SettingsUtil {
     }
 
     public static String getString(Collection c, String attr) {
-        if (!containsKey(c, attr)) {
+        if (notContains(c, attr)) {
             return null;
         }
 
@@ -234,7 +199,7 @@ public class SettingsUtil {
     }
 
     public static int getInt(Collection c, String attr, int def) {
-        if (!containsKey(c, attr)) {
+        if (notContains(c, attr)) {
             return def;
         }
         try {
@@ -244,40 +209,34 @@ public class SettingsUtil {
         }
     }
 
-    private static boolean containsKey(Collection c, String attr) {
-        return (c != null && c.getSettings() != null
-                && c.getSettings().containsKey(attr));
+    private static boolean notContains(Collection c, String attr) {
+        return (c == null || c.getSettings() == null
+                || !c.getSettings().containsKey(attr));
     }
 
     // Update the settings our context listeners would normally do
     private static void reloadSettings() {
         EntityManager em = PersistUtil.getEntityManager();
-        Query q = em.createNamedQuery("SettingsParameter.getAttr");
-        SettingsParameter s = null;
+        SettingsParameter s;
 
         // Host
-        q.setParameter("attr", SettingsConstants.PARAM_IMS);
-        s = (SettingsParameter) q.getSingleResult();
+        s = getOrDefault(PARAM_IMS, ims, em);
         AuditThreadFactory.setIMS(s.getValue());
 
         // Port
-        q.setParameter("attr", SettingsConstants.PARAM_IMS_PORT);
-        s = (SettingsParameter) q.getSingleResult();
+        s = getOrDefault(PARAM_IMS_PORT, imsPort, em);
         AuditThreadFactory.setImsPort(Integer.parseInt(s.getValue()));
 
         // SSL
-        q.setParameter("attr", SettingsConstants.PARAM_IMS_SSL);
-        s = (SettingsParameter) q.getSingleResult();
+        s = getOrDefault(PARAM_IMS_SSL, imsSSL, em);
         AuditThreadFactory.setSSL(Boolean.valueOf(s.getValue()));
 
         // Token Class
-        q.setParameter("attr", SettingsConstants.PARAM_IMS_TOKEN_CLASS);
-        s = (SettingsParameter) q.getSingleResult();
+        s = getOrDefault(PARAM_IMS_TOKEN_CLASS, imsTokenClass, em);
         AuditThreadFactory.setTokenClass(s.getValue());
 
         // Audit Only
-        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_ONLY);
-        s = (SettingsParameter) q.getSingleResult();
+        s = getOrDefault(PARAM_AUDIT_ONLY, auditOnly, em);
         AuditThreadFactory.setAuditOnly(Boolean.valueOf(s.getValue()));
 
         // Max Audits
@@ -291,39 +250,42 @@ public class SettingsUtil {
         */
 
         // Mail Server
-        q.setParameter("attr", SettingsConstants.PARAM_SMTP_SERVER);
-        s = (SettingsParameter) q.getSingleResult();
+        s = getOrDefault(PARAM_SMTP_SERVER, mailServer, em);
         SchedulerContextListener.setMailServer(s.getValue());
 
         // Mail From
-        q.setParameter("attr", SettingsConstants.PARAM_FROM);
-        s = (SettingsParameter) q.getSingleResult();
+        s = getOrDefault(PARAM_FROM, mailFrom, em);
         SchedulerContextListener.setMailFrom(s.getValue());
 
         // Audit Blocking
-        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_BLOCKING);
-        s = (SettingsParameter) q.getSingleResult();
+        s = getOrDefault(PARAM_AUDIT_BLOCKING, auditBlocking, em);
         AuditThreadFactory.setBlocking(Boolean.valueOf(s.getValue()));
 
-        // Max block time
-        q.setParameter("attr", SettingsConstants.PARAM_AUDIT_MAX_BLOCK_TIME);
-        s = (SettingsParameter) q.getSingleResult();
-        AuditThreadFactory.setMaxBlockTime(Integer.parseInt(s.getValue()));
+        s = getOrDefault(PARAM_IMS_MAX_RETRY, imsMaxRetry, em);
+        if (Strings.isNonNegativeInt(s.getValue())) {
+            AuditThreadFactory.setImsRetryAttempts(Integer.parseInt(s.getValue()));
+        }
+
+        s = getOrDefault(PARAM_IMS_RESET_TIMEOUT, imsResetTimeout, em);
+        if (Strings.isNonNegativeInt(s.getValue())) {
+            AuditThreadFactory.setImsResetTimeout(Integer.parseInt(s.getValue()));
+        }
     }
 
     /**
      * Get a SettingsParameter by its attribute name or set the default value and persist it
      *
-     * @param attr the Attribute to query for
+     * @param attr         the Attribute to query for
      * @param defaultValue the default value of the attribute
-     * @param em the EntityManager to query with
+     * @param em           the EntityManager to query with
      * @return the queried SettingsParameter
      */
     public static SettingsParameter getOrDefault(String attr,
                                                  String defaultValue,
                                                  EntityManager em) {
         SettingsParameter result = new SettingsParameter(attr, defaultValue, false);
-        TypedQuery<SettingsParameter> q = em.createNamedQuery("SettingsParameter.getAttr",
+        TypedQuery<SettingsParameter> q = em.createNamedQuery(
+                "SettingsParameter.getAttr",
                 SettingsParameter.class);
         q.setParameter("attr", attr);
 
@@ -331,7 +293,10 @@ public class SettingsUtil {
             result = q.getSingleResult();
             // just in case
             if (result.getValue() == null || result.getValue().isEmpty()) {
+                em.getTransaction().begin();
                 result.setValue(defaultValue);
+                em.merge(result);
+                em.getTransaction().commit();
             }
         } catch (NoResultException ex) {
             em.getTransaction().begin();
