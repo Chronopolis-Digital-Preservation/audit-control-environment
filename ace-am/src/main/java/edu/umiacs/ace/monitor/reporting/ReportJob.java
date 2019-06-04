@@ -51,35 +51,32 @@ import java.util.GregorianCalendar;
 
 /**
  * Report Generation job for quartz
+ *
  * @author toaster
  */
 public class ReportJob implements Job {
 
     public static final String ATTR_POLICY = "policy";
     private static final Logger LOG = Logger.getLogger(ReportJob.class);
-    private LogEventManager logManager;
 
     public ReportJob() {
     }
 
     @Override
-    public void execute( JobExecutionContext arg0 ) throws JobExecutionException {
+    public void execute(JobExecutionContext arg0) throws JobExecutionException {
         NDC.push("[report]");
-        ReportPolicy reportPolicy = null;
-        reportPolicy = (ReportPolicy) arg0.getJobDetail().getJobDataMap().get(
-                ATTR_POLICY);
+        ReportPolicy reportPolicy;
+        reportPolicy = (ReportPolicy) arg0.getJobDetail().getJobDataMap().get(ATTR_POLICY);
         long session = System.currentTimeMillis();
-        logManager = new LogEventManager(session, reportPolicy.getCollection()); 
+        LogEventManager logManager = new LogEventManager(session, reportPolicy.getCollection());
 
         LOG.debug("Starting job " + reportPolicy.getName());
         try {
             CronTrigger cron = (CronTrigger) arg0.getTrigger();
 
-            CronExpression expression = new CronExpression(
-                    cron.getCronExpression());
+            CronExpression expression = new CronExpression(cron.getCronExpression());
 
-            Date startDate = extractDuration(expression,
-                    arg0.getScheduledFireTime());
+            Date startDate = extractDuration(expression, arg0.getScheduledFireTime());
 
             SummaryGenerator sg = new SummaryGenerator(reportPolicy.getName(),
                     reportPolicy.getCollection(),
@@ -88,17 +85,16 @@ public class ReportJob implements Job {
             ReportSummary report = sg.generateReport();
             SchedulerContextListener.mailReport(report, createMailList(reportPolicy));
 
-        } catch ( ParseException ex ) {
+        } catch (ParseException ex) {
             LOG.error("Unknown parse exception", ex);
             throw new JobExecutionException(ex);
         } catch (MessagingException ex) {
             EntityManager em = PersistUtil.getEntityManager();
-            logManager.persistCollectionEvent(LogEnum.SMTP_ERROR,
-                                              ex.getMessage(), em);
+            logManager.persistCollectionEvent(LogEnum.SMTP_ERROR, ex.getMessage(), em);
             em.close();
             LOG.error("Could not send report summary", ex);
             throw new JobExecutionException(ex);
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             LOG.error("Unknown exception", e);
             throw new JobExecutionException(e);
         } finally {
@@ -107,27 +103,28 @@ public class ReportJob implements Job {
         }
     }
 
-    private String[] createMailList( ReportPolicy rp ) {
+    private String[] createMailList(ReportPolicy rp) {
         return rp.getEmailList().split("\\s*,\\s*");
     }
 
-    private Date extractDuration( CronExpression expression, Date triggerDate )
+    private Date extractDuration(CronExpression expression, Date triggerDate)
             throws JobExecutionException {
 
+        // todo: is it possible to replace this with java.time?
         Calendar prevCal = new GregorianCalendar();
 
         int count = 0;
         prevCal.setTime(triggerDate);
         prevCal.add(Calendar.MONTH, -1);
-        while ( !expression.isSatisfiedBy(prevCal.getTime()) && count < 12 ) {
+        while (!expression.isSatisfiedBy(prevCal.getTime()) && count < 12) {
             count++;
             prevCal.add(Calendar.MONTH, -1);
         }
 
-        if ( !expression.isSatisfiedBy(prevCal.getTime()) ) {
+        if (!expression.isSatisfiedBy(prevCal.getTime())) {
             throw new JobExecutionException(
                     "Count not find previous execution time, curr " + triggerDate + " expression "
-                    + expression.getCronExpression());
+                            + expression.getCronExpression());
         }
 
         return prevCal.getTime();

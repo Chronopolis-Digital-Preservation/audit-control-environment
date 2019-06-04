@@ -69,13 +69,11 @@ import javax.mail.MessagingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
-import javax.sql.DataSource;
 import java.io.InputStream;
 import java.security.MessageDigest;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -732,44 +730,45 @@ public final class AuditThread extends Thread implements CancelCallback {
         em.close();
     }
 
-    private void setInactiveBefore(Date d) {
+    private void setInactiveBefore(Date startDate) {
+        // ignore partial audits
         if (baseItemPathList != null) {
             return;
         }
 
-        DataSource dataSource = PersistUtil.getDataSource();
         EntityManager em = PersistUtil.getEntityManager();
         EntityTransaction trans = em.getTransaction();
-        trans.begin();
 
         try {
+            // Truncate the start date of the audit to seconds because we don't have fractional
+            // seconds in our database
+            Instant startInstant = startDate.toInstant().truncatedTo(ChronoUnit.SECONDS);
+            Timestamp start = Timestamp.from(startInstant);
+            trans.begin();
             // Update the monitored item table
             Query query = em.createNamedQuery("MonitoredItem.updateMissing")
                     .setParameter("coll", coll)
-                    .setParameter("date", d);
-
+                    .setParameter("date", start);
             int i = query.executeUpdate();
             if (i > 0) {
                 LOG.info("Set " + i + " new missing items");
 
                 // Add log entries for the new missing items
-                Connection connection = dataSource.getConnection();
-                PreparedStatement ps = connection.prepareStatement("INSERT INTO logevent(session, path, date, logtype, collection_id) " +
-                        "SELECT ?, path, NOW(), ?, parentcollection_id FROM monitored_item m WHERE m.parentcollection_id = ? AND m.state = ? AND m.statechange = ?");
-                ps.setLong(1, session);
-                ps.setInt(2, LogEnum.FILE_MISSING.getType());
-                ps.setLong(3, coll.getId());
-                ps.setString(4, String.valueOf('M'));
-                ps.setTimestamp(5, new Timestamp(d.getTime()));
-                ps.executeUpdate();
-                ps.close();
-                connection.close();
+                final String sql =
+                        "INSERT INTO logevent(session, path, date, logtype, collection_id) " +
+                        "SELECT ?, path, NOW(), ?, parentcollection_id FROM monitored_item m " +
+                        "WHERE m.parentcollection_id = ? AND m.state = ? AND m.statechange = ?";
+
+                Query insert = em.createNativeQuery(sql);
+                insert.setParameter(1, session);
+                insert.setParameter(2, LogEnum.FILE_MISSING.getType());
+                insert.setParameter(3, coll.getId());
+                insert.setParameter(4, String.valueOf('M'));
+                insert.setParameter(5, start);
+                insert.executeUpdate();
             }
-            trans.commit();
-        } catch (SQLException e) {
-            trans.rollback();
-            LOG.error("SQL error, rolling back missing items and log entries", e);
         } finally {
+            trans.commit();
             em.close();
         }
     }

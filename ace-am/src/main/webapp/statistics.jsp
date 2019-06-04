@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <jsp:include page="imports.jsp"/>
-    <title>Statistics</title>
+    <title>Collection Ingest Reporting</title>
 
     <style type="text/css">
         /**
@@ -43,7 +43,7 @@
 </head>
 <body>
 <jsp:include page="header.jsp"/>
-<h3 style="text-align: center;">Ingestion Statistics</h3>
+<h3 style="text-align: center;">Collection Ingestion Report</h3>
 <div class="container">
     <div id="searchtable">
         <form method="POST" role="form">
