@@ -1,5 +1,7 @@
 package edu.umiacs.ace.rest;
 
+import edu.umiacs.util.Argument;
+
 import java.util.Date;
 
 /**
@@ -22,15 +24,22 @@ public class MonitoredItemBean {
     public MonitoredItemBean() {
     }
 
-    public MonitoredItemBean(Long id, String path, char state, String fileDigest, Long size , Date lastSeen, Date stateChange, Date lastVisited) {
+    public MonitoredItemBean(Long id,
+                             String path,
+                             char state,
+                             String fileDigest,
+                             Long size,
+                             Date lastSeen,
+                             Date stateChange,
+                             Date lastVisited) {
         this.id = id;
         this.path = path;
         this.state = String.valueOf(state);
         this.fileDigest = fileDigest;
         this.size = size;
-        this.lastSeen = lastSeen;
-        this.stateChange = stateChange;
-        this.lastVisited = lastVisited;
+        this.lastSeen = Argument.dateClone(lastSeen);
+        this.stateChange = Argument.dateClone(stateChange);
+        this.lastVisited = Argument.dateClone(lastVisited);
     }
 
 
@@ -84,7 +93,7 @@ public class MonitoredItemBean {
     }
 
     public MonitoredItemBean setLastSeen(Date lastSeen) {
-        this.lastSeen = lastSeen;
+        this.lastSeen = Argument.dateClone(lastSeen);
         return this;
     }
 
@@ -93,7 +102,7 @@ public class MonitoredItemBean {
     }
 
     public MonitoredItemBean setStateChange(Date stateChange) {
-        this.stateChange = stateChange;
+        this.stateChange = Argument.dateClone(stateChange);
         return this;
     }
 
@@ -102,7 +111,7 @@ public class MonitoredItemBean {
     }
 
     public MonitoredItemBean setLastVisited(Date lastVisited) {
-        this.lastVisited = lastVisited;
+        this.lastVisited = Argument.dateClone(lastVisited);
         return this;
     }
 }

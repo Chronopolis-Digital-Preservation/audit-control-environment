@@ -32,10 +32,10 @@ package edu.umiacs.ace.monitor.core;
 
 import edu.umiacs.ace.hashtree.ProofHash;
 import edu.umiacs.ace.hashtree.ProofNode;
-import edu.umiacs.util.Strings;
-import edu.umiacs.ace.monitor.core.Token;
 import edu.umiacs.ace.util.HashValue;
 import edu.umiacs.util.Check;
+import edu.umiacs.util.Strings;
+
 import java.util.Date;
 
 /**
@@ -81,16 +81,16 @@ public class TokenBuilder {
     }
 
     public void addHashLevel(int inheritIdx, ProofNode hashes) {
+        if ( hashes.getHashes() == null || hashes.getHashes().size() < 1 ) {
+            throw new IllegalArgumentException("Hash list must have at least 1 hash");
+        }
+
         int pos = 0;
         int size = hashes.getHashes().size();
 
         if ( inheritIdx < 0 || inheritIdx > hashes.getHashes().size() ) {
             throw new IllegalArgumentException("Supplied index outside hashes list: "
                     + inheritIdx + "/" + hashes.getHashes().size());
-        }
-
-        if ( hashes.getHashes() == null || hashes.getHashes().size() < 1 ) {
-            throw new IllegalArgumentException("Hash list must have at least 1 hash");
         }
 
         for ( ProofHash hash : hashes.getHashes() ) {

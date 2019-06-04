@@ -54,9 +54,9 @@ import java.util.List;
 /**
  * Log summary generator, this will generate a report summarizing all log entries
  * made between the specified dates. If the end date is the current time, then
- * additional information will be contained showing the current state of the 
+ * additional information will be contained showing the current state of the
  * collection.
- * 
+ *
  * @author toaster
  */
 public class SummaryGenerator extends ReportItemTypes {
@@ -65,29 +65,27 @@ public class SummaryGenerator extends ReportItemTypes {
     private Date startDate;
     private long sessionID = 0;
     private String reportName;
-    private List<ReportItem> itemList = new ArrayList<ReportItem>();
+    private List<ReportItem> itemList = new ArrayList<>();
     private static final Logger LOG = Logger.getLogger(SummaryGenerator.class);
 
-    public SummaryGenerator( String reportName, Collection collection,
-            Date startDate ) {
+    public SummaryGenerator(String reportName, Collection collection, Date startDate) {
         this.collection = collection;
         this.startDate = Argument.dateClone(startDate);
 
-        if ( Strings.isEmpty(reportName) ) {
-            reportName = "Report Starting " + startDate;
-        }
-        {
+        if (Strings.isEmpty(reportName)) {
+            this.reportName = "Report Starting " + startDate;
+        } else {
             this.reportName = reportName;
         }
     }
 
-    public SummaryGenerator( Collection collection, long session ) {
+    public SummaryGenerator(Collection collection, long session) {
         this.collection = collection;
         this.sessionID = session;
         reportName = "Session Report: " + session;
     }
 
-    public SummaryGenerator( Collection collection ) {
+    public SummaryGenerator(Collection collection) {
         this.collection = collection;
         reportName = "Entire Collection Report";
     }
@@ -99,7 +97,7 @@ public class SummaryGenerator extends ReportItemTypes {
         try {
             queryCurrentState();
             queryLogHistory();
-        } catch ( SQLException e ) {
+        } catch (SQLException e) {
             LOG.error("Error creating report", e);
         }
 
@@ -112,7 +110,7 @@ public class SummaryGenerator extends ReportItemTypes {
         summary.setEndDate(reportEndDate);
         summary.setReportName(reportName);
 
-        for ( ReportItem ri : itemList ) {
+        for (ReportItem ri : itemList) {
             ri.setReport(summary);
         }
 
@@ -124,12 +122,12 @@ public class SummaryGenerator extends ReportItemTypes {
             try {
                 em.persist(summary);
                 et.commit();
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 LOG.error("Error commiting summary ", e);
                 et.rollback();
             }
         } finally {
-            if ( em != null ) {
+            if (em != null) {
                 em.close();
             }
             LOG.debug("Finished creating report for " + collection.getName());
@@ -147,7 +145,7 @@ public class SummaryGenerator extends ReportItemTypes {
         try {
             // query selects lowest date, id, count for groupings of log types
             connection = ds.getConnection();
-            if ( sessionID > 0 ) {
+            if (sessionID > 0) {
                 ps = connection.prepareStatement("SELECT MIN(logevent.DATE), "
                         + "MIN(logevent.ID), logevent.LOGTYPE, count(logevent.LOGTYPE)"
                         + "FROM logevent WHERE logevent.SESSION = ? AND "
@@ -155,8 +153,8 @@ public class SummaryGenerator extends ReportItemTypes {
                 ps.setLong(1, sessionID);
                 ps.setLong(2, collection.getId());
 
-            } else if ( startDate != null ) {
-
+            } else if (startDate != null) {
+                // startDate is truncated from the argument.dateClone above
                 ps = connection.prepareStatement("SELECT MIN(logevent.DATE), "
                         + "MIN(logevent.ID), logevent.LOGTYPE, count(logevent.LOGTYPE)"
                         + "FROM logevent WHERE logevent.DATE >= ? AND "
@@ -175,11 +173,11 @@ public class SummaryGenerator extends ReportItemTypes {
             // create entries for each result, for start date and session id
             // use lowest returned
             rs = ps.executeQuery();
-            while ( rs.next() ) {
-                if ( startDate == null || startDate.after(rs.getTimestamp(1)) ) {
+            while (rs.next()) {
+                if (startDate == null || startDate.after(rs.getTimestamp(1))) {
                     startDate = rs.getTimestamp(1);
                 }
-                if ( sessionID == 0 || sessionID > rs.getLong(2) ) {
+                if (sessionID == 0 || sessionID > rs.getLong(2)) {
                     sessionID = rs.getLong(2);
                 }
                 String logName = LogEnum.valueOf(rs.getInt(3)).getShortName();
@@ -204,21 +202,21 @@ public class SummaryGenerator extends ReportItemTypes {
             connection = ds.getConnection();
             ps = connection.prepareStatement(
                     "SELECT monitored_item.STATE, count(monitored_item.STATE) "
-                    + "FROM monitored_item " + "WHERE monitored_item.PARENTCOLLECTION_ID = ? AND "
-                    + "monitored_item.DIRECTORY = 0 " + "GROUP BY monitored_item.STATE");
+                            + "FROM monitored_item " + "WHERE monitored_item.PARENTCOLLECTION_ID = ? AND "
+                            + "monitored_item.DIRECTORY = 0 " + "GROUP BY monitored_item.STATE");
             ps.setLong(1, collection.getId());
             rs = ps.executeQuery();
             long total = 0;
             long totalErrors = 0;
 
-            while ( rs.next() ) {
+            while (rs.next()) {
                 char state = rs.getString(1).charAt(0);
                 long count = rs.getLong(2);
 
                 total += count;
 
 
-                switch ( state ) {
+                switch (state) {
                     case 'A':
                         itemList.add(new ReportItem(ACTIVE, count, false));
                         break;

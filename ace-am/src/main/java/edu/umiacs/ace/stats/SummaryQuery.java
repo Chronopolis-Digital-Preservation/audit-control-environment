@@ -29,6 +29,7 @@ import java.util.List;
  *
  * TODO: Paged for large summaries
  * TODO: Query for no groups
+ * TODO: See if we can use the report_summary table to speed up the query
  *
  * Created by shake on 8/30/16.
  */

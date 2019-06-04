@@ -46,7 +46,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 
     <um:Auth role="Status">
         <li class="nav-item">
-        <a class="nav-link" href="Statistics">Statistics</a>
+        <a class="nav-link" href="Statistics">Reporting</a>
             </li>
     </um:Auth>
 </ul>
