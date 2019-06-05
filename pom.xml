@@ -6,7 +6,7 @@
 
     <groupId>edu.umiacs.ace</groupId>
     <artifactId>ace</artifactId>
-    <version>1.14-SNAPSHOT</version>
+    <version>1.14-RELEASE</version>
     <packaging>pom</packaging>
     <scm>
         <connection>scm:git:https://gitlab.umiacs.umd.edu/adapt/ace.git</connection>
@@ -37,6 +37,11 @@
             <url>https://scm.umiacs.umd.edu/adapt/repository/maven-releases/</url>
             <id>adapt-sonatype</id>
             <name>ADAPT Project Repository</name>
+        </repository>
+        <repository>
+            <url>https://scm.umiacs.umd.edu/adapt/repository/maven-snapshots/</url>
+            <id>adapt-snapshots</id>
+            <name>ADAPT Snapshot Repository</name>
         </repository>
         <repository>
             <name>OSS Sonatype Staging</name>

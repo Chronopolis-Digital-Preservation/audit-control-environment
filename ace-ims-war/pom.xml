@@ -4,7 +4,7 @@
     <parent>
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
-        <version>1.14-SNAPSHOT</version>
+        <version>1.14-RELEASE</version>
     </parent>
     <artifactId>ace-ims-war</artifactId>
     <name>ace-ims-war</name>

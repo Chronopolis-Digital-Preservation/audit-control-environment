@@ -176,7 +176,7 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn" value="Submit"><span>Submit</span></button>
+                <button type="submit" class="btn is-secondary" value="Submit"><span>Submit</span></button>
             </form>
         </div>
         <table id="statustable">
