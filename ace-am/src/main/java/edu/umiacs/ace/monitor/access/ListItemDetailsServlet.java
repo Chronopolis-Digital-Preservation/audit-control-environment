@@ -30,23 +30,24 @@
 // $Id$
 package edu.umiacs.ace.monitor.access;
 
-import edu.umiacs.ace.util.EntityManagerServlet;
+import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.core.MonitoredItemManager;
-import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.util.Strings;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * List details for a file or directory
- * 
+ *
  * @author toaster
  */
 public final class ListItemDetailsServlet extends EntityManagerServlet {
@@ -56,30 +57,30 @@ public final class ListItemDetailsServlet extends EntityManagerServlet {
     private static final String PARAM_PATH = "itempath";
 
     @Override
-    protected void processRequest( HttpServletRequest request,
-            HttpServletResponse response, EntityManager em ) throws ServletException, IOException {
-
+    protected void processRequest(HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  EntityManager em) throws ServletException, IOException {
         Collection coll = getCollection(request, em);
         String path = getParameter(request, PARAM_PATH, "");
         MonitoredItemManager mim = new MonitoredItemManager(em);
 
-        if ( coll == null ) {
-            throw new ServletException("No collection found");
+        if (coll == null) {
+            response.sendError(400, "collectionid must be present");
+            return;
         }
 
-        if ( Strings.isEmpty(path) ) {
-
-
+        if (Strings.isEmpty(path)) {
             request.setAttribute(PAGE_ITEMS, mim.getCollectionRoots(coll));
         } else {
             MonitoredItem item = mim.getItemByPath(path, coll);
-            if ( item == null ) {
-                throw new ServletException("No item for path " + path);
+            if (item == null) {
+                response.sendError(400, "No item for path " + path);
+                return;
             }
+
             List<MonitoredItem> childItems;
-            if ( item.isDirectory() ) {
-                childItems = mim.listChildren(item.getParentCollection(),
-                        item.getPath());
+            if (item.isDirectory()) {
+                childItems = mim.listChildren(item.getParentCollection(), item.getPath());
             } else {
                 childItems = Collections.emptyList();
             }
@@ -88,13 +89,12 @@ public final class ListItemDetailsServlet extends EntityManagerServlet {
         }
 
         RequestDispatcher dispatcher;
-        if ( hasJson(request) ) {
+        if (hasJson(request)) {
             dispatcher = request.getRequestDispatcher("listitem-json.jsp");
         } else {
             dispatcher = request.getRequestDispatcher("listitem.jsp");
         }
+
         dispatcher.forward(request, response);
-
-
     }
 }
