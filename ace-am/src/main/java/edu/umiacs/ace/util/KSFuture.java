@@ -12,6 +12,9 @@ import static edu.umiacs.ace.util.Submittable.RunState.RUNNING;
 /**
  * KnownSubmittableFuture. Just so we have less generics going around.
  *
+ * Note: We could extend FutureTask here instead of in the KnownFuture - one less class to have
+ * floating around.
+ *
  * Created by shake on 9/14/15.
  */
 public class KSFuture<V extends Runnable> extends KnownFuture<Submittable<V>> {

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
-        <version>1.13-RELEASE</version>
+        <version>1.14-RELEASE</version>
     </parent>
 
     <packaging>ear</packaging>
@@ -49,6 +49,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-ear-plugin</artifactId>
+                <version>3.0.1</version>
                 <configuration>
                     <defaultLibBundleDir>lib</defaultLibBundleDir>
                     <modules>

@@ -59,17 +59,19 @@ import java.util.Properties;
 
 /**
  * Context listener to control the starting and stopping of the quartz scheduler used to generate
- * reports. 
+ * reports.
+ *
  * @author toaster
  */
 public class SchedulerContextListener implements ServletContextListener {
+    private static final Logger LOG = Logger.getLogger(SchedulerContextListener.class);
+    private static final String JOB_PREFIX = "report-";
+    private static final String TRIGGER_PREFIX = "reporttrigger-";
 
-    public static final String PARAM_SMTP_SERVER = "mail.server";
-    public static final String PARAM_FROM = "mail.from";
-    private SchedulerFactory schedFact = null;
+    // todo: could get these from settings params
+    private static final String PARAM_SMTP_SERVER = "mail.server";
+    private static final String PARAM_FROM = "mail.from";
     private static Scheduler sched = null;
-    private static final Logger LOG = Logger.getLogger(
-            SchedulerContextListener.class);
     private static String mailserver;
     private static String mailfrom;
 
@@ -86,7 +88,7 @@ public class SchedulerContextListener implements ServletContextListener {
             s = SettingsUtil.getOrDefault(PARAM_FROM, SettingsConstants.mailFrom, em);
             mailfrom = s.getValue();
 
-            schedFact = new org.quartz.impl.StdSchedulerFactory();
+            SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
             sched = schedFact.getScheduler();
             sched.start();
             LOG.debug("Starting the scheduler, registering all jobs");
@@ -104,8 +106,7 @@ public class SchedulerContextListener implements ServletContextListener {
     }
 
     @Override
-    public void contextDestroyed(
-            ServletContextEvent arg0) {
+    public void contextDestroyed(ServletContextEvent arg0) {
         try {
             if (sched != null) { // npe if startup never worked
                 sched.shutdown();
@@ -116,31 +117,30 @@ public class SchedulerContextListener implements ServletContextListener {
         }
     }
 
-    public static final void removeJob(ReportPolicy job) {
+    public static void removeJob(ReportPolicy job) {
         try {
+            final String jobName = JOB_PREFIX + job.getId();
             LOG.debug("Removing job " + job.getName());
-            sched.deleteJob("report-" + job.getId(), null);
+            sched.deleteJob(jobName, null);
         } catch (SchedulerException e) {
             LOG.error("Error removing " + job.getName(), e);
-            throw new RuntimeException("Error removeing job " + job.getName());
+            throw new RuntimeException("Error removing job " + job.getName());
         }
     }
 
-    public static final void addJob(ReportPolicy job) {
-        JobDetail detail = new JobDetail("report-" + job.getId(), null,
-                ReportJob.class);
-        detail.getJobDataMap().put(ReportJob.ATTR_POLICY, job);
+    public static void addJob(ReportPolicy job) {
+        final String jobName = JOB_PREFIX + job.getId();
+        final String triggerName = TRIGGER_PREFIX + job.getId();
 
+        JobDetail detail = new JobDetail(jobName, null, ReportJob.class);
+        detail.getJobDataMap().put(ReportJob.ATTR_POLICY, job);
         try {
-            Trigger cronTrig = new CronTrigger("reporttrigger-" + job.getId(),
-                    null, job.getCronString());
-            LOG.debug(
-                    "Adding job " + job.getName() + " cron " + job.getCronString());
+            Trigger cronTrig = new CronTrigger(triggerName, null, job.getCronString());
+            LOG.debug("Adding job " + job.getName() + " cron " + job.getCronString());
             sched.scheduleJob(detail, cronTrig);
         } catch (ParseException pe) {
             LOG.error("Error creating trigger", pe);
-            throw new RuntimeException(
-                    "Error parsing cron trigger in job" + job.getName());
+            throw new RuntimeException("Error parsing cron trigger in job" + job.getName());
         } catch (SchedulerException e) {
             LOG.error("Error adding " + job.getName(), e);
             throw new RuntimeException("Error adding job " + job.getName());

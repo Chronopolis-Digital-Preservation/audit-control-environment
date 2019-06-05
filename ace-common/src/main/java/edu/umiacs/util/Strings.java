@@ -116,7 +116,7 @@ public final class Strings
         }
     }
 
-        /**
+    /**
      * Determines if a string is a valid integer.
      *
      * @param val string value to check.
@@ -134,6 +134,20 @@ public final class Strings
         }
         catch ( NumberFormatException e )
         {
+            return false;
+        }
+    }
+
+    /**
+     * Determine if a string is a valid integer which is greater than or equal to 0.
+     *
+     * @param val string value to check
+     * @return true if {@code val} can successfully be parsed and is positive
+     */
+    public static boolean isNonNegativeInt(Object val) {
+        try {
+            return isValidInt(val) && Integer.parseInt(val.toString()) >= 0;
+        } catch (NumberFormatException e) {
             return false;
         }
     }

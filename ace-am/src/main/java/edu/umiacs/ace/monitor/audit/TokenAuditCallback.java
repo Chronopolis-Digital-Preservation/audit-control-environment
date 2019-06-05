@@ -57,14 +57,14 @@ public final class TokenAuditCallback implements ValidationCallback {
     private long totalErrors = 0;
     private long validTokens = 0;
     private CancelCallback cancel;
-    //    private Collection collection;
-    LogEventManager logManager;
+    private LogEventManager logManager;
 
-    public TokenAuditCallback( Map<AceToken, MonitoredItem> itemMap,
-            CancelCallback callback, Collection collection, long session ) {
+    public TokenAuditCallback(Map<AceToken, MonitoredItem> itemMap,
+                              CancelCallback callback,
+                              Collection collection,
+                              long session ) {
         this.itemMap = itemMap;
         this.cancel = callback;
-        //        this.collection = collection;
         logManager = new LogEventManager(session, collection);
     }
 
@@ -81,12 +81,8 @@ public final class TokenAuditCallback implements ValidationCallback {
         totalErrors++;
         LOG.error("Exception throw registering", throwable);
         EntityManager em = PersistUtil.getEntityManager();
-        // EntityTransaction trans = em.getTransaction();
-        // trans.begin();
         String msg = "Exception in batch thread" + Strings.exceptionAsString(throwable);
         logManager.persistCollectionEvent(LogEnum.SYSTEM_ERROR, msg, em);
-        //        lem.abortSite(collection, "Exception in batch thread", throwable);
-        // trans.commit();
         em.close();
         cancel.cancel();
     }
@@ -106,10 +102,7 @@ public final class TokenAuditCallback implements ValidationCallback {
 
         if ( !token.getValid() ) {
             token.setValid(true);
-            //            LogEventManager lem = new LogEventManager(session, collection);
-            //            String path = response.getName();
             em.persist(logManager.createItemEvent(LogEnum.TOKEN_VALID, item.getPath()));
-            //            em.persist(lem.validToken(path, collection));
         }
 
         if ( item.getState() == 'I' || item.getState() == 'R' ) {

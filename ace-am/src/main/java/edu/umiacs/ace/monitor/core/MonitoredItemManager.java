@@ -34,11 +34,11 @@ package edu.umiacs.ace.monitor.core;
 import edu.umiacs.ace.monitor.log.LogEnum;
 import edu.umiacs.ace.monitor.log.LogEventManager;
 import edu.umiacs.ace.util.PersistUtil;
-import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -49,41 +49,25 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- *
  * @author toaster
  */
 public class MonitoredItemManager {
 
     private static Lock lock = new ReentrantLock();
-    private static final Logger LOG = Logger.getLogger(
-            MonitoredItemManager.class);
-    EntityManager em;
+    private EntityManager em;
     // TODO: This may leak...
     private Set<String> existingParents = new HashSet<>();
 
-    public MonitoredItemManager( EntityManager em ) {
+    public MonitoredItemManager(EntityManager em) {
         this.em = em;
     }
 
-    public Iterable<MonitoredItem> listItemsBefore( Collection c, Date d ) {
-        lock.lock();
-        try {
-
-            Query q = em.createNamedQuery("MonitoredItem.listItemsBefore");
-            q.setParameter("date", d);
-            q.setParameter("coll", c);
-            return q.getResultList();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public void createDirectory( String directory, String root, Collection c ) {
+    public void createDirectory(String directory, String root, Collection c) {
         MonitoredItem mi;
-        if ( existingParents.contains(directory) || directory == null ) {
+        if (existingParents.contains(directory) || directory == null) {
             return;
         }
-        if ( (mi = getItemByPath(directory, c)) != null ) {
+        if ((mi = getItemByPath(directory, c)) != null) {
             EntityTransaction trans = em.getTransaction();
             trans.begin();
             Date d = new Date();
@@ -100,26 +84,25 @@ public class MonitoredItemManager {
     }
 
     /**
-     * 
-     * 
      * @param path path to look for
      * @return MonitoredItem if exist, null otherwise
      */
-    public MonitoredItem getItemByPath( String path, Collection c ) {
+    public MonitoredItem getItemByPath(String path, Collection c) {
         lock.lock();
         try {
             MonitoredItem tmp = new MonitoredItem();
             tmp.setPath(path);
 
-            Query q = em.createNamedQuery("MonitoredItem.getItemByPath");
+            TypedQuery<MonitoredItem> q =
+                    em.createNamedQuery("MonitoredItem.getItemByPath", MonitoredItem.class);
             q.setParameter("path", path);
             q.setParameter("coll", c);
 
             // Make sure we have the correct item
             List<MonitoredItem> li = q.getResultList();
-            Collections.sort(li, new PathComparator());
+            li.sort(new PathComparator());
             int idx = Collections.binarySearch(li, tmp, new PathComparator());
-            return (idx >= 0 ? li.get(idx): null);
+            return (idx >= 0 ? li.get(idx) : null);
         } finally {
             lock.unlock();
         }
@@ -130,23 +113,23 @@ public class MonitoredItemManager {
      * @param id to get
      * @return the monitored item
      */
-    public MonitoredItem getItemById( String id, Collection c ) {
+    public MonitoredItem getItemById(String id, Collection c) {
         EntityManager pem = PersistUtil.getEntityManager();
         return pem.find(MonitoredItem.class, Long.parseLong(id));
     }
 
     /**
      * Set the state on all items that contain no tokens to false
-     * 
+     *
      * @param c
      */
-    public void setMissingTokensInvalid( Collection c, long session ) {
+    public void setMissingTokensInvalid(Collection c, long session) {
         Query q = em.createNamedQuery("MonitoredItem.listNullTokens");
         q.setParameter("coll", c);
 
-        LogEventManager lem = new LogEventManager(session,c);
+        LogEventManager lem = new LogEventManager(session, c);
 
-        for ( Object o : q.getResultList() ) {
+        for (Object o : q.getResultList()) {
             MonitoredItem mi = (MonitoredItem) o;
             mi.setState('T');
             EntityTransaction et = em.getTransaction();
@@ -159,16 +142,21 @@ public class MonitoredItemManager {
 
     /**
      * Create new master item, master item has no replicas.
-     * 
-     * @param path relative path to this item (w/o collection prefix)
-     * @param parentDir relative parent path to this item, null if parent is collection
-     * @param directory true if this is a directory
+     *
+     * @param path             relative path to this item (w/o collection prefix)
+     * @param parentDir        relative parent path to this item, null if parent is collection
+     * @param directory        true if this is a directory
      * @param parentCollection collection this item belongs to
+     * @param initialState     the initial state to set
+     * @param size             the size to set
      * @return
      */
-    public MonitoredItem addItem( String path, String parentDir,
-            boolean directory,
-            Collection parentCollection, char initialState, long size ) {
+    public MonitoredItem addItem(String path,
+                                 String parentDir,
+                                 boolean directory,
+                                 Collection parentCollection,
+                                 char initialState,
+                                 long size) {
         lock.lock();
         try {
             MonitoredItem mi = new MonitoredItem();
@@ -193,11 +181,11 @@ public class MonitoredItemManager {
         }
     }
 
-    public List<MonitoredItem> getCollectionRoots( Collection parent ) {
-
+    public List<MonitoredItem> getCollectionRoots(Collection parent) {
         lock.lock();
         try {
-            Query q = em.createNamedQuery("MonitoredItem.listRoots");
+            TypedQuery<MonitoredItem> q =
+                    em.createNamedQuery("MonitoredItem.listRoots", MonitoredItem.class);
             q.setParameter("coll", parent);
             return q.getResultList();
         } finally {
@@ -207,14 +195,15 @@ public class MonitoredItemManager {
 
     /**
      * List all files that are in state P or D
-     * 
+     *
      * @param coll
      * @return
      */
-    public List<MonitoredItem> listRemoteErrors( Collection coll ) {
+    public List<MonitoredItem> listRemoteErrors(Collection coll) {
         lock.lock();
         try {
-            Query q = em.createNamedQuery("MonitoredItem.listRemoteErrors");
+            TypedQuery<MonitoredItem> q =
+                    em.createNamedQuery("MonitoredItem.listRemoteErrors", MonitoredItem.class);
             q.setParameter("coll", coll);
             return q.getResultList();
         } finally {
@@ -222,24 +211,22 @@ public class MonitoredItemManager {
         }
     }
 
-    public List<MonitoredItem> listChildren( Collection coll, String parentPath ) {
+    public List<MonitoredItem> listChildren(Collection coll, String parentPath) {
         lock.lock();
         try {
-            Query q = em.createNamedQuery("MonitoredItem.listChildren");
+            TypedQuery<MonitoredItem> q =
+                    em.createNamedQuery("MonitoredItem.listChildren", MonitoredItem.class);
             q.setParameter("coll", coll);
             q.setParameter("parent", parentPath);
             return q.getResultList();
-
         } finally {
             lock.unlock();
         }
     }
 
-    public Long countErrorsInCollection( Collection c ) {
-
+    public Long countErrorsInCollection(Collection c) {
         Query q = em.createNamedQuery("MonitoredItem.countErrorsInCollection");
         q.setParameter("coll", c);
-
         return (Long) q.getSingleResult();
     }
 

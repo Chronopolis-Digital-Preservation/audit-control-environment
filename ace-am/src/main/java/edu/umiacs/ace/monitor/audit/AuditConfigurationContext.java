@@ -55,6 +55,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
 
+import static edu.umiacs.ace.monitor.settings.SettingsConstants.*;
+
 /**
  * Set the IMS for the AuditThread to use. Also, startup a background task
  * to handle firing off monitor tasks.
@@ -65,13 +67,6 @@ import java.util.stream.Collectors;
  */
 public final class AuditConfigurationContext implements ServletContextListener {
 
-    //private static final String PARAM_IMS = "ims";
-    //private static final String PARAM_IMS_PORT = "ims.port";
-    //private static final String PARAM_IMS_TOKEN_CLASS = "ims.tokenclass";
-    //private static final String PARAM_IMS_SSL = "ims.ssl";
-    //private static final String PARAM_DISABLE_AUTO_AUDIT = "auto.audit.disable";
-    //private static final String PARAM_THROTTLE_MAXAUDIT = "throttle.maxaudit";
-    //private static final String PARAM_AUDIT_ONLY = "audit.only";
     public static final String ATTRIBUTE_PAUSE = "pause";
     private static final long HOUR = 1000 * 60 * 60;
     private Timer checkTimer;
@@ -98,68 +93,51 @@ public final class AuditConfigurationContext implements ServletContextListener {
         ctx.setAttribute(ATTRIBUTE_PAUSE, pb);
 
         // Invert the boolean because the PB checks if we're paused, not enabled
-        String enableAudits = resultMap.getOrDefault(
-                SettingsConstants.PARAM_AUTO_AUDIT_ENABLE,
-                SettingsConstants.autoAudit);
+        String enableAudits = resultMap.getOrDefault(PARAM_AUTO_AUDIT_ENABLE, autoAudit);
         pb.setPaused(!Boolean.valueOf(enableAudits));
 
         checkTimer = new Timer("Audit Check Timer");
         checkTimer.schedule(new MyTimerTask(pb), 0, HOUR);
 
         // set IMS for audit Thread from server parameter
-        AuditThreadFactory.setIMS(resultMap.getOrDefault(
-                SettingsConstants.PARAM_IMS,
-                SettingsConstants.ims));
+        AuditThreadFactory.setIMS(resultMap.getOrDefault(PARAM_IMS, ims));
 
-        String tokenClass = resultMap.getOrDefault(
-                SettingsConstants.PARAM_IMS_TOKEN_CLASS,
-                SettingsConstants.imsTokenClass);
+        String tokenClass = resultMap.getOrDefault(PARAM_IMS_TOKEN_CLASS, imsTokenClass);
         AuditThreadFactory.setTokenClass(tokenClass);
 
-        String port = resultMap.getOrDefault(
-                SettingsConstants.PARAM_IMS_PORT,
-                SettingsConstants.imsPort);
+        String port = resultMap.getOrDefault(PARAM_IMS_PORT, imsPort);
         if (Strings.isValidInt(port)) {
            AuditThreadFactory.setImsPort(Integer.parseInt(port));
         }
 
-        String auditOnly = resultMap.getOrDefault(
-                SettingsConstants.PARAM_AUDIT_ONLY,
-                SettingsConstants.auditOnly);
+        String auditOnly = resultMap.getOrDefault(PARAM_AUDIT_ONLY, SettingsConstants.auditOnly);
         AuditThreadFactory.setAuditOnly(Boolean.valueOf(auditOnly));
 
-        // keep this off for now even though it isn't used
-        AuditThreadFactory.setAuditSampling(false);
-
-        String imsSsl = resultMap.getOrDefault(
-                SettingsConstants.PARAM_IMS_SSL,
-                SettingsConstants.imsSSL);
+        String imsSsl = resultMap.getOrDefault(PARAM_IMS_SSL, imsSSL);
         AuditThreadFactory.setSSL(Boolean.valueOf(imsSsl));
 
-        String blocking = resultMap.getOrDefault(
-                SettingsConstants.PARAM_AUDIT_BLOCKING,
-                SettingsConstants.auditBlocking);
+        String blocking = resultMap.getOrDefault(PARAM_AUDIT_BLOCKING, auditBlocking);
         AuditThreadFactory.setBlocking(Boolean.valueOf(blocking));
 
-        String blockTimeS = resultMap.getOrDefault(
-                SettingsConstants.PARAM_AUDIT_MAX_BLOCK_TIME,
-                SettingsConstants.auditMaxBlockTime);
-        int blockTime = 0;
-        if (Strings.isValidInt(blockTimeS)) {
-            blockTime = Integer.parseInt(blockTimeS);
+        int maxRetry = Integer.parseInt(imsMaxRetry);
+        String imsRetryString = resultMap.getOrDefault(PARAM_IMS_MAX_RETRY, imsMaxRetry);
+        if (Strings.isNonNegativeInt(imsRetryString)) {
+            maxRetry = Integer.parseInt(imsRetryString);
         }
+        AuditThreadFactory.setImsRetryAttempts(maxRetry);
 
-        // Just in case...
-        if (blockTime < 0) {
-            blockTime = 0;
+        int resetTimeout = Integer.parseInt(imsResetTimeout);
+        String imsResetTimeout = resultMap.getOrDefault(
+                PARAM_IMS_RESET_TIMEOUT,
+                SettingsConstants.imsResetTimeout);
+        if (Strings.isNonNegativeInt(imsResetTimeout)) {
+            resetTimeout = Integer.parseInt(imsResetTimeout);
         }
-        AuditThreadFactory.setMaxBlockTime(blockTime);
+        AuditThreadFactory.setImsResetTimeout(resetTimeout);
 
-        String maxAudit = resultMap.getOrDefault(
-                SettingsConstants.PARAM_THROTTLE_MAXAUDIT,
-                SettingsConstants.maxAudit);
-        if (Strings.isValidInt(maxAudit)) {
-            int audit = Integer.parseInt(maxAudit);
+        String maxAuditString = resultMap.getOrDefault(PARAM_THROTTLE_MAXAUDIT, maxAudit);
+        if (Strings.isValidInt(maxAuditString)) {
+            int audit = Integer.parseInt(maxAuditString);
             if (audit > 0) {
                 AuditThreadFactory.setMaxAudits(audit);
             }

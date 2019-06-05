@@ -6,32 +6,36 @@
 package edu.umiacs.ace.monitor.settings;
 
 import edu.umiacs.ace.util.EntityManagerServlet;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
+import org.apache.log4j.Logger;
+
+import javax.persistence.EntityManager;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author shake
  */
-public class AddSettingServlet extends EntityManagerServlet{
+public class AddSettingServlet extends EntityManagerServlet {
+
+    private static final Logger log = Logger.getLogger(AddSettingServlet.class);
 
     @Override
-    protected void processRequest(HttpServletRequest request, HttpServletResponse
-            response, EntityManager em) throws ServletException, IOException {
-        List<SettingsParameter> customSettings = new ArrayList<SettingsParameter>();
+    protected void processRequest(HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  EntityManager em) throws ServletException, IOException {
+        List<SettingsParameter> customSettings = new ArrayList<>();
 
         ServletFileUpload su = new ServletFileUpload();
         try {
@@ -58,7 +62,7 @@ public class AddSettingServlet extends EntityManagerServlet{
 
             }
         } catch (FileUploadException ex) {
-            //            Logger.getLogger(SettingsServlet.class.getName()).log(Level.SEVERE, null, ex);
+            log.warn("Exception in AddSettingServlet", ex);
         }
 
         SettingsUtil.updateSettings(customSettings);

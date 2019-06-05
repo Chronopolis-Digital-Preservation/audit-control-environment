@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>edu.umiacs.ace</groupId>
     <artifactId>ace</artifactId>
-    <version>1.13-RELEASE</version>
+    <version>1.14-RELEASE</version>
     <packaging>pom</packaging>
     <scm>
-        <connection>scm:svn:https://subversion.umiacs.umd.edu/ace/tags/ace-1.9</connection>
+        <connection>scm:git:https://gitlab.umiacs.umd.edu/adapt/ace.git</connection>
     </scm>
 
     <name>ace</name>
@@ -17,10 +19,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.0.2</version>
+                <version>3.8.0</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
         </plugins>
@@ -35,6 +37,11 @@
             <url>https://scm.umiacs.umd.edu/adapt/repository/maven-releases/</url>
             <id>adapt-sonatype</id>
             <name>ADAPT Project Repository</name>
+        </repository>
+        <repository>
+            <url>https://scm.umiacs.umd.edu/adapt/repository/maven-snapshots/</url>
+            <id>adapt-snapshots</id>
+            <name>ADAPT Snapshot Repository</name>
         </repository>
         <repository>
             <name>OSS Sonatype Staging</name>
@@ -58,6 +65,11 @@
             <name>Internal Releases</name>
             <url>https://scm.umiacs.umd.edu/adapt/repository/maven-releases/</url>
         </repository>
+        <snapshotRepository>
+            <id>adapt-snapshots</id>
+            <name>Internal Releases</name>
+            <url>https://scm.umiacs.umd.edu/adapt/repository/maven-snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <dependencies>
@@ -83,17 +95,6 @@
                 <build.identifier>${project.version}</build.identifier>
             </properties>
         </profile>
-        <profile>
-            <id>hudson</id>
-            <activation>
-                <property>
-                    <name>BUILD_NUMBER</name>
-                </property>
-            </activation>
-            <properties>
-                <build.identifier>${project.version} (hudson build:${BUILD_NUMBER} revision:${SVN_REVISION})</build.identifier>
-            </properties>
-        </profile>
     </profiles>
     <modules>
         <module>ace-common</module>
@@ -108,16 +109,5 @@
         <module>ace-ims-ear</module> 
     </modules>
 
-    <!--<reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <configuration>
-                    <configLocation>config/sun_checks.xml</configLocation>
-                </configuration>
-            </plugin>
-        </plugins>
-    </reporting>-->
 </project>
 

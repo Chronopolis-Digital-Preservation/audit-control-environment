@@ -99,10 +99,9 @@ public final class AuditTokens extends Thread implements CancelCallback {
     /**
      * Return a new or existing thread. New threads will start replication
      *
-     * @param c the collection to create a thread for
-     * @return The AuditTokens thread
+     * @param c the {@link Collection} to create an {@link AuditTokens} thread for
      */
-    public static AuditTokens createThread(Collection c) {
+    public static void createThread(Collection c) {
         CollectionThreadPoolExecutor executor = CollectionThreadPoolExecutor.getExecutor();
         AuditTokens at = new AuditTokens(c);
         at.imsHost = AuditThreadFactory.getIMS();
@@ -111,14 +110,9 @@ public final class AuditTokens extends Thread implements CancelCallback {
 
         // If we already submitted, return the existing thread
         // Else add the current thread to the map
-        if (future == null) {
-            KSFuture<AuditTokens> previous = runningThreads.get(c);
-            at = getAuditTokens(previous);
-        } else {
+        if (future != null) {
             runningThreads.put(c, future);
         }
-
-        return at;
     }
 
     public static boolean isRunning(Collection c) {
@@ -203,9 +197,13 @@ public final class AuditTokens extends Thread implements CancelCallback {
                     imsPort,
                     AuditThreadFactory.useSSL(),
                     AuditThreadFactory.isBlocking(),
-                    AuditThreadFactory.getMaxBlockTime());
+                    AuditThreadFactory.getImsRetryAttempts(),
+                    AuditThreadFactory.getImsResetTimeout());
             callback = new TokenAuditCallback(itemMap, this, collection, session);
-            validator = ims.createTokenValidator(callback, 1000, 5000,
+            validator = ims.createTokenValidator(collection.getId().toString(),
+                    callback,
+                    1000,
+                    5000,
                     digest);
         } catch (Throwable e) {
             EntityManager em;

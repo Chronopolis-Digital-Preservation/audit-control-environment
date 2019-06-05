@@ -4,7 +4,7 @@
     <parent>
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
-        <version>1.13-RELEASE</version>
+        <version>1.14-RELEASE</version>
     </parent>
     <artifactId>ace-ims-ejb</artifactId>
     <name>ace-ims-ejb</name>
@@ -46,6 +46,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-ejb-plugin</artifactId>
+                <version>3.0.1</version>
                 <configuration>
                     <ejbVersion>3.0</ejbVersion>
                 </configuration>

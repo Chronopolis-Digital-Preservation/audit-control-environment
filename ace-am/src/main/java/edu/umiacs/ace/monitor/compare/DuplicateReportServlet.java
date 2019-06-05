@@ -32,10 +32,17 @@
 package edu.umiacs.ace.monitor.compare;
 
 import edu.umiacs.ace.monitor.access.CollectionCountContext;
+import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.util.PersistUtil;
-import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.sql.SQL;
+import org.apache.log4j.Logger;
+
+import javax.persistence.EntityManager;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -46,15 +53,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.persistence.EntityManager;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.log4j.Logger;
 
 /**
- *
  * @author toaster
  */
 public class DuplicateReportServlet extends EntityManagerServlet {
@@ -68,8 +68,9 @@ public class DuplicateReportServlet extends EntityManagerServlet {
     public static final String PAGE_TIME = "time";
 
     @Override
-    protected void processRequest( HttpServletRequest request,
-            HttpServletResponse response, EntityManager em ) throws ServletException, IOException {
+    protected void processRequest(HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  EntityManager em) throws ServletException, IOException {
         Collection collection = null;
         RequestDispatcher dispatcher;
         Connection conn = null;
@@ -78,29 +79,29 @@ public class DuplicateReportServlet extends EntityManagerServlet {
 //        long totalFiles = 0;
 
         // digest, # instances of digest
-        Set<MyEntry> duplicateCount = new TreeSet<MyEntry>();
+        Set<MyEntry> duplicateCount = new TreeSet<>();
         // # digest instances, total over all digests
-        List<HistEntry> histogram = new ArrayList<HistEntry>();
+        List<HistEntry> histogram = new ArrayList<>();
 
         long collectionId = getParameter(request, PARAM_COLLECTION_ID, 0);
-        if ( collectionId > 0 ) {
+        if (collectionId > 0) {
             collection = em.getReference(Collection.class, collectionId);
 
             try {
                 conn = PersistUtil.getDataSource().getConnection();
                 PreparedStatement pst =
                         conn.prepareStatement(
-                        "SELECT monitored_item.FILEDIGEST, count(monitored_item.FILEDIGEST) "
-                        + "FROM monitored_item " + "WHERE monitored_item.PARENTCOLLECTION_ID = ? "
-                        + "GROUP BY monitored_item.FILEDIGEST HAVING COUNT(monitored_item.FILEDIGEST) > 1");
+                                "SELECT monitored_item.FILEDIGEST, count(monitored_item.FILEDIGEST) "
+                                        + "FROM monitored_item " + "WHERE monitored_item.PARENTCOLLECTION_ID = ? "
+                                        + "GROUP BY monitored_item.FILEDIGEST HAVING COUNT(monitored_item.FILEDIGEST) > 1");
                 pst.setLong(1, collectionId);
                 ResultSet rs = pst.executeQuery();
 
-                while ( rs.next() ) {
+                while (rs.next()) {
                     String hash = rs.getString(1);
                     int count = rs.getInt(2);
 //                    totalFiles += count;
-                    if ( count > 1 ) {
+                    if (count > 1) {
                         duplicateCount.add(new MyEntry(count, hash));
                         totalDups += count - 1;
                         increment(histogram, count);
@@ -110,13 +111,17 @@ public class DuplicateReportServlet extends EntityManagerServlet {
                 rs.close();
                 pst.close();
                 LOG.info("Duplicate report on " + collection.getName() + " time "
-                + (System.currentTimeMillis() - startTime) + " total dups " + totalDups);
+                        + (System.currentTimeMillis() - startTime) + " total dups " + totalDups);
 
-            } catch ( SQLException e ) {
+            } catch (SQLException e) {
                 throw new ServletException(e);
             } finally {
                 SQL.release(conn);
             }
+        } else {
+            // if there's no collectionid present, return with a bad request
+            response.sendError(400, "collectionid must be present");
+            return;
         }
 
         Collections.sort(histogram);
@@ -127,9 +132,9 @@ public class DuplicateReportServlet extends EntityManagerServlet {
         request.setAttribute(PAGE_LIST, duplicateCount);
         request.setAttribute(PAGE_HISTO, histogram);
         request.setAttribute(PAGE_TIME, (System.currentTimeMillis() - startTime));
-        
 
-        if ( hasJson(request) ) {
+
+        if (hasJson(request)) {
             dispatcher = request.getRequestDispatcher("duplicatereport-json.jsp");
         } else {
             dispatcher = request.getRequestDispatcher("duplicatereport.jsp");
@@ -137,9 +142,9 @@ public class DuplicateReportServlet extends EntityManagerServlet {
         dispatcher.forward(request, response);
     }
 
-    private void increment( List<HistEntry> map, int idx ) {
-        for ( HistEntry e : map ) {
-            if ( e.digestCount == idx ) {
+    private void increment(List<HistEntry> map, int idx) {
+        for (HistEntry e : map) {
+            if (e.digestCount == idx) {
                 e.instances++;
                 return;
             }
@@ -153,7 +158,7 @@ public class DuplicateReportServlet extends EntityManagerServlet {
         int digestCount;
         int instances;
 
-        private HistEntry( int digestCount ) {
+        private HistEntry(int digestCount) {
             this.digestCount = digestCount;
             this.instances = 1;
         }
@@ -175,26 +180,26 @@ public class DuplicateReportServlet extends EntityManagerServlet {
         }
 
         @Override
-        public boolean equals( Object obj ) {
-            if ( obj == null ) {
+        public boolean equals(Object obj) {
+            if (obj == null) {
                 return false;
             }
-            if ( getClass() != obj.getClass() ) {
+            if (getClass() != obj.getClass()) {
                 return false;
             }
             final HistEntry other = (HistEntry) obj;
-            if ( this.digestCount != other.digestCount ) {
+            if (this.digestCount != other.digestCount) {
                 return false;
             }
-            if ( this.instances != other.instances ) {
+            if (this.instances != other.instances) {
                 return false;
             }
             return true;
         }
 
         @Override
-        public int compareTo( HistEntry o ) {
-            if ( digestCount == o.digestCount ) {
+        public int compareTo(HistEntry o) {
+            if (digestCount == o.digestCount) {
                 return digestCount - o.digestCount;
             }
             return instances - o.instances;
@@ -206,7 +211,7 @@ public class DuplicateReportServlet extends EntityManagerServlet {
         int count;
         String digest;
 
-        private MyEntry( int count, String digest ) {
+        private MyEntry(int count, String digest) {
             this.count = count;
             this.digest = digest;
         }
@@ -220,26 +225,26 @@ public class DuplicateReportServlet extends EntityManagerServlet {
         }
 
         @Override
-        public boolean equals( Object obj ) {
-            if ( obj == null ) {
+        public boolean equals(Object obj) {
+            if (obj == null) {
                 return false;
             }
-            if ( getClass() != obj.getClass() ) {
+            if (getClass() != obj.getClass()) {
                 return false;
             }
             final MyEntry other = (MyEntry) obj;
-            if ( this.count != other.count ) {
+            if (this.count != other.count) {
                 return false;
             }
-            if ( (this.digest == null) ? (other.digest != null) : !this.digest.equals(other.digest) ) {
-                return false;
-            }
-            return true;
+
+            return (this.digest == null)
+                    ? (other.digest == null)
+                    : this.digest.equals(other.digest);
         }
 
         @Override
-        public int compareTo( MyEntry o ) {
-            if ( o.count != count ) {
+        public int compareTo(MyEntry o) {
+            if (o.count != count) {
                 return o.count - count;
             } else {
                 return o.digest.compareTo(digest);

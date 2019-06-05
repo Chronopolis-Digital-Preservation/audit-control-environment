@@ -34,22 +34,23 @@ import edu.umiacs.ace.driver.AuditIterable;
 import edu.umiacs.ace.driver.DriverStateBean;
 import edu.umiacs.ace.driver.DriverStateBean.State;
 import edu.umiacs.ace.driver.FileBean;
-import edu.umiacs.ace.driver.filter.PathFilter;
-import edu.umiacs.ace.driver.StorageDriver;
-import edu.umiacs.ace.monitor.core.MonitoredItem;
-import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.driver.QueryThrottle;
 import edu.umiacs.ace.driver.StateBeanDigestListener;
+import edu.umiacs.ace.driver.StorageDriver;
+import edu.umiacs.ace.driver.filter.PathFilter;
+import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.util.HashValue;
 import edu.umiacs.ace.util.ThreadedDigestStream;
 import edu.umiacs.ace.util.ThrottledInputStream;
-import edu.umiacs.io.IO;
 import edu.umiacs.util.Strings;
+import org.apache.log4j.Logger;
+
+import javax.persistence.EntityManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -58,12 +59,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import javax.persistence.EntityManager;
-import org.apache.log4j.Logger;
 
 /**
  * Storage driver for accessing files stored on a local file system (ie, java.io.File)
- * 
+ *
  * @author toaster
  */
 public class LocalFileAccess extends StorageDriver {
@@ -138,18 +137,19 @@ public class LocalFileAccess extends StorageDriver {
     class MyIterator implements Iterator<FileBean> {
 
         private FileBean next;
-        private Queue<File> dirsToProcess = new LinkedList<File>();
-        private Queue<File> filesToProcess = new LinkedList<File>();
+        private Queue<File> dirsToProcess = new LinkedList<>();
+        private Queue<File> filesToProcess = new LinkedList<>();
         private MessageDigest digest;
-//        private byte[] buffer = new byte[BLOCK_SIZE];
         private File rootFile;
         private PathFilter filter;
         private DriverStateBean statebean;
         private ThreadedDigestStream reader;
         private boolean cancel = false;
 
-        public MyIterator(MonitoredItem[] startPath, PathFilter filter,
-                String digestAlgorithm, DriverStateBean statebean) {
+        public MyIterator(MonitoredItem[] startPath,
+                          PathFilter filter,
+                          String digestAlgorithm,
+                          DriverStateBean statebean) {
             this.statebean = statebean;
             this.filter = filter;
             try {
@@ -163,8 +163,7 @@ public class LocalFileAccess extends StorageDriver {
                 if (startPath != null) {
                     for (MonitoredItem mi : startPath) {
                         File startFile;
-                        startFile = new File(
-                                getCollection().getDirectory() + mi.getPath());
+                        startFile = new File(getCollection().getDirectory() + mi.getPath());
                         if (startFile.isDirectory()) {
                             dirsToProcess.add(startFile);
 
@@ -224,13 +223,13 @@ public class LocalFileAccess extends StorageDriver {
                 if (fileList == null) {
                     LOG.info("Could not read directory, skipping: " + directory);
                 } else {
-                    for (File f : directory.listFiles()) {
+                    for (File f : fileList) {
                         LOG.trace("Found item " + f);
-                        if ( f.isDirectory() && 
+                        if ( f.isDirectory() &&
                              filter.process(extractPathList(f), true)) {
                             LOG.trace("Adding matching directory: " + f);
                             dirsToProcess.add(f);
-                        } else if ( f.isFile() && 
+                        } else if ( f.isFile() &&
                                     filter.process(extractPathList(f), false)) {
                             LOG.trace("Adding matching file: " + f);
                             filesToProcess.add(f);
@@ -254,11 +253,9 @@ public class LocalFileAccess extends StorageDriver {
             int substrLength = rootFile.getPath().length();
 
             // build directory path
-            List<String> dirPathList = new ArrayList<String>();
+            List<String> dirPathList = new ArrayList<>();
             File currFile = file;
             while (!currFile.equals(rootFile)) {
-//                LOG.trace("Adding dir to path: " + currFile.getPath().substring(
-//                        substrLength));
                 String pathToAdd = currFile.getPath().substring(substrLength);
                 pathToAdd = pathToAdd.replace(File.separatorChar, '/');
                 dirPathList.add(pathToAdd);
@@ -269,11 +266,7 @@ public class LocalFileAccess extends StorageDriver {
 
         @SuppressWarnings("empty-statement")
         private FileBean processFile(File file) {
-
-
-            DigestInputStream dis = null;
             FileBean fb = new FileBean();
-
             fb.setPathList(extractPathList(file));
 
             LOG.trace("Processing file: " + file);
@@ -307,7 +300,6 @@ public class LocalFileAccess extends StorageDriver {
                 fb.setError(true);
                 fb.setErrorMessage(Strings.exceptionAsString(ie));
             } finally {
-                IO.release(dis);
                 statebean.setStateAndReset(State.IDLE);
                 if (cancel) {
                     return null;

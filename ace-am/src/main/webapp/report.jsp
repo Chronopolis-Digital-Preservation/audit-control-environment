@@ -7,6 +7,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@taglib tagdir="/WEB-INF/tags" prefix="h" %>
+<%@taglib uri="/WEB-INF/tlds/monitor" prefix="um" %>
 
 
 <!DOCTYPE html
@@ -114,6 +115,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         <td class="lblTd">Corrupt Files</td>
         <td class="dataTd"><h:DefaultValue test="${collection.corruptFiles > -1}"
                                            success="${collection.corruptFiles}" failure="0"/>
+            <um:Auth role="Remove Item">
             <c:if test="${collection.corruptFiles > 0}">
                 <a class="badge badge-danger text-white"
                    data-toggle="modal" data-target="#mutableModal"
@@ -121,29 +123,40 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                     Remove All
                 </a>
             </c:if>
+            </um:Auth>
         </td>
     </tr>
     <tr>
         <td class="tblLinks">
             <a href="Report?collectionid=${collection.collection.id}&amp;text=1&amp;count=-1">
                 Download List</a></td>
+        <um:Auth role="Audit">
         <td class="tblLinks">
             <a href="StartSync?collectionid=${collection.collection.id}&amp;type=corrupt">
-                Audit Corrupt Files</a></td>
-        <td class="tblLinks"><a href="EventLog?sessionId=${session}">Recent Events</a></td>
+                Audit Corrupt Files
+            </a>
+        </td>
+        </um:Auth>
+        <um:Auth role="Log">
+        <td class="tblLinks">
+            <a href="EventLog?sessionId=${session}">Recent Events</a>
+        </td>
+        </um:Auth>
     </tr>
 </table>
 
 
 <form method="GET" action="RemoveItem">
     <div class="container" style="width: 90%">
+        <um:Auth role="Remove Item">
         <span>Select All:&nbsp;</span> <input type="checkbox" id="selectall"/>
+        </um:Auth>
         <input type="hidden" name="redirect" value="Report"/>
         <input type="hidden" name="collectionid" value="${collection.collection.id}"/>
         <table id="reportTable">
             <thead>
             <tr>
-                <td>Remove</td>
+                <um:Auth role="Remove Item"><td>Remove</td></um:Auth>
                 <td>State</td>
                 <td>Path</td>
                 <td>Last Seen</td>
@@ -152,9 +165,11 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             </thead>
             <c:forEach var="item" items="${items}">
                 <tr>
+                    <um:Auth role="Remove Item">
                     <td>
                         <input type="checkbox" name="removal" id="removal" value="${item.id}"/>
                     </td>
+                    </um:Auth>
                     <td>
                         <c:choose>
                             <c:when test="${item.stateAsString eq 'C'}">
@@ -193,11 +208,20 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                     </td>
                     <td class="datecol"><span>${fn:replace(item.lastSeen, " ", "&nbsp;")}</span>
                     </td>
-                    <td><a class="badge badge-primary text-white" href="EventLog?logpath=${item.path}">log</a>
+                    <td>
+                        <um:Auth role="Log">
+                        <a class="badge badge-primary text-white"
+                           href="EventLog?logpath=${item.path}">log
+                        </a>
+                        </um:Auth>
+
+                        <!-- TODO: Permissions -->
+                        <um:Auth role="Remove Item">
                         <a class="badge badge-danger text-white" data-toggle="modal" data-target="#mutableModal"
                            data-href="RemoveItem?itemid=${item.id}&amp;redirect=Report%3Fcollectionid=${collection.collection.id}">
                             remove
                         </a>
+                        </um:Auth>
                     </td>
                 </tr>
             </c:forEach>
@@ -219,12 +243,15 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         </table>
 
         <!-- Button trigger -->
+        <um:Auth role="Remove Item">
         <button type="button" class="btn btn-danger" data-toggle="modal"
                 data-target="#formModal" style="width: 25%">
             Remove Selected
         </button>
+        </um:Auth>
 
         <!-- Modal -->
+        <um:Auth role="Remove Item">
         <div class="modal fade" id="formModal" tabindex="-1" role="dialog"
              aria-labelledby="formModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
@@ -250,10 +277,12 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 </div>
             </div>
         </div>
+        </um:Auth>
     </div>
 </form>
 
 <!-- A separate modal outside the form to handle the hrefs -->
+<um:Auth role="Remove Item">
 <div class="modal fade" id="mutableModal" tabindex="-1" role="dialog"
      aria-labelledby="mutableModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -278,6 +307,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         </div>
     </div>
 </div>
+</um:Auth>
 
 <jsp:include page="footer.jsp"/>
 <script type="text/javascript">

@@ -65,10 +65,10 @@ public class AuditThreadFactory {
     private static int imsPort = 80;
     private static String tokenClass = "SHA-256";
     private static boolean auditOnly = false;
-    private static boolean auditSample = false;
     private static boolean ssl = false;
     private static boolean blocking = false;
-    private static int maxBlockTime = 0;
+    private static int imsRetryAttempts = 3;
+    private static int imsResetTimeout = 3000;
 
     public static void setIMS( String ims ) {
         if (Strings.isEmpty(ims)) {
@@ -95,8 +95,8 @@ public class AuditThreadFactory {
     }
 
     public static void setImsPort(int imsPort) {
-        if (imsPort < 1 && imsPort > 32768) {
-            LOG.error("ims port must be between 1 and 32768, setting default");
+        if (imsPort < 1 || imsPort > 32768) {
+            LOG.warn("ims port must be between 1 and 32768, setting default");
             imsPort = Integer.parseInt(SettingsConstants.imsPort);
         }
         AuditThreadFactory.imsPort = imsPort;
@@ -106,8 +106,24 @@ public class AuditThreadFactory {
         AuditThreadFactory.auditOnly = auditOnlyMode;
     }
 
-    public static void setAuditSampling(boolean auditSampling ) {
-        AuditThreadFactory.auditSample = auditSampling;
+    public static int getImsRetryAttempts() {
+        return imsRetryAttempts;
+    }
+
+    public static void setImsRetryAttempts(int attempts) {
+        if (attempts >= 0) {
+            imsRetryAttempts = attempts;
+        }
+    }
+
+    public static int getImsResetTimeout() {
+        return imsResetTimeout;
+    }
+
+    public static void setImsResetTimeout(int timeout) {
+        if (timeout >= 0) {
+            imsResetTimeout = timeout;
+        }
     }
 
     public static void setBlocking(boolean blocking) {
@@ -118,17 +134,6 @@ public class AuditThreadFactory {
         return AuditThreadFactory.blocking;
     }
 
-    public static void setMaxBlockTime(int maxBlockTime) {
-        if ( maxBlockTime < 0 ) {
-            maxBlockTime = 0;
-        }
-        AuditThreadFactory.maxBlockTime = maxBlockTime;
-    }
-
-    public static int getMaxBlockTime() {
-       return maxBlockTime;
-    }
-
     public static boolean isAuditing() {
         return !audits.isEmpty();
     }
@@ -136,28 +141,27 @@ public class AuditThreadFactory {
     /**
      * Return a new or existing thread if any room is available New threads will start replication
      * 
-     * @param c
-     * @param tri
-     * @return
+     * @param collection the {@link Collection} to run a file audit on
+     * @param driver the {@link StorageDriver} for retrieving files
+     * @param verbose flag for setting verbose output of the {@link AuditThread}
+     * @param startItem the first {@link MonitoredItem} to audit from or null to audit all items
      */
-    public static AuditThread createThread(Collection c,
-                                           StorageDriver tri,
-                                           boolean verbose,
-                                           MonitoredItem... startItem) {
+    public static void createThread(Collection collection,
+                                    StorageDriver driver,
+                                    boolean verbose,
+                                    MonitoredItem... startItem) {
         // Note: Because we don't put the collection/thread in the map atomically, we need to lock
         CollectionThreadPoolExecutor executor = getExecutor();
-        LOG.trace("Creating new thread for " + c.getName());
+        LOG.trace("Creating new thread for " + collection.getName());
         AuditThread newThread;
-        newThread = new AuditThread(c, tri, auditOnly, verbose, startItem);
+        newThread = new AuditThread(collection, driver, auditOnly, verbose, startItem);
         newThread.setImsHost(imsHost);
         newThread.setImsPort(imsPort);
         newThread.setTokenClassName(tokenClass);
-        KSFuture<AuditThread> f = executor.submitFileAudit(c, newThread);
+        KSFuture<AuditThread> f = executor.submitFileAudit(collection, newThread);
         if (f != null) {
-            audits.put(c, f);
+            audits.put(collection, f);
         }
-
-        return null;
     }
 
     public static AuditThread getThread(Collection c) {

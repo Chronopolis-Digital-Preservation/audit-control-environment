@@ -31,12 +31,16 @@
 
 package edu.umiacs.ace.ims.api;
 
+import edu.umiacs.ace.hashtree.Proof;
 import edu.umiacs.ace.hashtree.ProofValidator;
 import edu.umiacs.ace.ims.ws.ProofElement;
 import edu.umiacs.ace.ims.ws.RoundSummary;
 import edu.umiacs.ace.token.AceToken;
 import edu.umiacs.ace.util.HashValue;
 import edu.umiacs.util.Check;
+import org.apache.log4j.Logger;
+import org.apache.log4j.NDC;
+
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,32 +51,39 @@ import java.util.Map;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
 
 /**
+ * Validate ACE Tokens using {@link IMSService#getRoundSummaries(List)} for the {@link AceToken}
+ * rounds which we have.
+ *
+ * Note: This follows the same type of processing as {@link ImmediateTokenRequestBatch}, which
+ * can be referenced for documentation.
  *
  * @author toaster
  */
-public class TokenValidator extends Thread
-{
+public class TokenValidator extends Thread {
 
-    private Map<AceToken, String> requests = new HashMap<AceToken, String>();
-    private IMSService connection;
+    private static final Logger print = Logger.getLogger(TokenValidator.class);
+
+    private Map<AceToken, String> requests = new HashMap<>();
     private ValidationCallback callback;
-    private static final Logger print =
-            Logger.getLogger(TokenValidator.class);
     private boolean shutdownRequested = false;
     private boolean processNow = false;
-    private int maxWaitTime;
-    private int maxQueueLength;
-    private Lock lock = new ReentrantLock();
-    private Condition processCondition;
-    private MessageDigest digest;
 
-    TokenValidator(IMSService connection, ValidationCallback callback,
-            int maxWaitTime, int maxQueueLength, MessageDigest digest)
-    {
+    private final IMSService connection;
+    private final String identifier;
+    private final int maxWaitTime;
+    private final int maxQueueLength;
+    private final Lock lock = new ReentrantLock();
+    private final Condition processCondition;
+    private final MessageDigest digest;
+
+    TokenValidator(IMSService connection,
+                   String identifier,
+                   ValidationCallback callback,
+                   int maxWaitTime,
+                   int maxQueueLength,
+                   MessageDigest digest) {
         Check.notNull("connection", connection);
         Check.notNull("callback", callback);
         Check.notNull("digest", digest);
@@ -81,91 +92,53 @@ public class TokenValidator extends Thread
         this.maxQueueLength = maxQueueLength;
         this.maxWaitTime = maxWaitTime;
         this.digest = digest;
+        this.identifier = identifier;
 
         processCondition = lock.newCondition();
         this.start();
     }
 
-//    public void add(String fileHash, AceToken token) throws InterruptedException
-//    {
-//        Check.notNull("token", token);
-//        Check.notNull("fileHash", fileHash);
-//
-//        lock.lockInterruptibly();
-//        try
-//        {
-//            if ( shutdownRequested )
-//            {
-//                throw new IllegalStateException("Process shutdown");
-//            }
-//            print.trace("Adding work: " + fileHash);
-//            requests.put(IMSUtil.convertToken(token), fileHash);
-//            if ( requests.size() >= maxQueueLength )
-//            {
-//                processCondition.signal();
-//            }
-//        }
-//        finally
-//        {
-//            lock.unlock();
-//        }
-//    }
-
-    public void add(String fileHash, AceToken token) throws InterruptedException
-    {
+    public void add(String fileHash, AceToken token) throws InterruptedException {
         Check.notNull("token", token);
         Check.notNull("fileHash", fileHash);
 
         lock.lockInterruptibly();
-        try
-        {
-            if ( shutdownRequested )
-            {
+        try {
+            if (shutdownRequested) {
                 throw new IllegalStateException("Process shutdown");
             }
             print.trace("Adding work: " + fileHash);
             requests.put(token, fileHash);
-            if ( requests.size() >= maxQueueLength )
-            {
+            if (requests.size() >= maxQueueLength) {
                 processCondition.signal();
             }
-        }
-        finally
-        {
+        } finally {
             lock.unlock();
         }
     }
 
-    public void close()
-    {
+    public void close() {
         lock.lock();
-        try
-        {
+        try {
             shutdownRequested = true;
-            print.info("Shutdown requested");
+            print.info("Shutdown requested for validator");
             processCondition.signal();
-        }
-        finally
-        {
+        } finally {
             lock.unlock();
         }
 
-        try
-        {
+        try {
             this.join();
-        }
-        catch ( InterruptedException ie )
-        {
+        } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
         }
     }
 
-    private boolean isBatchReady()
-    {
+    private boolean isBatchReady() {
         return requests.size() > 0 &&
                 (requests.size() >= maxQueueLength ||
-                processNow ||
-                shutdownRequested);
+                        processNow ||
+                        shutdownRequested);
     }
 
     /**
@@ -174,26 +147,22 @@ public class TokenValidator extends Thread
      * 3. For each token, check to ensure it validates
      * 4. call appropriate callback for each token
      */
-    private void processBatch()
-    {
-        List<Long> roundNumbers = new ArrayList<Long>();
+    private void processBatch() {
+        List<Long> roundNumbers = new ArrayList<>();
         ProofValidator pv = new ProofValidator();
 
-        Map<Long, LinkedList<WorkUnit>> proofMap = new HashMap<Long, LinkedList<WorkUnit>>();
+        Map<Long, LinkedList<WorkUnit>> proofMap = new HashMap<>();
 
         lock.lock();
-        try
-        {
+        try {
             print.trace("Processing batch of size: " + requests.size());
-            for ( AceToken token : requests.keySet() )
-            {
+            for (AceToken token : requests.keySet()) {
                 String hash = requests.get(token);
                 WorkUnit unit = new WorkUnit();
                 unit.setHash(hash);
                 unit.setTokenResponse(token);
 
-                if ( !roundNumbers.contains(token.getRound()) )
-                {
+                if (!roundNumbers.contains(token.getRound())) {
 
                     roundNumbers.add(token.getRound());
                     proofMap.put(token.getRound(), new LinkedList<WorkUnit>());
@@ -204,9 +173,7 @@ public class TokenValidator extends Thread
             print.trace("batch load finished, calling clear, unlocking.");
             requests.clear();
             print.trace("requests size: " + requests.size());
-        }
-        finally
-        {
+        } finally {
             lock.unlock();
         }
 
@@ -214,29 +181,24 @@ public class TokenValidator extends Thread
         List<RoundSummary> summaries = connection.getRoundSummaries(roundNumbers);
         print.trace("IMS returned " + summaries.size() + " rounds");
 
-        for ( RoundSummary summary : summaries )
-        {
+        for (RoundSummary summary : summaries) {
 
             long round = summary.getId();
 
-            for ( WorkUnit unit : proofMap.get(round) )
-            {
+            for (WorkUnit unit : proofMap.get(round)) {
                 AceToken response = unit.getTokenResponse();
                 String localLeafHash = unit.getHash();
 
                 String imsSuppliedHash = summary.getHashValue();
-//                String calculatedHash = calculateRoot(digest,
-//                        localLeafHash, response.getProofElements());
-                String calculatedHash = HashValue.asHexString(pv.rootHash(digest, response.getProof(), HashValue.asBytes(localLeafHash)));
+                Proof responseProof = response.getProof();
+                byte[] localHash = HashValue.asBytes(localLeafHash);
+                byte[] rootHash = pv.rootHash(digest, responseProof, localHash);
+                String calculatedHash = HashValue.asHexString(rootHash);
 
-                if ( imsSuppliedHash.equals(calculatedHash) )
-                {
+                if (imsSuppliedHash.equals(calculatedHash)) {
                     callback.validToken(response);
-                }
-                else
-                {
-                    callback.invalidToken(response, imsSuppliedHash,
-                            calculatedHash);
+                } else {
+                    callback.invalidToken(response, imsSuppliedHash, calculatedHash);
                 }
 
             }
@@ -248,51 +210,38 @@ public class TokenValidator extends Thread
     }
 
     @Override
-    public void run()
-    {
+    public void run() {
 
-        NDC.push("Validation Thread: ");
+        NDC.push("Validation Thread (" + identifier + "): ");
         print.info("Started");
 
         lock.lock();
-        try
-        {
+        try {
 
-            while ( true )
-            {
+            while (true) {
                 print.info("Checking batch");
-                while ( isBatchReady() )
-                {
+                while (isBatchReady()) {
                     print.info("Processing batch, queued items: " + requests.size());
                     processBatch();
                 }
-                if ( shutdownRequested )
-                {
+                if (shutdownRequested) {
                     print.info("Shutdown acknowledged");
                     break;
                 }
-                Date deadline = new Date(System.currentTimeMillis()
-                                         + maxWaitTime);
-                try
-                {
+                Date deadline = new Date(System.currentTimeMillis() + maxWaitTime);
+                try {
                     print.info("Waiting until: " + deadline);
                     processNow = !processCondition.awaitUntil(deadline);
-                }
-                catch ( InterruptedException ie )
-                {
+                } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                     print.info("Interrupted");
                     break;
                 }
             }
 
-        }
-        catch ( Throwable e )
-        {
+        } catch (Throwable e) {
             callback.unexpectedException(e);
-        }
-        finally
-        {
+        } finally {
             lock.unlock();
             print.info("Stopped");
             NDC.pop();
@@ -302,87 +251,71 @@ public class TokenValidator extends Thread
 
     /**
      * Calculate the root hash given the leaf, local hash and a list of proof elements
-     * proof calculation starts at elements[0] . The element.getIndex() position is 
+     * proof calculation starts at elements[0] . The element.getIndex() position is
      * where the localHash, or hash from lower tree level is inserted. The
      * hashes for each element are run through the supplied digest. the elements[n]
      * value is what eventually gets returned. Please note digest will be reset prior
      * to computation start
-     * 
-     * @param digest algorithm to use
+     *
+     * @param digest    algorithm to use
      * @param localHash leaf hash to start tree bottom w/
-     * @param elements levels proof tree w/ idx 0 the leaf and idx n root -1
+     * @param elements  levels proof tree w/ idx 0 the leaf and idx n root -1
      * @return
      */
     public static String calculateRoot(MessageDigest digest, String localHash,
-            List<ProofElement> elements)
-    {
+                                       List<ProofElement> elements) {
         // previous from lower level in tree is inserted at element.getIndex() position
         byte[] currentHash = HashValue.asBytes(localHash);
         digest.reset();
 
-        for ( ProofElement element : elements )
-        {
+        for (ProofElement element : elements) {
             digest.reset();
             int index = element.getIndex();
             int i = 0;
-//            System.out.println("index: " + element.getIndex());
-            for ( String hash : element.getHashes() )
-            {
+            for (String hash : element.getHashes()) {
                 byte[] hashBytes = HashValue.asBytes(hash);
 
                 // it element index is the current index, insert then continue on
-                if ( i == index )
-                {
-//                    System.out.println("prev hash: " + i + " " + HashValue.asHexString(currentHash));
+                if (i == index) {
                     digest.update(currentHash);
                     i++;
                 }
 
-//                System.out.println("elem hash: " + i + " " + hash);
                 digest.update(hashBytes);
                 i++;
 
 
             }
             // end case, if index is last element in list, then need to append
-            if ( index == i )
-            {
-//                System.out.println("prev hash: " + i + " " + HashValue.asHexString(currentHash));
+            if (index == i) {
                 digest.update(currentHash);
             }
             currentHash = digest.digest();
-//            System.out.println("Calc ihv: " + HashValue.asHexString(currentHash));
         }
         return HashValue.asHexString(currentHash);
     }
 
-    private class WorkUnit
-    {
+    private class WorkUnit {
 
         private String hash;
         private AceToken tokenResponse;
 
-        public WorkUnit()
-        {
+        public WorkUnit() {
         }
 
-        public void setTokenResponse(AceToken tokenResponse)
-        {
+        public void setTokenResponse(AceToken tokenResponse) {
             this.tokenResponse = tokenResponse;
         }
 
-        public AceToken getTokenResponse()
-        {
+        public AceToken getTokenResponse() {
             return tokenResponse;
         }
 
-        public void setHash(String hash)
-        {
+        public void setHash(String hash) {
             this.hash = hash;
         }
 
-        public String getHash()
-        {
+        public String getHash() {
             return hash;
         }
     }

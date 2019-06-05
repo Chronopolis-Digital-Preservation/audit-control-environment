@@ -49,6 +49,7 @@ public class SettingsParameter implements Serializable {
     public SettingsParameter(String attr, String value) {
        this.attr = attr;
        this.value = value;
+       this.custom = false;
     }
 
     public Long getId() {

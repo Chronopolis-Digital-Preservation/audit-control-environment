@@ -4,8 +4,7 @@
   <parent>
     <artifactId>ace</artifactId>
     <groupId>edu.umiacs.ace</groupId>
-    <version>1.13-RELEASE</version>
-    <relativePath>../pom.xml</relativePath>
+    <version>1.14-RELEASE</version>
   </parent>
   <artifactId>ace-ims-api</artifactId>
   <name>ace-ims-api</name>
@@ -16,8 +15,6 @@
   </properties>
 
   <dependencies>
-    
-
     <dependency>
       <groupId>edu.umiacs.ace</groupId>
       <artifactId>ace-ims-ws</artifactId>
@@ -28,6 +25,5 @@
       <artifactId>ace-common</artifactId>
       <version>${project.version}</version>
     </dependency>
-
   </dependencies>
 </project>
