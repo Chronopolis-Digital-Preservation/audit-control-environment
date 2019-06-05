@@ -36,7 +36,9 @@ import edu.umiacs.ace.util.EntityManagerServlet;
 import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -47,7 +49,7 @@ import java.util.List;
 
 /**
  * Show the current status of a collection, listing any non-active files
- * 
+ *
  * @author toaster
  */
 public class CollectionSummaryServlet extends EntityManagerServlet {
@@ -63,15 +65,16 @@ public class CollectionSummaryServlet extends EntityManagerServlet {
     public static final String PAGE_COUNT = "count";
     public static final String PAGE_SESSION = "session";
 
-    /** 
+    /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
+     *
+     * @param request  servlet request
      * @param response servlet response
      */
     @Override
-    protected void processRequest( HttpServletRequest request,
-            HttpServletResponse response, EntityManager em )
-            throws ServletException, IOException {
+    protected void processRequest(HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  EntityManager em) throws ServletException, IOException {
         RequestDispatcher dispatch;
         long startid = getParameter(request, PARAM_START, 0);
         long topid = getParameter(request, PARAM_TOP, 0);
@@ -84,41 +87,47 @@ public class CollectionSummaryServlet extends EntityManagerServlet {
 
         // determine start
         String startquery = "";
-        if ( startid > 0 ) {
+        if (startid > 0) {
             startquery = "AND m.id > :id ";
-        } else if ( topid > 0 ) {
+        } else if (topid > 0) {
             startquery = "AND m.id < :id ";
         }
 
         // build query
 
-        Query q;
+        TypedQuery<MonitoredItem> q;
         Collection c = getCollection(request, em);
+        // todo: if null should we return all error'd items from the db?
+        // probably a bad idea for this servlet
+        if (c == null) {
+            response.sendError(400, "collectionid must be present!");
+            return;
+        }
+
         query += "m.parentCollection = :coll " + startquery;
-        q = em.createQuery(query);
+        q = em.createQuery(query, MonitoredItem.class);
         q.setParameter("coll", c);
 
         LOG.debug("query: " + query);
         // fill in start ids if necessary
-        if ( startid > 0 ) {
+        if (startid > 0) {
             q.setParameter("id", startid);
-        } else if ( topid > 0 ) {
+        } else if (topid > 0) {
             q.setParameter("id", topid);
         }
 
-        if ( count != -1 ) {
+        if (count != -1) {
             q.setMaxResults(count);
         }
         List<MonitoredItem> miList = q.getResultList();
-        if ( miList != null && miList.size() > 0 ) {
-            request.setAttribute(PAGE_NEXT,
-                    miList.get(miList.size() - 1).getId() + 1);
+        if (miList != null && miList.size() > 0) {
+            request.setAttribute(PAGE_NEXT, miList.get(miList.size() - 1).getId() + 1);
         }
 
-        if ( listOnly ) {
+        if (listOnly) {
             Writer writer = response.getWriter();
             response.setContentType("text/plain");
-            for ( MonitoredItem mi : miList ) {
+            for (MonitoredItem mi : miList) {
                 writer.write(mi.getState() + ":" + mi.getPath() + "\r\n");
             }
             return;
@@ -132,8 +141,7 @@ public class CollectionSummaryServlet extends EntityManagerServlet {
         csb.setTotalFiles(CollectionCountContext.getFileCount(c));
         csb.setActiveFiles(CollectionCountContext.getActiveCount(c));
         csb.setCorruptFiles(CollectionCountContext.getCorruptCount(c));
-        csb.setInvalidDigests(CollectionCountContext.getTokenMismatchCount(
-                c));
+        csb.setInvalidDigests(CollectionCountContext.getTokenMismatchCount(c));
         csb.setMissingFiles(CollectionCountContext.getMissingCount(c));
         csb.setMissingTokens(CollectionCountContext.getMissingTokenCount(c));
         csb.setTotalErrors(CollectionCountContext.getTotalErrors(c));
@@ -145,7 +153,7 @@ public class CollectionSummaryServlet extends EntityManagerServlet {
         request.setAttribute(PAGE_COLLECTION, csb);
         request.setAttribute(PAGE_COUNT, count);
 
-        if ( hasJson(request) ) {
+        if (hasJson(request)) {
             dispatch = request.getRequestDispatcher("report-json.jsp");
         } else {
             dispatch = request.getRequestDispatcher("report.jsp");
@@ -160,6 +168,11 @@ public class CollectionSummaryServlet extends EntityManagerServlet {
         Query q = em.createQuery(query);
         q.setParameter("c", c);
         q.setMaxResults(1);
-        return (Long) q.getSingleResult();
+        try {
+            return (Long) q.getSingleResult();
+        } catch (NoResultException e) {
+            LOG.warn("No sessions available for collection", e);
+            return null;
+        }
     }
 }

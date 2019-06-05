@@ -31,11 +31,12 @@
 
 package edu.umiacs.ace.monitor.reporting;
 
-import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.util.Strings;
-import java.io.IOException;
-import java.text.ParseException;
+import org.apache.log4j.Logger;
+import org.quartz.CronExpression;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
@@ -44,8 +45,8 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.log4j.Logger;
-import org.quartz.CronExpression;
+import java.io.IOException;
+import java.text.ParseException;
 
 /**
  * Servlet to configure automated generation of ReportSummarys .
@@ -55,7 +56,6 @@ import org.quartz.CronExpression;
  * month = month list to run
  * day = day of month to run
  * reportid = id of existing to modify, if empty this will create a new one
- * 
  *
  * @author toaster
  */
@@ -76,54 +76,54 @@ public class ReportConfigurationServlet extends EntityManagerServlet {
             ReportConfigurationServlet.class);
 
     @Override
-    protected void processRequest( HttpServletRequest request,
-            HttpServletResponse response, EntityManager em ) throws ServletException, IOException {
-
-        long removeid = getParameter(request, PARAM_REMOVEID, 0);
+    protected void processRequest(HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  EntityManager em) throws ServletException, IOException {
+        Collection coll;
         ReportPolicy rp = getReportPolicy(request, em);
-        Collection coll = null;
-        if ( rp != null ) {
+        long removeid = getParameter(request, PARAM_REMOVEID, 0);
+
+        if (rp != null) {
             coll = rp.getCollection();
         } else {
             coll = getCollection(request, em);
         }
 
-        if ( removeid > 0 ) {
-            ReportPolicy removePolicy = em.getReference(ReportPolicy.class,
-                    removeid);
-            
-            if ( removePolicy != null ) {
+        if (removeid > 0) {
+            ReportPolicy removePolicy = em.getReference(ReportPolicy.class, removeid);
+
+            if (removePolicy != null) {
                 LOG.debug("Removing report policy " + removePolicy.getName());
                 coll = removePolicy.getCollection();
                 EntityTransaction trans = em.getTransaction();
                 trans.begin();
                 try {
-                    SchedulerContextListener.removeJob(rp);
+                    SchedulerContextListener.removeJob(removePolicy);
                     em.remove(removePolicy);
                     trans.commit();
-                } catch ( Exception e ) {
+                } catch (Exception e) {
                     LOG.error("Error removing report", e);
                 }
             }
         } // are we saving a new or modifying existing
-        else if ( !Strings.isEmpty(request.getParameter(PARAM_SUBMIT)) ) {
+        else if (!Strings.isEmpty(request.getParameter(PARAM_SUBMIT))) {
 
             String name = getParameter(request, PARAM_NAME, null);
-            CronExpression ce = null;
+            CronExpression ce;
             try {
                 ce = extractCronString(request);
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 LOG.error("Bad regex", e);
                 throw new ServletException(e);
             }
             LOG.debug("Extracted cron string " + ce.getCronExpression());
 
-            if ( rp != null ) {
+            if (rp != null) {
 
-
-                if ( !Strings.isEmpty(name) ) {
+                if (!Strings.isEmpty(name)) {
                     rp.setName(name);
                 }
+
                 rp.setEmailList(getParameter(request, PARAM_EMAIL, null));
                 rp.setCronString(ce.getCronExpression());
                 EntityTransaction trans = em.getTransaction();
@@ -133,23 +133,22 @@ public class ReportConfigurationServlet extends EntityManagerServlet {
                     trans.commit();
                     SchedulerContextListener.removeJob(rp);
                     SchedulerContextListener.addJob(rp);
-                } catch ( Exception e ) {
+                } catch (Exception e) {
                     LOG.error("Error merging report", e);
                 }
 
             } else {
                 rp = new ReportPolicy();
                 // if name is null && months are null, do not persist
-                if ( Strings.isEmpty(name) ) {
+                if (Strings.isEmpty(name)) {
                     name = "unnamed";
                 }
 
                 rp.setName(name);
                 rp.setCronString(ce.getCronExpression());
                 rp.setEmailList(getParameter(request, PARAM_EMAIL, null));
-                if ( coll == null ) {
-                    throw new ServletException(
-                            "No collection included for report");
+                if (coll == null) {
+                    throw new ServletException("No collection included for report");
                 }
                 rp.setCollection(coll);
 
@@ -159,7 +158,7 @@ public class ReportConfigurationServlet extends EntityManagerServlet {
                     em.persist(rp);
                     trans.commit();
                     SchedulerContextListener.addJob(rp);
-                } catch ( Exception e ) {
+                } catch (Exception e) {
                     LOG.error("Error saving report", e);
                 }
             }
@@ -173,7 +172,7 @@ public class ReportConfigurationServlet extends EntityManagerServlet {
         request.setAttribute(PAGE_REPORTS, q.getResultList());
         request.setAttribute(PAGE_COLLECTION, coll);
         request.setAttribute(PAGE_REPORT, rp);
-        if ( rp != null ) {
+        if (rp != null) {
             LOG.debug("Shoving report policy into page context: " + rp.getName());
             // hack for now to extract day/month string and set months
             //TODO: this should be moved into a taglib if we decide to support
@@ -181,44 +180,41 @@ public class ReportConfigurationServlet extends EntityManagerServlet {
 //            request.setAttribute(name, );
 
             request.setAttribute(PAGE_DAY, extractDay(rp.getCronString()));
-            for ( String s : extractMonthList(rp.getCronString()) ) {
+            for (String s : extractMonthList(rp.getCronString())) {
                 request.setAttribute(s, "checked");
             }
         }
 
-        RequestDispatcher dispatcher = request.getRequestDispatcher(
-                "reportpolicy.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("reportpolicy.jsp");
         dispatcher.forward(request, response);
     }
 
-    public String extractDay( String c ) {
+    public String extractDay(String c) {
         String cronList[] = c.split("\\s");
         return cronList[3];
     }
 
-    public String[] extractMonthList( String c ) {
+    public String[] extractMonthList(String c) {
         String cronList[] = c.split("\\s");
         return cronList[4].split(",");
     }
 
-    public CronExpression extractCronString( HttpServletRequest request ) throws ParseException {
+    public CronExpression extractCronString(HttpServletRequest request) throws ParseException {
         StringBuilder sb = new StringBuilder();
 
         sb.append("0 0 0 "); // s, m, h
 
         String day = getParameter(request, PARAM_DAY, null);
         LOG.trace("Attempting to extract day from " + day);
-        if ( day != null && day.matches("^([012]?[0-9]{1}|L)$") ) {
+        if (day != null && day.matches("^([012]?[0-9]{1}|L)$")) {
             sb.append(day + " ");
         } else {
-            throw new IllegalArgumentException(
-                    day + " is not valid day, required 1-28 or L");
+            throw new IllegalArgumentException(day + " is not valid day, required 1-28 or L");
         }
         String[] monthList = getParameterList(request, PARAM_MONTH);
-        if ( monthList != null ) {
-            for ( String s : monthList ) {
-                if ( s.matches(
-                        "^(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)$") ) {
+        if (monthList != null) {
+            for (String s : monthList) {
+                if (s.matches("^(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)$")) {
                     sb.append(s + ",");
                 }
 
@@ -234,14 +230,13 @@ public class ReportConfigurationServlet extends EntityManagerServlet {
 
     }
 
-    public ReportPolicy getReportPolicy( HttpServletRequest request,
-            EntityManager em ) {
+    public ReportPolicy getReportPolicy(HttpServletRequest request, EntityManager em) {
         long reportId;
 
-        if ( (reportId = getParameter(request, PARAM_REPORTID, 0)) > 0 ) {
+        if ((reportId = getParameter(request, PARAM_REPORTID, 0)) > 0) {
             try {
                 return em.getReference(ReportPolicy.class, reportId);
-            } catch ( EntityNotFoundException e ) {
+            } catch (EntityNotFoundException e) {
                 return null;
             }
         }

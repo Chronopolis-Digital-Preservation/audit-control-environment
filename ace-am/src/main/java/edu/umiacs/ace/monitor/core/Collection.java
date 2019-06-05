@@ -199,6 +199,7 @@ public class Collection implements Serializable {
         return state.asChar();
     }
 
+    @JsonIgnore
     public CollectionState getStateEnum() {
         return state;
     }
