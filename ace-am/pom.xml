@@ -6,7 +6,7 @@
     <parent>
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
-        <version>1.15-SNAPSHOT</version>
+        <version>1.14.1-RELEASE</version>
     </parent>
     <artifactId>ace-am</artifactId>
     <name>ace-am</name>
@@ -99,9 +99,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.web</groupId>
-            <artifactId>javax.servlet.jsp.jstl</artifactId>
-            <version>1.2.5</version>
+            <groupId>javax.servlet.jsp.jstl</groupId>
+            <artifactId>javax.servlet.jsp.jstl-api</artifactId>
+            <version>1.2.2</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

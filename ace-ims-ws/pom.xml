@@ -6,7 +6,7 @@
     <parent>
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
-        <version>1.15-SNAPSHOT</version>
+        <version>1.14.1-RELEASE</version>
     </parent>
     <artifactId>ace-ims-ws</artifactId>
     <name>ace-ims-ws</name>
