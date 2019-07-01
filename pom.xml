@@ -57,14 +57,13 @@
         <!-- dependency bom -->
         <jaxb.version>2.3.1</jaxb.version>
         <jaxws.version>2.3.1</jaxws.version>
-        <jersey.version>2.24</jersey.version>
+        <jersey.version>2.28</jersey.version>
         <guava.version>28.0-jre</guava.version>
         <commons-io.version>2.6</commons-io.version>
         <commons-fu.version>1.4</commons-fu.version>
         <commons-csv.version>1.6</commons-csv.version>
         <commons-collections.version>4.3</commons-collections.version>
         <log4j2.version>2.11.2</log4j2.version>
-        <jackson.version>2.9.9</jackson.version>
         <eclipselink.version>2.7.4</eclipselink.version>
     </properties>
 
@@ -133,16 +132,6 @@
 
             <!-- audit manager misc -->
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.sun.mail</groupId>
                 <artifactId>javax.mail</artifactId>
                 <version>1.6.2</version>
@@ -151,6 +140,23 @@
                 <groupId>org.apache.taglibs</groupId>
                 <artifactId>taglibs-standard-impl</artifactId>
                 <version>1.2.5</version>
+            </dependency>
+
+            <!-- audit manager jersey -->
+            <dependency>
+                <groupId>org.glassfish.jersey.containers</groupId>
+                <artifactId>jersey-container-servlet</artifactId>
+                <version>${jersey.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.media</groupId>
+                <artifactId>jersey-media-json-jackson</artifactId>
+                <version>${jersey.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.inject</groupId>
+                <artifactId>jersey-hk2</artifactId>
+                <version>${jersey.version}</version>
             </dependency>
 
             <!-- apache commons + guava -->

@@ -139,7 +139,7 @@ public class IngestStore extends EntityManagerServlet {
 
         IngestThreadPool tPool = IngestThreadPool.getInstance();
         tPool.submitTokens(batchTokens, coll);
-        response.sendRedirect("/TokenImportStatus?active=" + coll.getId());
+        response.sendRedirect("TokenImportStatus?active=" + coll.getId());
     }
 
 }
