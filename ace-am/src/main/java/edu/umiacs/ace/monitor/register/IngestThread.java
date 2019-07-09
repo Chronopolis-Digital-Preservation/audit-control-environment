@@ -32,7 +32,6 @@ package edu.umiacs.ace.monitor.register;
 
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
-import edu.umiacs.ace.monitor.core.MonitoredItemManager;
 import edu.umiacs.ace.monitor.core.Token;
 import edu.umiacs.ace.monitor.log.LogEnum;
 import edu.umiacs.ace.monitor.log.LogEvent;
@@ -45,6 +44,9 @@ import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -93,7 +95,7 @@ public class IngestThread extends RecursiveAction {
             return;
         }
 
-        if (identifiers.size() < 7000) {
+        if (identifiers.size() < 2500) {
             // TODO: I still want to play around with rollbacks in case of failure
             em = PersistUtil.getEntityManager();
             EntityTransaction trans = em.getTransaction();
@@ -115,7 +117,6 @@ public class IngestThread extends RecursiveAction {
         MonitoredItem item;
         session = System.currentTimeMillis();
         logManager = new LogEventManager(session, coll);
-        MonitoredItemManager mim = new MonitoredItemManager(em);
 
         // Cycle through all items read in and add/update tokens
         // Commit only if there are no errors in all transactions
@@ -123,7 +124,7 @@ public class IngestThread extends RecursiveAction {
         for (String identifier : identifiers) {
             queued.remove(identifier);
             Token token = tokens.get(identifier);
-            item = mim.getItemByPath(identifier, coll);
+            item = getItemByPath(identifier, coll);
             if (item == null) {
                 LOG.debug("[Ingest Thread " + Thread.currentThread().getId()
                         + "] Adding new item " + identifier);
@@ -256,4 +257,28 @@ public class IngestThread extends RecursiveAction {
         mi.setSize(size);
         return mi;
     }
+
+
+    /**
+     * From MIM but without locking
+     *
+     * @param path path to look for
+     * @return MonitoredItem if exist, null otherwise
+     */
+    public MonitoredItem getItemByPath(String path, Collection c) {
+        MonitoredItem tmp = new MonitoredItem();
+        tmp.setPath(path);
+
+        TypedQuery<MonitoredItem> q =
+                em.createNamedQuery("MonitoredItem.getItemByPath", MonitoredItem.class);
+        q.setParameter("path", path);
+        q.setParameter("coll", c);
+
+        // Make sure we have the correct item
+        List<MonitoredItem> li = q.getResultList();
+        li.sort(Comparator.comparing(MonitoredItem::getPath));
+        int idx = Collections.binarySearch(li, tmp, Comparator.comparing(MonitoredItem::getPath));
+        return (idx >= 0 ? li.get(idx) : null);
+    }
+
 }

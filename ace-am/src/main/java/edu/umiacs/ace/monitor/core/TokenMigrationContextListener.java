@@ -35,6 +35,12 @@ import edu.umiacs.ace.monitor.audit.AuditConfigurationContext;
 import edu.umiacs.ace.monitor.audit.AuditConfigurationContext.PauseBean;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.sql.SQL;
+import org.apache.log4j.Logger;
+import org.apache.log4j.NDC;
+
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.sql.Blob;
@@ -43,11 +49,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.sql.DataSource;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
 
 /**
  * Token migration listner to migrate tokens from the older pre-1.6 version to the current 1.6+
@@ -225,7 +226,7 @@ public class TokenMigrationContextListener implements ServletContextListener {
                         + writeStmt.executeBatch().length);
                 writeConn.commit();
 
-                LOG.info("Entried processed: " + i);
+                LOG.info("Entries processed: " + i);
             } catch ( SQLException e ) {
                 writeConn.rollback();
                 LOG.error("SQL Exception while moving tokens");

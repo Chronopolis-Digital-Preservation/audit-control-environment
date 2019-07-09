@@ -4,7 +4,7 @@
   <parent>
     <artifactId>ace</artifactId>
     <groupId>edu.umiacs.ace</groupId>
-    <version>1.14-RELEASE</version>
+    <version>1.14.1-RELEASE</version>
   </parent>
   <artifactId>audit-core</artifactId>
   <name>Core audit queue</name>

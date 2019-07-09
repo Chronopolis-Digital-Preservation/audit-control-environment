@@ -33,7 +33,7 @@ public class IngestSupervisor implements Runnable {
     public IngestSupervisor(final Map<String, Token> tokens, final Collection coll) {
         this.tokens = tokens;
         this.coll = coll;
-        this.pool = new ForkJoinPool();
+        this.pool = ForkJoinPool.commonPool();
         this.states = new ConcurrentHashMap<>();
 
         // so we don't have to worry about npes
@@ -58,7 +58,7 @@ public class IngestSupervisor implements Runnable {
 
         dirTask.quietlyJoin();
         fileTask.quietlyJoin();
-        pool.shutdown();
+        // pool.shutdown();
         LOG.info("Leaving Supervisor");
     }
 

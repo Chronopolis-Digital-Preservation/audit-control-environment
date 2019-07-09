@@ -141,7 +141,9 @@ public class IngestThreadPool {
 
     protected static void shutdownPools() {
         LOG.debug("[Ingest] Shutting down thread pools.");
-        cache.invalidateAll();
+        if (cache != null) {
+            cache.invalidateAll();
+        }
     }
 
 }

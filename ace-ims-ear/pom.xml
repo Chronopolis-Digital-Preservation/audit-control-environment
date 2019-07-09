@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ace</artifactId>
         <groupId>edu.umiacs.ace</groupId>
-        <version>1.14-RELEASE</version>
+        <version>1.14.1-RELEASE</version>
     </parent>
 
     <packaging>ear</packaging>
@@ -21,8 +21,8 @@
     <dependencies>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk16</artifactId>
-            <version>1.45</version>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.62</version>
         </dependency>
         <dependency>
             <groupId>edu.umiacs.ace</groupId>

@@ -593,9 +593,12 @@ public final class AuditThread extends Thread implements CancelCallback {
         LOG.trace("Generated checksum: " + currentFileHash + " expected checksum: " + storedDigest);
         LogEvent event;
 
-        // If we have a registered file, set the digested value
+        // If we have a registered file:
+        // set the stored digest to be the generated hash
+        // set the file digest of the current monitored_item to the generated hash
         if (null == storedDigest) {
             LOG.trace("Setting digest for registered file " + item.getPath());
+            storedDigest = currentFileHash;
             item.setFileDigest(currentFileHash);
             item.setLastSeen(new Date());
         }

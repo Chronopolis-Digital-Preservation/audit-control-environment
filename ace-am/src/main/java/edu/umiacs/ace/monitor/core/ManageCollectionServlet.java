@@ -37,6 +37,8 @@ import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
 import org.apache.log4j.Logger;
+import org.apache.log4j.NDC;
+import org.eclipse.persistence.exceptions.DatabaseException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -50,9 +52,11 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.concurrent.ForkJoinPool;
 
 /**
  * add,modify,remove the settings of a collection
+ *
  * @author toaster
  */
 public class ManageCollectionServlet extends EntityManagerServlet {
@@ -77,7 +81,6 @@ public class ManageCollectionServlet extends EntityManagerServlet {
 //    private static final String PARAM_PEER_COLLECTION_PREFIX = "peer_col_id";
 
     /**
-     *
      * @param request
      * @param response
      * @param em
@@ -86,7 +89,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
      */
     @Override
     protected void processRequest(HttpServletRequest request,
-            HttpServletResponse response, EntityManager em)
+                                  HttpServletResponse response, EntityManager em)
             throws ServletException, IOException {
 
         EntityTransaction trans;
@@ -97,7 +100,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
 
 
         /*
-         * Modification, view, or removal of an existing collection       
+         * Modification, view, or removal of an existing collection
          *  if we have an int, and its > 0, and it is the key for a resource
          */
         if ((collection = getCollection(request, em)) != null) {
@@ -105,9 +108,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
 
             if (collection.getStorage() != null) {
                 storage = StorageDriverFactory.createStorageAccess(collection, em);
-
             }
-
 
             /*
              * Tst to see if we're removing a collection
@@ -115,13 +116,12 @@ public class ManageCollectionServlet extends EntityManagerServlet {
             if (!Strings.isEmpty(request.getParameter(PARAM_REMOVE))
                     && request.getParameter(PARAM_REMOVE).toLowerCase().equals("yes")) {
                 LOG.debug("removing collection " + collection.getName());
-                removeCollection(em, collection, storage);
+                ForkJoinPool.commonPool().submit(new RemoveThread(collection, storage));
                 response.sendRedirect("Status?collectionid=-1");
                 return;
             } /*
              * otherwise, are we updating?
-             */
-            else if (checkParameters(request)
+             */ else if (checkParameters(request)
                     && ((paramCheckResponse = checkStorage(storage, request, collection)) == null)) {
                 LOG.debug("updating collection: " + collection.getName());
                 trans = em.getTransaction();
@@ -135,17 +135,15 @@ public class ManageCollectionServlet extends EntityManagerServlet {
             } /*
              * ok, we're just opening an existing collection for modification
              *  - this should display the storage page since storage will be set
-             */
-            else {
+             */ else {
                 LOG.debug("loading existing collection: " + collection.getName());
                 dispatcher = request.getRequestDispatcher("collectionmodify.jsp");
             }
         } /*
          * its either a new submission, or requesting a blank page.
-         *  We shouldn't set storage information here yet, just create the 
+         *  We shouldn't set storage information here yet, just create the
          *  new collection and create a blank storage
-         */
-        else {
+         */ else {
             collection = new Collection();
             collection.setState(CollectionState.NEVER);
             populateCollection(request, collection);
@@ -154,8 +152,7 @@ public class ManageCollectionServlet extends EntityManagerServlet {
             if (checkParameters(request) && hasDigest(request)) {
                 LOG.debug("creating collection, empty driver: " + collection.getName());
                 PersistUtil.persist(collection);
-                storage = StorageDriverFactory.createStorageAccess(collection,
-                        em);
+                storage = StorageDriverFactory.createStorageAccess(collection, em);
                 CollectionCountContext.incrementTotalCollections();
             }
 
@@ -180,37 +177,6 @@ public class ManageCollectionServlet extends EntityManagerServlet {
             result = sd.checkParameters(request.getParameterMap(), collection.getDirectory());
         }
         return result;
-    }
-
-    private void removeCollection(EntityManager em, Collection collection, StorageDriver storage) {
-        EntityTransaction trans;
-        Query q;
-        trans = em.getTransaction();
-        trans.begin();
-        q = em.createNamedQuery("LogEvent.deleteByCollection");
-        q.setParameter("coll", collection);
-        q.executeUpdate();
-        q = em.createNamedQuery("Token.deleteByCollection");
-        q.setParameter("coll", collection);
-        q.executeUpdate();
-        q = em.createNamedQuery("MonitoredItem.deleteByCollection");
-        q.setParameter("coll", collection);
-        q.executeUpdate();
-        q = em.createNamedQuery("FilterEntry.dropByCollection");
-        q.setParameter("coll", collection);
-        q.executeUpdate();
-        q = em.createNamedQuery("ReportSummary.deleteByCollection");
-        q.setParameter("coll", collection);
-        q.executeUpdate();
-        q = em.createNamedQuery("PeerCollection.deleteByCollection");
-        q.setParameter("coll", collection);
-        q.executeUpdate();
-        if (storage != null) {
-            storage.remove(em);
-        }
-        em.remove(collection);
-        CollectionCountContext.decrementTotalCollections(collection);
-        trans.commit();
     }
 
     private boolean hasDigest(HttpServletRequest req) {
@@ -246,29 +212,23 @@ public class ManageCollectionServlet extends EntityManagerServlet {
         }
 
         if (col.getSettings() == null)
-            col.setSettings(new HashMap<String, String>());
+            col.setSettings(new HashMap<>());
 
         if (!Strings.isEmpty(req.getParameter(PARAM_EMAILLIST))) {
-//            col.setEmailList(req.getParameter(PARAM_EMAILLIST));
             col.getSettings().put(ConfigConstants.ATTR_EMAIL_RECIPIENTS, req.getParameter(PARAM_EMAILLIST));
         }
-//
+
         if (Strings.isValidInt(req.getParameter(PARAM_CHECKPERIOD))) {
             col.getSettings().put(ConfigConstants.ATTR_AUDIT_PERIOD, req.getParameter(PARAM_CHECKPERIOD));
-//            col.setCheckPeriod(Integer.parseInt(req.getParameter(PARAM_CHECKPERIOD)));
         }
-//
+
         if (req.getParameter(PARAM_PROXY_DATA) != null) {
             col.getSettings().put(ConfigConstants.ATTR_PROXY_DATA, req.getParameter(PARAM_PROXY_DATA));
-//            col.setProxyData("true".equals(req.getParameter(PARAM_PROXY_DATA).toLowerCase()));
         }
-//
+
         if (req.getParameter(PARAM_AUDIT_TOKENS) != null) {
             col.getSettings().put(ConfigConstants.ATTR_AUDIT_TOKENS, req.getParameter(PARAM_AUDIT_TOKENS));
-//            col.setAuditTokens("true".equals(req.getParameter(PARAM_AUDIT_TOKENS).toLowerCase()));
         }
-
-
     }
 
     public boolean checkParameters(HttpServletRequest req) {
@@ -276,4 +236,93 @@ public class ManageCollectionServlet extends EntityManagerServlet {
                 && !Strings.isEmpty(req.getParameter(PARAM_DIR))
                 && StorageDriverFactory.listResources().contains(req.getParameter(PARAM_DRIVER)));
     }
+
+    private class RemoveThread implements Runnable {
+        private static final String COLL_ID = "collection_id";
+        private static final String PARENT_ID = "parent_id";
+        private static final String PARENT_COLL_ID = "parentcollection_id";
+
+        private static final String LOG_EVENT = "logevent";
+        private static final String LOG_EVENT_ID = COLL_ID;
+        private static final String ACE_TOKEN = "acetoken";
+        private static final String ACE_TOKEN_ID = PARENT_COLL_ID;
+        private static final String MONITORED_ITEM = "monitored_item";
+        private static final String MONITORED_ITEM_ID = PARENT_COLL_ID;
+        private static final String FILTER_ENTRY = "filter_entry";
+        private static final String FILTER_ENTRY_ID = COLL_ID;
+        private static final String REPORT_SUMMARY = "report_summary";
+        private static final String REPORT_SUMMARY_ID = COLL_ID;
+        private static final String PEER_COLLECTION = "peer_collection";
+        private static final String PEER_COLLECTION_ID = PARENT_ID;
+
+        private Boolean abort = false;
+        private Collection collection;
+        private StorageDriver storage;
+
+        private RemoveThread(Collection collection, StorageDriver storage) {
+            this.collection = collection;
+            this.storage = storage;
+        }
+
+        @Override
+        public void run() {
+            // this is on a separate thread so re-acquire the entity manager
+            NDC.push("[Remove " + collection.getName() + "] ");
+            EntityManager em = PersistUtil.getEntityManager();
+            // batching to reduce contention on tables when deleting many rows
+            // todo: native queries aren't the best for this, but deleting with jpql is... weird
+            //   could possibly try to use a CriteriaBuilder and issue a subquery
+            LOG.info("Starting remove");
+            batchRm(em, collection, LOG_EVENT, LOG_EVENT_ID);
+            batchRm(em, collection, ACE_TOKEN, ACE_TOKEN_ID);
+            batchRm(em, collection, MONITORED_ITEM, MONITORED_ITEM_ID);
+            batchRm(em, collection, FILTER_ENTRY, FILTER_ENTRY_ID);
+            batchRm(em, collection, REPORT_SUMMARY, REPORT_SUMMARY_ID);
+            batchRm(em, collection, PEER_COLLECTION, PEER_COLLECTION_ID);
+
+            if (!abort) {
+                // The collection and storage driver are detached at this point so they need to be
+                // re-acquired
+                collection = em.find(Collection.class, collection.getId());
+                storage = StorageDriverFactory.createStorageAccess(collection, em);
+                if (storage != null) {
+                    storage.remove(em);
+                }
+
+                LOG.info("Finishing remove");
+                EntityTransaction transaction = em.getTransaction();
+                transaction.begin();
+                em.remove(collection);
+                transaction.commit();
+                CollectionCountContext.decrementTotalCollections(collection);
+            }
+
+            NDC.pop();
+            NDC.clear();
+        }
+
+        private void batchRm(EntityManager em, Collection coll, String table, String row) {
+            final String queryString = "DELETE FROM %s WHERE %s = %s ORDER BY id LIMIT 1000";
+            boolean run = true;
+
+            LOG.debug("Removing entries for " + table);
+            Query q = em.createNativeQuery(String.format(queryString, table, row, coll.getId()));
+            while (run && !abort) {
+                EntityTransaction trans = em.getTransaction();
+                trans.begin();
+                try {
+                    int affected = q.executeUpdate();
+                    trans.commit();
+                    run = (affected != 0);
+                    // LOG.info("Removed " + affected + " rows setting run to " + run);
+                } catch (DatabaseException e) {
+                    LOG.warn("Caught exception when removing collection", e);
+                    trans.rollback();
+                    run = false;
+                    abort = true;
+                }
+            }
+        }
+    }
+
 }
