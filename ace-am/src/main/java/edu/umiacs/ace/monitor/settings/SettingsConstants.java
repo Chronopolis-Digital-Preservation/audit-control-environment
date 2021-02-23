@@ -40,7 +40,7 @@ public class SettingsConstants {
     public static final String mailFrom = "acemail@localhost";
     public static final String maxAudit = "3";
     public static final String autoAudit = "true";
-    public static final String ims = "ims.umiacs.umd.edu";
+    public static final String ims = "ims.tdl.org";
     public static final String imsPort = "80";
     public static final String imsTokenClass = "SHA-256";
     public static final String imsMaxRetry = "3";

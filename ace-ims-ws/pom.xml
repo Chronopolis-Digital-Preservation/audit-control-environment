@@ -25,7 +25,7 @@
                         <configuration>
                             <wsdlUrls>
                                 <wsdlUrl>
-                                    http://ims.umiacs.umd.edu/ace-ims/IMSWebService?wsdl
+                                    http://ims.tdl.org/ace-ims/IMSWebService?wsdl
                                 </wsdlUrl>
                             </wsdlUrls>
                             <bindingFiles>

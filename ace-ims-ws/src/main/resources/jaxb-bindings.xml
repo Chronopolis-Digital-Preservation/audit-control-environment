@@ -3,7 +3,7 @@
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
     version="1.0">
-    <jxb:bindings schemaLocation="http://ims.umiacs.umd.edu:80/ace-ims/IMSWebService?xsd=1" node="/xsd:schema">
+    <jxb:bindings schemaLocation="http://ims.tdl.org:80/ace-ims/IMSWebService?xsd=1" node="/xsd:schema">
         <jxb:globalBindings>
             <jxb:serializable/>
         </jxb:globalBindings>

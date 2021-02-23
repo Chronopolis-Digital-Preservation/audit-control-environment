@@ -50,7 +50,7 @@ public class TokenStoreWriterTest {
         AceToken sampleToken;
         sampleToken = new AceToken();
         sampleToken.setDate(new Date());
-        sampleToken.setIms("ims.umiacs.umd.edu");
+        sampleToken.setIms("ims.tdl.org");
         sampleToken.setImsService("SHA-256-0");
         sampleToken.setRound(54678);
 
