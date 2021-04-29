@@ -10,7 +10,8 @@ public enum CStateBean {
     ACTIVE("A"),
     ERROR("E"),
     INTERRUPTED("I"),
-    NEVER_SCANNED("N");
+    NEVER_SCANNED("N"),
+	REMOVED("R");
 
     private final String state;
 

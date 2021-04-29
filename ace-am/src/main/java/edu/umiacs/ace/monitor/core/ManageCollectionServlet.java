@@ -33,6 +33,7 @@ package edu.umiacs.ace.monitor.core;
 import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.driver.StorageDriverFactory;
 import edu.umiacs.ace.monitor.access.CollectionCountContext;
+import edu.umiacs.ace.monitor.access.StatusServlet;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
@@ -116,9 +117,20 @@ public class ManageCollectionServlet extends EntityManagerServlet {
             if (!Strings.isEmpty(request.getParameter(PARAM_REMOVE))
                     && request.getParameter(PARAM_REMOVE).toLowerCase().equals("yes")) {
                 LOG.debug("removing collection " + collection.getName());
-                ForkJoinPool.commonPool().submit(new RemoveThread(collection, storage));
-                response.sendRedirect("Status?collectionid=-1");
-                return;
+
+                // update collection state to REMOVED
+                collection.setState(CollectionState.REMOVED);
+                trans = em.getTransaction();
+                trans.begin();
+                em.merge(collection);
+                trans.commit();
+
+                // remove from audit context
+                CollectionCountContext.decrementTotalCollections(collection);
+                // clear session of the working collection
+                request.getSession().removeAttribute(StatusServlet.SESSION_WORKINGCOLLECTION);
+ 
+                dispatcher = request.getRequestDispatcher("collectionfinish.jsp");
             } /*
              * otherwise, are we updating?
              */ else if (checkParameters(request)

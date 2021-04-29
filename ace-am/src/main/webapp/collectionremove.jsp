@@ -19,10 +19,8 @@ Author     : toaster
         <div class="standardBody">
         <h3>Confirm Remove</h3>
             <p>
-                All replica, file, and log information for the collection
-                ${workingCollection.collection.name} will be removed forever. This process can take
-                time for larger collections, which may continue to appear until the remove is
-                complete.
+                This will flag the state of collection ${workingCollection.collection.name} to be REMOVED.
+                Note that this won't remove any files from the node and you may need to delete files manually.
             </p>
 
             <p>Click Remove to proceed.</p>

@@ -35,6 +35,10 @@ Author     : toaster
                         <td>${collection.directory}</td>
                     </tr>
                     <tr>
+                        <td>State</td>
+                        <td>${collection.state}</td>
+                    </tr>
+                    <tr>
                         <td><a href="Status">Back</a></td>
                     </tr>
                 </tbody>

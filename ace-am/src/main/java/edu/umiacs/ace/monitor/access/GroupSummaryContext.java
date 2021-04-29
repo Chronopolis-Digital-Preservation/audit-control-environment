@@ -5,6 +5,7 @@ import edu.umiacs.ace.util.PersistUtil;
 import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -99,11 +100,14 @@ public class GroupSummaryContext implements ServletContextListener {
             groupSummary.setParameter(i, param);
             i++;
         }
-
-        List<GroupSummary> results = (List<GroupSummary>) groupSummary.getResultList();
-        for (GroupSummary result : results) {
-            log.info("Result: group " + result.getGroup() + ", size: " + result.getSize() + ", count: " + result.getCount());
-            summaries.put(result.getGroup(), result);
+        try {
+	        List<GroupSummary> results = (List<GroupSummary>) groupSummary.getResultList();
+	        for (GroupSummary result : results) {
+	            log.info("Result: group " + result.getGroup() + ", size: " + result.getSize() + ", count: " + result.getCount());
+	            summaries.put(result.getGroup(), result);
+	        }
+        } catch (PersistenceException e) {
+        	log.error("Error qury GroupSummy.", e);
         }
     }
 }

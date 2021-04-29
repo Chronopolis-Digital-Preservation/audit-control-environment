@@ -67,7 +67,7 @@ public class StatusServlet extends EntityManagerServlet {
     private static final int DEFAULT_COUNT = 100;
 
     // TODO: Add session fields for pagination and search params
-    private static final String SESSION_WORKINGCOLLECTION = "workingCollection";
+    public static final String SESSION_WORKINGCOLLECTION = "workingCollection";
 
     private static final String PARAM_CSV = "csv";
 
