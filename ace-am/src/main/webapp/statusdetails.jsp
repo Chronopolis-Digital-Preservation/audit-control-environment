@@ -13,6 +13,10 @@
         <legend>${workingCollection.collection.name} <a href="Status?collectionid=-1">x</a></legend>
         <table id="detailstbl1">
             <tr>
+                <td>Collection State</td>
+                <td>${workingCollection.collection.getStateEnum()}</td>
+            </tr>
+            <tr>
                 <td>Audit Status: </td>
                 <td id="threaddetailsTD">
                     <c:choose>
@@ -32,6 +36,7 @@
                                 </table>
                             </div></c:when>
                         <c:when test="${workingCollection.tokenAuditRunning}">Token Audit in progress</c:when>
+                        <c:when test="${workingCollection.collection.state eq 'R'.charAt(0)}">N/A</c:when>
                         <c:otherwise>Idle</c:otherwise>
                     </c:choose>
                 </td>
@@ -130,7 +135,7 @@
         <table id="dettable">        
             <tr>
                 <um:Auth role="Audit">
-                    <c:if test="${!workingCollection.tokenAuditRunning && workingCollection.collection.storage != null}">
+                    <c:if test="${workingCollection.collection.state ne 'R'.charAt(0) && (!workingCollection.tokenAuditRunning && workingCollection.collection.storage != null)}">
                         <c:choose>
                             <c:when test="${workingCollection.fileAuditRunning || workingCollection.queued}">
                                 <td>
@@ -149,7 +154,7 @@
                         </c:choose>
                     </c:if>
                     
-                    <c:if test="${!workingCollection.fileAuditRunning || workingCollection.queued}">
+                    <c:if test="${workingCollection.collection.state ne 'R'.charAt(0) && (!workingCollection.fileAuditRunning || workingCollection.queued)}">
                         <c:choose>
                             <c:when test="${workingCollection.tokenAuditRunning}">
                                 <td><a href="StopSync?type=token&amp;collectionid=${workingCollection.collection.id}" title="Stop Token Audit" ><img src="images/stop.jpg" alt="Stop Token Audit" /></a></td>
@@ -168,7 +173,7 @@
                     <td>
                         <fieldset id="dropmenu2" style="display: none; z-index: 2; position: absolute; background-color: #FFFFFF; width: 150px;">
                             <legend><span onclick="toggleVisibility('dropmenu1','block'); toggleVisibility('dropmenu2','block');">close</span></legend>
-                        <c:if test="${!(workingCollection.fileAuditRunning || workingCollection.tokenAuditRunning || workingCollection.queued)}">
+                        <c:if test="${workingCollection.collection.state ne 'R'.charAt(0) && (!(workingCollection.fileAuditRunning || workingCollection.tokenAuditRunning || workingCollection.queued))}">
                             <um:Auth role="Collection Modify">
                                 <a href="ManageCollection?collectionid=${workingCollection.collection.id}" title="Configure connection settings for this collection" >Collection Settings</a><br>
                                 <a href="collectionremove.jsp" title="Delete Collection">Remove Collection</a><br>
@@ -179,14 +184,16 @@
                                 <a href="ReportConfiguration?collectionid=${workingCollection.collection.id}">Modify Reporting</a><br>
                             </um:Auth>
                         </c:if>
-                        <um:Auth role="Summary">
-                            <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=store" title="Download tokenstore for this collection">Download TokenStore</a><br>
-                            <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=digest" title="Download a list of all digests in this collection">Download Digests</a><br>
-                            <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=checkm" title="Download a checkm manifest of all items in this collection">Download checkm list</a><br>
-                            <c:if test="${workingCollection.collection.settings['proxy.data']}">
-                                <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=wget" title="Down wget-compatible list of files in this collection">Download wget file list</a><br>
-                            </c:if>
-                        </um:Auth>
+                        <c:if test="${workingCollection.collection.state ne 'R'.charAt(0)}">
+	                        <um:Auth role="Summary">
+	                            <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=store" title="Download tokenstore for this collection">Download TokenStore</a><br>
+	                            <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=digest" title="Download a list of all digests in this collection">Download Digests</a><br>
+	                            <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=checkm" title="Download a checkm manifest of all items in this collection">Download checkm list</a><br>
+	                            <c:if test="${workingCollection.collection.settings['proxy.data']}">
+	                                <a href="Summary?collectionid=${workingCollection.collection.id}&amp;output=wget" title="Down wget-compatible list of files in this collection">Download wget file list</a><br>
+	                            </c:if>
+	                        </um:Auth>
+                        </c:if>
                         <um:Auth role="Compare">
                             <a href="compare_form.jsp">Compare Collection</a><br>
                         </um:Auth>

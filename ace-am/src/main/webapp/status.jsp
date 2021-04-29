@@ -254,6 +254,9 @@
                             <c:when test="${item.queued}">
                                 Queued
                             </c:when>
+                            <c:when test="${item.collection.state eq 'R'.charAt(0)}">
+                                Excluded
+                            </c:when>
                             <c:when test="${item.collection.lastSync == null || item.collection.settings['audit.period'] < 1 || pause.paused}">
                                 Unknown
                             </c:when>
