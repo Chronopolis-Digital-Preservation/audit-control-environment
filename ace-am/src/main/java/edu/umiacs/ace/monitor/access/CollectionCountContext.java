@@ -107,7 +107,7 @@ public class CollectionCountContext implements ServletContextListener {
                 try {
                     EntityManager em = PersistUtil.getEntityManager();
                     Query collQuery = em.createNamedQuery(
-                            "Collection.listAllCollections", Collection.class);
+                            "Collection.listAllAuditCollections", Collection.class);
 
                     for (Object o : collQuery.getResultList()) {
                         Collection collection = (Collection) o;

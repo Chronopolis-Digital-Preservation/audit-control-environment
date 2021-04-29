@@ -7,7 +7,7 @@ package edu.umiacs.ace.monitor.core;
  */
 public enum CollectionState {
 
-    ACTIVE, INTERRUPTED, NEVER, ERROR;
+    ACTIVE, INTERRUPTED, NEVER, ERROR, REMOVED;
 
     public static CollectionState fromChar(char state) {
         switch (state) {
@@ -19,6 +19,8 @@ public enum CollectionState {
                 return NEVER;
             case 'E':
                 return ERROR;
+            case 'R':
+                return REMOVED;
             default:
                 throw new IllegalArgumentException("Unknown state " + state);
         }

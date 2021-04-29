@@ -19,6 +19,8 @@ public class CollectionStateConverter implements AttributeConverter<CollectionSt
                 return "I";
             case ERROR:
                 return "E";
+            case REMOVED:
+                return "R";
             default:
                 throw new IllegalArgumentException("Unknown state " + collectionState);
         }
@@ -35,6 +37,8 @@ public class CollectionStateConverter implements AttributeConverter<CollectionSt
                 return CollectionState.INTERRUPTED;
             case "E":
                 return CollectionState.ERROR;
+            case "R":
+                return CollectionState.REMOVED;
             default:
                 throw new IllegalArgumentException("Unknown state " + s);
         }

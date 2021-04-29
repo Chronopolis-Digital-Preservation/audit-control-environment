@@ -199,7 +199,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
                 }
 
                 Query query =
-                        em.createNamedQuery("Collection.listAllCollections");
+                        em.createNamedQuery("Collection.listAllAuditCollections");
 
                 items = query.getResultList();
 
