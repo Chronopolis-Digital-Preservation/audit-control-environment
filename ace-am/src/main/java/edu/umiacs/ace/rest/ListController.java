@@ -89,7 +89,7 @@ public class ListController {
 
     /**
      * New API method to get all collections with query parameters
-     *
+     * Exclude REMOVED state collections
      * @return
      */
     @GET
@@ -98,7 +98,9 @@ public class ListController {
     public List<Collection> getCollections(@QueryParam("group") String group,
                                            @QueryParam("active") Boolean active,
                                            @QueryParam("corrupt") Boolean corrupt) {
-        EntityManager entityManager = PersistUtil.getEntityManager();
+    	LOG.info("GET /collections: group " + group + ", active " + active + ", corrupt " + corrupt + " ...");
+
+    	EntityManager entityManager = PersistUtil.getEntityManager();
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Collection> cq = cb.createQuery(Collection.class);
         Root<Collection> coll = cq.from(Collection.class);
@@ -110,8 +112,32 @@ public class ListController {
         if (corrupt != null && corrupt) {
             cq.where(cb.equal(coll.get("state"), CollectionState.ERROR));
         }
-        cq.orderBy(cb.asc(coll.get("group")));
 
+        cq.where(cb.notEqual(coll.get("state"), CollectionState.REMOVED));
+        cq.orderBy(cb.asc(coll.get("group")));
+  
+        return entityManager.createQuery(cq).getResultList();
+    }
+
+    /**
+     * API method to get all collections with REMOVED state
+     *
+     * @return
+     */
+    @GET
+    @Path("collections/removed")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Collection> getRemovedCollections() {
+    	LOG.info("GET /collections/removed ...");
+
+    	EntityManager entityManager = PersistUtil.getEntityManager();
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Collection> cq = cb.createQuery(Collection.class);
+        Root<Collection> coll = cq.from(Collection.class);
+        cq.select(coll);
+        cq.where(cb.equal(coll.get("state"), CollectionState.REMOVED));
+        cq.orderBy(cb.asc(coll.get("group")));
+  
         return entityManager.createQuery(cq).getResultList();
     }
 
