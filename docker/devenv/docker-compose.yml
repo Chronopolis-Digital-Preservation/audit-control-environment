@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+
+  ace-build:
+    image: 'local/ace-dev'
+    hostname: ace-dev
+    volumes:
+      - "../..:/audit-control-environment"
+    ports:
+      - "8080:8080"
