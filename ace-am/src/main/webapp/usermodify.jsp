@@ -24,7 +24,7 @@ Author     : toaster
             }
 
             #usertablehead {
-                padding: 10px;
+                padding: 10px 0px;
 
             }
         </style>

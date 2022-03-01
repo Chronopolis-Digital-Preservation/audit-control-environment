@@ -16,10 +16,18 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>System Settings</title>
     <link rel="stylesheet" type="text/css" href="style.css"/>
+    <style type="text/css">
+        body {
+            width: 980px !important;
+            margin-top: 8px !important;
+            padding: 0px !important;
+        }
+    </style>  
 </head>
 <body>
 <jsp:include page="header.jsp"/>
 <FORM name="settingsform" METHOD="POST" ENCTYPE="multipart/form-data" ACTION="UpdateSettings">
+  <div align="center">
     <fieldset id="settingsTable">
         <legend class="form-legend">System Settings</legend>
         <div class="tabs">
@@ -271,6 +279,7 @@
         <input type="submit" value="Set Defaults" name="default" class="btn is-secondary"
                style="width: 125px;">
     </div>
+  </div>
 </FORM>
 
 <jsp:include page="footer.jsp"/>
