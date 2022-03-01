@@ -23,7 +23,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 
     <style type="text/css">
         body {
-            width: 752px !important;
+            width: 980px !important;
             margin-top: 8px !important;
             padding-right: 0px !important;
         }
@@ -37,16 +37,18 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         }
 
         #summaryTable {
-            margin-left: 50px;
             margin-right: auto;
         }
 
         .lblTd {
-            padding-left: 50px;
+            min-width: 200px;
+            white-space: nowrap;
         }
 
         .dataTd {
             padding-left: 10px;
+            padding-right: 10px;
+            min-width: 50px;
         }
 
         #reportTable {
@@ -70,7 +72,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         }
 
         .tblLinks {
-            padding-left: 50px;
+            margin-right: 24px;
         }
 
     </style>
@@ -79,7 +81,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 <jsp:include page="header.jsp"/>
 <jsp:useBean id="collection" scope="request"
              type="edu.umiacs.ace.monitor.access.CollectionSummaryBean"/>
-<table id="summaryTable">
+<div class="container" style="width: 90%; margin-bottom: 20px;">
+  <table id="summaryTable">
     <tr>
         <td class="lblTd">Active Files</td>
         <td class="dataTd">
@@ -127,24 +130,26 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         </td>
     </tr>
     <tr>
-        <td class="tblLinks">
+      <td colspan="6">
+        <span class="tblLinks">
             <a href="Report?collectionid=${collection.collection.id}&amp;text=1&amp;count=-1">
-                Download List</a></td>
+                Download List</a></span>
         <um:Auth role="Audit">
-        <td class="tblLinks">
+        <span class="tblLinks">
             <a href="StartSync?collectionid=${collection.collection.id}&amp;type=corrupt">
                 Audit Corrupt Files
             </a>
-        </td>
+        </span>
         </um:Auth>
         <um:Auth role="Log">
-        <td class="tblLinks">
+        <span class="tblLinks">
             <a href="EventLog?sessionId=${session}">Recent Events</a>
-        </td>
+        </span>
         </um:Auth>
+      </td>
     </tr>
-</table>
-
+  </table>
+</div>
 
 <form method="GET" action="RemoveItem">
     <div class="container" style="width: 90%">

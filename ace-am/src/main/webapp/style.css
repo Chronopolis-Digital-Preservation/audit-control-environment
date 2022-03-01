@@ -1,8 +1,8 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 10px;
-    width: 750px;
-    border: 1px solid #000000;
+    font-size: 16px;
+    width: 980px;
+    border: 2px solid #000000;
     margin-left: auto !important;
     margin-right: auto !important;
 }
@@ -14,7 +14,7 @@ h1 {
 }
 
 a:link, a:visited {
-    font-size: 12px;
+    font-size: 16px;
     color: #003388;
     text-decoration: none;
 }
@@ -28,7 +28,7 @@ a img {
 }
 
 input {
-    font-size: 12px;
+    font-size: 16px;
 }
 
 /*
@@ -64,7 +64,7 @@ ul {
 }
 
 .standardBody {
-    font-size: 12px;
+    font-size: 16px;
     margin-top: 0px;
     margin-bottom: 25px;
     margin-left: 50px;
@@ -86,7 +86,7 @@ padding: 0px;
 padding-left: 15px;
 padding-right: 15px;
 border-bottom: 1px solid #000000;
-font-size: x-small;
+font-size: 16px;
 }
 
 .menubar table {
@@ -160,7 +160,7 @@ vertical-align: top;
     height: 100px;
     position: absolute;
     color: black;
-    font-size: small;
+    font-size: 16px;
 }
 
 #statustable thead {
@@ -173,16 +173,15 @@ vertical-align: top;
 
 #statustable tr td {
     padding-left: 5px;
+    height: 24px;
 }
 
 #statustable {
-    font-size: small;
+    font-size: 16px;
     border: 1px solid #000000;
     margin-top: 25px;
     margin-bottom: 25px;
-    margin-left: 50px;
-    margin-right: 50px;
-    width: 650px;
+    width: 96%;
 }
 
 #dettable tr td {
@@ -191,11 +190,11 @@ vertical-align: top;
 }
 
 #details {
-    font-size: small;
+    font-size: 16px;
     margin-top: 0px;
     margin-left: 50px;
     margin-right: 50px;
-    width: 650px;
+    width: 90%;
 }
 
 .logtypeselection {
@@ -204,16 +203,16 @@ vertical-align: top;
 }
 
 #settingsTable {
-    font-size: small;
+    width: 70%;
+    font-size: 16px;
     border: 1px solid #000000;
-    margin-left: 5%;
-    margin-right: 5%;
+    padding: 20px 60px;
 }
 
 .settingsRow {
     margin-top: 5px;
     margin-bottom: 5px;
-    height: 20px;
+    height: 24px;
     width: 100%;
     clear: both;
 }
@@ -260,37 +259,37 @@ vertical-align: top;
     margin-bottom: -10px;
     margin-left: auto;
     margin-right: auto;
-    width: 650px;
+    width: 90%;
 }
 
 .input {
     padding: 2px;
     display: flex;
-    width: 650px;
+    width: 720px;
 }
 
 .input-group-addon {
     border: 1px solid #ccc;
-    font-size: 12px;
+    font-size: 16px;
     background-color: #e8e8e8;
     text-align: center;
-    width: 75px;
-    height: 20px;
-    line-height: 20px;
-    padding: 3px 10px;
+    width: 20%;
+    padding: 6px;
+    font-weight: bold;
+    color: #333;
 }
 
 .form-input {
     border: 1px solid #ccc;
-    width: 100%;
-    padding: 3px 8px;
+    width: 80%;
+    padding: 6px 8px;
     margin-left: -1px;
     margin-right: 5px;
 }
 
 .form-select {
     border: 1px solid #ccc;
-    width: 100%;
+    width: 80%;
     margin-left: -3px;
     margin-right: 5px;
 }
@@ -338,7 +337,7 @@ vertical-align: top;
 
 .form-help {
     display: block;
-    font-size: 0.7rem;
+    font-size: 16px;
     margin-bottom: .25rem;
     margin-top: 0.25rem;
     text-align: center;
@@ -350,16 +349,15 @@ vertical-align: top;
 }
 
 .btn {
-    padding: 2px;
+    padding: 6px;
     width: 75px;
-    height: 25px;
     border: 1px solid #939393;
     border-radius: 0;
-    margin-left: 2px;
-    margin-top: 2px;
+    margin: 6px 2px 12px 2px;
     color: #363636;
     background-color: hsl(217, 100%, 82%);
-    font-size: 0.75rem;
+    font-size: 14px;
+    font-weight: bold;
 }
 
 .btn.is-secondary {

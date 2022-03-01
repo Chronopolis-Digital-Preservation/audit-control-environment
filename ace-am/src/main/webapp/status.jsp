@@ -147,7 +147,7 @@
 
         </c:if>
 
-        <div id="searchtable">
+        <div id="searchtable" align="center">
             <form method="GET" role="form">
                 <div class="input">
                     <span class="input-group-addon">Group</span>
@@ -176,10 +176,14 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn is-secondary" value="Submit"><span>Submit</span></button>
+                <div class="input" align="left">
+                    <button type="submit" class="btn is-secondary" value="Submit"><span>Submit</span></button>
+                </div>
             </form>
         </div>
-        <table id="statustable">
+
+        <div style="width: 100%" align="center">
+          <table id="statustable">
             <thead>
                 <td></td><td width="45%">Collection Name</td>
                 <td>Type</td><td>Total Files*</td>
@@ -290,7 +294,8 @@
                         <c:otherwise>Automated auditing active.</c:otherwise>
                     </c:choose></td></tr>
 
-        </table>
+          </table>
+        </div>
 
        <table id="linktable">
             <tr>

@@ -34,7 +34,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         <style type="text/css">
             #logtypeselection
             {
-                width: 75%;
+                width: 90%;
                 margin-left: auto;
                 margin-top: 0px;
                 margin-right: auto;
@@ -88,12 +88,13 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             .log {
                 margin-left: auto;
                 margin-right: auto;
-                width: 720px;
+                width: 90%;
                 border-left: 1px solid #000000;
                 border-right: 1px solid #000000;
                 border-bottom: 1px solid #000000;
                 margin-bottom: 10px;
                 margin-top:10px;
+                min-height: 90px;
             }
             
         </style>
@@ -102,8 +103,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         <jsp:include page="header.jsp" />
         <script type="text/javascript">document.getElementById('log').style.backgroundColor = '#ccccff';</script>
         
-        
-        <table id="logtypeselection">
+        <div align="center">
+          <table id="logtypeselection">
             
             <c:if test="${sessionId > 0}">
                 <tr><td colspan="7">
@@ -146,9 +147,9 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 <td align="center"><input onClick="javascript:toggleSelected('sync'); return false;" ${selects['sync']} type="checkbox" style="border:none"/></td> 
             </tr>
             
-        </table>
+          </table>
         
-        <c:if test="${loglist != null}">
+          <c:if test="${loglist != null}">
             <div class="log">
                 <c:forEach var="item" items="${loglist}">
                     <div id="logEntries" class="logItem"
@@ -178,7 +179,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                     </div>
                 </c:forEach>
             </div>
-        </c:if>
+          </c:if>
+        </div>
         
         <table id="browselinktable" >
             <tr>

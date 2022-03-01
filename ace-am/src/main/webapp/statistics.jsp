@@ -1,4 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -11,7 +13,7 @@
          * a few fixes to make everything in line with the rest of ACE
          */
         body {
-            width: 752px !important;
+            width: 980px !important;
             margin-top: 8px !important;
         }
 
@@ -38,13 +40,15 @@
             margin: 1rem -15px;
             background-color: #f7f7f9;
             -ms-overflow-style: -ms-autohiding-scrollbar;
+            width: 90%;
+            min-height: 120px;
         }
     </style>
 </head>
 <body>
 <jsp:include page="header.jsp"/>
 <h3 style="text-align: center;">Collection Ingestion Report</h3>
-<div class="container">
+<div align="center">
     <div id="searchtable">
         <form method="POST" role="form">
             <div class="form-group">
@@ -76,14 +80,17 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary"
-                    value="Submit"><span>Submit</span></button>
-            <button type="submit" class="btn btn-primary" name="csv"
-                    value="true" style="width: 10rem;"><span>Download As CSV</span></button>
+            <div align="left">
+                <button type="submit" class="btn btn-primary"
+                        value="Submit"><span>Submit</span></button>
+                <button type="submit" class="btn btn-primary" name="csv"
+                        value="true" style="width: 10rem;"><span>Download As CSV</span></button>
+            </div>
         </form>
     </div>
 
-    <div class="results">
+    <div align="center">
+      <div class="results">
         <table class="table table-sm">
             <thead>
             <tr>
@@ -106,6 +113,7 @@
             </c:forEach>
             </tbody>
         </table>
+      </div>
     </div>
 </div>
 <jsp:include page="footer.jsp"/>
