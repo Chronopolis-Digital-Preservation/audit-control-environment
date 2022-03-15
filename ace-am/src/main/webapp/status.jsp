@@ -133,7 +133,11 @@
                 background-color: #e8e8e8;
             }
 
-
+            .lbl-group
+            {
+            	color: #444444;
+            	width: 100%;
+            }
         </style>
     </head>
 
@@ -201,9 +205,14 @@
 
                     <tr>
                         <td class="groupheader" colspan="3" onclick="toggleVisibility('spexpand${group}','inline'); toggleVisibility('sphide${group}','inline');">
-                            <span onclick="showGroup('grouptr${group}')" id="spexpand${group}" style="display:none;float: left;width: 25px;" >[+]</span>
-                            <span onclick="hideGroup('grouptr${group}')" id="sphide${group}" style="display:inline;float: left;width: 25px;" >[-]</span>
-                            ${group}
+                        	<div onclick="showGroup('grouptr${group}')" id="spexpand${group}" style="display:none;cursor: pointer;" >
+                        		<div class="lbl-group">[+] Group:</div>
+                        		<div style="margin-left:20px;">${group}</div>
+                        	</div>
+                        	<div onclick="hideGroup('grouptr${group}')" id="sphide${group}" style="display:inline;cursor: pointer;" >
+                        		<div class="lbl-group">[-] Group:</div>
+                        		<div style="margin-left:20px;">${group}</div>
+                        	</div>
                         </td>
                         <td class="groupheader" colspan="3" id="group${group}">
                                 ${group_count} /<c:choose><c:when test="${size > 0}"><d:FileSize value="${size}" /></c:when><c:otherwise>0 B</c:otherwise></c:choose>
