@@ -33,6 +33,7 @@ package edu.umiacs.ace.monitor.audit;
 import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.driver.StorageDriverFactory;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.CollectionState;
 import edu.umiacs.ace.monitor.core.ConfigConstants;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
 import edu.umiacs.ace.monitor.settings.SettingsConstants;
@@ -200,6 +201,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
 
                 Query query =
                         em.createNamedQuery("Collection.listAllAuditCollections");
+                query.setParameter("state", CollectionState.REMOVED);
 
                 items = query.getResultList();
 
