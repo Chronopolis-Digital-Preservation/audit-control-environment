@@ -189,10 +189,14 @@
         <div style="width: 100%" align="center">
           <table id="statustable">
             <thead>
-                <td></td><td width="45%">Collection Name</td>
-                <td>Type</td><td>Total Files*</td>
-                <td>Last Audit</td>
-                <td>Next Audit</td>
+                <td></td>
+                <td width="36%" nowrap>Collection Name</td>
+                <td>Type</td>
+                <td nowrap>Total Files*</td>
+                <td nowrap>Disk Size</td>
+                <td nowrap>Last Audit</td>
+                <td nowrap>Next Audit</td>
+                <td nowrap>Audit Period</td>
             </thead>
             <c:set var="count" value="0" />
             <jsp:useBean id="today" class="java.util.Date"/>
@@ -214,9 +218,16 @@
                         		<div style="margin-left:20px;">${group}</div>
                         	</div>
                         </td>
-                        <td class="groupheader" colspan="3" id="group${group}">
-                                ${group_count} /<c:choose><c:when test="${size > 0}"><d:FileSize value="${size}" /></c:when><c:otherwise>0 B</c:otherwise></c:choose>
+                        <td class="groupheader" id="group${group}">
+                                ${group_count}
                         </td>
+                        <td class="groupheader">
+                            <c:choose>
+                                <c:when test="${size > 0}"><d:FileSize value="${size}" /></c:when>
+                                <c:otherwise>0 B</c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td class="groupheader" colspan="3"></td>
                     </tr>
                     <c:set var="counttotal" value="0" />
                     <c:set var="sizetotal" value="0" />
@@ -257,6 +268,12 @@
                     <td>${item.collection.storage}</td>
                     <td><h:DefaultValue test="${item.totalFiles > -1}" success="${item.totalFiles}" failure="Unknown" /></td>
                     <td>
+                        <c:choose>
+                            <c:when test="${item.totalSize > 0}"><d:FileSize value="${item.totalSize}" /></c:when>
+                            <c:otherwise>0 B</c:otherwise>
+                        </c:choose>
+                    </td>
+                    <td>
                         <fmt:formatDate pattern="MMM dd yyyy" value="${item.collection.lastSync}"/>
                     </td>
                     <td>
@@ -283,6 +300,7 @@
                             </c:otherwise>
                         </c:choose>
                     </td>
+                    <td nowrap>${item.collection.settings['audit.period']} days</td>
                 </tr>
                 <c:set var="count" value="${count + 1}" />
                 <c:set var="currgroup" value="${item.collection.group}" />
