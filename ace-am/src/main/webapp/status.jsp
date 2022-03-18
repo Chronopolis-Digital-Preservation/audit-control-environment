@@ -189,8 +189,7 @@
         <div style="width: 100%" align="center">
           <table id="statustable">
             <thead>
-                <td></td>
-                <td width="36%" nowrap>Collection Name</td>
+                <td colspan="2"><span style="padding-left:20px;">Group Name</span></td>
                 <td>Type</td>
                 <td nowrap>Total Files*</td>
                 <td nowrap>Disk Size</td>
@@ -209,13 +208,11 @@
 
                     <tr>
                         <td class="groupheader" colspan="3" onclick="toggleVisibility('spexpand${group}','inline'); toggleVisibility('sphide${group}','inline');">
-                        	<div onclick="showGroup('grouptr${group}')" id="spexpand${group}" style="display:none;cursor: pointer;" >
-                        		<div class="lbl-group">[+] Group:</div>
-                        		<div style="margin-left:20px;">${group}</div>
+                        	<div class="lbl-group" onclick="showGroup('grouptr${group}')" id="spexpand${group}" style="display:none;cursor: pointer;" >
+                        		<span class="lbl-group">[+]</span><span style="margin-left:6px;">${group}</span>
                         	</div>
                         	<div onclick="hideGroup('grouptr${group}')" id="sphide${group}" style="display:inline;cursor: pointer;" >
-                        		<div class="lbl-group">[-] Group:</div>
-                        		<div style="margin-left:20px;">${group}</div>
+                        		<span class="lbl-group">[-]</span><span style="margin-left:6px;">${group}</span>
                         	</div>
                         </td>
                         <td class="groupheader" id="group${group}">
@@ -234,7 +231,7 @@
                 </c:if>
 
                 <tr class="statusrow grouptr${item.collection.group}" >
-                    <td>
+                    <td width="6%" nowrap>
 
                         <c:choose>
                             <c:when test="${item.fileAuditRunning || item.tokenAuditRunning}">
@@ -262,7 +259,7 @@
                             </c:otherwise>
                         </c:choose>
                     </td>
-                    <td>
+                    <td width="36%">
                         <a href="Status?collectionid=${item.collection.id}&page=${page.page}&count=${page.count}">${item.collection.name}</a>
                     </td>
                     <td>${item.collection.storage}</td>
