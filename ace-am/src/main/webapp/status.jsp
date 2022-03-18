@@ -195,8 +195,8 @@
                 <td nowrap>Total Files*</td>
                 <td nowrap>Disk Size</td>
                 <td nowrap>Last Audit</td>
-                <td nowrap>Audit Period</td>
                 <td nowrap>Next Audit</td>
+                <td nowrap>Audit Period</td>
             </thead>
             <c:set var="count" value="0" />
             <jsp:useBean id="today" class="java.util.Date"/>
@@ -276,7 +276,6 @@
                     <td>
                         <fmt:formatDate pattern="MMM dd yyyy" value="${item.collection.lastSync}"/>
                     </td>
-                    <td nowrap>${item.collection.settings['audit.period']} days</td>
                     <td>
                         <c:choose>
                             <c:when test="${item.fileAuditRunning || item.tokenAuditRunning}">
@@ -301,6 +300,7 @@
                             </c:otherwise>
                         </c:choose>
                     </td>
+                    <td nowrap>${item.collection.settings['audit.period']} days</td>
                 </tr>
                 <c:set var="count" value="${count + 1}" />
                 <c:set var="currgroup" value="${item.collection.group}" />
