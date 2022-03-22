@@ -73,7 +73,7 @@ import java.util.Map;
     @NamedQuery(name = "Collection.listAllCollections", query =
     "SELECT c FROM Collection c ORDER BY c.group"),
     @NamedQuery(name = "Collection.listAllAuditCollections", query =
-    "SELECT c FROM Collection c WHERE c.state <> 'R' ORDER BY c.group"),
+    "SELECT c FROM Collection c WHERE c.state <> :state ORDER BY c.group"),
     @NamedQuery(name = "Collection.getCollectionByName", query =
     "SELECT c FROM Collection c WHERE c.name = :name"),
     @NamedQuery(name = "Collection.listGroups", query =

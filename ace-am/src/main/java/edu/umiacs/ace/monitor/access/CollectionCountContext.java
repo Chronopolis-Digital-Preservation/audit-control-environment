@@ -33,6 +33,7 @@ package edu.umiacs.ace.monitor.access;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import edu.umiacs.ace.monitor.core.Collection;
+import edu.umiacs.ace.monitor.core.CollectionState;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.sql.SQL;
 import org.apache.log4j.Logger;
@@ -108,6 +109,7 @@ public class CollectionCountContext implements ServletContextListener {
                     EntityManager em = PersistUtil.getEntityManager();
                     Query collQuery = em.createNamedQuery(
                             "Collection.listAllAuditCollections", Collection.class);
+                    collQuery.setParameter("state", CollectionState.REMOVED);
 
                     for (Object o : collQuery.getResultList()) {
                         Collection collection = (Collection) o;
