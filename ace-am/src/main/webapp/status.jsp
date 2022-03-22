@@ -138,6 +138,29 @@
             	color: #444444;
             	width: 100%;
             }
+            .lbl-indicator
+            {
+            	padding-left: 5px;
+            	padding-right: 20px;
+            	vertical-align: top;
+            }
+            .title-error
+            {
+            	text-align: left;
+            	font-weight: bold;
+            	size: 20px;
+            	color: brown;
+            	margin: 16px 0px -0px 24px;
+            }
+
+            #statustable-errors
+            {
+            	font-size: 16px;
+            	border: 1px solid brown;
+            	margin-top: 6px;
+            	margin-bottom: 25px;
+            	width: 96%;
+            }  
         </style>
     </head>
 
@@ -186,6 +209,111 @@
             </form>
         </div>
 
+		<c:if test="${errorCollections.size() > 0}">
+	        <div style="width: 100%" align="center">
+	          <div class="title-error">Error / Interrupted collections</div>
+	          <table id="statustable-errors">
+	            <thead>
+	                <td colspan="2"><span style="padding-left:20px;">Group Name</span></td>
+	                <td>Type</td>
+	                <td nowrap>Total Files*</td>
+	                <td nowrap>Disk Size</td>
+	                <td nowrap>Last Audit</td>
+	                <td nowrap>Next Audit</td>
+	                <td nowrap>Audit Period</td>
+	            </thead>
+	            <c:forEach var="item" items="${errorCollections}">
+	
+	                <c:if test="${currErrGroup != item.collection.group && item.collection.group != null}">
+	                	<c:set var="errgroup" value="${item.collection.group}"/>
+	                    <tr>
+	                        <td class="groupheader" style="padding-left:4px;" colspan="3" onclick="toggleVisibility('errspexpand${errgroup}','inline'); toggleVisibility('errsphide${errgroup}','inline');">
+	                        	<div onclick="showGroup('grouptrerr${errgroup}')" id="errspexpand${errgroup}" style="display:none;cursor: pointer;" >
+	                        		<span class="lbl-group">[+]</span><span style="margin-left:6px;">${errgroup}</span>
+	                        	</div>
+	                        	<div onclick="hideGroup('grouptrerr${errgroup}')" id="errsphide${errgroup}" style="display:inline;cursor: pointer;" >
+	                        		<span class="lbl-group">[-]</span><span style="margin-left:6px;">${errgroup}</span>
+	                        	</div>
+	                        </td>
+	                        <td class="groupheader" colspan="5" ></td>
+	                    </tr>
+	                </c:if>
+	
+	                <tr class="grouptrerr${item.collection.group}" >
+	                    <td width="6%" nowrap>
+	
+	                        <c:choose>
+	                            <c:when test="${item.fileAuditRunning || item.tokenAuditRunning}">
+	                                <img src="images/running.jpg" title="Audit in progress" alt="running" />
+	                            </c:when>
+	                            <c:when test="${item.queued}">
+	                                <img src="images/queued.jpg" title="Audit is queued" alt="queued" />
+	                            </c:when>
+	                            <c:otherwise>
+	                                <img src="images/stopped.jpg" title="No audit in progress" alt="idle" />
+	                            </c:otherwise>
+	                        </c:choose>
+	                        <c:choose>
+	                            <c:when test="${'A'.bytes[0] == item.collection.state }">
+	                                <img src="images/file-ok.jpg" title="Last audit successful" alt="Last audit successful"/>
+	                            </c:when>
+	                            <c:when test="${'E'.bytes[0] == item.collection.state }">
+	                                <img src="images/error.jpg" title="Collection contains errors" alt="Collection contains errors"/>
+	                            </c:when>
+	                            <c:when test="${'I'.bytes[0] == item.collection.state }">
+	                                <img src="images/error.jpg" title="Last audit was interrupted" alt="Last audit was interrupted"/>
+	                            </c:when>
+	                            <c:otherwise>
+	                                <img src="images/file-bad.jpg" title="Complete audit has not occurred" alt="Complete audit has not occurred"/>
+	                            </c:otherwise>
+	                        </c:choose>
+	                    </td>
+		                <td width="36%">
+		                	<a href="Status?collectionid=${item.collection.id}">${item.collection.name}</a>
+		                </td>
+	                    <td>${item.collection.storage}</td>
+	                    <td><h:DefaultValue test="${item.totalFiles > -1}" success="${item.totalFiles}" failure="Unknown" /></td>
+	                    <td>
+	                        <c:choose>
+	                            <c:when test="${item.totalSize > 0}"><d:FileSize value="${item.totalSize}" /></c:when>
+	                            <c:otherwise>0 B</c:otherwise>
+	                        </c:choose>
+	                    </td>
+	                    <td>
+	                        <fmt:formatDate pattern="MMM dd yyyy" value="${item.collection.lastSync}"/>
+	                    </td>
+	                    <td>
+	                        <c:choose>
+	                            <c:when test="${item.fileAuditRunning || item.tokenAuditRunning}">
+	                                In Progress
+	                            </c:when>
+	                            <c:when test="${item.queued}">
+	                                Queued
+	                            </c:when>
+	                            <c:when test="${item.collection.state eq 'R'.charAt(0)}">
+	                                Excluded
+	                            </c:when>
+	                            <c:when test="${item.collection.lastSync == null || item.collection.settings['audit.period'] < 1 || pause.paused}">
+	                                Unknown
+	                            </c:when>
+	                            <c:when test="${today.time > (item.collection.lastSync.time + item.collection.settings['audit.period'] * 1000 * 60 * 60 * 24)}">
+	                                <span style="color: red; font-weight: bold">
+	                                    <d:DateAdd date="${item.collection.lastSync}" format="MMM dd yyyy" period="${item.collection.settings['audit.period']}"/>
+	                                </span>
+	                            </c:when>
+	                            <c:otherwise>
+	                                <d:DateAdd date="${item.collection.lastSync}" format="MMM dd yyyy" period="${item.collection.settings['audit.period']}"/>
+	                            </c:otherwise>
+	                        </c:choose>
+	                    </td>
+	                    <td nowrap>${item.collection.settings['audit.period']} days</td>
+	                </tr>
+	                <c:set var="currErrGroup" value="${item.collection.group}" />
+	            </c:forEach>
+	          </table>
+	        </div>
+        </c:if>
+
         <div style="width: 100%" align="center">
           <table id="statustable">
             <thead>
@@ -208,7 +336,7 @@
 
                     <tr>
                         <td class="groupheader" colspan="3" onclick="toggleVisibility('spexpand${group}','inline'); toggleVisibility('sphide${group}','inline');">
-                        	<div class="lbl-group" onclick="showGroup('grouptr${group}')" id="spexpand${group}" style="display:none;cursor: pointer;" >
+                        	<div onclick="showGroup('grouptr${group}')" id="spexpand${group}" style="display:none;cursor: pointer;" >
                         		<span class="lbl-group">[+]</span><span style="margin-left:6px;">${group}</span>
                         	</div>
                         	<div onclick="hideGroup('grouptr${group}')" id="sphide${group}" style="display:inline;cursor: pointer;" >
@@ -311,9 +439,16 @@
                         </c:choose>
                     </d:Auth>
                 </td></tr>
-            <tr><td colspan="5"><br /><img src="images/running.jpg" alt="running"/> - Audit in progress&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/stopped.jpg" alt="stopped"/> - Audit idle</td></tr>
-            <tr><td colspan="5">* - Total files and status not updated until after first sync.</td></tr>
-            <tr><td colspan="5"><c:choose>
+            <tr>
+            	<td colspan="7">
+            		<br />
+            		<img src="images/running.jpg" alt="running"/><span class="lbl-indicator">- Audit in progress</span>
+            		<img src="images/stopped.jpg" alt="stopped"/><span class="lbl-indicator">- Audit idle</span>
+            		<img src="images/error.jpg" alt="error"/><span class="lbl-indicator">- Error or interrupted</span>
+        		</td>
+    		</tr>
+            <tr><td colspan="7">* - Total files and status not updated until after first sync.</td></tr>
+            <tr><td colspan="7"><c:choose>
                         <c:when test="${pause.paused}"><span id="inactiveaudit">Automated auditing is currently paused.</span> </c:when>
                         <c:otherwise>Automated auditing active.</c:otherwise>
                     </c:choose></td></tr>
