@@ -59,6 +59,7 @@ public class StatusServlet extends EntityManagerServlet {
     private static final Logger LOG = Logger.getLogger(StatusServlet.class);
 
     private static final String PAGE_COLLECTIONS = "collections";
+    private static final String ERROR_COLLECTIONS = "errorCollections";
     private static final String PAGE_STATES = "states";
     private static final String PAGE_COUNT = "count";
     private static final String PAGE_NUMBER = "page";
@@ -78,6 +79,8 @@ public class StatusServlet extends EntityManagerServlet {
     // Search Params
     private static final String PARAM_GROUP = "status_group";
     private static final String PARAM_STATE = "status_state";
+    private static final String PARAM_STATE_ERROR = "status_state_error";
+    private static final String PARAM_STATE_INTERRUPTED = "status_state_interrupted";
     private static final String PARAM_COLLECTION_LIKE = "status_collection";
     private static final String PARAM_AUDIT_DATE = "audit";
 
@@ -97,7 +100,9 @@ public class StatusServlet extends EntityManagerServlet {
             throws ServletException, IOException {
         RequestDispatcher dispatcher;
         List<CollectionSummaryBean> collections;
+        List<CollectionSummaryBean> errorCollections;
         List<Collection> items;
+        List<Collection> errorItems;
 
         long page = getParameter(request, PARAM_PAGE, DEFAULT_PAGE);
         int count = (int) getParameter(request, PARAM_COUNT, DEFAULT_COUNT);
@@ -165,7 +170,7 @@ public class StatusServlet extends EntityManagerServlet {
         countString.append(params);
 
         TypedQuery<Collection> query =
-                em.createQuery(queryString.toString(), Collection.class);
+                em.createQuery(queryString.toString(), Collection.class);       
         // em.createNamedQuery("Collection.listAllCollections");
         query.setFirstResult((int) offset);
         query.setMaxResults(count);
@@ -206,7 +211,15 @@ public class StatusServlet extends EntityManagerServlet {
             collections.add(csb);
         }
 
+        errorItems = getErrorCollections(em);
+        errorCollections = new ArrayList<>();
+        for (Collection col : errorItems) {
+            CollectionSummaryBean csb = createCollectionSummary(col);
+            errorCollections.add(csb);
+        }
+
         request.setAttribute(PAGE_COLLECTIONS, collections);
+        request.setAttribute(ERROR_COLLECTIONS, errorCollections);
         request.setAttribute(PAGE_STATES, ImmutableList.copyOf(CStateBean.values()));
         request.setAttribute(PAGE_COUNT, count);
         request.setAttribute(PAGE_NUMBER, pb);
@@ -219,6 +232,25 @@ public class StatusServlet extends EntityManagerServlet {
             dispatcher = request.getRequestDispatcher("status.jsp");
         }
         dispatcher.forward(request, response);
+    }
+
+    /**
+     * Build error collections query
+     * @return
+     */
+    private List<Collection> getErrorCollections(EntityManager em) {
+    	StringBuilder errorQueryBuilder = new StringBuilder();
+    	errorQueryBuilder.append("SELECT c FROM Collection c");
+    	errorQueryBuilder.append(" WHERE c.state IN(:" + PARAM_STATE_ERROR + ", :" + PARAM_STATE_INTERRUPTED + ")");
+    	errorQueryBuilder.append(" ORDER BY c.group ASC, c.name ASC");
+
+        TypedQuery<Collection> query =
+                em.createQuery(errorQueryBuilder.toString(), Collection.class);
+
+        query.setParameter(PARAM_STATE_ERROR, CollectionState.ERROR);
+        query.setParameter(PARAM_STATE_INTERRUPTED, CollectionState.INTERRUPTED);
+        
+    	return query.getResultList();
     }
 
     private void setWorkingCollection(HttpServletRequest request, EntityManager em) {
