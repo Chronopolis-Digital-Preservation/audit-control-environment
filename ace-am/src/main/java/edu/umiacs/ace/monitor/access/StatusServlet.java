@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author toaster
@@ -60,6 +61,7 @@ public class StatusServlet extends EntityManagerServlet {
 
     private static final String PAGE_COLLECTIONS = "collections";
     private static final String ERROR_COLLECTIONS = "errorCollections";
+    private static final String NO_GROUP_COLLECTIONS = "noGroupCollections";
     private static final String PAGE_STATES = "states";
     private static final String PAGE_COUNT = "count";
     private static final String PAGE_NUMBER = "page";
@@ -101,8 +103,10 @@ public class StatusServlet extends EntityManagerServlet {
         RequestDispatcher dispatcher;
         List<CollectionSummaryBean> collections;
         List<CollectionSummaryBean> errorCollections;
+        List<CollectionSummaryBean> noGroupCollections;
         List<Collection> items;
         List<Collection> errorItems;
+        List<Collection> noGroupItems;
 
         long page = getParameter(request, PARAM_PAGE, DEFAULT_PAGE);
         int count = (int) getParameter(request, PARAM_COUNT, DEFAULT_COUNT);
@@ -218,11 +222,20 @@ public class StatusServlet extends EntityManagerServlet {
             errorCollections.add(csb);
         }
 
+        noGroupItems = getNoGroupCollections(items);
+        noGroupCollections = new ArrayList<>();
+        for (Collection col : noGroupItems) {
+            CollectionSummaryBean csb = createCollectionSummary(col);
+            noGroupCollections.add(csb);
+        }
+
         request.setAttribute(PAGE_COLLECTIONS, collections);
         request.setAttribute(ERROR_COLLECTIONS, errorCollections);
+        request.setAttribute(NO_GROUP_COLLECTIONS, noGroupCollections);
         request.setAttribute(PAGE_STATES, ImmutableList.copyOf(CStateBean.values()));
         request.setAttribute(PAGE_COUNT, count);
         request.setAttribute(PAGE_NUMBER, pb);
+        request.setAttribute("colGroups", getCollectionGroups(em));
         request.setAttribute("groups", GroupSummaryContext.summaries);
         if (hasJson(request)) {
             dispatcher = request.getRequestDispatcher("status-json.jsp");
@@ -251,6 +264,22 @@ public class StatusServlet extends EntityManagerServlet {
         query.setParameter(PARAM_STATE_INTERRUPTED, CollectionState.INTERRUPTED);
         
     	return query.getResultList();
+    }
+
+    private List<String> getCollectionGroups(EntityManager em) {
+    	StringBuilder queryBuilder = new StringBuilder();
+    	queryBuilder.append("SELECT DISTINCT c.group FROM Collection c");
+    	queryBuilder.append(" WHERE c.group IS NOT NULL AND  c.group <> '' ");
+    	queryBuilder.append(" ORDER BY c.group ASC, c.name ASC");
+
+        TypedQuery<String> query =
+                em.createQuery(queryBuilder.toString(), String.class);
+
+    	return query.getResultList();
+    }
+
+    private List<Collection> getNoGroupCollections(List<Collection> collections) {
+    	return collections.stream().filter(c -> c.getGroup() == null || c.getGroup().length() == 0).collect(Collectors.toList());
     }
 
     private void setWorkingCollection(HttpServletRequest request, EntityManager em) {
