@@ -30,6 +30,12 @@
             var grouptr = 'grouptr';
             var statusrow = 'statusrow';
 
+            function search() {
+                document.getElementById('action').value = 'search';
+
+                document.getElementById("searchForm").submit();
+            }
+
             function toggleVisibility(id,type) {
                 var t = document.getElementById(id);
                 var display = t.style.display;
@@ -47,7 +53,7 @@
                     }
                 }
             }
-            function searchGroup(group)
+            function browseGroup(group)
             {
                 document.getElementById('group-filter').value = group;
 
@@ -231,7 +237,7 @@
         </c:if>
 
         <div id="searchtable" align="center">
-            <form method="GET" role="form" id="searchForm">
+            <form method="GET" role="form" id="searchForm" onsubmit="search()">
                 <div class="input">
                     <span class="input-group-addon">Group</span>
                     <input type="text" class="form-input" id="group-filter"
@@ -260,6 +266,7 @@
                 </div>
 
                 <div class="input" align="left">
+                    <input type="hidden" id="action" name="action" value="${action}"/>
                     <button type="submit" class="btn is-secondary" value="Submit"><span>Submit</span></button>
                 </div>
             </form>
@@ -415,7 +422,7 @@
                         </c:choose>
                     </td>
                     <td width="36%">
-                        <a href="Status?collectionid=${item.collection.id}&page=${page.page}&count=${page.count}">${item.collection.name}</a>
+                        <a href="Status?collectionid=${item.collection.id}&page=${page.page}&count=${page.count}&action=${action}">${item.collection.name}</a>
                     </td>
                     <td>${item.collection.storage}</td>
                     <td><h:DefaultValue test="${item.totalFiles > -1}" success="${item.totalFiles}" failure="Unknown" /></td>
@@ -465,7 +472,7 @@
                 <c:set var="sizetotal" value="0" />         
                 <tr class="groupheaderrow${group}">
                     <td class="groupheader" colspan="3" onclick="toggleVisibility('spexpand${group}','inline'); toggleVisibility('sphide${group}','inline');">
-                    	<div onclick="searchGroup('${group}')" id="spexpand${group}" style="display:none;cursor: pointer;" >
+                    	<div onclick="browseGroup('${group}')" id="spexpand${group}" style="display:none;cursor: pointer;" >
                     		<span class="lbl-group">[+]</span><span style="margin-left:6px;">${group}</span>
                     	</div>
                     	<div onclick="hideGroup('grouptr${group}')" id="sphide${group}" style="display:inline;cursor: pointer;" >
@@ -517,7 +524,7 @@
 		                        </c:choose>
 		                    </td>
 		                    <td width="36%">
-		                        <a href="Status?collectionid=${item.collection.id}&status_group=${group}&page=${page.page}&count=${page.count}">${item.collection.name}</a>
+		                        <a href="Status?collectionid=${item.collection.id}&status_group=${group}&page=${page.page}&count=${page.count}&action=${action}">${item.collection.name}</a>
 		                    </td>
 		                    <td>${item.collection.storage}</td>
 		                    <td><h:DefaultValue test="${item.totalFiles > -1}" success="${item.totalFiles}" failure="Unknown" /></td>
