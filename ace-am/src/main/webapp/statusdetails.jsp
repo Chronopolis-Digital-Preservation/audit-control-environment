@@ -9,8 +9,9 @@
     "http://www.w3.org/TR/html4/loose.dtd">
 
 <c:if test="${workingCollection != null}">
-    <fieldset>
-        <legend>${workingCollection.collection.name} <a href="Status?collectionid=-1">x</a></legend>
+    <fieldset id="col-container">
+        <legend>${workingCollection.collection.name}</legend>
+        <a class="btn-close" onclick="document.getElementById('col-container').style.display='none'">Close</a>
         <table id="detailstbl1">
             <tr>
                 <td>Collection State</td>
