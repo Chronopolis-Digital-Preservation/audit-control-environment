@@ -1,0 +1,196 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by JAX-WS RI (http://jax-ws.java.net). RI's version is Metro/2.4.2 (UNKNOWN-17d59c9; 2018-09-26T15:16:30-0700) JAXWS-RI/2.3.1 JAXWS-API/2.3.1 JAXB-RI/2.3.1 JAXB-API/2.3.1 svn-revision#unknown. --><xs:schema xmlns:tns="http://ws.ims.ace.umiacs.edu/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://ws.ims.ace.umiacs.edu/">
+
+<xs:element name="IMSFault" type="tns:IMSFault"/>
+
+<xs:element name="createWitnessProofForRound" type="tns:createWitnessProofForRound"/>
+
+<xs:element name="createWitnessProofForRoundResponse" type="tns:createWitnessProofForRoundResponse"/>
+
+<xs:element name="getRoundSummaries" type="tns:getRoundSummaries"/>
+
+<xs:element name="getRoundSummariesResponse" type="tns:getRoundSummariesResponse"/>
+
+<xs:element name="requestLink" type="tns:requestLink"/>
+
+<xs:element name="requestLinkResponse" type="tns:requestLinkResponse"/>
+
+<xs:element name="requestTokensAsync" type="tns:requestTokensAsync"/>
+
+<xs:element name="requestTokensAsyncResponse" type="tns:requestTokensAsyncResponse"/>
+
+<xs:element name="requestTokensImmediate" type="tns:requestTokensImmediate"/>
+
+<xs:element name="requestTokensImmediateResponse" type="tns:requestTokensImmediateResponse"/>
+
+<xs:element name="retrieveTokens" type="tns:retrieveTokens"/>
+
+<xs:element name="retrieveTokensResponse" type="tns:retrieveTokensResponse"/>
+
+<xs:complexType name="retrieveTokens">
+<xs:sequence>
+<xs:element name="requestNumber" type="xs:long"/>
+<xs:element name="sessionKey" type="xs:long"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="retrieveTokensResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:tokenResponse" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="tokenResponse">
+<xs:sequence>
+<xs:element name="digestProvider" type="xs:string" minOccurs="0"/>
+<xs:element name="digestService" type="xs:string" minOccurs="0"/>
+<xs:element name="name" type="xs:string" minOccurs="0"/>
+<xs:element name="proofElements" type="tns:proofElement" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+<xs:element name="roundId" type="xs:long"/>
+<xs:element name="statusCode" type="xs:int"/>
+<xs:element name="timestamp" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="tokenClassName" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="proofElement">
+<xs:sequence>
+<xs:element name="hashes" type="xs:string" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+<xs:element name="index" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="IMSFault">
+<xs:sequence>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+<xs:element name="serverFault" type="xs:boolean"/>
+<xs:element name="statusCode" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="createWitnessProofForRound">
+<xs:sequence>
+<xs:element name="rounds" type="xs:long" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="createWitnessProofForRoundResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:roundResponse" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="roundResponse">
+<xs:sequence>
+<xs:element name="digestProvider" type="xs:string" minOccurs="0"/>
+<xs:element name="digestService" type="xs:string" minOccurs="0"/>
+<xs:element name="proofElements" type="tns:proofElement" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+<xs:element name="roundId" type="xs:long"/>
+<xs:element name="roundTimestamp" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="tokenClassName" type="xs:string" minOccurs="0"/>
+<xs:element name="witnessId" type="xs:long"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getRoundSummaries">
+<xs:sequence>
+<xs:element name="rounds" type="xs:long" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getRoundSummariesResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:roundSummary" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="roundSummary">
+<xs:sequence>
+<xs:element name="hashValue" type="xs:string" minOccurs="0"/>
+<xs:element name="id" type="xs:long" minOccurs="0"/>
+<xs:element name="timestamp" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="tokenClass" type="tns:tokenClass" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="tokenClass">
+<xs:sequence>
+<xs:element name="digestProviderName" type="xs:string" minOccurs="0"/>
+<xs:element name="digestServiceName" type="xs:string" minOccurs="0"/>
+<xs:element name="id" type="xs:long" minOccurs="0"/>
+<xs:element name="linkingAllowed" type="xs:boolean"/>
+<xs:element name="maximumRequests" type="xs:int"/>
+<xs:element name="minimumRequests" type="xs:int"/>
+<xs:element name="name" type="xs:string" minOccurs="0"/>
+<xs:element name="requestAsyncAllowed" type="xs:boolean"/>
+<xs:element name="requestImmediateAllowed" type="xs:boolean"/>
+<xs:element name="requestTimeout" type="xs:long"/>
+<xs:element name="roundLength" type="xs:long"/>
+<xs:element name="treeOrder" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="requestLink">
+<xs:sequence>
+<xs:element name="tokenClassName" type="xs:string" minOccurs="0"/>
+<xs:element name="hashValue" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="requestLinkResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:linkResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="linkResponse">
+<xs:sequence>
+<xs:element name="previousHash" type="xs:string" minOccurs="0"/>
+<xs:element name="rootHash" type="xs:string" minOccurs="0"/>
+<xs:element name="roundId" type="xs:long"/>
+<xs:element name="timestamp" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="tokenClassName" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="requestTokensImmediate">
+<xs:sequence>
+<xs:element name="tokenClassName" type="xs:string" minOccurs="0"/>
+<xs:element name="requests" type="tns:tokenRequest" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="tokenRequest">
+<xs:sequence>
+<xs:element name="hashValue" type="xs:string" minOccurs="0"/>
+<xs:element name="name" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="requestTokensImmediateResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:tokenResponse" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="requestTokensAsync">
+<xs:sequence>
+<xs:element name="tokenClassName" type="xs:string" minOccurs="0"/>
+<xs:element name="requests" type="tns:tokenRequest" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="requestTokensAsyncResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:tokenReceipt" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="tokenReceipt">
+<xs:sequence>
+<xs:element name="now" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="readyAt" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="requestNumber" type="xs:long"/>
+<xs:element name="sessionKey" type="xs:long"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>
