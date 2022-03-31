@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author toaster
@@ -60,9 +61,11 @@ public class StatusServlet extends EntityManagerServlet {
 
     private static final String PAGE_COLLECTIONS = "collections";
     private static final String ERROR_COLLECTIONS = "errorCollections";
+    private static final String NO_GROUP_COLLECTIONS = "noGroupCollections";
     private static final String PAGE_STATES = "states";
     private static final String PAGE_COUNT = "count";
     private static final String PAGE_NUMBER = "page";
+    private static final String ACTION_SEARCH = "search";
 
     private static final long DEFAULT_PAGE = 0;
     private static final int DEFAULT_COUNT = 100;
@@ -83,6 +86,7 @@ public class StatusServlet extends EntityManagerServlet {
     private static final String PARAM_STATE_INTERRUPTED = "status_state_interrupted";
     private static final String PARAM_COLLECTION_LIKE = "status_collection";
     private static final String PARAM_AUDIT_DATE = "audit";
+    private static final String PARAM_ACTION = "action";
 
     // Filter params?
     // ...group
@@ -101,8 +105,11 @@ public class StatusServlet extends EntityManagerServlet {
         RequestDispatcher dispatcher;
         List<CollectionSummaryBean> collections;
         List<CollectionSummaryBean> errorCollections;
+        List<CollectionSummaryBean> noGroupCollections;
         List<Collection> items;
         List<Collection> errorItems;
+        List<Collection> noGroupItems;
+        List<String> collectionGroups;
 
         long page = getParameter(request, PARAM_PAGE, DEFAULT_PAGE);
         int count = (int) getParameter(request, PARAM_COUNT, DEFAULT_COUNT);
@@ -111,6 +118,7 @@ public class StatusServlet extends EntityManagerServlet {
         String group = getParameter(request, PARAM_GROUP, null);
         String state = getParameter(request, PARAM_STATE, null);
         String collection = getParameter(request, PARAM_COLLECTION_LIKE, null);
+        String action = getParameter(request, PARAM_ACTION, null);
         // String date = getParameter(request, PARAM_GROUP, null);
         PageBean pb = new PageBean((int) page, count, "");
 
@@ -218,11 +226,31 @@ public class StatusServlet extends EntityManagerServlet {
             errorCollections.add(csb);
         }
 
+        collectionGroups = new ArrayList<>();
+        noGroupCollections = new ArrayList<>();
+        if (action != null && action.trim().equalsIgnoreCase(ACTION_SEARCH)) {
+        	// Search action
+        	collectionGroups = getCollectionGroups(items);
+            noGroupItems = getNoGroupCollections(items);      	
+        } else {
+        	// Browser groups action
+        	collectionGroups = searchCollectionGroups(em);
+        	noGroupItems = searchNoGroupCollections(em); 
+        }
+
+        for (Collection col : noGroupItems) {
+            CollectionSummaryBean csb = createCollectionSummary(col);
+            noGroupCollections.add(csb);
+        }  
+
         request.setAttribute(PAGE_COLLECTIONS, collections);
         request.setAttribute(ERROR_COLLECTIONS, errorCollections);
+        request.setAttribute(NO_GROUP_COLLECTIONS, noGroupCollections);
         request.setAttribute(PAGE_STATES, ImmutableList.copyOf(CStateBean.values()));
         request.setAttribute(PAGE_COUNT, count);
         request.setAttribute(PAGE_NUMBER, pb);
+        request.setAttribute("action", action);
+        request.setAttribute("colGroups", collectionGroups);
         request.setAttribute("groups", GroupSummaryContext.summaries);
         if (hasJson(request)) {
             dispatcher = request.getRequestDispatcher("status-json.jsp");
@@ -253,6 +281,43 @@ public class StatusServlet extends EntityManagerServlet {
     	return query.getResultList();
     }
 
+    private List<String> searchCollectionGroups(EntityManager em) {
+    	StringBuilder queryBuilder = new StringBuilder();
+    	queryBuilder.append("SELECT DISTINCT c.group FROM Collection c");
+    	queryBuilder.append(" WHERE c.group IS NOT NULL AND  c.group <> '' ");
+    	queryBuilder.append(" ORDER BY c.group ASC, c.name ASC");
+
+        TypedQuery<String> query =
+                em.createQuery(queryBuilder.toString(), String.class);
+
+    	return query.getResultList();
+    }
+
+    private List<String> getCollectionGroups(List<Collection> collections) {
+    	return collections.stream().filter(x -> x.getGroup() != null && x.getGroup().length() > 0).map(x -> {return x.getGroup();}).distinct().collect(Collectors.toList());
+    }
+
+    private List<Collection> getNoGroupCollections(List<Collection> collections) {
+    	return collections.stream().filter(c -> c.getGroup() == null || c.getGroup().length() == 0).collect(Collectors.toList());
+    }
+
+    /**
+     * 
+     * @param em
+     * @return
+     */
+    private List<Collection> searchNoGroupCollections(EntityManager em) {
+    	StringBuilder queryBuilder = new StringBuilder();
+    	queryBuilder.append("SELECT c FROM Collection c");
+    	queryBuilder.append(" WHERE c.group IS NULL OR c.group = '' ");
+    	queryBuilder.append(" ORDER BY c.name ASC");
+
+        TypedQuery<Collection> query =
+                em.createQuery(queryBuilder.toString(), Collection.class);
+
+    	return query.getResultList();
+    }
+ 
     private void setWorkingCollection(HttpServletRequest request, EntityManager em) {
         long collectionId;
         String idParam = request.getParameter(PARAM_COLLECTION_ID);

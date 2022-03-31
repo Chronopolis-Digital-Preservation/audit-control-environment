@@ -26,14 +26,20 @@
         <title>ACE Audit Manager</title>
         <script type="text/javascript" SRC="srbFunctions.js" ></script>
         <script type="text/javascript">
-            function toggleVisibility(id,type) {
+            var groupheaderrow = 'groupheaderrow';
+            var grouptr = 'grouptr';
+            var statusrow = 'statusrow';
 
+            function search() {
+                document.getElementById('action').value = 'search';
+
+                document.getElementById("searchForm").submit();
+            }
+
+            function toggleVisibility(id,type) {
                 var t = document.getElementById(id);
-                if (t.style.display == type) {
-                    t.style.display = "none";
-                } else {
-                    t.style.display = type;
-                }
+                var display = t.style.display;
+                t.style.display = display === 'none' ? 'inline' : 'none';
             }
             function showGroup(id)
             {
@@ -41,11 +47,24 @@
 
                 for (i = 0; i < divs.length; i++)
                 {
-                    if (divs[i].className.indexOf(id) != -1)
+                    if (divs[i].className.split(' ').includes(id))
                     {
                         divs[i].style.display = "";
                     }
                 }
+            }
+            function browseGroup(group)
+            {
+                var action = document.getElementById('action').value;
+            	if (action == 'search')
+            	{
+            	    showGroup(grouptr + group)
+            	    return;
+            	}
+                document.getElementById('group-filter').value = group;
+
+                document.getElementById("searchForm").submit();
+                
             }
             function hideGroup(id)
             {
@@ -53,7 +72,36 @@
 
                 for (i = 0; i < divs.length; i++)
                 {
-                    if (divs[i].className.indexOf(id) != -1)
+                    if (divs[i].className.split(' ').includes(id))
+                    {
+                        divs[i].style.display = "none";
+                    }
+                }
+            }
+            function collapseGroups()
+            {
+                var action = document.getElementById('action').value;
+                if (action === 'search')
+                    return;
+                
+                var group = document.getElementById('group-filter').value.trim();
+                var divs = document.getElementsByTagName('tr');
+
+                for (i = 0; i < divs.length; i++)
+                {
+                	var iclass = divs[i].className;
+
+                    if (iclass.indexOf(groupheaderrow) == 0) {
+                        var igroup = iclass.substring(iclass.indexOf(groupheaderrow) + groupheaderrow.length);
+                        if (group != igroup) {
+                            document.getElementById('spexpand' + igroup).style.display = 'inline';
+                            document.getElementById('sphide' + igroup).style.display = 'none';
+                        } else {
+                            document.getElementById('spexpand' + igroup).style.display = 'none';
+                            document.getElementById('sphide' + igroup).style.display = 'inline';
+                        }
+                    }
+                    else if (iclass.indexOf(statusrow) == 0 && iclass != statusrow && (group.length == 0 || !iclass.endsWith(grouptr + group)))
                     {
                         divs[i].style.display = "none";
                     }
@@ -77,6 +125,14 @@
             }
 
             .statusrow {
+                background-color: #FFFFFF;
+            }
+
+            .statuserrrow:hover {
+                background-color: #e8e8e8;
+            }
+
+            .statuserrrow {
                 background-color: #FFFFFF;
             }
 
@@ -175,9 +231,13 @@
         </style>
     </head>
 
-    <body>
+    <body onload="javascript: collapseGroups();">
         <jsp:include page="header.jsp" />
-        <script type="text/javascript">document.getElementById('status').style.backgroundColor = '#ccccff';</script>
+        <script type="text/javascript">
+        	if (document.getElementById('status') !== null) {
+        		document.getElementById('status').style.backgroundColor = '#ccccff';
+    		}
+		</script>
         <c:if test="${workingCollection != null}">
             <div id="details">
                 <jsp:include page="statusdetails.jsp"/>
@@ -186,7 +246,7 @@
         </c:if>
 
         <div id="searchtable" align="center">
-            <form method="GET" role="form">
+            <form method="GET" role="form" id="searchForm" onsubmit="search()">
                 <div class="input">
                     <span class="input-group-addon">Group</span>
                     <input type="text" class="form-input" id="group-filter"
@@ -215,6 +275,7 @@
                 </div>
 
                 <div class="input" align="left">
+                    <input type="hidden" id="action" name="action" value="${action}"/>
                     <button type="submit" class="btn is-secondary" value="Submit"><span>Submit</span></button>
                 </div>
             </form>
@@ -250,7 +311,7 @@
 	                    </tr>
 	                </c:if>
 	
-	                <tr class="grouptrerr${item.collection.group}" >
+	                <tr class="statuserrrow grouptrerr${item.collection.group}" >
 	                    <td width="6%" nowrap>
 	
 	                        <c:choose>
@@ -338,38 +399,9 @@
             </thead>
             <c:set var="count" value="0" />
             <jsp:useBean id="today" class="java.util.Date"/>
-            <c:forEach var="item" items="${collections}">
 
-                <c:if test="${currgroup != item.collection.group && item.collection.group != null}">
-                    <c:set var="group" value="${item.collection.group}"/>
-                    <c:set var="group_count" value="${groups[group].count}"/>
-                    <c:set var="size" value="${groups[group].size}"/>
-
-                    <tr>
-                        <td class="groupheader" colspan="3" onclick="toggleVisibility('spexpand${group}','inline'); toggleVisibility('sphide${group}','inline');">
-                        	<div onclick="showGroup('grouptr${group}')" id="spexpand${group}" style="display:none;cursor: pointer;" >
-                        		<span class="lbl-group">[+]</span><span style="margin-left:6px;">${group}</span>
-                        	</div>
-                        	<div onclick="hideGroup('grouptr${group}')" id="sphide${group}" style="display:inline;cursor: pointer;" >
-                        		<span class="lbl-group">[-]</span><span style="margin-left:6px;">${group}</span>
-                        	</div>
-                        </td>
-                        <td class="groupheader" id="group${group}">
-                                ${group_count}
-                        </td>
-                        <td class="groupheader">
-                            <c:choose>
-                                <c:when test="${size > 0}"><d:FileSize value="${size}" /></c:when>
-                                <c:otherwise>0 B</c:otherwise>
-                            </c:choose>
-                        </td>
-                        <td class="groupheader" colspan="3"></td>
-                    </tr>
-                    <c:set var="counttotal" value="0" />
-                    <c:set var="sizetotal" value="0" />
-                </c:if>
-
-                <tr class="statusrow grouptr${item.collection.group}" >
+            <c:forEach var="item" items="${noGroupCollections}">	
+                <tr class="statusrow" >
                     <td width="6%" nowrap>
 
                         <c:choose>
@@ -399,7 +431,7 @@
                         </c:choose>
                     </td>
                     <td width="36%">
-                        <a href="Status?collectionid=${item.collection.id}&page=${page.page}&count=${page.count}">${item.collection.name}</a>
+                        <a href="Status?collectionid=${item.collection.id}&page=${page.page}&count=${page.count}&action=${action}">${item.collection.name}</a>
                     </td>
                     <td>${item.collection.storage}</td>
                     <td><h:DefaultValue test="${item.totalFiles > -1}" success="${item.totalFiles}" failure="Unknown" /></td>
@@ -438,8 +470,112 @@
                     </td>
                     <td nowrap>${item.collection.settings['audit.period']} days</td>
                 </tr>
+
                 <c:set var="count" value="${count + 1}" />
-                <c:set var="currgroup" value="${item.collection.group}" />
+            </c:forEach>
+
+            <c:forEach var="group" items="${colGroups}">
+                <c:set var="group_count" value="${groups[group].count}"/>
+                <c:set var="size" value="${groups[group].size}"/>
+                <c:set var="counttotal" value="0" />
+                <c:set var="sizetotal" value="0" />         
+                <tr class="groupheaderrow${group}">
+                    <td class="groupheader" colspan="3" onclick="toggleVisibility('spexpand${group}','inline'); toggleVisibility('sphide${group}','inline');">
+                    	<div onclick="browseGroup('${group}')" id="spexpand${group}" style="display:none;cursor: pointer;" >
+                    		<span class="lbl-group">[+]</span><span style="margin-left:6px;">${group}</span>
+                    	</div>
+                    	<div onclick="hideGroup('grouptr${group}')" id="sphide${group}" style="display:inline;cursor: pointer;" >
+                    		<span class="lbl-group">[-]</span><span style="margin-left:6px;">${group}</span>
+                    	</div>
+                    </td>
+                    <td class="groupheader" id="group${group}">
+                            ${group_count}
+                    </td>
+                    <td class="groupheader">
+                        <c:choose>
+                            <c:when test="${size > 0}"><d:FileSize value="${size}" /></c:when>
+                            <c:otherwise>0 B</c:otherwise>
+                        </c:choose>
+                    </td>
+                    <td class="groupheader" colspan="3"></td>
+                </tr>
+
+                <c:forEach var="item" items="${collections}">        	
+	                <c:if test="${item.collection.group != null && group == item.collection.group}">
+	
+		                <tr class="statusrow grouptr${item.collection.group}" >
+		                    <td width="6%" nowrap>
+		
+		                        <c:choose>
+		                            <c:when test="${item.fileAuditRunning || item.tokenAuditRunning}">
+		                                <img src="images/running.jpg" title="Audit in progress" alt="running" />
+		                            </c:when>
+		                            <c:when test="${item.queued}">
+		                                <img src="images/queued.jpg" title="Audit is queued" alt="queued" />
+		                            </c:when>
+		                            <c:otherwise>
+		                                <img src="images/stopped.jpg" title="No audit in progress" alt="idle" />
+		                            </c:otherwise>
+		                        </c:choose>
+		                        <c:choose>
+		                            <c:when test="${'A'.bytes[0] == item.collection.state }">
+		                                <img src="images/file-ok.jpg" title="Last audit successful" alt="Last audit successful"/>
+		                            </c:when>
+		                            <c:when test="${'E'.bytes[0] == item.collection.state }">
+		                                <img src="images/error.jpg" title="Collection contains errors" alt="Collection contains errors"/>
+		                            </c:when>
+		                            <c:when test="${'I'.bytes[0] == item.collection.state }">
+		                                <img src="images/error.jpg" title="Last audit was interrupted" alt="Last audit was interrupted"/>
+		                            </c:when>
+		                            <c:otherwise>
+		                                <img src="images/file-bad.jpg" title="Complete audit has not occurred" alt="Complete audit has not occurred"/>
+		                            </c:otherwise>
+		                        </c:choose>
+		                    </td>
+		                    <td width="36%">
+		                        <a href="Status?collectionid=${item.collection.id}&status_group=${group}&page=${page.page}&count=${page.count}&action=${action}">${item.collection.name}</a>
+		                    </td>
+		                    <td>${item.collection.storage}</td>
+		                    <td><h:DefaultValue test="${item.totalFiles > -1}" success="${item.totalFiles}" failure="Unknown" /></td>
+		                    <td>
+		                        <c:choose>
+		                            <c:when test="${item.totalSize > 0}"><d:FileSize value="${item.totalSize}" /></c:when>
+		                            <c:otherwise>0 B</c:otherwise>
+		                        </c:choose>
+		                    </td>
+		                    <td>
+		                        <fmt:formatDate pattern="MMM dd yyyy" value="${item.collection.lastSync}"/>
+		                    </td>
+		                    <td>
+		                        <c:choose>
+		                            <c:when test="${item.fileAuditRunning || item.tokenAuditRunning}">
+		                                In Progress
+		                            </c:when>
+		                            <c:when test="${item.queued}">
+		                                Queued
+		                            </c:when>
+		                            <c:when test="${item.collection.state eq 'R'.charAt(0)}">
+		                                Excluded
+		                            </c:when>
+		                            <c:when test="${item.collection.lastSync == null || item.collection.settings['audit.period'] < 1 || pause.paused}">
+		                                Unknown
+		                            </c:when>
+		                            <c:when test="${today.time > (item.collection.lastSync.time + item.collection.settings['audit.period'] * 1000 * 60 * 60 * 24)}">
+		                                <span style="color: red; font-weight: bold">
+		                                    <d:DateAdd date="${item.collection.lastSync}" format="MMM dd yyyy" period="${item.collection.settings['audit.period']}"/>
+		                                </span>
+		                            </c:when>
+		                            <c:otherwise>
+		                                <d:DateAdd date="${item.collection.lastSync}" format="MMM dd yyyy" period="${item.collection.settings['audit.period']}"/>
+		                            </c:otherwise>
+		                        </c:choose>
+		                    </td>
+		                    <td nowrap>${item.collection.settings['audit.period']} days</td>
+		                </tr>
+
+		                <c:set var="count" value="${count + 1}" />
+	                </c:if>
+                </c:forEach>
             </c:forEach>
 
             <tr><td colspan="5"><br/><d:Auth role="Collection Modify" showUnauthenticated="true"><a href="ManageCollection">Add Collection</a></d:Auth> &nbsp;&nbsp;&nbsp&nbsp;&nbsp;
