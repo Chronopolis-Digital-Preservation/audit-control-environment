@@ -47,7 +47,7 @@
 
                 for (i = 0; i < divs.length; i++)
                 {
-                    if (divs[i].className.indexOf(id) != -1)
+                    if (divs[i].className.split(' ').includes(id))
                     {
                         divs[i].style.display = "";
                     }
@@ -55,6 +55,12 @@
             }
             function browseGroup(group)
             {
+                var action = document.getElementById('action').value;
+            	if (action == 'search')
+            	{
+            	    showGroup(grouptr + group)
+            	    return;
+            	}
                 document.getElementById('group-filter').value = group;
 
                 document.getElementById("searchForm").submit();
@@ -66,7 +72,7 @@
 
                 for (i = 0; i < divs.length; i++)
                 {
-                    if (divs[i].className.indexOf(id) != -1)
+                    if (divs[i].className.split(' ').includes(id))
                     {
                         divs[i].style.display = "none";
                     }
@@ -74,10 +80,13 @@
             }
             function collapseGroups()
             {
-                var group = document.getElementById('group-filter').value.trim()
+                var action = document.getElementById('action').value;
+                if (action === 'search')
+                    return;
+                
+                var group = document.getElementById('group-filter').value.trim();
                 var divs = document.getElementsByTagName('tr');
 
-                var currGroup = '';
                 for (i = 0; i < divs.length; i++)
                 {
                 	var iclass = divs[i].className;
@@ -92,7 +101,7 @@
                             document.getElementById('sphide' + igroup).style.display = 'inline';
                         }
                     }
-                    else if (iclass.indexOf(statusrow) == 0 && iclass != statusrow && (group.length == 0 || iclass.indexOf(group) < 0))
+                    else if (iclass.indexOf(statusrow) == 0 && iclass != statusrow && (group.length == 0 || !iclass.endsWith(grouptr + group)))
                     {
                         divs[i].style.display = "none";
                     }
