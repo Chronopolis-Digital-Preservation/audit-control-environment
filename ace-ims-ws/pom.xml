@@ -23,11 +23,10 @@
                             <goal>wsimport</goal>
                         </goals>
                         <configuration>
-                            <wsdlUrls>
-                                <wsdlUrl>
-                                    http://ims.tdl.org/ace-ims/IMSWebService?wsdl
-                                </wsdlUrl>
-                            </wsdlUrls>
+                            <wsdlDirectory>${basedir}/src/main/resources</wsdlDirectory>
+                            <wsdlFiles>
+				                <wsdlFile>IMSWebService.wsdl</wsdlFile>
+				            </wsdlFiles>
                             <bindingFiles>
                                 <bindingFile>${basedir}/src/main/resources/jaxb-bindings.xml
                                 </bindingFile>
