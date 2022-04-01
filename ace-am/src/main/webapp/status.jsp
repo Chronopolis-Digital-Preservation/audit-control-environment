@@ -228,6 +228,26 @@
             	margin-bottom: 25px;
             	width: 96%;
             }  
+            .audit-success
+            {
+            	font-size: 14px;
+            	color: darkgreen;
+            }
+            .audit-error, .audit-interrupted
+            {
+            	font-size: 14px;
+            	color: red;
+            }
+            .audit-never
+            {
+            	font-size: 14px;
+            	color: #444;
+            }
+            .auditing, .queued, .idle
+            {
+            	font-size: 14px;
+            	color: #336699;
+            }
         </style>
     </head>
 
@@ -316,27 +336,27 @@
 	
 	                        <c:choose>
 	                            <c:when test="${item.fileAuditRunning || item.tokenAuditRunning}">
-	                                <img src="images/running.jpg" title="Audit in progress" alt="running" />
+	                                <span class="auditing" title="Audit in progress">Auditing</span>
 	                            </c:when>
 	                            <c:when test="${item.queued}">
-	                                <img src="images/queued.jpg" title="Audit is queued" alt="queued" />
+	                                <span class="queued" title="Audit is queued">Queued</span>
 	                            </c:when>
 	                            <c:otherwise>
-	                                <img src="images/stopped.jpg" title="No audit in progress" alt="idle" />
+	                                <span class="idle" title="No audit in progress">Idle</span>
 	                            </c:otherwise>
 	                        </c:choose>
 	                        <c:choose>
 	                            <c:when test="${'A'.bytes[0] == item.collection.state }">
-	                                <img src="images/file-ok.jpg" title="Last audit successful" alt="Last audit successful"/>
+	                                <span class="audit-success" title="Last audit successful">Passed</span>
 	                            </c:when>
 	                            <c:when test="${'E'.bytes[0] == item.collection.state }">
-	                                <img src="images/error.jpg" title="Collection contains errors" alt="Collection contains errors"/>
+	                                <span class="audit-error" title="Collection contains errors">Error</span>
 	                            </c:when>
 	                            <c:when test="${'I'.bytes[0] == item.collection.state }">
-	                                <img src="images/error.jpg" title="Last audit was interrupted" alt="Last audit was interrupted"/>
+	                                <span class="audit-interrupted" title="Last audit was interrupted">Interrupted</span>
 	                            </c:when>
 	                            <c:otherwise>
-	                                <img src="images/file-bad.jpg" title="Complete audit has not occurred" alt="Complete audit has not occurred"/>
+	                                <span class="audit-never" title="Complete audit has not occurred">N/A</span>
 	                            </c:otherwise>
 	                        </c:choose>
 	                    </td>
@@ -406,27 +426,27 @@
 
                         <c:choose>
                             <c:when test="${item.fileAuditRunning || item.tokenAuditRunning}">
-                                <img src="images/running.jpg" title="Audit in progress" alt="running" />
+                                <span class="auditing" title="Audit in progress">Auditing</span>
                             </c:when>
                             <c:when test="${item.queued}">
-                                <img src="images/queued.jpg" title="Audit is queued" alt="queued" />
+                                <span class="queued" title="Audit is queued">Queued</span>
                             </c:when>
                             <c:otherwise>
-                                <img src="images/stopped.jpg" title="No audit in progress" alt="idle" />
+                                <span class="idle" title="No audit in progress">Idle</span>
                             </c:otherwise>
                         </c:choose>
                         <c:choose>
                             <c:when test="${'A'.bytes[0] == item.collection.state }">
-                                <img src="images/file-ok.jpg" title="Last audit successful" alt="Last audit successful"/>
+                                <span class="audit-success" title="Last audit successful">Passed</span>
                             </c:when>
                             <c:when test="${'E'.bytes[0] == item.collection.state }">
-                                <img src="images/error.jpg" title="Collection contains errors" alt="Collection contains errors"/>
+                                <span class="audit-error" title="Collection contains errors">Error</span>
                             </c:when>
                             <c:when test="${'I'.bytes[0] == item.collection.state }">
-                                <img src="images/error.jpg" title="Last audit was interrupted" alt="Last audit was interrupted"/>
+                                <span class="audit-interrupted" title="Last audit was interrupted">Interrupted</span>
                             </c:when>
                             <c:otherwise>
-                                <img src="images/file-bad.jpg" title="Complete audit has not occurred" alt="Complete audit has not occurred"/>
+                                <span class="audit-never" title="Complete audit has not occurred">N/A</span>
                             </c:otherwise>
                         </c:choose>
                     </td>
@@ -508,27 +528,27 @@
 		
 		                        <c:choose>
 		                            <c:when test="${item.fileAuditRunning || item.tokenAuditRunning}">
-		                                <img src="images/running.jpg" title="Audit in progress" alt="running" />
+		                                <span class="auditing" title="Audit in progress">Auditing</span>
 		                            </c:when>
 		                            <c:when test="${item.queued}">
-		                                <img src="images/queued.jpg" title="Audit is queued" alt="queued" />
+		                                <span class="queued" title="Audit is queued">Queued</span>
 		                            </c:when>
 		                            <c:otherwise>
-		                                <img src="images/stopped.jpg" title="No audit in progress" alt="idle" />
+		                                <span class="idle" title="No audit in progress">Idle</span>
 		                            </c:otherwise>
 		                        </c:choose>
 		                        <c:choose>
 		                            <c:when test="${'A'.bytes[0] == item.collection.state }">
-		                                <img src="images/file-ok.jpg" title="Last audit successful" alt="Last audit successful"/>
+		                                <span class="audit-success" title="Last audit successful">Passed</span>
 		                            </c:when>
 		                            <c:when test="${'E'.bytes[0] == item.collection.state }">
-		                                <img src="images/error.jpg" title="Collection contains errors" alt="Collection contains errors"/>
+		                                <span class="audit-error" title="Collection contains errors">Error</span>
 		                            </c:when>
 		                            <c:when test="${'I'.bytes[0] == item.collection.state }">
-		                                <img src="images/error.jpg" title="Last audit was interrupted" alt="Last audit was interrupted"/>
+		                                <span class="audit-interrupted" title="Last audit was interrupted">Interrupted</span>
 		                            </c:when>
 		                            <c:otherwise>
-		                                <img src="images/file-bad.jpg" title="Complete audit has not occurred" alt="Complete audit has not occurred"/>
+		                                <span class="audit-never" title="Complete audit has not occurred">N/A</span>
 		                            </c:otherwise>
 		                        </c:choose>
 		                    </td>
@@ -586,14 +606,6 @@
                         </c:choose>
                     </d:Auth>
                 </td></tr>
-            <tr>
-            	<td colspan="7">
-            		<br />
-            		<img src="images/running.jpg" alt="running"/><span class="lbl-indicator">- Audit in progress</span>
-            		<img src="images/stopped.jpg" alt="stopped"/><span class="lbl-indicator">- Audit idle</span>
-            		<img src="images/error.jpg" alt="error"/><span class="lbl-indicator">- Error or interrupted</span>
-        		</td>
-    		</tr>
             <tr><td colspan="7">* - Total files and status not updated until after first sync.</td></tr>
             <tr><td colspan="7"><c:choose>
                         <c:when test="${pause.paused}"><span id="inactiveaudit">Automated auditing is currently paused.</span> </c:when>
