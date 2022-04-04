@@ -38,5 +38,5 @@ jobs:
       - name: Tell us which runner you are on...
         run: |
           hostname
-          ping lib-thor
-          ping fakecomputer
+          ping -c 1 lib-thor
+          ping -c 1 fakecomputer
