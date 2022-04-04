@@ -36,4 +36,7 @@ jobs:
       
       # Runs a set of commands using the runners shell
       - name: Tell us which runner you are on...
-        run: hostname
+        run: |
+          hostname
+          ping lib-thor
+          ping fakecomputer
