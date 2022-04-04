@@ -38,5 +38,5 @@ jobs:
       - name: Tell us which runner you are on...
         run: |
           hostname
-          docker ps
-          docker run hello-world
+          ssh -T ansible@chrondev hostname
+          ssh -T ansible@chrondev uptime
