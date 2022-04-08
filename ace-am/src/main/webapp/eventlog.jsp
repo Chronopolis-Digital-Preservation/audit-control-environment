@@ -12,15 +12,48 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Activity Log</title>
         <script type="text/javascript">
+            var scrollDivHeight = 420;
+
+            var timeoutId;
+            var count = '${count}';
+            var logSize = '${loglist.size()}';
+            var firstRecord = '${loglist[0].id}';  // reverted results
+            var lastRecord = '${loglist[loglist.size() - 1].id}';
             
+            var url = 'EventLog?sessionId=${sessionId}&collection=${collection}&logpath=${logpath}&toggletype=${logType}&replicasite=${siteId}&count=${count}';
+
+            document.addEventListener("DOMContentLoaded", function(event) {
+                var logElement = document.getElementById('log');
+                logElement.addEventListener("wheel", function(e){
+                    var st = logElement.scrollTop;
+
+                    var scrollingParam;
+                    var scrollingDistance = logElement.scrollHeight - scrollDivHeight;
+                    if (st >= scrollingDistance && logSize == count) {
+                        scrollingParam = 'top=' + lastRecord; // scrolling down
+                        loadPage(url + '&' + scrollingParam);
+                    } else if (st <= 0 && e.deltaY <= 0 && logSize == count) {
+                        scrollingParam = 'start=' + firstRecord;  // scrolling up
+                        loadPage(url + '&' + scrollingParam);
+                    }
+                }, false);
+            });
+
+            function loadPage(url) {
+                if (timeoutId === null || timeoutId === undefined) {
+                    timeoutId = setTimeout(() => { document.location.href = url; }, 500);
+                }
+            }
+
+            function hideEventLog() {
+                document.getElementById("eventLogOverlay").style.display = "none";
+            }
+
             function toggleVisibility(id) {
                 var t = document.getElementById("msg" + id);
-                if (t.style.display == "block") {
-                    t.style.display = "none";
-                } else {
-                t.style.display = "block";
-            } 
-        }
+                document.getElementById('eventLogOverlay').style.display = 'block';
+                document.getElementById('eventLogDetails').innerHTML = t.innerHTML;
+        } 
         
         function toggleSelected(logType) {
             window.location = "EventLog?start=${start}&count=${count}&toggletype=" + logType ; 
@@ -56,22 +89,12 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 margin-bottom:2px;
                 margin-top:2px;
                 cursor: pointer;
+                width: 96%;
+                text-align: left;
             }
-            .id {
-                position:absolute;
-                margin-left: 15px;
-            }
-            .date {
-                position:absolute;
-                margin-left:100px;
-            }
-            .type {
-                position:absolute;
-                margin-left:400px
-            }
-            .session {
-                position:absolute;
-                margin-left: 300px;
+            .id, .date, .type, .session {
+                margin-left: 6px;
+                padding-right: 6px;              
             }
             .msg {
                 width: 100%;
@@ -84,24 +107,98 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             }
             .logItem {
                 border-top: 1px solid #000000;
+                width: 96%;
             }
-            .log {
+            #log {
                 margin-left: auto;
                 margin-right: auto;
-                width: 90%;
+                width: 96%;
                 border-left: 1px solid #000000;
                 border-right: 1px solid #000000;
                 border-bottom: 1px solid #000000;
                 margin-bottom: 10px;
                 margin-top:10px;
-                min-height: 90px;
+                height: 420px;
+                overflow-y: scroll;
             }
-            
+
+            /* event log overlay */
+            #eventLogOverlay
+            {
+                display: none;
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background-color: rgba(0, 0, 0, 0.3);
+                z-index: 1001;
+            }
+            .eventLogContainer
+            {
+                position: relative;
+                width: 84%;
+                top: 6%;
+                left: 16%;
+                transform: translateX(-8%) translateY(-3%);
+                background-color: white;
+            }
+            .eventLogBanner
+            {
+                background-color: #efefef;
+                height: 36px;
+                text-align: left;
+                padding-left: 30px;
+                padding-top: 10px;
+            }
+            .eventLogHeader
+            {
+                color: #444;
+                font-size: 20px;
+                font-weight: bold;
+            }
+            #eventLogDetails
+            {
+                display: block;
+                min-height: 360px;
+                max-height: 560px;
+                overflow: auto;
+                padding-left: 30px;
+            }
+
+            /* scrollbar */
+            ::-webkit-scrollbar
+            {
+                width: 16px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 6px;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #ccc;
+                border-radius: 6px;
+            }
+            ::-webkit-scrollbar-thumb:hover
+            {
+                background: #999;
+            }   
         </style>
     </head>
     <body>
+        <div id="eventLogOverlay">
+            <div class="eventLogContainer">
+                <div class="eventLogBanner">
+                    <span class="eventLogHeader">Event Log Details</span>
+                    <a class="btn-close" onClick="javascript:hideEventLog();">Close</a>
+                </div>
+                <div id="eventLogDetails"></div>
+            </div>
+        </div> 
         <jsp:include page="header.jsp" />
-        <script type="text/javascript">document.getElementById('log').style.backgroundColor = '#ccccff';</script>
+        <script type="text/javascript">if(document.getElementById('log')!=undefined){document.getElementById('log').style.backgroundColor = '#ccccff';}</script>
         
         <div align="center">
           <table id="logtypeselection">
@@ -149,8 +246,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             
           </table>
         
-          <c:if test="${loglist != null}">
-            <div class="log">
+          <div id="log" class="log">
+             <c:if test="${loglist != null}">
                 <c:forEach var="item" items="${loglist}">
                     <div id="logEntries" class="logItem"
                          onclick='javascript:toggleVisibility(${item.id})'
@@ -158,44 +255,32 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                          onmouseout='javascript:this.style.background="#ffffff"'
                          >
                         <div class="info">
-                            <div class="id">${item.id}</div>
-                            <div class="date">${item.date}</div>
-                            <div class="session">${item.session}</div>
-                            <div class="type"><log:LogType type="${item.logType}" /></div>
+                            <span class="id">${item.id}</span>
+                            <span class="date">${item.date}</span>
+                            <span class="session">${item.session}</span>
+                            <span class="type"><log:LogType type="${item.logType}" /></span>
                         </div>
-                        <br>
+
                         <div class="msg" id="msg${item.id}">
-                            <c:if test="${item.collection != null}">
-                                Collection: <a href="EventLog?collection=${item.collection.id}">${item.collection.name}</a><BR>
-                            </c:if>
-                            <c:if test="${item.path != null}">
-                                Path: <a href="EventLog?logpath=${item.path}">${item.path}</a><BR>
-                            </c:if>
-                            Session: <a href="EventLog?start=1&sessionId=${item.session}">${item.session}</a><BR>
-                            Event Type: <log:LogType type="${item.logType}" verbose="true" /><BR>
-                            Details:<BR>
-                                <pre>${item.description}</pre>
+                            <div style="margin:20px;">
+                                <c:if test="${item.collection != null}">
+                                    Collection: <a href="EventLog?collection=${item.collection.id}">${item.collection.name}</a><br/>
+                                </c:if>
+                                <c:if test="${item.path != null}">
+                                    Path: <a href="EventLog?logpath=${item.path}">${item.path}</a><br/>
+                                </c:if>
+                                Session: <a href="EventLog?start=1&sessionId=${item.session}">${item.session}</a><br/>
+                                Event Type: <log:LogType type="${item.logType}" verbose="true" /><br/>
+                                Details:<br/>
+                                    <pre>${item.description}</pre>
+                            </div>
                         </div>
                     </div>
                 </c:forEach>
-            </div>
-          </c:if>
+              </c:if>
+          </div>
         </div>
-        
-        <table id="browselinktable" >
-            <tr>
-                <td align="left">
-                    <a href="EventLog?start=1&count=${count}">|&lt;</a>&nbsp;&nbsp;&nbsp;<a href="EventLog?top=${loglist[0].id}&count=${count}&start=0">&lt;&lt;</a>
-                </td>
-                <td align="center">
-                    Show per page: <a href="EventLog?start=${loglist[0].id}&count=20">20</a> <a href="EventLog?start=${loglist[0].id}&count=50">50</a> <a href="EventLog?start=${loglist[0].id}&count=100">100</a>
-                </td>
-                <td align="right">
-                    <a href="EventLog?start=${loglist[count - 1].id + 1}&count=${count}">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;<a href="EventLog?count=${count}&start=0&top=0">&gt;|</a>
-                </td>
-            </tr>
-        </table>
-        
-        <jsp:include page="footer.jsp" />        
+       
+        <jsp:include page="footer.jsp" />     
     </body>
 </html>
