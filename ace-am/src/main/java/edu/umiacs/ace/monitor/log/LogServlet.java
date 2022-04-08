@@ -59,7 +59,7 @@ public class LogServlet extends EntityManagerServlet {
 
     private static final Logger LOG = Logger.getLogger(LogServlet.class);
     private static final long DEFAULT_START = 0;
-    private static final int DEFAULT_COUNT = 20;
+    private static final int DEFAULT_COUNT = 30;
     private static final long DEFAULT_SESSION = 0;
     private static final long DEFAULT_TOP = 0;
     // possible values for parameter toggletype
@@ -93,9 +93,9 @@ public class LogServlet extends EntityManagerServlet {
         long top = getParameter(request, PARAM_TOP, DEFAULT_TOP);
         long collection = getParameter(request, PARAM_COLLECTION, 0L);
         String path = getParameter(request, PARAM_PATH, null);
-        boolean reverseResults = false;
+        //boolean reverseResults = false;
 
-        LOG.debug(
+        System.out.println(
                 "session" + session + " start: " + start + " count: " + count + " top: " + top
                 + " path: " + path);
 
@@ -103,7 +103,7 @@ public class LogServlet extends EntityManagerServlet {
 
         // <editor-fold defaultstate="collapsed" desc="where clause setting. Click on the + sign on the left to edit the code.">
         List<String> queries = new ArrayList<String>();
-        StringBuilder queryString = new StringBuilder();
+        //StringBuilder queryString = new StringBuilder();
 
         if ( session > 0 ) {
             queries.add("l.session = :session");
@@ -117,24 +117,72 @@ public class LogServlet extends EntityManagerServlet {
         if ( !Strings.isEmpty(path) ) {
             queries.add("l.path = :path");
         }
-        // handle start index
-        // if start is set, select greater than start
-        // else if top set, select less than top
-        if ( start > 0 ) {
-            queries.add("l.id >= :start");
-        } else if ( top > 0 ) {
-            queries.add("l.id < :top");
-        } else {
-            queries.add("l.id >= :start");
-        }
 
         if ( typeMap.size() > 0 ) {
             queries.add(generateTypeString(typeMap));
         }
         // </editor-fold>
 
+        // Handling scrolling results, which is expected to return page count number of results
+        List<LogEvent> results = getQueryResult(request, em, new ArrayList<>(queries), session, collection, path, start, top, count);
 
-        // build query string
+        if (results.size() < count && (start > 0 || top > 0)) {
+        	// return max page count of results
+        	long first = 0;
+        	long last = 0;
+        	if (results.size() > 0) {
+        		first = results.get(0).getId();
+        		last = results.get(results.size() - 1).getId();
+        	}
+        	start = start > 0 ? 0 : top > 0 ? last : start;
+			top = start > 0 ? first + 1 : top > 0 ? 0 : top;
+
+			HttpSession s = request.getSession();
+			s.setAttribute(PARAM_START, start);
+			s.setAttribute(PARAM_TOP, top);
+
+			results = getQueryResult(request, em, new ArrayList<>(queries), session, collection, path, start, top, count);
+        }
+
+        request.setAttribute(PAGE_LOGLIST, results);
+        request.setAttribute(PAGE_COUNT, count);
+
+        // add in collection list
+//        Query query =
+//                em.createNamedQuery("Collection.listAllCollections");
+//        request.setAttribute(PAGE_COLLECTIONLIST,query.getResultList());
+        RequestDispatcher rd;
+        if ( hasJson(request) ) {
+            rd = request.getRequestDispatcher("eventlog-json.jsp");
+        } else {
+            rd = request.getRequestDispatcher("eventlog.jsp");
+        }
+        rd.forward(request, response);
+    }
+
+    private List<LogEvent> getQueryResult(HttpServletRequest request,
+    		EntityManager em,
+    		List<String> queries,
+    		long session,
+    		long collection,
+    		String path,
+    		long start,
+    		long top,
+    		int count) {
+    	StringBuilder queryString = new StringBuilder();
+
+        // handle start index
+        // if start is set, select greater than start
+        // else if top set, select less than top
+        if ( start > 0 ) {
+        	queries.add("l.id >= :start");
+        } else if ( top > 0 ) {
+        	queries.add("l.id <= :top");
+        } else {
+        	queries.add("l.id >= :start");
+        }
+
+    	// build query string
         queryString.append("SELECT l FROM LogEvent l");
 
         if ( queries.size() > 0 ) {
@@ -152,13 +200,12 @@ public class LogServlet extends EntityManagerServlet {
         }
 
         queryString.append(" ORDER BY l.id");
+
         // set order descending if we have no start and we have a count
         // otherwise we have a start, or blank page w/ no parameters given
-        if ( start < 1 && count > 0 ) {
-            queryString.append(" DESC");
-            reverseResults = true;
+        if (start < 1 && (top > 0 || count > 0)) {
+        	queryString.append(" DESC");
         }
-
 
         LOG.debug("Log query: " + queryString);
         em = PersistUtil.getEntityManager();
@@ -184,31 +231,15 @@ public class LogServlet extends EntityManagerServlet {
         } else if ( top > 0 ) {
             q.setParameter("top", top);
         } else {
-            q.setParameter("start", 1);
+            q.setParameter("start", start);
         }
-        // </editor-fold>
 
-        List results;
-        if ( reverseResults ) {
-            results = new ArrayList(q.getResultList());
+        List<LogEvent> results = q.getResultList();
+        if ( !(start < 1 && (top > 0 || count > 0)) ) {
+        	results = new ArrayList<>(results);
             Collections.reverse(results);
-        } else {
-            results = q.getResultList();
         }
-        request.setAttribute(PAGE_LOGLIST, results);
-        request.setAttribute(PAGE_COUNT, count);
-
-        // add in collection list
-//        Query query =
-//                em.createNamedQuery("Collection.listAllCollections");
-//        request.setAttribute(PAGE_COLLECTIONLIST,query.getResultList());
-        RequestDispatcher rd;
-        if ( hasJson(request) ) {
-            rd = request.getRequestDispatcher("eventlog-json.jsp");
-        } else {
-            rd = request.getRequestDispatcher("eventlog.jsp");
-        }
-        rd.forward(request, response);
+        return results;
     }
 
     private void testClear( HttpServletRequest request, String paramName ) {

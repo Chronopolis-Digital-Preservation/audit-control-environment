@@ -188,17 +188,6 @@
             {
                 background-color: #e8e8e8;
             }
-            .btn-close
-            {
-                z-index: 101;
-                position: relative;
-                float: right;
-                border: 2px solid #ccc;
-                padding: 3px 6px;
-                background-color: #ddd;
-                opacity: 0.75;
-                cursor: pointer;
-            }
 
             .lbl-group
             {

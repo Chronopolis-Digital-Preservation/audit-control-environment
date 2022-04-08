@@ -419,3 +419,18 @@ vertical-align: top;
     flex-shrink: 0;
     justify-content: flex-start;
 }
+
+.btn-close
+{
+    z-index: 1100;
+    position: relative;
+    float: right;
+    color:#111;
+    margin-right: 5px;
+    border: 1px solid #999;
+    padding: 3px 6px;
+    border-radius: 3px;
+    background-color: #ddd;
+    opacity: 0.75;
+    cursor: pointer;
+}
