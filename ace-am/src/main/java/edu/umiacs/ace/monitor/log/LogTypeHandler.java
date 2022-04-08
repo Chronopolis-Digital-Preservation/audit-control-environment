@@ -33,6 +33,9 @@ package edu.umiacs.ace.monitor.log;
 
 import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.JspWriter;
+
+import java.io.IOException;
+
 import javax.servlet.jsp.JspException;
 
 /**
@@ -47,23 +50,24 @@ public class LogTypeHandler extends SimpleTagSupport {
     private boolean verbose = false;
 
     @Override
-    public void doTag() throws JspException {
+    public void doTag() throws JspException, IOException {
 
         JspWriter out = getJspContext().getOut();
 
         try {
-
-            out.println(LogEnum.valueOf(type));
+        	LogEnum logType = LogEnum.valueOf(type);
+            out.println(logType);
             if ( verbose ) {
-                out.println(" - " + LogEnum.valueOf(type).getDetails());
+                out.println(" - " + logType.getDetails());
             }
+
+        } catch ( Exception ex ) {
+        	out.println(ex.getMessage() + ": " + type);
+        } finally {
             JspFragment f = getJspBody();
             if ( f != null ) {
                 f.invoke(out);
             }
-
-        } catch ( java.io.IOException ex ) {
-            throw new JspException(ex.getMessage());
         }
 
     }
