@@ -59,7 +59,7 @@ public class LogServlet extends EntityManagerServlet {
 
     private static final Logger LOG = Logger.getLogger(LogServlet.class);
     private static final long DEFAULT_START = 0;
-    private static final int DEFAULT_COUNT = 30;
+    private static final int DEFAULT_COUNT = 50;
     private static final long DEFAULT_SESSION = 0;
     private static final long DEFAULT_TOP = 0;
     // possible values for parameter toggletype
