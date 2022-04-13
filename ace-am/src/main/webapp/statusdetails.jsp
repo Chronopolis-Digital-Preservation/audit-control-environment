@@ -11,7 +11,7 @@
 <c:if test="${workingCollection != null}">
     <fieldset id="col-container">
         <legend>${workingCollection.collection.name}</legend>
-        <a class="btn-close" onclick="document.getElementById('col-container').style.display='none'">Close</a>
+        <a class="btn-close" onclick="javascript: closeColContainer();">Close</a>
         <table id="detailstbl1">
             <tr>
                 <td>Collection State</td>
