@@ -81,6 +81,7 @@
             function closeColContainer() {
                 document.getElementById('collectionid').value = '-1';
                 document.getElementById('col-container').style.display='none';
+                document.getElementById("searchForm").submit();
             }
             function collapseGroups()
             {
@@ -109,6 +110,13 @@
                     {
                         divs[i].style.display = "none";
                     }
+                }
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const collectionId = urlParams.get('collectionid')
+                if (collectionId == null || collectionId.length == 0 || Number(collectionId) < 0) {
+                    var groupToggle = document.getElementById(grouptr + group);
+                    groupToggle.scrollIntoView();
                 }
             }
         </script>
@@ -495,11 +503,13 @@
                 <c:set var="sizetotal" value="0" />         
                 <tr class="groupheaderrow${group}">
                     <td class="groupheader" colspan="3" onclick="toggleVisibility('spexpand${group}','inline'); toggleVisibility('sphide${group}','inline');">
-                    	<div onclick="browseGroup('${group}')" id="spexpand${group}" style="display:none;cursor: pointer;" >
-                    		<span class="lbl-group">[+]</span><span style="margin-left:6px;">${group}</span>
-                    	</div>
-                    	<div onclick="hideGroup('grouptr${group}')" id="sphide${group}" style="display:inline;cursor: pointer;" >
-                    		<span class="lbl-group">[-]</span><span style="margin-left:6px;">${group}</span>
+                        <div id="grouptr${group}">
+                    	    <div onclick="browseGroup('${group}')" id="spexpand${group}" style="display:none;cursor: pointer;" >
+                    		    <span class="lbl-group">[+]</span><span style="margin-left:6px;">${group}</span>
+                    	    </div>
+                    	    <div onclick="hideGroup('grouptr${group}')" id="sphide${group}" style="display:inline;cursor: pointer;" >
+                    		    <span class="lbl-group">[-]</span><span style="margin-left:6px;">${group}</span>
+                    	    </div>
                     	</div>
                     </td>
                     <td class="groupheader" id="group${group}">
