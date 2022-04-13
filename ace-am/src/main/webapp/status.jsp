@@ -78,6 +78,10 @@
                     }
                 }
             }
+            function closeColContainer() {
+                document.getElementById('collectionid').value = '-1';
+                document.getElementById('col-container').style.display='none';
+            }
             function collapseGroups()
             {
                 var action = document.getElementById('action').value;
@@ -284,6 +288,7 @@
                 </div>
 
                 <div class="input" align="left">
+                    <input type="hidden" id="collectionid" name="collectionid" value="${collectionid}"/>
                     <input type="hidden" id="action" name="action" value="${action}"/>
                     <button type="submit" class="btn is-secondary" value="Submit"><span>Submit</span></button>
                 </div>
