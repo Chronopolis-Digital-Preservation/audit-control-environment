@@ -62,7 +62,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             window.location = "EventLog?start=${start}&count=${count}&replicasite=" + siteId ; 
         }
         </script>
-        
+
+        <link rel="stylesheet" type="text/css" href="bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" href="style.css" />
         <style type="text/css">
             #logtypeselection
@@ -84,17 +85,18 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 margin-left: auto;
                 margin-right: auto;
             }
-            
+ 
+            .logHeader
+            {
+                font-weight: bold;
+                color: #888;
+                width: 96%;
+                text-align: left;
+
+            }
             .info {   
                 margin-bottom:2px;
                 margin-top:2px;
-                cursor: pointer;
-                width: 96%;
-                text-align: left;
-            }
-            .id, .date, .type, .session {
-                margin-left: 6px;
-                padding-right: 6px;              
             }
             .msg {
                 width: 100%;
@@ -108,6 +110,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             .logItem {
                 border-top: 1px solid #000000;
                 width: 96%;
+                cursor: pointer;
+                text-align: left;
             }
             #log {
                 margin-left: auto;
@@ -148,10 +152,10 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             .eventLogBanner
             {
                 background-color: #efefef;
-                height: 36px;
+                height: 45px;
                 text-align: left;
                 padding-left: 30px;
-                padding-top: 10px;
+                padding-top: 6px;
             }
             .eventLogHeader
             {
@@ -246,38 +250,50 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             
           </table>
         
-          <div id="log" class="log">
-             <c:if test="${loglist != null}">
+          <div id="log" class="container log">
+            <div class="row logHeader">
+                <div class="col-md-1">ID</div>
+                <div class="col-md-4">Date</div>
+                <div class="col-md-2">Session</div>
+                <div class="col-md-5">Event Type</div>
+            </div>
+            <c:if test="${loglist != null}">
                 <c:forEach var="item" items="${loglist}">
-                    <div id="logEntries" class="logItem"
+                    <div id="logEntries-${item.id}" class="row logItem"
                          onclick='javascript:toggleVisibility(${item.id})'
                          onmouseover='javascript:this.style.background="#e8e8e8"' 
                          onmouseout='javascript:this.style.background="#ffffff"'
                          >
-                        <div class="info">
-                            <span class="id">${item.id}</span>
-                            <span class="date">${item.date}</span>
-                            <span class="session">${item.session}</span>
-                            <span class="type"><log:LogType type="${item.logType}" /></span>
+                        <div class="col-md-1">
+                            <span class="info">${item.id}</span>
                         </div>
-
-                        <div class="msg" id="msg${item.id}">
-                            <div style="margin:20px;">
-                                <c:if test="${item.collection != null}">
-                                    Collection: <a href="EventLog?collection=${item.collection.id}">${item.collection.name}</a><br/>
-                                </c:if>
-                                <c:if test="${item.path != null}">
-                                    Path: <a href="EventLog?logpath=${item.path}">${item.path}</a><br/>
-                                </c:if>
-                                Session: <a href="EventLog?start=1&sessionId=${item.session}">${item.session}</a><br/>
-                                Event Type: <log:LogType type="${item.logType}" verbose="true" /><br/>
-                                Details:<br/>
-                                    <pre>${item.description}</pre>
-                            </div>
+                        <div class="col-md-4">
+                            <span class="info">${item.date}</span>
+                        </div>
+                        <div class="col-md-2">
+                            <span class="info">${item.session}</span>
+                        </div>
+                        <div class="col-md-5">
+                            <span class="info"><log:LogType type="${item.logType}" /></span>
+                        </div>
+                    </div>
+                      
+                    <div class="msg" id="msg${item.id}">
+                        <div style="margin:20px;">
+                            <c:if test="${item.collection != null}">
+                                Collection: <a href="EventLog?collection=${item.collection.id}">${item.collection.name}</a><br/>
+                            </c:if>
+                            <c:if test="${item.path != null}">
+                                Path: <a href="EventLog?logpath=${item.path}">${item.path}</a><br/>
+                            </c:if>
+                            Session: <a href="EventLog?start=1&sessionId=${item.session}">${item.session}</a><br/>
+                            Event Type: <log:LogType type="${item.logType}" verbose="true" /><br/>
+                            Details:<br/>
+                                <pre>${item.description}</pre>
                         </div>
                     </div>
                 </c:forEach>
-              </c:if>
+            </c:if>
           </div>
         </div>
        
