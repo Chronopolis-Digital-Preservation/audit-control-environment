@@ -140,37 +140,37 @@
                         <c:choose>
                             <c:when test="${workingCollection.fileAuditRunning || workingCollection.queued}">
                                 <td>
-                                    <a href="StopSync?type=file&amp;collectionid=${workingCollection.collection.id}" title="Stop File Audit" >
-                                        <img src="images/stop.jpg" alt="Stop File Audit" >
+                                    <a href="StopSync?type=file&amp;collectionid=${workingCollection.collection.id}" title="Stop File Audit">
+                                        Stop File Audit
                                     </a>
                                 </td>
                             </c:when>
                             <c:otherwise>
                                 <td>
                                     <a href="StartSync?type=file&amp;collectionid=${workingCollection.collection.id}" title="Start File Audit">
-                                        <img src="images/file-audit-start.jpg" alt="Start File Audit" >
+                                        Start File Audit
                                     </a>
                                 </td>
                             </c:otherwise>
                         </c:choose>
                     </c:if>
-                    
+
                     <c:if test="${workingCollection.collection.state ne 'R'.charAt(0) && (!workingCollection.fileAuditRunning || workingCollection.queued)}">
                         <c:choose>
                             <c:when test="${workingCollection.tokenAuditRunning}">
-                                <td><a href="StopSync?type=token&amp;collectionid=${workingCollection.collection.id}" title="Stop Token Audit" ><img src="images/stop.jpg" alt="Stop Token Audit" /></a></td>
+                                <td><a href="StopSync?type=token&amp;collectionid=${workingCollection.collection.id}" title="Stop Token Audit">Stop Token Audit</a></td>
                                     </c:when>
                                     <c:otherwise>
-                                <td><a href="StartSync?type=token&amp;collectionid=${workingCollection.collection.id}" title="Start Token Audit"><img src="images/token-audit-start.jpg" alt="Token File Audit" ></a></td>
+                                <td><a href="StartSync?type=token&amp;collectionid=${workingCollection.collection.id}" title="Start Token Audit">Start Token Audit</a></td>
                                     </c:otherwise>
                                 </c:choose>
                             </c:if>
                         </um:Auth>
                 
                 <!--<td><a href="#" onclick="javascript:showBrowse(${workingCollection.collection.id}); return false;">Browse</a>-->
-                <um:Auth role="Browse"><td><a href="Browse?collection=${workingCollection.collection.id}" title="Browse"><img src="images/browse.jpg" alt="Browse"></a></td></um:Auth>
-                <um:Auth role="Log"><td><a href="EventLog?collection=${workingCollection.collection.id}&amp;clear=1&amp;toggletype=sync"><img title="Event Log" src="images/log.jpg" alt="View Log"></a></td></um:Auth>
-                <um:Auth role="Report"><td><a href="Report?collectionid=${workingCollection.collection.id}" title="Report"><img src="images/report.jpg" alt="Report"></a></td></um:Auth>
+                <um:Auth role="Browse"><td><a href="Browse?collection=${workingCollection.collection.id}" title="Browse">Browse</a></td></um:Auth>
+                <um:Auth role="Log"><td><a href="EventLog?collection=${workingCollection.collection.id}&amp;clear=1&amp;toggletype=sync">View Log</a></td></um:Auth>
+                <um:Auth role="Report"><td><a href="Report?collectionid=${workingCollection.collection.id}" title="Report">Report</a></td></um:Auth>
                     <td>
                         <fieldset id="dropmenu2" style="display: none; z-index: 2; position: absolute; background-color: #FFFFFF; width: 150px;">
                             <legend><span onclick="toggleVisibility('dropmenu1','block'); toggleVisibility('dropmenu2','block');">close</span></legend>
