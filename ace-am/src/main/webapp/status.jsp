@@ -236,21 +236,6 @@
             	margin-bottom: 25px;
             	width: 96%;
             }  
-            .audit-success
-            {
-            	font-size: 14px;
-            	color: darkgreen;
-            }
-            .audit-error, .audit-interrupted
-            {
-            	font-size: 14px;
-            	color: red;
-            }
-            .audit-never
-            {
-            	font-size: 14px;
-            	color: #444;
-            }
             .auditing, .queued, .idle
             {
             	font-size: 14px;
@@ -281,7 +266,7 @@
             	width: 100%;
             	background-color: #F2FBFF;
             	font-weight: normal;
-            } 
+            }
         </style>
     </head>
 
@@ -408,16 +393,16 @@
 	                    <td>
 	                        <c:choose>
 	                            <c:when test="${'A'.bytes[0] == item.collection.state }">
-	                                <span class="audit-success" title="Last audit successful">Passed</span>
+	                                <img src="images/file-ok.jpg" title="Last audit successful" alt="Last audit successful"/>
 	                            </c:when>
 	                            <c:when test="${'E'.bytes[0] == item.collection.state }">
-	                                <span class="audit-error" title="Collection contains errors">Error</span>
+	                                <img src="images/error.jpg" title="Collection contains errors" alt="Collection contains errors"/>
 	                            </c:when>
 	                            <c:when test="${'I'.bytes[0] == item.collection.state }">
-	                                <span class="audit-interrupted" title="Last audit was interrupted">Interrupted</span>
+	                                <img src="images/warning.jpg" title="Last audit was interrupted" alt="Last audit was interrupted"/>
 	                            </c:when>
 	                            <c:otherwise>
-	                                <span class="audit-never" title="Complete audit has not occurred">N/A</span>
+	                                <img src="images/file-bad.jpg" title="Complete audit has not occurred" alt="Complete audit has not occurred"/>
 	                            </c:otherwise>
 	                        </c:choose>
 	                    </td>
@@ -548,16 +533,16 @@
 		                    <td>
 		                        <c:choose>
 		                            <c:when test="${'A'.bytes[0] == item.collection.state }">
-		                                <span class="audit-success" title="Last audit successful">Passed</span>
+		                                <img src="images/file-ok.jpg" title="Last audit successful" alt="Last audit successful"/>
 		                            </c:when>
 		                            <c:when test="${'E'.bytes[0] == item.collection.state }">
-		                                <span class="audit-error" title="Collection contains errors">Error</span>
+		                                <img src="images/error.jpg" title="Collection contains errors" alt="Collection contains errors"/>
 		                            </c:when>
 		                            <c:when test="${'I'.bytes[0] == item.collection.state }">
-		                                <span class="audit-interrupted" title="Last audit was interrupted">Interrupted</span>
+		                                <img src="images/warning.jpg" title="Last audit was interrupted" alt="Last audit was interrupted"/>
 		                            </c:when>
 		                            <c:otherwise>
-		                                <span class="audit-never" title="Complete audit has not occurred">N/A</span>
+		                                <img src="images/file-bad.jpg" title="Complete audit has not occurred" alt="Complete audit has not occurred"/>
 		                            </c:otherwise>
 		                        </c:choose>
 		                    </td>
@@ -664,16 +649,16 @@
                     <td>
                         <c:choose>
                             <c:when test="${'A'.bytes[0] == item.collection.state }">
-                                <span class="audit-success" title="Last audit successful">Passed</span>
+                                <img src="images/file-ok.jpg" title="Last audit successful" alt="Last audit successful"/>
                             </c:when>
                             <c:when test="${'E'.bytes[0] == item.collection.state }">
-                                <span class="audit-error" title="Collection contains errors">Error</span>
+                                <img src="images/error.jpg" title="Collection contains errors" alt="Collection contains errors"/>
                             </c:when>
                             <c:when test="${'I'.bytes[0] == item.collection.state }">
-                                <span class="audit-interrupted" title="Last audit was interrupted">Interrupted</span>
+                                <img src="images/warning.jpg" title="Last audit was interrupted" alt="Last audit was interrupted"/>
                             </c:when>
                             <c:otherwise>
-                                <span class="audit-never" title="Complete audit has not occurred">N/A</span>
+                                <img src="images/file-bad.jpg" title="Complete audit has not occurred" alt="Complete audit has not occurred"/>
                             </c:otherwise>
                         </c:choose>
                     </td>
@@ -734,6 +719,15 @@
                         </c:choose>
                     </d:Auth>
                 </td></tr>
+            <tr>
+            	<td colspan="7">
+            		<br />
+            		<img src="images/file-ok.jpg" alt="Last audit successful"/><span class="lbl-indicator">- OK</span>
+            		<img src="images/error.jpg" alt="Error"/><span class="lbl-indicator">- Error</span>
+            		<img src="images/warning.jpg" alt="Interrupted"/><span class="lbl-indicator">- Interrupted</span>
+            		<img src="images/file-bad.jpg" alt="Complete audit has not occurred"/><span class="lbl-indicator">- No audit</span>
+        		</td>
+    		</tr>
             <tr><td colspan="7">* - Total files and status not updated until after first sync.</td></tr>
             <tr><td colspan="7"><c:choose>
                         <c:when test="${pause.paused}"><span id="inactiveaudit">Automated auditing is currently paused.</span> </c:when>
