@@ -155,70 +155,6 @@ public class StatusServlet extends EntityManagerServlet {
             request.setAttribute(PARAM_STATE, state);
         }
 
-        queryString.append("SELECT c FROM Collection c");
-        countString.append("SELECT COUNT(c.id) FROM Collection c");
-
-        if (queries.size() > 0) {
-            params.append(" WHERE");
-        }
-
-        Iterator<String> it = queries.iterator();
-        while (it.hasNext()) {
-            String query = it.next();
-            params.append(" ")
-                  .append(query);
-            if (it.hasNext()) {
-                params.append(" AND");
-            }
-        }
-
-        queryString.append(params);
-        // allows us to keep a consistent order when displaying collections
-        queryString.append(" ORDER BY c.group ASC, c.name ASC");
-        countString.append(params);
-
-        TypedQuery<Collection> query =
-                em.createQuery(queryString.toString(), Collection.class);       
-        // em.createNamedQuery("Collection.listAllCollections");
-        query.setFirstResult((int) offset);
-        query.setMaxResults(count);
-
-        Query countQuery = em.createQuery(countString.toString());
-
-        // TODO: Can probably tidy this up a bit
-        if (!Strings.isEmpty(group)) {
-            query.setParameter(PARAM_GROUP, "%" + group + "%");
-            countQuery.setParameter(PARAM_GROUP, "%" + group + "%");
-        }
-
-        if (!Strings.isEmpty(collection)) {
-            query.setParameter(PARAM_COLLECTION_LIKE, "%" + collection + "%");
-            countQuery.setParameter(PARAM_COLLECTION_LIKE, "%" + collection + "%");
-        }
-
-        if (!Strings.isEmpty(state) && state.length() == 1) {
-            query.setParameter(PARAM_STATE, CollectionState.fromChar(state.charAt(0)));
-            countQuery.setParameter(PARAM_STATE, CollectionState.fromChar(state.charAt(0)));
-        }
-
-        items = query.getResultList();
-
-        // We only need to execute this query if we have parameters
-        // and need to update the total count of collections
-        if (queries.size() > 0) {
-            long totalResults = (long) countQuery.getSingleResult();
-            LOG.info("Total results from query: " + totalResults);
-            pb.update(totalResults);
-        }
-
-        setWorkingCollection(request, em);
-
-        collections = new ArrayList<>();
-        for (Collection col : items) {
-            CollectionSummaryBean csb = createCollectionSummary(col);
-            collections.add(csb);
-        }
-
         errorItems = getErrorCollections(em);
         errorCollections = new ArrayList<>();
         for (Collection col : errorItems) {
@@ -226,8 +162,78 @@ public class StatusServlet extends EntityManagerServlet {
             errorCollections.add(csb);
         }
 
+        collections = new ArrayList<>();
+        items = new ArrayList<>();
+
         collectionGroups = new ArrayList<>();
         noGroupCollections = new ArrayList<>();
+
+        if (queries.size() > 0 || action != null && action.trim().equalsIgnoreCase(ACTION_SEARCH)) {
+        	// Query collections
+            queryString.append("SELECT c FROM Collection c");
+            countString.append("SELECT COUNT(c.id) FROM Collection c");
+
+            if (queries.size() > 0) {
+                params.append(" WHERE");
+            }
+
+            Iterator<String> it = queries.iterator();
+            while (it.hasNext()) {
+                String query = it.next();
+                params.append(" ")
+                      .append(query);
+                if (it.hasNext()) {
+                    params.append(" AND");
+                }
+            }
+
+            queryString.append(params);
+            // allows us to keep a consistent order when displaying collections
+            queryString.append(" ORDER BY c.group ASC, c.name ASC");
+            countString.append(params);
+
+            TypedQuery<Collection> query =
+                    em.createQuery(queryString.toString(), Collection.class);       
+            // em.createNamedQuery("Collection.listAllCollections");
+            query.setFirstResult((int) offset);
+            query.setMaxResults(count);
+
+            Query countQuery = em.createQuery(countString.toString());
+
+            // TODO: Can probably tidy this up a bit
+            if (!Strings.isEmpty(group)) {
+                query.setParameter(PARAM_GROUP, "%" + group + "%");
+                countQuery.setParameter(PARAM_GROUP, "%" + group + "%");
+            }
+
+            if (!Strings.isEmpty(collection)) {
+                query.setParameter(PARAM_COLLECTION_LIKE, "%" + collection + "%");
+                countQuery.setParameter(PARAM_COLLECTION_LIKE, "%" + collection + "%");
+            }
+
+            if (!Strings.isEmpty(state) && state.length() == 1) {
+                query.setParameter(PARAM_STATE, CollectionState.fromChar(state.charAt(0)));
+                countQuery.setParameter(PARAM_STATE, CollectionState.fromChar(state.charAt(0)));
+            }
+
+            items = query.getResultList();
+
+            // We only need to execute this query if we have parameters
+            // and need to update the total count of collections
+            if (queries.size() > 0) {
+                long totalResults = (long) countQuery.getSingleResult();
+                LOG.info("Total results from query: " + totalResults);
+                pb.update(totalResults);
+            }
+            
+            for (Collection col : items) {
+                CollectionSummaryBean csb = createCollectionSummary(col);
+                collections.add(csb);
+            }
+        }
+
+        setWorkingCollection(request, em);
+
         if (action != null && action.trim().equalsIgnoreCase(ACTION_SEARCH)) {
         	// Search action
         	collectionGroups = getCollectionGroups(items);
