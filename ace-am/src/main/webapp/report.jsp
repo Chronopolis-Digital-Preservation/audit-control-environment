@@ -75,13 +75,17 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             margin-right: 24px;
         }
 
+        .container {
+            width: 94%;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
 <jsp:include page="header.jsp"/>
 <jsp:useBean id="collection" scope="request"
              type="edu.umiacs.ace.monitor.access.CollectionSummaryBean"/>
-<div class="container" style="width: 90%; margin-bottom: 20px;">
+<div class="container">
   <table id="summaryTable">
     <tr>
         <td class="lblTd">Active Files</td>
@@ -152,7 +156,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 </div>
 
 <form method="GET" action="RemoveItem">
-    <div class="container" style="width: 90%">
+    <div class="container">
         <um:Auth role="Remove Item">
         <span>Select All:&nbsp;</span> <input type="checkbox" id="selectall"/>
         </um:Auth>

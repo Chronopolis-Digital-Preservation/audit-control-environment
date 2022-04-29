@@ -58,3 +58,4 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 <div class="header">
     <img src="images/title.jpg" alt="ACE Audit Manager"><BR><div style="font-size: large; color: red">${globalMessage}</div>
 </div>
+<jsp:include page="breadcrumbs.jsp" />

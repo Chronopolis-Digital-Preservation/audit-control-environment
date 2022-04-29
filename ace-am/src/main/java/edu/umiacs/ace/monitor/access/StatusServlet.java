@@ -72,6 +72,7 @@ public class StatusServlet extends EntityManagerServlet {
 
     // TODO: Add session fields for pagination and search params
     public static final String SESSION_WORKINGCOLLECTION = "workingCollection";
+    public static final String SESSION_COLLECTION_URI = "collectionUri";
 
     private static final String PARAM_CSV = "csv";
 
@@ -333,6 +334,7 @@ public class StatusServlet extends EntityManagerServlet {
         if (Strings.isValidLong(idParam) && -1 == collectionId) {
             // clear the working collection
             request.getSession().removeAttribute(SESSION_WORKINGCOLLECTION);
+            request.getSession().removeAttribute(SESSION_COLLECTION_URI);
         } else if (Strings.isValidLong(idParam)                                            // valid param
                 && (workingCollectionBean == null                                          // no working collection
                 || !workingCollectionBean.getCollection().getId().equals(collectionId))) { // or one which does not equal our requested collection
@@ -341,6 +343,9 @@ public class StatusServlet extends EntityManagerServlet {
             if (workingCollection != null) {
                 workingCollectionBean = createCollectionSummary(workingCollection);
                 request.getSession().setAttribute(SESSION_WORKINGCOLLECTION, workingCollectionBean);
+
+                String collectionUri = request.getRequestURL()+"?"+request.getQueryString();
+                request.getSession().setAttribute(SESSION_COLLECTION_URI, collectionUri);
             }
 
         } else {
