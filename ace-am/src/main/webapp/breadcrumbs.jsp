@@ -38,16 +38,15 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 <c:set var="lastPath" value="${uriPaths[fn:length(uriPaths)-1]}" />
 <c:set var="pageName">
     <c:choose>
-        <c:when test="${fn:indexOf(lastPath, 'Users') >= 0}">Accounts</c:when>
-        <c:when test="${fn:indexOf(lastPath, 'Statistics') >= 0}">Reporting</c:when>
-        <c:when test="${fn:indexOf(lastPath, 'EventLog') >= 0 && colid != ''}">View Log</c:when>
+        <c:when test="${fn:indexOf(lastPath, 'Users') >= 0}">User Accounts</c:when>
+        <c:when test="${fn:indexOf(lastPath, 'Statistics') >= 0}">Global Ingest Report</c:when>
         <c:when test="${fn:indexOf(lastPath, 'EventLog') >= 0}">Event Log</c:when>
         <c:when test="${fn:indexOf(lastPath, 'UpdateSettings') >= 0}">System Settings</c:when>
         <c:when test="${fn:indexOf(lastPath, 'ManageCollection') >= 0}">Collection Settings</c:when>
         <c:when test="${fn:indexOf(lastPath, 'collectionremove') >= 0}">Remove Collection</c:when>
         <c:when test="${fn:indexOf(lastPath, 'ingest_form') >= 0}">Import Tokens</c:when>
         <c:when test="${fn:indexOf(lastPath, 'ManageFilters') >= 0}">Modify Filters</c:when>
-        <c:when test="${fn:indexOf(lastPath, 'ReportConfiguration') >= 0}">Modify Reporting</c:when>
+        <c:when test="${fn:indexOf(lastPath, 'ReportConfiguration') >= 0}">Automated Reports</c:when>
         <c:when test="${fn:indexOf(lastPath, 'compare_form') >= 0}">Compare Collection</c:when>
         <c:when test="${fn:indexOf(lastPath, 'ReportDuplicates') >= 0}">Show Duplicate Files</c:when>
         <c:when test="${fn:indexOf(lastPath, 'ViewSummary') >= 0}">Activity Reports</c:when>
