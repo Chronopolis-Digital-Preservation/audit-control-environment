@@ -12,7 +12,7 @@ Author     : toaster
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Create/Update Users</title>
+        <title>${pageHeader}</title>
         <link rel="stylesheet" type="text/css" href="style.css" />
         <style type="text/css">
             #error {
@@ -31,6 +31,8 @@ Author     : toaster
     </head>
     <body>
         <jsp:include page="header.jsp" />
+        <h1 class="page_header">${pageHeader}</h1>
+        
         <script type="text/javascript">document.getElementById('users').style.backgroundColor = '#ccccff';</script>
         <div class="standardBody">
 

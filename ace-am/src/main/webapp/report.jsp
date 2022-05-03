@@ -18,7 +18,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Collection Errors</title>
+    <title>${pageHeader}</title>
     <jsp:include page="imports.jsp"/>
 
     <style type="text/css">
@@ -83,6 +83,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 </head>
 <body>
 <jsp:include page="header.jsp"/>
+<h1 class="page_header">${pageHeader}</h1>
+
 <jsp:useBean id="collection" scope="request"
              type="edu.umiacs.ace.monitor.access.CollectionSummaryBean"/>
 <div class="container">

@@ -17,7 +17,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>Summary Reports</title>
+        <title>${pageHeader}</title>
         <link rel="stylesheet" type="text/css" href="style.css" />
         <c:choose>
             <c:when test="${coll != null}">
@@ -90,6 +90,8 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
     </head>
     <body>
         <jsp:include page="header.jsp" />
+        <h1 class="page_header">${pageHeader}</h1>
+ 
         <div class="standardBody">
             <c:choose>
                 <c:when test="${coll != null}">

@@ -12,7 +12,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Ingest Tokens</title>
+    <title>${pageHeader}</title>
     <jsp:include page="imports.jsp"/>
     <style type="text/css">
         button.btn {
@@ -22,8 +22,9 @@
 </head>
 <body>
 <jsp:include page="header.jsp"/>
+<h1 class="page_header">${pageHeader}</h1>
+
 <div class="standardBody">
-    <h4>Import Tokens</h4>
     <h6>
         Working Collection is ${workingCollection.collection.group} -
         ${workingCollection.collection.name}
