@@ -53,7 +53,7 @@ ul {
 
 .nav-link {
     display: block;
-    padding: .5em 1em;
+    padding: .5em 0.5em;
 }
 
 .justify-content-center {
@@ -433,4 +433,29 @@ vertical-align: top;
     background-color: #ddd;
     opacity: 0.75;
     cursor: pointer;
+}
+
+.breadcrumb
+{
+    list-style: none;
+    border-radius: 4px;
+    background-color: #ffffff;
+    margin-bottom: 0px !important;
+    padding: 0px 40px !important;
+    margin-bottom: 12px !important;
+}
+
+ol, ol li
+{
+    list-style-type:decimal;
+    padding: 0px;
+    margin: 0px;
+    display: flex;
+}
+
+.breadcrumb>li+li:before
+{
+    content: "/";
+    color: #bbb;
+    margin-top: 8px;
 }

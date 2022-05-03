@@ -177,8 +177,8 @@
                         <c:if test="${workingCollection.collection.state ne 'R'.charAt(0) && (!(workingCollection.fileAuditRunning || workingCollection.tokenAuditRunning || workingCollection.queued))}">
                             <um:Auth role="Collection Modify">
                                 <a href="ManageCollection?collectionid=${workingCollection.collection.id}" title="Configure connection settings for this collection" >Collection Settings</a><br>
-                                <a href="collectionremove.jsp" title="Delete Collection">Remove Collection</a><br>
-                                <a href="ingest_form.jsp" title="Import Tokens">Import Tokens</a><br>
+                                <a href="collectionremove.jsp?collectionid=${workingCollection.collection.id}" title="Delete Collection">Remove Collection</a><br>
+                                <a href="ingest_form.jsp?collectionid=${workingCollection.collection.id}" title="Import Tokens">Import Tokens</a><br>
                                 <a href="ManageFilters?collectionid=${workingCollection.collection.id}">Modify Filters</a><BR>                                
                             </um:Auth>
                             <um:Auth role="Modify Activity Reporting">
@@ -196,7 +196,7 @@
 	                        </um:Auth>
                         </c:if>
                         <um:Auth role="Compare">
-                            <a href="compare_form.jsp">Compare Collection</a><br>
+                            <a href="compare_form.jsp?collectionid=${workingCollection.collection.id}">Compare Collection</a><br>
                         </um:Auth>
                         <um:Auth role="Show Duplicates">
                             <a href="ReportDuplicates?collectionid=${workingCollection.collection.id}">Show Duplicate Files</a>
