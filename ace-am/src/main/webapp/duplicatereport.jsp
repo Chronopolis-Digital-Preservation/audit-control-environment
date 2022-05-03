@@ -18,7 +18,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>Identical Files</title>
+        <title>${pageHeader}</title>
         <link rel="stylesheet" type="text/css" href="style.css" />
         <style type="text/css">
             .digest {
@@ -29,6 +29,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     </head>
     <body>
         <jsp:include page="header.jsp" />
+        <h1 class="page_header">${pageHeader}</h1>
+
         <div class="standardBody">
             Total Files: ${totalfiles} Duplicate Files: ${totaldups} <fmt:formatNumber maxFractionDigits="2" type="number" value="${(totaldups / totalfiles) * 100}" />% Generation time: ${time}ms
             <table>

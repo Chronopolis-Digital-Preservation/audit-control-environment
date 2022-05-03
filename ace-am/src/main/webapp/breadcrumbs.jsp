@@ -36,7 +36,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 </c:set>
 <c:set var="uriPaths" value="${fn:split(pageUri, '/')}" />
 <c:set var="lastPath" value="${uriPaths[fn:length(uriPaths)-1]}" />
-<c:set var="pageName">
+<c:set var="pageHeader" scope="request">
     <c:choose>
         <c:when test="${fn:indexOf(lastPath, 'Users') >= 0}">User Accounts</c:when>
         <c:when test="${fn:indexOf(lastPath, 'Statistics') >= 0}">Global Ingest Report</c:when>
@@ -65,9 +65,9 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
             <a class="nav-link" href="${collectionUri}" style="font-size: 15px;">${colname}</a>
         </li>
     </c:if>
-    <c:if test="${fn:endsWith(pageContext.servletContext.contextPath, pageName) == false}">
+    <c:if test="${fn:endsWith(pageContext.servletContext.contextPath, pageHeader) == false}">
         <li>
-            <div class="nav-link" style="color: #666; font-size: 15px;">${pageName}</div>
+            <div class="nav-link" style="color: #666; font-size: 15px;">${pageHeader}</div>
         </li>
     </c:if>
 </ol>

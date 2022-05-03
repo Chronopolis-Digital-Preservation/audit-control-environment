@@ -10,7 +10,10 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>Activity Log</title>
+        <title>${pageHeader}</title>
+
+        <jsp:include page="imports.jsp"/>
+ 
         <script type="text/javascript">
             var scrollDivHeight = 420;
 
@@ -63,8 +66,6 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         }
         </script>
 
-        <link rel="stylesheet" type="text/css" href="bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" href="style.css" />
         <style type="text/css">
             #logtypeselection
             {
@@ -202,6 +203,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             </div>
         </div> 
         <jsp:include page="header.jsp" />
+        <h1 class="page_header">${pageHeader}</h1>
+ 
         <script type="text/javascript">if(document.getElementById('log')!=undefined){document.getElementById('log').style.backgroundColor = '#ccccff';}</script>
         
         <div align="center">

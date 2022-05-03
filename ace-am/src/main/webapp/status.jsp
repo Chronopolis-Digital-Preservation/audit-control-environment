@@ -23,7 +23,7 @@
         </c:choose>
 
 
-        <title>ACE Audit Manager</title>
+        <title>${pageHeader}</title>
         <script type="text/javascript" SRC="srbFunctions.js" ></script>
         <script type="text/javascript">
             var groupheaderrow = 'groupheaderrow';
@@ -272,6 +272,8 @@
 
     <body onload="javascript: collapseGroups();">
         <jsp:include page="header.jsp" />
+        <h1 class="page_header">${pageHeader}</h1>
+ 
         <script type="text/javascript">
         	if (document.getElementById('status') !== null) {
         		document.getElementById('status').style.backgroundColor = '#ccccff';

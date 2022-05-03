@@ -22,7 +22,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>Modify Collection Filters</title>
+        <title>${pageHeader}</title>
         <link rel="stylesheet" type="text/css" href="style.css" />
         <script type="text/javascript" src="jquery-1.7.1.min.js"></script>
         <script type="text/javascript">
@@ -63,6 +63,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     </head>
     <body>
         <jsp:include page="header.jsp" />
+        <h1 class="page_header">${pageHeader}</h1>
+
         <div class="standardBody">
 
             <h3>Filters for files in '${collection.name}'</h3>

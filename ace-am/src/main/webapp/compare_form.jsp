@@ -18,7 +18,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Compare Collection</title>
+    <title>${pageHeader}</title>
     <link rel="stylesheet" type="text/css" href="style.css"/>
     <style>
         #compareOr {
@@ -108,6 +108,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 </head>
 <body>
 <jsp:include page="header.jsp"/>
+<h1 class="page_header">${pageHeader}</h1>
+
 <div class="standardBody">
     <h3 class="standardHeader" id="compareCollectionHeader">Report Collection Differences
         for ${workingCollection.collection.name}</h3>

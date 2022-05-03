@@ -18,7 +18,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>Browse Collection</title>
+        <title>${pageHeader}</title>
         <link rel="stylesheet" type="text/css" href="style.css" />
         <script type="text/javascript" SRC="srbFunctions.js" ></script>
         <style type="text/css">
@@ -115,7 +115,8 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
     <body>
 
         <jsp:include page="header.jsp" />
-
+        <h1 class="page_header">${pageHeader}</h1>
+ 
         <div id="collectionHeader">
             <div class="container">
                 <p class="heading is-centered">Group</p>

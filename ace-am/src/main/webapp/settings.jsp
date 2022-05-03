@@ -14,7 +14,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>System Settings</title>
+    <title>${pageHeader}</title>
     <link rel="stylesheet" type="text/css" href="style.css"/>
     <style type="text/css">
         body {
@@ -26,10 +26,11 @@
 </head>
 <body>
 <jsp:include page="header.jsp"/>
+<h1 class="page_header">${pageHeader}</h1>
+
 <FORM name="settingsform" METHOD="POST" ENCTYPE="multipart/form-data" ACTION="UpdateSettings">
   <div align="center">
     <fieldset id="settingsTable">
-        <legend class="form-legend">System Settings</legend>
         <div class="tabs">
             <ul>
                 <li class="is-active" aria-controls="general-settings"><a>General</a></li>
