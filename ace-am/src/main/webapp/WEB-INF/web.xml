@@ -119,6 +119,10 @@
         <servlet-class>edu.umiacs.ace.monitor.users.UsersServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>Logout</servlet-name>
+        <servlet-class>edu.umiacs.ace.monitor.users.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>Status</servlet-name>
         <servlet-class>edu.umiacs.ace.monitor.access.StatusServlet</servlet-class>
     </servlet>
@@ -242,6 +246,10 @@
     <servlet-mapping>
         <servlet-name>Users</servlet-name>
         <url-pattern>/Users</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Logout</servlet-name>
+        <url-pattern>/Logout</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Status</servlet-name>
@@ -806,7 +814,11 @@
     </security-constraint>
 
     <login-config>
-        <auth-method>BASIC</auth-method>
+        <auth-method>FORM</auth-method>
+        <form-login-config>
+            <form-login-page>/loginform.jsp</form-login-page>
+            <form-error-page>/loginform.jsp?auth=0</form-error-page>
+        </form-login-config>
         <realm-name>Audit Manager</realm-name>
     </login-config>
     <security-role>
