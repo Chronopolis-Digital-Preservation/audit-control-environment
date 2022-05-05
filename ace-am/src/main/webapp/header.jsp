@@ -8,6 +8,7 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%> 
 <%@taglib uri="/WEB-INF/tlds/monitor" prefix="um"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
@@ -59,6 +60,25 @@ on Libraries node in Projects view can be used to add the JSTL 1.1 library.
         	<a class="nav-link" href="Logout">Logout</a>
         </li>
     </um:Auth>
+
+    <c:set var="pageUri">
+        <c:choose>
+            <c:when test="${requestScope['javax.servlet.forward.request_uri'] != null}">
+                ${requestScope['javax.servlet.forward.request_uri']}
+            </c:when>
+            <c:otherwise>${pageContext.request.requestURI}</c:otherwise>
+        </c:choose>
+    </c:set>
+    <c:set var="uriPaths" value="${fn:split(pageUri, '/')}" />
+    <c:set var="lastPath" value="${uriPaths[fn:length(uriPaths)-1]}" />
+ 
+    <c:if test="${lastPath == 'ace-am'}">
+        <um:Auth role="!Status">
+            <li class="nav-item">
+        	    <a class="nav-link" href="Status">Login</a>
+            </li>
+        </um:Auth>
+    </c:if>
 </ul>
 <div class="header">
     <img src="images/title.jpg" alt="ACE Audit Manager"><BR><div style="font-size: large; color: red">${globalMessage}</div>
