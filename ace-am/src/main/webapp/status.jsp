@@ -4,6 +4,7 @@
 <%@taglib tagdir="/WEB-INF/tags" prefix="h" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@taglib uri="/WEB-INF/tlds/monitor" prefix="d"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -21,9 +22,16 @@
                 <meta http-equiv="refresh" content="600"/>
             </c:otherwise>
         </c:choose>
-
-
-        <title>${pageHeader}</title>
+        <title>
+            <c:choose>
+                <c:when test="${fn:endsWith(pageContext.servletContext.contextPath, pageHeader) == false}">
+                    ACE Audit Manager
+                </c:when>
+                <c:otherwise>
+                    ${pageHeader}
+                </c:otherwise>
+            </c:choose> 
+        </title>
         <script type="text/javascript" SRC="srbFunctions.js" ></script>
         <script type="text/javascript">
             var groupheaderrow = 'groupheaderrow';
@@ -272,7 +280,9 @@
 
     <body onload="javascript: collapseGroups();">
         <jsp:include page="header.jsp" />
-        <h1 class="page_header">${pageHeader}</h1>
+        <c:if test="${fn:endsWith(pageContext.servletContext.contextPath, pageHeader) == false}">
+            <h1 class="page_header">${pageHeader}</h1>
+        </c:if>
  
         <script type="text/javascript">
         	if (document.getElementById('status') !== null) {
