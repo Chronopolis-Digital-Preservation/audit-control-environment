@@ -19,13 +19,12 @@ Author     : toaster
         <h1 class="page_header">${pageHeader}</h1>
 
         <div class="standardBody">
-        <h3>Confirm Remove</h3>
+        <h2>Are you sure you want to Remove this collection? </h2>
             <p>
-                This will flag the state of collection ${workingCollection.collection.name} to be REMOVED.
-                Note that this won't remove any files from the node and you may need to delete files manually.
+                This action will permanently change the state of collection bulk34 to REMOVED. ACE will not continue tracking or auditing the collection. This action CANNOT be undone. This will not remove any files from storage.
             </p>
 
-            <p>Click Remove to proceed.</p>
+            <p>Click <b>Remove</b> to proceed.</p>
 
         <a href="ManageCollection?remove=yes&collectionid=${workingCollection.collection.id}">
             Remove</a>&nbsp;&nbsp;&nbsp;
