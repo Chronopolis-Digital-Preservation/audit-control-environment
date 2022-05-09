@@ -63,10 +63,6 @@ public class LogServlet extends EntityManagerServlet {
     private static final long DEFAULT_SESSION = 0;
     private static final long DEFAULT_TOP = 0;
     // possible values for parameter toggletype
-    public static final String CHOICE_ERRORS = "errors";
-    public static final String CHOICE_MISSING = "missing";
-    public static final String CHOICE_NEWMASTER = "newmaster";
-    public static final String CHOICE_SYNC = "sync";
     public static final String PARAM_START = "start"; // count forwards from item, inclusive
     public static final String PARAM_COUNT = "count"; // show count items on a page
     public static final String PARAM_TOP = "top"; // count backwards starting at top (start not set)
@@ -319,23 +315,23 @@ public class LogServlet extends EntityManagerServlet {
             returnString = new StringBuilder(" l.logType IN ( ");
         }
         for ( String key : selectedTypes.keySet() ) {
-            if ( CHOICE_ERRORS.equals(key) ) {
+            if ( LogEvent.CHOICE_ERRORS.equals(key) ) {
                 returnString.append(LogEnum.SYSTEM_ERROR.getType()).append(",");
                 returnString.append(LogEnum.SITE_UNACCESSABLE.getType()).append(",");
                 returnString.append(LogEnum.LOG_TYPE_UNKNOWN.getType()).append(",");
                 returnString.append(LogEnum.CREATE_TOKEN_ERROR.getType()).append(",");
                 returnString.append(LogEnum.ERROR_READING.getType()).append(",");
                 returnString.append(LogEnum.UNKNOWN_IMS_COMMUNICATION_ERROR.getType()).append(",");
-            } else if ( CHOICE_MISSING.equals(key) ) {
+            } else if ( LogEvent.CHOICE_MISSING.equals(key) ) {
                 returnString.append(LogEnum.FILE_MISSING.getType()).append(",");
                 returnString.append(LogEnum.FILE_CORRUPT.getType()).append(",");
                 returnString.append(LogEnum.MISSING_TOKEN.getType()).append(",");
-            } else if ( CHOICE_NEWMASTER.equals(key) ) {
+            } else if ( LogEvent.CHOICE_NEWMASTER.equals(key) ) {
                 returnString.append(LogEnum.FILE_NEW.getType()).append(",");
                 returnString.append(LogEnum.ADD_TOKEN.getType()).append(",");
                 returnString.append(LogEnum.FILE_ONLINE.getType()).append(",");
                 returnString.append(LogEnum.FILE_REGISTER.getType()).append(",");
-            } else if ( CHOICE_SYNC.equals(key) ) {
+            } else if ( LogEvent.CHOICE_SYNC.equals(key) ) {
                 returnString.append(LogEnum.FILE_AUDIT_FINISH.getType()).append(",");
                 returnString.append(LogEnum.FILE_AUDIT_START.getType()).append(",");
                 returnString.append(LogEnum.FILE_AUDIT_CANCEL.getType()).append(",");
@@ -376,23 +372,23 @@ public class LogServlet extends EntityManagerServlet {
             return map;
         }
 
-        if ( CHOICE_ERRORS.equals(toggleType) ) {
-            if ( map.containsKey(CHOICE_ERRORS) ) {
-                map.remove(CHOICE_ERRORS);
+        if ( LogEvent.CHOICE_ERRORS.equals(toggleType) ) {
+            if ( map.containsKey(LogEvent.CHOICE_ERRORS) ) {
+                map.remove(LogEvent.CHOICE_ERRORS);
             } else {
-                map.put(CHOICE_ERRORS, "checked");
+                map.put(LogEvent.CHOICE_ERRORS, "checked");
             }
-        } else if ( CHOICE_MISSING.equals(toggleType) ) {
-            if ( map.containsKey(CHOICE_MISSING) ) {
-                map.remove(CHOICE_MISSING);
+        } else if ( LogEvent.CHOICE_MISSING.equals(toggleType) ) {
+            if ( map.containsKey(LogEvent.CHOICE_MISSING) ) {
+                map.remove(LogEvent.CHOICE_MISSING);
             } else {
-                map.put(CHOICE_MISSING, "checked");
+                map.put(LogEvent.CHOICE_MISSING, "checked");
             }
-        } else if ( CHOICE_NEWMASTER.equals(toggleType) ) {
-            if ( map.containsKey(CHOICE_NEWMASTER) ) {
-                map.remove(CHOICE_NEWMASTER);
+        } else if ( LogEvent.CHOICE_NEWMASTER.equals(toggleType) ) {
+            if ( map.containsKey(LogEvent.CHOICE_NEWMASTER) ) {
+                map.remove(LogEvent.CHOICE_NEWMASTER);
             } else {
-                map.put(CHOICE_NEWMASTER, "checked");
+                map.put(LogEvent.CHOICE_NEWMASTER, "checked");
             }
         } //        else if ( CHOICE_NEWREPLICA.equals(toggleType) )
         //        {
@@ -405,11 +401,11 @@ public class LogServlet extends EntityManagerServlet {
         //                map.put(CHOICE_NEWREPLICA, "checked");
         //            }
         //        }
-        else if ( CHOICE_SYNC.equals(toggleType) ) {
-            if ( map.containsKey(CHOICE_SYNC) ) {
-                map.remove(CHOICE_SYNC);
+        else if ( LogEvent.CHOICE_SYNC.equals(toggleType) ) {
+            if ( map.containsKey(LogEvent.CHOICE_SYNC) ) {
+                map.remove(LogEvent.CHOICE_SYNC);
             } else {
-                map.put(CHOICE_SYNC, "checked");
+                map.put(LogEvent.CHOICE_SYNC, "checked");
             }
         }
 
