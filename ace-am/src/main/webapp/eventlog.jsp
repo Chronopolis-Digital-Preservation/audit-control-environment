@@ -91,7 +91,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             {
                 font-weight: bold;
                 color: #888;
-                width: 96%;
+                width: 100%;
                 text-align: left;
 
             }
@@ -110,7 +110,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             }
             .logItem {
                 border-top: 1px solid #000000;
-                width: 96%;
+                width: 100%;
                 cursor: pointer;
                 text-align: left;
             }
@@ -125,6 +125,18 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 margin-top:10px;
                 height: 420px;
                 overflow-y: scroll;
+            }
+            .col-md-padding {
+                padding-left: 8px !important;
+                padding-right: 8px !important;
+            }
+            .col-md-left-padding {
+                padding-left: 4px !important;
+                padding-right: 8px !important;
+            }
+            .col-md-right-padding {
+                padding-left: 8px !important;
+                padding-right: 4px !important;
             }
 
             /* event log overlay */
@@ -236,10 +248,10 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             
             <tr>
                 <td>Show Only:</td>
-                <td><b>System Errors</b></td>
-                <td><b>Monitored File Errors</b></td>
-                <td><b>New Master Items</b></td> 
-                <td><b>Sync Start/Stop Events</b></td>
+                <td align="center"><b>System Errors</b></td>
+                <td align="center"><b>Monitored File Errors</b></td>
+                <td align="center"><b>New Master Items</b></td> 
+                <td align="center"><b>Sync Start/Stop Events</b></td>
                 
             </tr>
             
@@ -255,10 +267,19 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         
           <div id="log" class="container log">
             <div class="row logHeader">
-                <div class="col-md-1">ID</div>
-                <div class="col-md-4">Date</div>
-                <div class="col-md-2">Session</div>
-                <div class="col-md-5">Event Type</div>
+                <div class="col-md-1 col-md-left-padding">ID</div>
+                <div class="col-md-5 col-md-padding">
+                    <div class="row">
+                        <div class="col-md-8">Date</div>
+                        <div class="col-md-4 col-md-left-padding">Session</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-md-right-padding">
+                    <div class="row">
+                        <div class="col-md-7">Event Type</div>
+                        <div class="col-md-5 col-md-right-padding">Category</div>
+                    </div>
+                </div>
             </div>
             <c:if test="${loglist != null}">
                 <c:forEach var="item" items="${loglist}">
@@ -267,18 +288,29 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                          onmouseover='javascript:this.style.background="#e8e8e8"' 
                          onmouseout='javascript:this.style.background="#ffffff"'
                          >
-                        <div class="col-md-1">
+                        <div class="col-md-1 col-md-left-padding">
                             <span class="info">${item.id}</span>
                         </div>
-                        <div class="col-md-4">
-                            <span class="info">${item.date}</span>
+                        <div class="col-md-5 col-md-padding">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <span class="info">${item.date}</span>
+                                </div>
+                                <div class="col-md-4 col-md-left-padding">
+                                    <span class="info">${item.session}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-2">
-                            <span class="info">${item.session}</span>
-                        </div>
-                        <div class="col-md-5">
-                            <span class="info"><log:LogType type="${item.logType}" /></span>
-                        </div>
+                        <div class="col-md-6 col-md-right-padding">
+                            <div class="row">
+                                <div class="col-md-7" style="overflow-wrap: break-word;">
+                                    <span class="info"><log:LogType type="${item.logType}" /></span>
+                                </div>
+                                <div class="col-md-5 col-md-right-padding">
+                                    <span class="info"><log:LogCategory type="${item.logType}" /></span>
+                                </div>
+                            </div>
+                        </div>                       
                     </div>
                       
                     <div class="msg" id="msg${item.id}">

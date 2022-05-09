@@ -127,6 +127,40 @@ public enum LogEnum {
         return shortName;
     }
 
+    /**
+     * Convert log type to category
+     * categories: errors (System Errors), missing (Monitored File Errors), newmaster (New Master Items), sync (Sync Start/Stop Event)
+     * @param logType
+     * @return
+     */
+	public String getCategory(int logType) {
+		String category = "";
+        if (logType == LogEnum.SYSTEM_ERROR.getType()
+			    || logType == LogEnum.SITE_UNACCESSABLE.getType()
+		        || logType == LogEnum.LOG_TYPE_UNKNOWN.getType()
+		        || logType == LogEnum.CREATE_TOKEN_ERROR.getType()
+		        || logType == LogEnum.ERROR_READING.getType()
+	            || logType == LogEnum.UNKNOWN_IMS_COMMUNICATION_ERROR.getType()) {
+		    category = LogEvent.CHOICE_ERRORS;
+	    } else if (logType == LogEnum.FILE_MISSING.getType()
+			    || logType == LogEnum.FILE_CORRUPT.getType()
+		        || logType == LogEnum.MISSING_TOKEN.getType()) {
+            category = LogEvent.CHOICE_MISSING;
+        } else if (logType == LogEnum.FILE_NEW.getType()
+			    || logType == LogEnum.ADD_TOKEN.getType()
+		        || logType == LogEnum.FILE_ONLINE.getType()
+		        || logType == LogEnum.FILE_REGISTER.getType()) {
+            category = LogEvent.CHOICE_NEWMASTER;
+        } else if (logType == LogEnum.FILE_AUDIT_FINISH.getType()
+	            || logType == LogEnum.FILE_AUDIT_START.getType()
+	            || logType == LogEnum.FILE_AUDIT_CANCEL.getType()
+                || logType == LogEnum.FILE_AUDIT_ABORT.getType()) {
+            category = LogEvent.CHOICE_SYNC;
+        }
+
+        return category;
+    }
+
     public static LogEnum valueOf( int i ) {
         switch ( i ) {
             case 0:

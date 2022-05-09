@@ -38,6 +38,17 @@
     </attribute>
   </tag>
   <tag>
+    <name>LogCategory</name>
+    <tag-class>edu.umiacs.ace.monitor.log.LogCategoryHandler</tag-class>
+    <body-content>scriptless</body-content>
+    <attribute>
+      <name>type</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>int</type>
+    </attribute>
+  </tag>
+  <tag>
     <name>tree</name>
     <tag-class>edu.umiacs.ace.monitor.access.browse.DirectoryTreeHandler</tag-class>
     <body-content>scriptless</body-content>

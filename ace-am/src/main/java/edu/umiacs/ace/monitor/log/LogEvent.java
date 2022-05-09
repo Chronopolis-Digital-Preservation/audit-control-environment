@@ -57,6 +57,10 @@ import javax.persistence.Temporal;
     "DELETE FROM LogEvent e WHERE e.collection = :coll")
 })
 public class LogEvent implements Serializable {
+    public static final String CHOICE_ERRORS = "errors";
+    public static final String CHOICE_MISSING = "missing";
+    public static final String CHOICE_NEWMASTER = "newmaster";
+    public static final String CHOICE_SYNC = "sync";
 
     private static final long serialVersionUID = 1L;
     @Id
