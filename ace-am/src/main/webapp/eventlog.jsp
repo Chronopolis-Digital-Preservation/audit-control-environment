@@ -248,10 +248,10 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             
             <tr>
                 <td>Show Only:</td>
-                <td><b>System Errors</b></td>
-                <td><b>Monitored File Errors</b></td>
-                <td><b>New Master Items</b></td> 
-                <td><b>Sync Start/Stop Events</b></td>
+                <td align="center"><b>System Errors</b></td>
+                <td align="center"><b>Monitored File Errors</b></td>
+                <td align="center"><b>New Master Items</b></td> 
+                <td align="center"><b>Sync Start/Stop Events</b></td>
                 
             </tr>
             
