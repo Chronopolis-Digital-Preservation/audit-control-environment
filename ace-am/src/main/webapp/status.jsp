@@ -248,8 +248,12 @@
             }
 			#statustable td, #statustable-errors td
             {
-            	padding-top: 3px !important;
-            	padding-bottom: 3px !important;
+            	padding-top: 4px !important;
+            	padding-bottom: 4px !important;
+            }
+            tr.statusrow td, tr.statuserrrow td
+            {
+                border-bottom: 1px solid #dee2e6;
             }
             #statustable thead, #statustable-errors thead
             {
@@ -266,6 +270,14 @@
             	width: 100%;
             	background-color: #F2FBFF;
             	font-weight: normal;
+            }
+            .row-strip-highlighted
+            {
+                background-color: #F5f5f5;
+            }
+            .row-strip-normal
+            {
+                background-color: #FFF;
             }
         </style>
     </head>
@@ -337,6 +349,12 @@
 	            <c:forEach var="item" items="${errorCollections}" varStatus="loop">
 	                <c:if test="${currErrGroup != item.collection.group || loop.index == 0}">
 	                	<c:set var="errgroup" value="${item.collection.group}"/>
+	                	<c:set var="stripclasserrors">
+	                	    <c:choose>
+	                	        <c:when test="${stripclasserrors.index % 2 == 0}">row-strip-highlighted</c:when>
+	                	        <c:otherwise>row-strip-highnormal</c:otherwise>
+	                	    </c:choose>
+	                	</c:set>
 	                	
 	                	<!-- close the collection group table -->
 	                	<c:if test="${loop.index > 0}">
@@ -359,9 +377,9 @@
 	                    </tr>
 
 	                    <tr class="grouptrerr${errgroup}">
-	                        <td colspan="3">
-	                          <div  style="margin-left:16px;margin-left:18px;">
-	                            <table id="statustable-errors-group">
+	                        <td colspan="3" style="border-bottom: none;">
+	                          <div  style="margin: 8px 4px 8px 16px;">
+	                            <table id="statustable-errors-group" border="0" cellpadding="0" cellspacing="0">
 	                              <thead>
 	                                <td width="4%" nowrap>Audit</td>
 	                                <td width="6%" nowrap>Status</td>
@@ -377,7 +395,7 @@
 	                    </tr>
 	                </c:if>
 
-	                <tr class="statuserrrow grouptrerr${item.collection.group}" >
+	                <tr class="statuserrrow ${stripclasserrors} grouptrerr${item.collection.group}">
 	                    <td nowrap>
 	
 	                        <c:choose>
@@ -497,9 +515,9 @@
                 </tr>
 
                 <tr class="statusrow groupexpanded grouptr${group}">
-                    <td colspan="3">
-                      <div  style="margin-left:16px;margin-left:18px;">
-                        <table id="statustable-group">
+                    <td colspan="3" style="border-bottom: none;">
+                      <div  style="margin: 8px 4px 8px 16px;">
+                        <table id="statustable-group" border="0" cellpadding="0" cellspacing="0">
                           <thead>
                             <td width="4%" nowrap>Audit</td>
                             <td width="6%" nowrap>Status</td>
@@ -514,10 +532,17 @@
                     </td>
                 </tr>
 	                
-                <c:forEach var="item" items="${collections}">        	
+                <c:forEach var="item" items="${collections}" varStatus="loopcollections">
+        	        <c:set var="stripclasscollections">
+            	        <c:choose>
+            	            <c:when test="${loopcollections.index % 2 == 0}">row-strip-highlighted</c:when>
+            	            <c:otherwise>row-strip-highnormal</c:otherwise>
+            	        </c:choose>
+            	    </c:set>       	
+
 	                <c:if test="${item.collection.group != null && group == item.collection.group}">
 	
-		                <tr class="statusrow grouptr${item.collection.group}" >
+		                <tr class="statusrow ${stripclasscollections} grouptr${item.collection.group}" >
 		                    <td width="6%" nowrap>
 		
 		                        <c:choose>
@@ -614,10 +639,10 @@
                 </td>
                 <td class="groupheader"></td>
               </tr>
-              <tr class="statusrow grouptrnogroup">
+              <tr class="statusrow grouptrnogroup" style="border-bottom: none;">
                 <td colspan="3">
-                  <div  style="margin-left:16px;margin-left:18px;">
-                    <table id="statustable-group">
+                  <div  style="margin: 8px 4px 8px 16px;">
+                    <table id="statustable-group" border="0" cellpadding="0" cellspacing="0">
                       <thead>
                         <td width="4%" nowrap>Audit</td>
                         <td width="6%" nowrap>Status</td>
@@ -632,8 +657,15 @@
                 </td>
               </tr>
 
-              <c:forEach var="item" items="${noGroupCollections}">	
-                <tr class="statusrow grouptrnogroup">
+              <c:forEach var="item" items="${noGroupCollections}" varStatus="loopnogroups">
+        	    <c:set var="stripclassnogroups">
+            	    <c:choose>
+            	        <c:when test="${loopnogroups.index % 2 == 0}">row-strip-highlighted</c:when>
+            	        <c:otherwise>row-strip-highnormal</c:otherwise>
+            	    </c:choose>
+            	</c:set>	
+
+                <tr class="statusrow stripclassnogroups grouptrnogroup">
                     <td>
 
                         <c:choose>

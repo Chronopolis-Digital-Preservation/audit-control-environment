@@ -109,7 +109,9 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 background: #e8e8e8;
             }
             .logItem {
-                border-top: 1px solid #000000;
+                border-top: 1px solid #dee2e6;
+                padding-top: 4px;
+                padding-bottom: 4px;
                 width: 100%;
                 cursor: pointer;
                 text-align: left;
@@ -127,16 +129,16 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 overflow-y: scroll;
             }
             .col-md-padding {
-                padding-left: 8px !important;
-                padding-right: 8px !important;
+                padding-left: 6px !important;
+                padding-right: 6px !important;
             }
             .col-md-left-padding {
-                padding-left: 4px !important;
-                padding-right: 8px !important;
+                padding-left: 3px !important;
+                padding-right: 6px !important;
             }
             .col-md-right-padding {
-                padding-left: 8px !important;
-                padding-right: 4px !important;
+                padding-left: 6px !important;
+                padding-right: 3px !important;
             }
 
             /* event log overlay */
@@ -183,6 +185,18 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 max-height: 560px;
                 overflow: auto;
                 padding-left: 30px;
+            }
+            .logItem:hover
+            {
+                background-color: #F2FBFF;
+            }
+            .row-strip-highlighted
+            {
+                background-color: #f5f5f5;
+            }
+            .row-strip-normal
+            {
+                background-color: #FFF;
             }
 
             /* scrollbar */
@@ -268,9 +282,9 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
           <div id="log" class="container log">
             <div class="row logHeader">
                 <div class="col-md-1 col-md-left-padding">ID</div>
-                <div class="col-md-5 col-md-padding">
+                <div class="col-md-5 col-md-left-padding">
                     <div class="row">
-                        <div class="col-md-8">Date</div>
+                        <div class="col-md-8 col-md-left-padding">Date</div>
                         <div class="col-md-4 col-md-left-padding">Session</div>
                     </div>
                 </div>
@@ -282,18 +296,23 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 </div>
             </div>
             <c:if test="${loglist != null}">
-                <c:forEach var="item" items="${loglist}">
-                    <div id="logEntries-${item.id}" class="row logItem"
+                <c:forEach var="item" items="${loglist}" varStatus="loop">
+        	        <c:set var="stripclass">
+            	        <c:choose>
+            	            <c:when test="${loop.index % 2 == 0}">row-strip-highlighted</c:when>
+            	            <c:otherwise>row-strip-highnormal</c:otherwise>
+            	        </c:choose>
+            	    </c:set>
+
+                    <div id="logEntries-${item.id}" class="row logItem ${stripclass}"
                          onclick='javascript:toggleVisibility(${item.id})'
-                         onmouseover='javascript:this.style.background="#e8e8e8"' 
-                         onmouseout='javascript:this.style.background="#ffffff"'
                          >
                         <div class="col-md-1 col-md-left-padding">
                             <span class="info">${item.id}</span>
                         </div>
-                        <div class="col-md-5 col-md-padding">
+                        <div class="col-md-5 col-md-left-padding">
                             <div class="row">
-                                <div class="col-md-8">
+                                <div class="col-md-8 col-md-left-padding">
                                     <span class="info">${item.date}</span>
                                 </div>
                                 <div class="col-md-4 col-md-left-padding">
