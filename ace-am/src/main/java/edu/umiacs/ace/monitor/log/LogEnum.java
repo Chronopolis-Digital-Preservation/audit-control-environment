@@ -103,6 +103,7 @@ public enum LogEnum {
     // audit stop errors
     FILE_AUDIT_CANCEL(30, "File Audit Cancel", "Auditing of this collection's files was cancelled"),
     FILE_AUDIT_ABORT(31, "File Audit Aborted", "Auditing of this collection's files was aborted"),
+    COLLECTION_REMOVED(32, "Collection Removed", "Dedicate or delete a collection, which will no longer be tracking."),
 
     SYSTEM_ERROR(99, "System Error", "Unknown system error occurred, check server logs");
     private int type;
@@ -221,6 +222,9 @@ public enum LogEnum {
             case 31:
                 return FILE_AUDIT_ABORT;
 
+            case 32:
+                return COLLECTION_REMOVED;
+ 
             case 99:
                 return SYSTEM_ERROR;
         }

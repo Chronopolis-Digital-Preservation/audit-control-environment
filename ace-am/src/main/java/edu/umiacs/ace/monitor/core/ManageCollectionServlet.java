@@ -34,6 +34,8 @@ import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.driver.StorageDriverFactory;
 import edu.umiacs.ace.monitor.access.CollectionCountContext;
 import edu.umiacs.ace.monitor.access.StatusServlet;
+import edu.umiacs.ace.monitor.log.LogEnum;
+import edu.umiacs.ace.monitor.log.LogEventManager;
 import edu.umiacs.ace.util.EntityManagerServlet;
 import edu.umiacs.ace.util.PersistUtil;
 import edu.umiacs.util.Strings;
@@ -52,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.ForkJoinPool;
 
@@ -125,6 +128,10 @@ public class ManageCollectionServlet extends EntityManagerServlet {
                 em.merge(collection);
                 trans.commit();
 
+                // Add COLLECTION_REMOVED event
+                long eventSession = System.currentTimeMillis();
+                addLogEvent(em, eventSession, null, new Date(), LogEnum.COLLECTION_REMOVED, collection, null);
+
                 // remove from audit context
                 CollectionCountContext.decrementTotalCollections(collection);
                 // clear session of the working collection
@@ -179,6 +186,21 @@ public class ManageCollectionServlet extends EntityManagerServlet {
         request.setAttribute(PAGE_DRIVER, storage);
         dispatcher.forward(request, response);
 
+    }
+
+    /**
+     * Persist log event.
+     * @param em
+     * @param session
+     * @param path
+     * @param date
+     * @param logType
+     * @param collection
+     * @param msg
+     */
+    private void addLogEvent(EntityManager em, long session, String path, Date date, LogEnum logType, Collection collection, String msg) {
+    	LogEventManager logEventManager = new LogEventManager(session, collection);
+    	logEventManager.persistItemEvent(logType, path, msg, em);
     }
 
     private String checkStorage(StorageDriver sd, ServletRequest request, Collection collection) {
