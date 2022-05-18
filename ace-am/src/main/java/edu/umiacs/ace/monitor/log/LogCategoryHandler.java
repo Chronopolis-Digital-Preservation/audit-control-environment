@@ -87,6 +87,9 @@ public class LogCategoryHandler extends SimpleTagSupport {
             case LogEvent.CHOICE_SYNC:
                 label = "Sync Start/Stop Events";
                 break;
+            case LogEvent.CHOICE_REMOVALS:
+                label = "Removals";
+                break;
             default:
                 label = category;
                 break;

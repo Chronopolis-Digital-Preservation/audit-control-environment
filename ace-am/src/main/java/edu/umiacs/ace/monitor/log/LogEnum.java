@@ -157,6 +157,8 @@ public enum LogEnum {
 	            || logType == LogEnum.FILE_AUDIT_CANCEL.getType()
                 || logType == LogEnum.FILE_AUDIT_ABORT.getType()) {
             category = LogEvent.CHOICE_SYNC;
+        } else if (logType == LogEnum.COLLECTION_REMOVED.getType()) {
+            category = LogEvent.CHOICE_REMOVALS;
         }
 
         return category;

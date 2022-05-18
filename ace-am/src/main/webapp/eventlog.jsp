@@ -262,6 +262,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             
             <tr>
                 <td>Show Only:</td>
+                <td align="center"><b>Removals</b></td>
                 <td align="center"><b>System Errors</b></td>
                 <td align="center"><b>Monitored File Errors</b></td>
                 <td align="center"><b>New Master Items</b></td> 
@@ -271,6 +272,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             
             <tr>
                 <td></td>
+                <td align="center"><input onClick="javascript:toggleSelected('removals'); return false;" ${selects['removals']} type="checkbox" style="border:none"/></td>
                 <td align="center"><input onClick="javascript:toggleSelected('errors'); return false;" ${selects['errors']} type="checkbox" style="border:none"/></td>
                 <td align="center"><input onClick="javascript:toggleSelected('missing'); return false;" ${selects['missing']} type="checkbox" style="border:none"/></td>
                 <td align="center"><input onClick="javascript:toggleSelected('newmaster'); return false;" ${selects['newmaster']} type="checkbox" style="border:none"/></td>
