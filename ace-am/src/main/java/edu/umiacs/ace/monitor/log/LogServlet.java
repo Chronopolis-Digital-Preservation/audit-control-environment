@@ -336,6 +336,8 @@ public class LogServlet extends EntityManagerServlet {
                 returnString.append(LogEnum.FILE_AUDIT_START.getType()).append(",");
                 returnString.append(LogEnum.FILE_AUDIT_CANCEL.getType()).append(",");
                 returnString.append(LogEnum.FILE_AUDIT_ABORT.getType()).append(",");
+            } else if ( LogEvent.CHOICE_REMOVALS.equals(key) ) {
+                returnString.append(LogEnum.COLLECTION_REMOVED.getType()).append(",");
             }
         }
 
@@ -408,7 +410,13 @@ public class LogServlet extends EntityManagerServlet {
                 map.put(LogEvent.CHOICE_SYNC, "checked");
             }
         }
-
+        else if ( LogEvent.CHOICE_REMOVALS.equals(toggleType) ) {
+            if ( map.containsKey(LogEvent.CHOICE_REMOVALS) ) {
+                map.remove(LogEvent.CHOICE_REMOVALS);
+            } else {
+                map.put(LogEvent.CHOICE_REMOVALS, "checked");
+            }
+        }
         return map;
     }
 }
