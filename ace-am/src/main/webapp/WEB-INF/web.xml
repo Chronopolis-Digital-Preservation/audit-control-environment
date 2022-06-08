@@ -814,11 +814,7 @@
     </security-constraint>
 
     <login-config>
-        <auth-method>FORM</auth-method>
-        <form-login-config>
-            <form-login-page>/loginform.jsp</form-login-page>
-            <form-error-page>/loginform.jsp?auth=0</form-error-page>
-        </form-login-config>
+        <auth-method>BASIC</auth-method>
         <realm-name>Audit Manager</realm-name>
     </login-config>
     <security-role>
