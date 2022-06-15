@@ -283,7 +283,7 @@
             {
                 background-color: #F5f5f5;
             }
-            .row-strip-normal
+            .row-strip-highnormal
             {
                 background-color: #FFF;
             }
@@ -357,14 +357,15 @@
 	            </thead>
 
 	            <c:forEach var="item" items="${errorCollections}" varStatus="loop">
+                	<c:set var="stripclasserrors">
+                	    <c:choose>
+                	        <c:when test="${loop.index % 2 == 0}">row-strip-highlighted</c:when>
+                	        <c:otherwise>row-strip-highnormal</c:otherwise>
+                	    </c:choose>
+                	</c:set>
+
 	                <c:if test="${currErrGroup != item.collection.group || loop.index == 0}">
 	                	<c:set var="errgroup" value="${item.collection.group}"/>
-	                	<c:set var="stripclasserrors">
-	                	    <c:choose>
-	                	        <c:when test="${stripclasserrors.index % 2 == 0}">row-strip-highlighted</c:when>
-	                	        <c:otherwise>row-strip-highnormal</c:otherwise>
-	                	    </c:choose>
-	                	</c:set>
 	                	
 	                	<!-- close the collection group table -->
 	                	<c:if test="${loop.index > 0}">
