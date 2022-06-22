@@ -93,6 +93,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 color: #888;
                 width: 100%;
                 text-align: left;
+                padding-left: 12px;
 
             }
             .info {   
@@ -110,8 +111,9 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             }
             .logItem {
                 border-top: 1px solid #dee2e6;
-                padding-top: 4px;
-                padding-bottom: 4px;
+                padding-top: 5px;
+                padding-bottom: 5px;
+                padding-left: 12px;
                 width: 100%;
                 cursor: pointer;
                 text-align: left;
@@ -119,7 +121,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             #log {
                 margin-left: auto;
                 margin-right: auto;
-                width: 96%;
+                width: 98%;
                 border-left: 1px solid #000000;
                 border-right: 1px solid #000000;
                 border-bottom: 1px solid #000000;
@@ -127,18 +129,11 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 margin-top:10px;
                 height: 420px;
                 overflow-y: scroll;
+                padding: 6px 10px;
             }
             .col-md-padding {
-                padding-left: 6px !important;
-                padding-right: 6px !important;
-            }
-            .col-md-left-padding {
-                padding-left: 3px !important;
-                padding-right: 6px !important;
-            }
-            .col-md-right-padding {
-                padding-left: 6px !important;
-                padding-right: 3px !important;
+                padding-left: 2px !important;
+                padding-right: 2px !important;
             }
 
             /* event log overlay */
@@ -281,19 +276,19 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             
           </table>
         
-          <div id="log" class="container log">
+          <div id="log" class="container log" align="center">
             <div class="row logHeader">
-                <div class="col-md-1 col-md-left-padding">ID</div>
-                <div class="col-md-5 col-md-left-padding">
+                <div class="col-md-7 col-md-padding">
                     <div class="row">
-                        <div class="col-md-8 col-md-left-padding">Date</div>
-                        <div class="col-md-4 col-md-left-padding">Session</div>
+                		<div class="col-md-2 col-md-padding">ID</div>
+                        <div class="col-md-6 col-md-padding">Date</div>
+                        <div class="col-md-3 col-md-padding">Session</div>
                     </div>
                 </div>
-                <div class="col-md-6 col-md-right-padding">
+                <div class="col-md-5 col-md-padding">
                     <div class="row">
                         <div class="col-md-7">Event Type</div>
-                        <div class="col-md-5 col-md-right-padding">Category</div>
+                        <div class="col-md-5 col-md-padding">Category</div>
                     </div>
                 </div>
             </div>
@@ -309,25 +304,25 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                     <div id="logEntries-${item.id}" class="row logItem ${stripclass}"
                          onclick='javascript:toggleVisibility(${item.id})'
                          >
-                        <div class="col-md-1 col-md-left-padding">
-                            <span class="info">${item.id}</span>
-                        </div>
-                        <div class="col-md-5 col-md-left-padding">
+                        <div class="col-md-7 col-md-padding">
                             <div class="row">
-                                <div class="col-md-8 col-md-left-padding">
+                                <div class="col-md-2 col-md-padding">
+                            		<span class="info">${item.id}</span>
+                        		</div>
+                                <div class="col-md-6 col-md-padding">
                                     <span class="info">${item.date}</span>
                                 </div>
-                                <div class="col-md-4 col-md-left-padding">
+                                <div class="col-md-3 col-md-padding">
                                     <span class="info">${item.session}</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6 col-md-right-padding">
+                        <div class="col-md-5 col-md-padding">
                             <div class="row">
                                 <div class="col-md-7" style="overflow-wrap: break-word;">
                                     <span class="info" style="word-wrap: break-word;"><log:LogType type="${item.logType}" /></span>
                                 </div>
-                                <div class="col-md-5 col-md-right-padding">
+                                <div class="col-md-5 col-md-padding" style="white-space: nowrap;">
                                     <span class="info"><log:LogCategory type="${item.logType}" /></span>
                                 </div>
                             </div>
