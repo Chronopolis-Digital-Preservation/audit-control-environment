@@ -325,7 +325,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                         <div class="col-md-6 col-md-right-padding">
                             <div class="row">
                                 <div class="col-md-7" style="overflow-wrap: break-word;">
-                                    <span class="info"><log:LogType type="${item.logType}" /></span>
+                                    <span class="info" style="word-wrap: break-word;"><log:LogType type="${item.logType}" /></span>
                                 </div>
                                 <div class="col-md-5 col-md-right-padding">
                                     <span class="info"><log:LogCategory type="${item.logType}" /></span>
