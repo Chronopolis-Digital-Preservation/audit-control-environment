@@ -169,7 +169,7 @@ public class StatusServlet extends EntityManagerServlet {
         collectionGroups = new ArrayList<>();
         noGroupCollections = new ArrayList<>();
 
-        if (queries.size() > 0 || action != null && action.trim().equalsIgnoreCase(ACTION_SEARCH)) {
+        if (hasJson(request) || queries.size() > 0 || action != null && action.trim().equalsIgnoreCase(ACTION_SEARCH)) {
         	// Query collections
             queryString.append("SELECT c FROM Collection c");
             countString.append("SELECT COUNT(c.id) FROM Collection c");
