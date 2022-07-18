@@ -41,7 +41,7 @@ import javax.servlet.jsp.JspException;
  */
 public class FileSizeHandler extends SimpleTagSupport {
 
-    private static final String[] units = {" B", " KB", " MB", " GB", " TB", " PB"};
+    private static final String[] units = {" B", " KiB", " MiB", " GiB", " TiB", " PiB"};
     private long value;
     private char unit;
 
