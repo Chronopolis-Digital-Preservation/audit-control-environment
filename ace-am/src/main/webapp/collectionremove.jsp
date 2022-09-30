@@ -19,12 +19,12 @@ Author     : toaster
         <h1 class="page_header">${pageHeader}</h1>
 
         <div class="standardBody">
-        <h2>Are you sure you want to Remove this collection? </h2>
+        <h2 style="color: #333;">Are you sure you want to Remove this collection? </h2>
             <p>
-                This action will permanently change the state of collection bulk34 to REMOVED. ACE will not continue tracking or auditing the collection. This action CANNOT be undone. This will not remove any files from storage.
+                This action will permanently change the state of collection <span class="highlight-text">${workingCollection.collection.name}</span> to <span class="highlight-text">REMOVED</span>. ACE will not continue tracking or auditing the collection. This action <span class="highlight-text">CANNOT</span> be undone. This will not remove any files from storage.
             </p>
 
-            <p>Click <b>Remove</b> to proceed.</p>
+            <p>Click <span class="highlight-text">Remove</span> to proceed.</p>
 
         <a href="ManageCollection?remove=yes&collectionid=${workingCollection.collection.id}">
             Remove</a>&nbsp;&nbsp;&nbsp;
