@@ -470,3 +470,8 @@ ol, ol li
     color: #bbb;
     margin-top: 8px;
 }
+
+.highlight-text {
+    font-weight: 600;
+    color: #444;
+}
