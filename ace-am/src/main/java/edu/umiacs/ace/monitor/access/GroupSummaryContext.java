@@ -25,6 +25,7 @@ public class GroupSummaryContext implements ServletContextListener {
     private static final Logger log = Logger.getLogger(GroupSummaryContext.class);
 
     public static Map<String, GroupSummary> summaries;
+    public static Map<String, GroupSummary> preservationSummaries;
 
     /**
      * Query to get ALL group summaries
@@ -32,6 +33,22 @@ public class GroupSummaryContext implements ServletContextListener {
     private static final String SUMMARY_QUERY_ALL =
             "SELECT c.colgroup, sum(m.size) AS size, sum(m.count) AS count " +
                     "FROM collection c " +
+                    "JOIN (  " +
+                    "SELECT sum(size) AS size, count(id) AS count, parentcollection_id   " +
+                    "FROM monitored_item   " +
+                    "WHERE directory = 0   " +
+                    "GROUP BY parentcollection_id " +
+                    ") AS m ON c.id = m.parentcollection_id " +
+                    "WHERE c.colgroup IS NOT NULL " +
+                    "GROUP BY c.colgroup";
+
+    /**
+     * Query to get group summaries for preservation storages with REMOVE state collections excluded
+     */
+    private static final String SUMMARY_QUERY_PRESERVATION_STORAGES =
+            "SELECT c.colgroup, sum(m.size) AS size, sum(m.count) AS count FROM " +
+                    "(SELECT * FROM collection " +
+                    "WHERE state <> 'R') as c " +
                     "JOIN (  " +
                     "SELECT sum(size) AS size, count(id) AS count, parentcollection_id   " +
                     "FROM monitored_item   " +
@@ -57,12 +74,19 @@ public class GroupSummaryContext implements ServletContextListener {
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         summaries = new HashMap<>();
         updateSummaries(ImmutableList.of(SUMMARY_QUERY_ALL),
-                ImmutableList.of());
+                ImmutableList.of(),
+                summaries);
+
+        preservationSummaries = new HashMap<>();
+        updateSummaries(ImmutableList.of(SUMMARY_QUERY_PRESERVATION_STORAGES),
+                ImmutableList.of(),
+                preservationSummaries);
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         summaries.clear();
+        preservationSummaries.clear();
     }
 
     /**
@@ -76,7 +100,12 @@ public class GroupSummaryContext implements ServletContextListener {
             log.debug("Updating group summary for " + group);
             updateSummaries(
                     ImmutableList.of(SUMMARY_QUERY_GROUP),
-                    ImmutableList.of(group));
+                    ImmutableList.of(group),
+                    summaries);
+            updateSummaries(
+                    ImmutableList.of(SUMMARY_QUERY_PRESERVATION_STORAGES),
+                    ImmutableList.of(group),
+                    preservationSummaries);
         }
     }
 
@@ -86,7 +115,7 @@ public class GroupSummaryContext implements ServletContextListener {
      * @param sql    the sql query to build
      * @param params the parameters to pass along to the query
      */
-    private static void updateSummaries(List<String> sql, List<String> params) {
+    private static void updateSummaries(List<String> sql, List<String> params, Map<String, GroupSummary> summaries) {
         EntityManager em = PersistUtil.getEntityManager();
 
         StringBuilder query = new StringBuilder();
