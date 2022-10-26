@@ -172,8 +172,9 @@ public class StatusServlet extends EntityManagerServlet {
         collectionGroups = new ArrayList<>();
         noGroupCollections = new ArrayList<>();
 
-        if (hasJson(request) || (queries.size() > 0 || action != null && action.trim().equalsIgnoreCase(ACTION_SEARCH))
-                && (queries.size() > 1 || state != "r")) {
+        // Skip querying collections when listing groups in status page, or searching for reservation storages specifically (exclude collections with REMOVE state)
+        if (hasJson(request) || queries.size() > 1 || queries.size() == 1 && (state == null || !state.equals(STATE_EXCLUDE_REMOVE))
+            || isSearchBehavior(action, state, queries.size())) {
             // Query collections
             queryString.append("SELECT c FROM Collection c");
             countString.append("SELECT COUNT(c.id) FROM Collection c");
@@ -239,20 +240,20 @@ public class StatusServlet extends EntityManagerServlet {
 
         setWorkingCollection(request, em);
 
-        if (action != null && action.trim().equalsIgnoreCase(ACTION_SEARCH)) {
-        	// Search action
-        	collectionGroups = getCollectionGroups(items);
-            noGroupItems = getNoGroupCollections(items);      	
+        collectionGroups = searchCollectionGroups(em);
+        if (isSearchBehavior(action, state, queries.size()) && !isBrowse(action, group, state, collection, queries.size(), collectionGroups)) {
+            // Search action
+            collectionGroups = getCollectionGroups(items);
+            noGroupItems = getNoGroupCollections(items);
         } else {
-        	// Browser groups action
-        	collectionGroups = searchCollectionGroups(em);
-        	noGroupItems = searchNoGroupCollections(em); 
+            // Browser groups action, or search group with REMOVE state excluded
+            noGroupItems = searchNoGroupCollections(em); 
         }
 
         for (Collection col : noGroupItems) {
             CollectionSummaryBean csb = createCollectionSummary(col);
             noGroupCollections.add(csb);
-        }  
+        }
 
         request.setAttribute(PAGE_COLLECTIONS, collections);
         request.setAttribute(ERROR_COLLECTIONS, errorCollections);
@@ -271,6 +272,29 @@ public class StatusServlet extends EntityManagerServlet {
             dispatcher = request.getRequestDispatcher("status.jsp");
         }
         dispatcher.forward(request, response);
+    }
+
+    /**
+     * Determine whether it's the REMOVE state excluded search
+     * @param action
+     * @param state
+     * @param querySize
+     * @return
+     */
+    private boolean isSearchBehavior(String action, String state, int querySize) {
+       return action != null && action.equalsIgnoreCase(ACTION_SEARCH) && (querySize > 1 || state == null || !state.equals(STATE_EXCLUDE_REMOVE));
+    }
+
+    /**
+     * Determine whether it's the REMOVE state excluded search
+     * @param action
+     * @param state
+     * @param querySize
+     * @return
+     */
+    private boolean isBrowse(String action, String group, String state, String collection, int querySize, List<String> groups) {
+       return action == null || !action.equalsIgnoreCase(ACTION_SEARCH)
+               || action.equalsIgnoreCase(ACTION_SEARCH) && querySize == 2 && groups.contains(group) && Strings.isEmpty(collection);
     }
 
     /**
