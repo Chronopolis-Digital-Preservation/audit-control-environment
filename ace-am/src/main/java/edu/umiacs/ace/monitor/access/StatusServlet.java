@@ -66,6 +66,7 @@ public class StatusServlet extends EntityManagerServlet {
     private static final String PAGE_COUNT = "count";
     private static final String PAGE_NUMBER = "page";
     private static final String ACTION_SEARCH = "search";
+    private static final String STATE_EXCLUDE_REMOVE = "r";
 
     private static final long DEFAULT_PAGE = 0;
     private static final int DEFAULT_COUNT = 100;
@@ -149,9 +150,11 @@ public class StatusServlet extends EntityManagerServlet {
             request.setAttribute(PARAM_COLLECTION_LIKE, collection);
         }
 
-        // Enforce that the state is not empty, or larger than 1 character
+        // Enforce that the state is not empty, or larger than 1 character.
+        // Lower case r: exclude collections with REMOVE state
+        // upper case R: only collections with REMOVE state
         if (!Strings.isEmpty(state) && state.length() == 1) {
-            queries.add("c.state = :status_state");
+            queries.add("c.state " + (state.equals(STATE_EXCLUDE_REMOVE) ? "<>" : "=") + " :status_state");
             pb.addParam(PARAM_STATE, state);
             request.setAttribute(PARAM_STATE, state);
         }
@@ -169,8 +172,10 @@ public class StatusServlet extends EntityManagerServlet {
         collectionGroups = new ArrayList<>();
         noGroupCollections = new ArrayList<>();
 
-        if (hasJson(request) || queries.size() > 0 || action != null && action.trim().equalsIgnoreCase(ACTION_SEARCH)) {
-        	// Query collections
+        // Skip querying collections when listing groups in status page, or searching for reservation storages specifically (exclude collections with REMOVE state)
+        if (hasJson(request) || queries.size() > 1 || queries.size() == 1 && (state == null || !state.equals(STATE_EXCLUDE_REMOVE))
+            || isSearchBehavior(action, state, queries.size())) {
+            // Query collections
             queryString.append("SELECT c FROM Collection c");
             countString.append("SELECT COUNT(c.id) FROM Collection c");
 
@@ -213,8 +218,8 @@ public class StatusServlet extends EntityManagerServlet {
             }
 
             if (!Strings.isEmpty(state) && state.length() == 1) {
-                query.setParameter(PARAM_STATE, CollectionState.fromChar(state.charAt(0)));
-                countQuery.setParameter(PARAM_STATE, CollectionState.fromChar(state.charAt(0)));
+                query.setParameter(PARAM_STATE, CollectionState.fromChar(state.toUpperCase().charAt(0)));
+                countQuery.setParameter(PARAM_STATE, CollectionState.fromChar(state.toUpperCase().charAt(0)));
             }
 
             items = query.getResultList();
@@ -235,20 +240,20 @@ public class StatusServlet extends EntityManagerServlet {
 
         setWorkingCollection(request, em);
 
-        if (action != null && action.trim().equalsIgnoreCase(ACTION_SEARCH)) {
-        	// Search action
-        	collectionGroups = getCollectionGroups(items);
-            noGroupItems = getNoGroupCollections(items);      	
+        collectionGroups = searchCollectionGroups(em);
+        if (isSearchBehavior(action, state, queries.size()) && !isBrowse(action, group, state, collection, queries.size(), collectionGroups)) {
+            // Search action
+            collectionGroups = getCollectionGroups(items);
+            noGroupItems = getNoGroupCollections(items);
         } else {
-        	// Browser groups action
-        	collectionGroups = searchCollectionGroups(em);
-        	noGroupItems = searchNoGroupCollections(em); 
+            // Browser groups action, or search group with REMOVE state excluded
+            noGroupItems = searchNoGroupCollections(em); 
         }
 
         for (Collection col : noGroupItems) {
             CollectionSummaryBean csb = createCollectionSummary(col);
             noGroupCollections.add(csb);
-        }  
+        }
 
         request.setAttribute(PAGE_COLLECTIONS, collections);
         request.setAttribute(ERROR_COLLECTIONS, errorCollections);
@@ -258,7 +263,7 @@ public class StatusServlet extends EntityManagerServlet {
         request.setAttribute(PAGE_NUMBER, pb);
         request.setAttribute("action", action);
         request.setAttribute("colGroups", collectionGroups);
-        request.setAttribute("groups", GroupSummaryContext.summaries);
+        request.setAttribute("groups", !Strings.isEmpty(state) && state.equals(STATE_EXCLUDE_REMOVE) ? GroupSummaryContext.preservationSummaries : GroupSummaryContext.summaries);
         if (hasJson(request)) {
             dispatcher = request.getRequestDispatcher("status-json.jsp");
         } else if (hasCsv(request)) {
@@ -267,6 +272,29 @@ public class StatusServlet extends EntityManagerServlet {
             dispatcher = request.getRequestDispatcher("status.jsp");
         }
         dispatcher.forward(request, response);
+    }
+
+    /**
+     * Determine whether it's the REMOVE state excluded search
+     * @param action
+     * @param state
+     * @param querySize
+     * @return
+     */
+    private boolean isSearchBehavior(String action, String state, int querySize) {
+       return action != null && action.equalsIgnoreCase(ACTION_SEARCH) && (querySize > 1 || state == null || !state.equals(STATE_EXCLUDE_REMOVE));
+    }
+
+    /**
+     * Determine whether it's the REMOVE state excluded search
+     * @param action
+     * @param state
+     * @param querySize
+     * @return
+     */
+    private boolean isBrowse(String action, String group, String state, String collection, int querySize, List<String> groups) {
+       return action == null || !action.equalsIgnoreCase(ACTION_SEARCH)
+               || action.equalsIgnoreCase(ACTION_SEARCH) && querySize == 2 && groups.contains(group) && Strings.isEmpty(collection);
     }
 
     /**

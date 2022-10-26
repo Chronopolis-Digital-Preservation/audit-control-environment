@@ -38,6 +38,10 @@
             var grouptr = 'grouptr';
             var statusrow = 'statusrow';
             var nogroup = 'nogroup';
+            var collGroups = [];
+            <c:forEach var="group" items="${colGroups}" varStatus="stat">
+                collGroups.push("${group}");   
+            </c:forEach>
 
             function search() {
                 document.getElementById('action').value = 'search';
@@ -64,16 +68,26 @@
             }
             function browseGroup(group)
             {
-                var action = document.getElementById('action').value;
-            	if (action == 'search')
-            	{
-            	    showGroup(grouptr + group)
-            	    return;
-            	}
+                if (canExpandGroups())
+                {
+                    // expend group on search, excpet search with option to filtering REMOVE state collections specifically
+                    showGroup(grouptr + group)
+                    return;
+                }
+
                 document.getElementById('group-filter').value = group;
 
                 document.getElementById("searchForm").submit();
-                
+            }
+            function canExpandGroups() {
+                var params = (new URL(document.location)).searchParams;
+                var state = params.get("status_state");
+                var action = document.getElementById('action').value;
+
+                var group = document.getElementById('group-filter').value.trim();
+                var collection = document.getElementById('coll-filter').value.trim();
+
+                return action == 'search' && (state !== 'r' || state === 'r' && (group !== '' && !collGroups.includes(group) || collection !== ''));
             }
             function hideGroup(id)
             {
@@ -94,16 +108,22 @@
             }
             function collapseGroups()
             {
+                var params = (new URL(document.location)).searchParams;
+                var state = params.get("status_state");
                 var action = document.getElementById('action').value;
-                if (action === 'search')
-                    return;
-                
+
                 var group = document.getElementById('group-filter').value.trim();
+                var collection = document.getElementById('coll-filter').value.trim();
+
+                if (canExpandGroups()) {
+                    return;
+                }
+                // collpase groups on search, excpet filtering out REMOVE state collections only
                 var divs = document.getElementsByTagName('tr');
 
                 for (i = 0; i < divs.length; i++)
                 {
-                	var iclass = divs[i].className;
+                    var iclass = divs[i].className;
 
                     if (iclass.indexOf(groupheaderrow) == 0) {
                         var igroup = iclass.substring(iclass.indexOf(groupheaderrow) + groupheaderrow.length);
@@ -324,6 +344,7 @@
                     <span class="input-group-addon">State</span>
                     <select name="status_state" id="state-filter" class="form-select">
                         <option value="">Select a Collection State</option>
+                        <option value="r" <c:if test="${status_state eq 'r'}">selected="selected"</c:if>>PRESERVATION STORAGE</option>
                         <c:forEach var="s" items="${states}">
                             <c:choose>
                                 <c:when test="${s.state eq status_state}">
