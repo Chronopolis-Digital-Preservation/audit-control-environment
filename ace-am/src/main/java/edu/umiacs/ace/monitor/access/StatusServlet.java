@@ -150,6 +150,10 @@ public class StatusServlet extends EntityManagerServlet {
             request.setAttribute(PARAM_COLLECTION_LIKE, collection);
         }
 
+        // Status page with removed collections excluded by default
+        if(Strings.isEmpty(state) && Strings.isEmpty(action) && queries.isEmpty()) {
+            state = STATE_EXCLUDE_REMOVE;
+        }
         // Enforce that the state is not empty, or larger than 1 character.
         // Lower case r: exclude collections with REMOVE state
         // upper case R: only collections with REMOVE state
