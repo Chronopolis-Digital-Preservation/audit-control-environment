@@ -151,7 +151,7 @@ public class StatusServlet extends EntityManagerServlet {
         }
 
         // Status page with removed collections excluded by default
-        if(Strings.isEmpty(state) && Strings.isEmpty(action) && queries.isEmpty()) {
+        if(Strings.isEmpty(state)) {
             state = STATE_EXCLUDE_REMOVE;
         }
         // Enforce that the state is not empty, or larger than 1 character.
