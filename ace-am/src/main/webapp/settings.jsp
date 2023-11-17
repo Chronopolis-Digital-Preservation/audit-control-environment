@@ -71,6 +71,14 @@
                 <input class="form-input-settings" type="text" id="mail.from" name="mail.from"
                        value="${currSettings['mail.from']}"/>
             </div>
+            <div class="form-field">
+                <label class="form-label" for="mail.to">Mail To</label>
+                <span class="form-help">
+                Set this e-mail address to an admin e-mail that should be sent on audit error
+            </span>
+                <input class="form-input-settings" type="text" id="mail.to" name="mail.to"
+                       value="${currSettings['mail.to']}"/>
+            </div>
         </div>
 
         <div class="tab-block" id="audit-settings">
