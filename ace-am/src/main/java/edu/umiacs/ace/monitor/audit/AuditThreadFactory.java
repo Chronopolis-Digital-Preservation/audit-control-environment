@@ -33,6 +33,10 @@ package edu.umiacs.ace.monitor.audit;
 import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
+import edu.umiacs.ace.monitor.log.LogEnum;
+import edu.umiacs.ace.monitor.reporting.ReportSummary;
+import edu.umiacs.ace.monitor.reporting.SchedulerContextListener;
+import edu.umiacs.ace.monitor.reporting.SummaryGenerator;
 import edu.umiacs.ace.monitor.settings.SettingsConstants;
 import edu.umiacs.ace.util.CollectionThreadPoolExecutor;
 import edu.umiacs.ace.util.KSFuture;
@@ -41,9 +45,11 @@ import edu.umiacs.ace.util.Submittable;
 import edu.umiacs.util.Strings;
 import org.apache.log4j.Logger;
 
+import javax.mail.MessagingException;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.security.SecureRandom;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,6 +65,9 @@ public class AuditThreadFactory {
     private static final Logger LOG = Logger.getLogger(AuditThreadFactory.class);
 
     private static ConcurrentHashMap<Collection, KSFuture<AuditThread>> audits =
+            new ConcurrentHashMap<>();
+    // AuditThread with errors that need admin notification
+    private static ConcurrentHashMap<Collection, AuditThread> auditErrors =
             new ConcurrentHashMap<>();
     private static int max_audits = 3;
     private static String imsHost = null;
@@ -228,10 +237,42 @@ public class AuditThreadFactory {
      */
     static void finished(Collection c) {
         LOG.trace("Finishing audit for collection " + c.getName());
+        // Copy audit error thread for admin notification
+        AuditThread audit = getThread(c);
+        if (audit.isCancelled() || audit.getAbortException() != null) {
+            auditErrors.put(c, audit);
+        }
+
         // Clean up everything which may contain a reference to the thread
         // Thread will only ever be removed once, so no need to worry about
         // race conditions
         audits.remove(c);
+    }
+
+    public static synchronized void notifyErrorAudits() throws MessagingException, InterruptedException {
+        while(isAuditing()) {
+            Thread.sleep(60*1000);
+        }
+
+        StringBuilder subject = new StringBuilder();
+        StringBuilder errorMessage = new StringBuilder();
+        if (auditErrors.size() > 0) {
+            // notify admin by mail
+            Enumeration<Collection> collections = auditErrors.keys();
+            while (collections.hasMoreElements()) {
+                Collection col = collections.nextElement();
+                AuditThread errorAudit = auditErrors.get(col);
+                ReportSummary reportSummary = errorAudit.getReportSummary();
+                String reportName = reportSummary.getReportName();
+                if (subject.indexOf(reportName) < 0) {
+                    subject.append(" -- " + reportName);
+                }
+                errorMessage.append("\n\n" + reportSummary.createReport());
+            }
+
+            SchedulerContextListener.notifyAdmin(subject.toString(), errorMessage.toString());
+            auditErrors.clear();
+        }
     }
 
     public static boolean useSSL() {

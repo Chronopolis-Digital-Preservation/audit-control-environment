@@ -179,6 +179,22 @@ public final class AuditThread extends Thread implements CancelCallback {
         return coll;
     }
 
+    /**
+     * The exception throw during auditing.
+     * @return
+     */
+    public Throwable getAbortException() {
+        return abortException;
+    }
+
+    /**
+     * The flag for cancelled audit.
+     * @return
+     */
+    public boolean isCancelled() {
+        return cancel;
+    }
+
     @Override
     public void cancel() {
         LOG.info("Received cancel for audit " + coll.getName());
@@ -418,7 +434,7 @@ public final class AuditThread extends Thread implements CancelCallback {
         LOG.trace("Generating audit report on " + session + " coll "
                 + coll.getName());
         CollectionCountContext.updateCollection(coll);
-        ReportSummary rs = new SummaryGenerator(coll, session).generateReport();
+        ReportSummary rs = getReportSummary();
         try {
             SchedulerContextListener.mailReport(rs, createMailList());
         } catch (MessagingException e) {
@@ -427,6 +443,10 @@ public final class AuditThread extends Thread implements CancelCallback {
             em.close();
             LOG.error("Could not send report summary", e);
         }
+    }
+
+    public ReportSummary getReportSummary() {
+        return new SummaryGenerator(coll, session).generateReport();
     }
 
     /**

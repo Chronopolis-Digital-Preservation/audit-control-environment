@@ -236,6 +236,11 @@ public final class AuditConfigurationContext implements ServletContextListener {
                             LOG.trace("No Sync on " + c.getName());
                         }
                     }
+
+                    // Notify admin if there's any errors occurred during auditing.
+                    if (items.size() > 0) {
+                        AuditThreadFactory.notifyErrorAudits();
+                    }
                 }
             } catch (Throwable t) {
                 LOG.error("Error testing to see if collections need auditing", t);
