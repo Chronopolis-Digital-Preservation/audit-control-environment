@@ -111,6 +111,7 @@ public final class AuditThread extends Thread implements CancelCallback {
     private String tokenClassName;
     private LogEventManager logManager;
     private AuditIterable<FileBean> iterableItems;
+    private ReportSummary reportSummary = null;
 
     public AuditThread(Collection c,
                        StorageDriver driver,
@@ -249,7 +250,7 @@ public final class AuditThread extends Thread implements CancelCallback {
                 performAudit();
             } catch (Throwable e) {
                 LOG.fatal("Uncaught exception in performAudit()", e);
-                if (abortException != null) {
+                if (abortException == null) {
                     abortException = e;
                 }
             }
@@ -445,8 +446,15 @@ public final class AuditThread extends Thread implements CancelCallback {
         }
     }
 
-    public ReportSummary getReportSummary() {
-        return new SummaryGenerator(coll, session).generateReport();
+    /**
+     * Generate report summary for audit.
+     */
+    public synchronized ReportSummary getReportSummary() {
+        if (reportSummary == null) {
+            reportSummary = new SummaryGenerator(coll, session).generateReport();
+        }
+
+        return reportSummary;
     }
 
     /**

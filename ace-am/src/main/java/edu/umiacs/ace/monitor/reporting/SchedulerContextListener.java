@@ -55,9 +55,7 @@ import javax.persistence.TypedQuery;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Properties;
-import java.util.stream.Stream;
 
 /**
  * Context listener to control the starting and stopping of the quartz scheduler used to generate
@@ -154,24 +152,19 @@ public class SchedulerContextListener implements ServletContextListener {
         }
     }
 
-    public static void mailReport(ReportSummary report, String[] mailList)
-            throws MessagingException {
-        mailReport(report, mailList, false);
-    }
-
     /**
-     * Mail report with flag fro administrator notification.
+     * Email report with option for admin notification.
      * @param report
      * @param mailList
      * @param notifyAdmin
      * @throws MessagingException
      */
-    public static void mailReport(ReportSummary report, String[] mailList, boolean notifyAdmin)
+    public static void mailReport(ReportSummary report, String[] mailList)
             throws MessagingException {
 
         String content = report == null ? null : report.createReport();
-        String subject = report == null ? "" : report.getReportName();
-        sendMail(subject, content, mailList, notifyAdmin);
+        String subject = report == null ? "" : "Ace Report: " + report.getReportName();
+        sendMail(subject, content, mailList);
     }
 
     /**
@@ -181,7 +174,7 @@ public class SchedulerContextListener implements ServletContextListener {
      * @throws MessagingException
      */
     public static void notifyAdmin(String subject, String content) throws MessagingException {
-        sendMail(subject, content, getAdminMailList(), true);
+        sendMail(subject, content, getAdminMailList());
     }
 
     /**
@@ -192,8 +185,10 @@ public class SchedulerContextListener implements ServletContextListener {
      * @param notifyAdmin
      * @throws MessagingException
      */
-    public static void sendMail(String subject, String content, String[] mailList, boolean notifyAdmin)
+    public static void sendMail(String subject, String content, String[] mailList)
             throws MessagingException {
+        LOG.debug("ACE audit report email list: " + String.join(", ", mailList) + ". Subject: " + subject + ", content: " + content);
+
         if (content == null || mailList == null || mailList.length == 0) {
             return;
         }
@@ -215,11 +210,6 @@ public class SchedulerContextListener implements ServletContextListener {
         InternetAddress addressFrom = new InternetAddress(mailfrom);
         msg.setFrom(addressFrom);
 
-        if (notifyAdmin) {
-            // additional admin notification mail list
-            mailList = Stream.concat(Arrays.stream(mailList), Arrays.stream(getAdminMailList()))
-                .distinct().toArray(String[]::new);
-        }
         InternetAddress[] addressTo = new InternetAddress[mailList.length];
         for (int i = 0; i < mailList.length; i++) {
             addressTo[i] = new InternetAddress(mailList[i]);
@@ -227,7 +217,7 @@ public class SchedulerContextListener implements ServletContextListener {
         msg.setRecipients(Message.RecipientType.TO, addressTo);
 
         // Setting the Subject and Content Type
-        msg.setSubject("Ace Report: " + subject);
+        msg.setSubject(subject);
         msg.setContent(content, "text/plain");
         Transport.send(msg);
         LOG.trace("Successfully mailed report to: " + Strings.join(',', mailList));

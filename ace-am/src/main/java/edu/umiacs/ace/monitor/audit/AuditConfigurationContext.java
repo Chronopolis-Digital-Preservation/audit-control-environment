@@ -98,7 +98,7 @@ public final class AuditConfigurationContext implements ServletContextListener {
         pb.setPaused(!Boolean.valueOf(enableAudits));
 
         checkTimer = new Timer("Audit Check Timer");
-        checkTimer.schedule(new MyTimerTask(pb), 0, HOUR);
+        checkTimer.schedule(new MyTimerTask(pb), 15*1000, HOUR);
 
         // set IMS for audit Thread from server parameter
         AuditThreadFactory.setIMS(resultMap.getOrDefault(PARAM_IMS, ims));
@@ -236,12 +236,10 @@ public final class AuditConfigurationContext implements ServletContextListener {
                             LOG.trace("No Sync on " + c.getName());
                         }
                     }
-
-                    // Notify admin if there's any errors occurred during auditing.
-                    if (items.size() > 0) {
-                        AuditThreadFactory.notifyErrorAudits();
-                    }
                 }
+
+                // Notify admin for error auditing.
+                AuditThreadFactory.notifyErrorAudits();
             } catch (Throwable t) {
                 LOG.error("Error testing to see if collections need auditing", t);
             } finally {

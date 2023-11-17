@@ -33,10 +33,8 @@ package edu.umiacs.ace.monitor.audit;
 import edu.umiacs.ace.driver.StorageDriver;
 import edu.umiacs.ace.monitor.core.Collection;
 import edu.umiacs.ace.monitor.core.MonitoredItem;
-import edu.umiacs.ace.monitor.log.LogEnum;
 import edu.umiacs.ace.monitor.reporting.ReportSummary;
 import edu.umiacs.ace.monitor.reporting.SchedulerContextListener;
-import edu.umiacs.ace.monitor.reporting.SummaryGenerator;
 import edu.umiacs.ace.monitor.settings.SettingsConstants;
 import edu.umiacs.ace.util.CollectionThreadPoolExecutor;
 import edu.umiacs.ace.util.KSFuture;
@@ -148,6 +146,13 @@ public class AuditThreadFactory {
     }
 
     /**
+     * Flag for error audit.
+     */
+    public static boolean hasAuditErrors() {
+        return auditErrors.size() > 0;
+    }
+
+    /**
      * Return a new or existing thread if any room is available New threads will start replication
      * 
      * @param collection the {@link Collection} to run a file audit on
@@ -237,10 +242,15 @@ public class AuditThreadFactory {
      */
     static void finished(Collection c) {
         LOG.trace("Finishing audit for collection " + c.getName());
-        // Copy audit error thread for admin notification
         AuditThread audit = getThread(c);
-        if (audit.isCancelled() || audit.getAbortException() != null) {
-            auditErrors.put(c, audit);
+        if (audit.isCancelled() || audit.getAbortException() != null || audit.getCollection().getState() == 'E' || audit.getCollection().getState() == 'I') {
+            synchronized(LOG) {
+                // Cache error audit thread for admin notification
+                auditErrors.put(c, audit);
+
+                Throwable error = audits.get(c).getKnownResult().getThread().getAbortException();
+                LOG.info("Cached audit error: " + (error == null ? "" : error.getMessage()) + audit.getCollection().getState());
+            }
         }
 
         // Clean up everything which may contain a reference to the thread
@@ -249,29 +259,47 @@ public class AuditThreadFactory {
         audits.remove(c);
     }
 
-    public static synchronized void notifyErrorAudits() throws MessagingException, InterruptedException {
+    /**
+     * Email notify admin if audit error occurred.
+     * @throws MessagingException
+     * @throws InterruptedException
+     */
+    public static void notifyErrorAudits() throws MessagingException, InterruptedException {
         while(isAuditing()) {
-            Thread.sleep(60*1000);
+            Thread.sleep(10*1000);
         }
 
-        StringBuilder subject = new StringBuilder();
-        StringBuilder errorMessage = new StringBuilder();
-        if (auditErrors.size() > 0) {
-            // notify admin by mail
-            Enumeration<Collection> collections = auditErrors.keys();
-            while (collections.hasMoreElements()) {
-                Collection col = collections.nextElement();
-                AuditThread errorAudit = auditErrors.get(col);
-                ReportSummary reportSummary = errorAudit.getReportSummary();
-                String reportName = reportSummary.getReportName();
-                if (subject.indexOf(reportName) < 0) {
-                    subject.append(" -- " + reportName);
-                }
-                errorMessage.append("\n\n" + reportSummary.createReport());
-            }
+        synchronized (LOG) {
+            if (auditErrors.size() > 0) {
+                LOG.info("Notify admin " + String.join(", ", SchedulerContextListener.getAdminMailList()) 
+                        + " for audit errors. Error size: " + auditErrors.size());
 
-            SchedulerContextListener.notifyAdmin(subject.toString(), errorMessage.toString());
-            auditErrors.clear();
+                StringBuilder subjectBuilder = new StringBuilder();
+                StringBuilder errorBuilder = new StringBuilder();
+                subjectBuilder.append("Error ACE Report: " + auditErrors.size() + " audit error" + (auditErrors.size() > 1 ? "s" : ""));
+                errorBuilder.append("Total " + auditErrors.size() + " error report(s):");
+                errorBuilder.append("\n***********************************************\n");
+                try {
+                    // notify admin by email
+                    Enumeration<Collection> collections = auditErrors.keys();
+                    while (collections.hasMoreElements()) {
+                        Collection col = collections.nextElement();
+                        AuditThread errorAudit = auditErrors.get(col);
+                        ReportSummary reportSummary = errorAudit.getReportSummary();
+                        String reportName = reportSummary.getReportName();
+                        if (subjectBuilder.indexOf(reportName) < 0) {
+                            subjectBuilder.append(reportName + " ");
+                            errorBuilder.append(reportSummary.createReport());
+                            errorBuilder.append("\n***********************************************\n");
+                        }
+                    }
+
+                    SchedulerContextListener.notifyAdmin(subjectBuilder.toString(), errorBuilder.toString());
+                    auditErrors.clear();
+                } catch (MessagingException e) {
+                    LOG.error("Could not send error audit report to admin", e);
+                }
+            }
         }
     }
 
