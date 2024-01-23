@@ -434,6 +434,7 @@ public final class AuditThread extends Thread implements CancelCallback {
     private void generateAuditReport() {
         LOG.trace("Generating audit report on " + session + " coll "
                 + coll.getName());
+
         CollectionCountContext.updateCollection(coll);
         ReportSummary rs = getReportSummary();
         try {

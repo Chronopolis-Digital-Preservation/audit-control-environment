@@ -187,11 +187,12 @@ public class SchedulerContextListener implements ServletContextListener {
      */
     public static void sendMail(String subject, String content, String[] mailList)
             throws MessagingException {
-        LOG.debug("ACE audit report email list: " + String.join(", ", mailList) + ". Subject: " + subject + ", content: " + content);
-
         if (content == null || mailList == null || mailList.length == 0) {
+            LOG.debug("Empty mail list or content for " + subject);
             return;
         }
+
+        LOG.debug("ACE audit report email list: " + String.join(", ", mailList) + ". Subject: " + subject + ", content: " + content);
 
         boolean debug = false;
 
