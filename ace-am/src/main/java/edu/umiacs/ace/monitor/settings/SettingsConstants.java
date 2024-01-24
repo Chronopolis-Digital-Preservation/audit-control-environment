@@ -38,6 +38,7 @@ public class SettingsConstants {
     public static final String auditSample = "false";
     public static final String mailServer = "localhost.localdomain";
     public static final String mailFrom = "acemail@localhost";
+    public static final String mailTo = "acemail@localhost";
     public static final String maxAudit = "3";
     public static final String autoAudit = "true";
     public static final String ims = "ims.tdl.org";

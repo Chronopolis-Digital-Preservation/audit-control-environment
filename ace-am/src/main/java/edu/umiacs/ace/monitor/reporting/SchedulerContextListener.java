@@ -71,9 +71,12 @@ public class SchedulerContextListener implements ServletContextListener {
     // todo: could get these from settings params
     private static final String PARAM_SMTP_SERVER = "mail.server";
     private static final String PARAM_FROM = "mail.from";
+    private static final String PARAM_TO = "mail.to";
     private static Scheduler sched = null;
     private static String mailserver;
     private static String mailfrom;
+    // The mail to list for admin notification on error
+    private static String mailto;
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
@@ -87,6 +90,8 @@ public class SchedulerContextListener implements ServletContextListener {
 
             s = SettingsUtil.getOrDefault(PARAM_FROM, SettingsConstants.mailFrom, em);
             mailfrom = s.getValue();
+            s = SettingsUtil.getOrDefault(PARAM_TO, SettingsConstants.mailTo, em);
+            mailto = s.getValue();
 
             SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
             sched = schedFact.getScheduler();
@@ -147,11 +152,47 @@ public class SchedulerContextListener implements ServletContextListener {
         }
     }
 
+    /**
+     * Email report with option for admin notification.
+     * @param report
+     * @param mailList
+     * @param notifyAdmin
+     * @throws MessagingException
+     */
     public static void mailReport(ReportSummary report, String[] mailList)
             throws MessagingException {
-        if (report == null || mailList == null || mailList.length == 0) {
+
+        String content = report == null ? null : report.createReport();
+        String subject = report == null ? "" : "Ace Report: " + report.getReportName();
+        sendMail(subject, content, mailList);
+    }
+
+    /**
+     * Send mail to notify administor
+     * @param subject
+     * @param content
+     * @throws MessagingException
+     */
+    public static void notifyAdmin(String subject, String content) throws MessagingException {
+        sendMail(subject, content, getAdminMailList());
+    }
+
+    /**
+     * Send mail
+     * @param subject
+     * @param content
+     * @param mailList
+     * @param notifyAdmin
+     * @throws MessagingException
+     */
+    public static void sendMail(String subject, String content, String[] mailList)
+            throws MessagingException {
+        if (content == null || mailList == null || mailList.length == 0) {
+            LOG.debug("Empty mail list or content for " + subject);
             return;
         }
+
+        LOG.debug("ACE audit report email list: " + String.join(", ", mailList) + ". Subject: " + subject + ", content: " + content);
 
         boolean debug = false;
 
@@ -177,8 +218,8 @@ public class SchedulerContextListener implements ServletContextListener {
         msg.setRecipients(Message.RecipientType.TO, addressTo);
 
         // Setting the Subject and Content Type
-        msg.setSubject("Ace Report: " + report.getReportName());
-        msg.setContent(report.createReport(), "text/plain");
+        msg.setSubject(subject);
+        msg.setContent(content, "text/plain");
         Transport.send(msg);
         LOG.trace("Successfully mailed report to: " + Strings.join(',', mailList));
     }
@@ -189,5 +230,13 @@ public class SchedulerContextListener implements ServletContextListener {
 
     public static void setMailFrom(String mailFrom) {
         SchedulerContextListener.mailfrom = mailFrom;
+    }
+
+    /**
+     * The mail list for administrator notification on audit error.
+     * @return
+     */
+    public static String[] getAdminMailList() {
+        return mailto.split("\\s*,\\s*");
     }
 }
