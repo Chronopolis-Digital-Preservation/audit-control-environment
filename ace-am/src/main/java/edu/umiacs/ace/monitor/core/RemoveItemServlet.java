@@ -31,6 +31,9 @@
 
 package edu.umiacs.ace.monitor.core;
 
+import static edu.umiacs.ace.monitor.access.browse.BrowseServlet.SESSION_DIRECTORY_TREE;
+import static edu.umiacs.ace.monitor.access.browse.BrowseServlet.SESSION_FILE;
+
 import com.google.common.collect.ImmutableSet;
 import edu.umiacs.ace.monitor.access.CollectionCountContext;
 import edu.umiacs.ace.monitor.access.browse.BrowseServlet;
@@ -123,6 +126,13 @@ public class RemoveItemServlet extends EntityManagerServlet {
         String redirect = request.getParameter(PARAM_REDIRECT);
         if (Strings.isEmpty(redirect)) {
             redirect = DEFAULT_REDIRECT;
+
+            Collection c = mutations.iterator().next();
+            request.setAttribute("collection", c);
+            session.setAttribute(SESSION_DIRECTORY_TREE, new DirectoryTree(c));
+            if (mutations.size() > 0) {
+                session.setAttribute(SESSION_FILE, null);
+            }
         }
 
         RequestDispatcher dispatcher = request.getRequestDispatcher(redirect);
