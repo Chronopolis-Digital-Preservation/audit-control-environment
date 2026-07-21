@@ -1,2 +1,2 @@
 #!/bin/bash
-docker exec -it ace_ace-build_1 /bin/bash
+docker exec -it ace-ace-build-1 /bin/bash
