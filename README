@@ -17,9 +17,13 @@ http://adapt.umiacs.umd.edu/ace
 Help, discussion:
 http://groups.google.com/group/ace-devel
 
-# Build
+Build
 - apt install openjdk-8-jdk-headless
 - update-alternatives --config java
 - git clone git@github.com:Chronopolis-Digital-Preservation/audit-control-environment.git
 - cd audit-control-environment
 - ./mvnw package
+
+WAR in ace-am/target/ace-am-1.15.0-RELEASE.war
+
+RELEASE in ace-dist/target/ace-dist-1.15.0-RELEASE-bin.tar.gz
