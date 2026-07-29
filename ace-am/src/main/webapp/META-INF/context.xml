@@ -16,5 +16,5 @@
        'name' is the resource name used by the web app to refer to this
        database and NOT the database name, do not change unless you want bad
        things to happen.-->
-  <Resource auth="Container" driverClassName="com.mysql.jdbc.Driver" maxActive="20" maxIdle="10" maxWait="-1" name="jdbc/aceamdb" password="ace" testOnBorrow="true" type="javax.sql.DataSource" url="jdbc:mysql://localhost/aceam?characterEncoding=UTF-8" username="aceam" validationQuery="SELECT 1"/>
+  <Resource auth="Container" driverClassName="com.mysql.jdbc.Driver" maxActive="20" maxIdle="10" maxWait="-1" name="jdbc/aceamdb" password="ace" testOnBorrow="true" type="javax.sql.DataSource" url="jdbc:mysql://localhost/aceam?characterEncoding=UTF-8&amp;useSSL=false" username="aceam" validationQuery="SELECT 1"/>
 </Context>
